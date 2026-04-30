@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="搜索">
+  <div class="min-h-screen bg-[var(--color-void)]">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)]">~/void-blog</a>
+        <span class="text-[var(--color-text-muted)]">/search</span>
+      </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-16">
+      <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-8 flex items-center gap-3">
+        <span class="text-[var(--color-neon-green)]">$</span> grep -r
+      </h1>
+
+      <div id="search" class="pagefind-ui"></div>
+    </main>
+  </div>
+
+  <link href="/void-blog/_pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script src="/void-blog/_pagefind/pagefind-ui.js" is:inline></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      new PagefindUI({
+        element: '#search',
+        showSubResults: true,
+        translations: {
+          placeholder: '搜索文章...',
+          zero_results: '没有找到 [SEARCH_TERM]',
+        }
+      })
+    })
+  </script>
+
+  <style is:global>
+    .pagefind-ui {
+      --pagefind-ui-scale: 0.9;
+      --pagefind-ui-primary: #00d4ff;
+      --pagefind-ui-text: #e8e8f0;
+      --pagefind-ui-background: #13131f;
+      --pagefind-ui-border: #1e1e30;
+      --pagefind-ui-tag: #13131f;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 8px;
+      --pagefind-ui-font: 'JetBrains Mono', monospace;
+    }
+    .pagefind-ui__search-input { background: #0f0f1a; }
+    .pagefind-ui__result { border-color: #1e1e30; }
+    .pagefind-ui__result:hover { background: #13131f; }
+  </style>
+</BaseLayout>

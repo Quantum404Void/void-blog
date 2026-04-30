@@ -1,6 +1,6 @@
 ---
 title: "负载均衡算法完全指南：从轮询到一致性哈希"
-description: "系统梳理静态与动态负载均衡算法，涵盖轮询、随机、权重、IP Hash、一致性 Hash、最少连接、最快响应等，并对比 Nginx、Dubbo、Ribbon 的实现差异。"
+description: "系统梳理静态与动态负载均衡算法，涵盖轮询、随机、权重、IP Hash、一致性 Hash、最少连接、最快响应等，并对比 Nginx、Dubbo、Spring Cloud LoadBalancer 的实现差异。"
 pubDate: 2023-11-15
 tags: ["分布式", "负载均衡", "Nginx", "微服务"]
 draft: false
@@ -214,17 +214,18 @@ upstream backend {
 
 ## 主流框架支持对比
 
-| 算法 | Nginx | Dubbo | Spring Cloud Ribbon |
-|------|-------|-------|---------------------|
-| 轮询 | ✅ 默认 | ✅ | ✅ `RoundRobinRule` |
-| 加权轮询 | ✅ `weight` | ✅ | ✅ `WeightedResponseTimeRule` |
-| 随机 | ✅ | ✅ | ✅ `RandomRule` |
+> ⚠️ Netflix Ribbon 已于 2021 年进入维护模式，Spring Cloud 2020+ 默认切换为 **Spring Cloud LoadBalancer**。新项目不建议继续使用 Ribbon。
+
+| 算法 | Nginx | Dubbo | Spring Cloud LoadBalancer |
+|------|-------|-------|---------------------------|
+| 轮询 | ✅ 默认 | ✅ | ✅ `RoundRobinLoadBalancer` |
+| 加权轮询 | ✅ `weight` | ✅ | ⚠️ 需自定义 |
+| 随机 | ✅ | ✅ | ✅ `RandomLoadBalancer` |
 | IP Hash | ✅ `ip_hash` | ❌ | ❌ |
 | URL Hash | ✅ `hash $uri` | ❌ | ❌ |
 | 一致性 Hash | ✅ `consistent` | ✅ | ❌ |
-| 最少连接 | ✅ `least_conn` | ❌ | ✅ `BestAvailableRule` |
-| 最快响应 | ❌（商业版） | ✅ | ✅ `WeightedResponseTimeRule` |
-| 故障重试 | ✅ `proxy_next_upstream` | ✅ | ✅ `RetryRule` |
+| 最少连接 | ✅ `least_conn` | ❌ | ❌ |
+| 故障重试 | ✅ `proxy_next_upstream` | ✅ | ✅ `RetryLoadBalancer` |
 
 ## 选型建议
 

@@ -1,0 +1,298 @@
+---
+title: "Clash / Mihomo 配置详解：规则、策略组与分流"
+description: "深入解析 Clash/Mihomo 的核心配置结构，包括代理节点、策略组类型、规则优先级、DNS fake-ip 模式，以及一份实用的完整配置模板。"
+pubDate: 2026-04-30
+tags: ["网络", "clash", "代理", "配置"]
+draft: false
+---
+
+## Clash / Mihomo 是什么
+
+**Clash** 是一个规则驱动的代理客户端内核，**Mihomo**（原 Clash.Meta）是它目前最活跃的分支，支持更多协议和特性。大多数 GUI 客户端（Clash Verge Rev、OpenClash 等）底层跑的都是 Mihomo 内核。
+
+> 注意：原版 Clash 仓库已于 2023 年 11 月删库，目前使用 Mihomo 内核。
+
+---
+
+## 配置文件结构
+
+一份 Clash 配置由以下几个部分组成：
+
+```yaml
+# 基础设置
+port: 7890          # HTTP 代理端口
+socks-port: 7891    # SOCKS5 代理端口
+mixed-port: 7892    # HTTP + SOCKS5 混合端口（推荐用这个）
+allow-lan: false    # 是否允许局域网连接
+mode: rule          # 代理模式：rule / global / direct
+log-level: info
+
+# DNS 配置
+dns: ...
+
+# 代理节点
+proxies: ...
+
+# 策略组
+proxy-groups: ...
+
+# 规则
+rules: ...
+```
+
+---
+
+## 代理模式
+
+| 模式 | 行为 |
+|------|------|
+| `rule` | 按规则分流，国内直连，国外走代理（**日常使用**）|
+| `global` | 全部走代理 |
+| `direct` | 全部直连，相当于关闭代理 |
+
+---
+
+## 策略组类型
+
+```yaml
+proxy-groups:
+  # 手动选择节点
+  - name: "手动选择"
+    type: select
+    proxies:
+      - "香港 01"
+      - "日本 01"
+      - DIRECT
+
+  # 自动测速，选延迟最低的
+  - name: "自动选择"
+    type: url-test
+    proxies:
+      - "香港 01"
+      - "日本 01"
+    url: "https://www.gstatic.com/generate_204"
+    interval: 300     # 每 5 分钟测速一次
+    tolerance: 50     # 延迟差在 50ms 内不切换
+
+  # 故障转移：第一个挂了自动换下一个
+  - name: "故障转移"
+    type: fallback
+    proxies:
+      - "香港 01"
+      - "日本 01"
+    url: "https://www.gstatic.com/generate_204"
+    interval: 60
+
+  # 负载均衡：多节点轮流用
+  - name: "负载均衡"
+    type: load-balance
+    proxies:
+      - "香港 01"
+      - "香港 02"
+    strategy: round-robin   # 或 consistent-hashing
+```
+
+---
+
+## 规则类型
+
+规则从上到下匹配，第一条命中则停止：
+
+```yaml
+rules:
+  # 域名完整匹配
+  - DOMAIN,example.com,DIRECT
+
+  # 域名后缀匹配（最常用）
+  - DOMAIN-SUFFIX,google.com,手动选择
+  - DOMAIN-SUFFIX,github.com,手动选择
+
+  # 域名关键词（慎用，容易误匹配）
+  - DOMAIN-KEYWORD,youtube,手动选择
+
+  # IP 段
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+
+  # GeoIP 国家码（需要 geoip.dat 数据库）
+  - GEOIP,CN,DIRECT
+  - GEOIP,PRIVATE,DIRECT
+
+  # 规则集（从 URL 加载，减少配置体积）
+  - RULE-SET,reject,REJECT        # 广告拦截
+  - RULE-SET,direct,DIRECT        # 国内直连
+  - RULE-SET,proxy,手动选择       # 需要代理
+
+  # 兜底规则，必须放最后
+  - MATCH,手动选择
+```
+
+---
+
+## DNS 配置
+
+DNS 是 Clash 里最容易踩坑的部分。
+
+### fake-ip 模式（推荐）
+
+```yaml
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  ipv6: false
+  enhanced-mode: fake-ip         # 关键配置
+  fake-ip-range: 198.18.0.1/16  # 分配给域名的假 IP 段
+  fake-ip-filter:                # 这些域名不用 fake-ip（NTP、局域网等）
+    - "*.lan"
+    - "*.local"
+    - "time.*.com"
+    - "+.ntp.org"
+  nameserver:
+    - 223.5.5.5      # 阿里 DNS（国内）
+    - 119.29.29.29   # 腾讯 DNS（国内）
+  fallback:
+    - "https://1.1.1.1/dns-over-https"   # Cloudflare DoH（国外）
+    - "https://8.8.8.8/dns-over-https"   # Google DoH（国外）
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+```
+
+**fake-ip 原理**：Clash 拦截 DNS 请求，立即返回一个假 IP（如 `198.18.0.1`），同时记录"假 IP → 域名"的映射。当实际连接请求到来时，Clash 查表得到真实域名，再按规则决定走代理还是直连，代理节点负责解析真实域名。
+
+好处：
+- 消除 DNS 污染（国内 DNS 不会污染走代理的域名）
+- 延迟更低（无需等待 DNS 解析）
+
+### redir-host 模式
+
+```yaml
+enhanced-mode: redir-host
+```
+
+Clash 真正解析域名，得到 IP 后再匹配 `IP-CIDR` 规则。缺点：国内 DNS 可能污染域名，且多一次 DNS 往返。
+
+---
+
+## 完整配置示例
+
+```yaml
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: warning
+ipv6: false
+
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - "+.ntp.org"
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  fallback:
+    - "https://1.1.1.1/dns-over-https"
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+
+proxies:
+  - name: "香港 01"
+    type: vless
+    server: hk01.example.com
+    port: 443
+    uuid: "your-uuid-here"
+    network: ws
+    tls: true
+    ws-opts:
+      path: /ws
+      headers:
+        Host: hk01.example.com
+
+proxy-groups:
+  - name: "节点选择"
+    type: select
+    proxies: ["自动选择", "香港 01", DIRECT]
+
+  - name: "自动选择"
+    type: url-test
+    proxies: ["香港 01"]
+    url: "https://www.gstatic.com/generate_204"
+    interval: 300
+
+  - name: "广告拦截"
+    type: select
+    proxies: [REJECT, DIRECT]
+
+rule-providers:
+  reject:
+    type: http
+    behavior: domain
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt"
+    path: ./ruleset/reject.yaml
+    interval: 86400
+  cn:
+    type: http
+    behavior: domain
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt"
+    path: ./ruleset/cn.yaml
+    interval: 86400
+  proxy:
+    type: http
+    behavior: domain
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt"
+    path: ./ruleset/proxy.yaml
+    interval: 86400
+
+rules:
+  - RULE-SET,reject,广告拦截
+  - RULE-SET,cn,DIRECT
+  - RULE-SET,proxy,节点选择
+  - GEOIP,CN,DIRECT
+  - GEOIP,PRIVATE,DIRECT,no-resolve
+  - MATCH,节点选择
+```
+
+---
+
+## 常见问题
+
+### DNS 泄露
+
+症状：用代理访问 Google，但 DNS 请求走了国内服务器，暴露了访问意图。
+
+解法：开启 fake-ip 模式 + 确保 `fallback` 里的 DNS 走代理（在 Clash Verge 里开启"系统代理"或 TUN 模式）。
+
+### 某些 App 绕过 Clash
+
+原因：App 直接使用 IP 硬编码或 DNS-over-HTTPS，不走系统代理。
+
+解法：开启 **TUN 模式**（虚拟网卡，接管全局流量）：
+
+```yaml
+tun:
+  enable: true
+  stack: mixed      # gvisor / lwip / mixed（推荐）
+  dns-hijack:
+    - "any:53"
+  auto-route: true
+  auto-detect-interface: true
+```
+
+### 规则集更新失败
+
+Clash Verge Rev 里手动点"更新规则集"，或检查 `rule-providers` 的 URL 是否可达。
+
+---
+
+## 规则集推荐
+
+- [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules)：国内最广泛使用的分流规则
+- [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)：更细粒度的 App 级规则

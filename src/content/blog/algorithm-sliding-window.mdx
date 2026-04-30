@@ -1,0 +1,266 @@
+---
+title: "滑动窗口算法：从暴力到 O(n) 的思维跃迁"
+description: "系统讲解滑动窗口算法的核心模板、适用题型，配合三道经典 LeetCode 题目的完整 C++ 实现，彻底理解双指针收缩思路。"
+pubDate: 2026-04-30
+tags: ["算法", "滑动窗口", "leetcode", "cpp"]
+draft: false
+---
+
+有一类题，暴力解法显而易见，O(n²) 甚至 O(n³)，但总觉得有更好的办法——答案往往是滑动窗口。
+
+滑动窗口的本质是一种**避免重复计算**的思维：通过维护一个可伸缩的区间 `[left, right]`，用 O(1) 的代价在每次移动时更新状态，把嵌套循环压缩成单次遍历。
+
+---
+
+## 什么题型适合滑动窗口
+
+记住这几个关键词：
+
+- **连续子数组或子串**（不能跳跃，必须连续）
+- **求最长 / 最短 / 恰好满足某条件**
+- **条件可以随窗口扩缩而增量更新**（加一个元素、减一个元素，状态好维护）
+
+典型不适用场景：需要选不连续元素（用 DP）、全局排序后处理（用排序+双指针）。
+
+---
+
+## 双指针收缩模板
+
+所有滑动窗口题都能套进这个框架：
+
+```cpp
+int left = 0;
+// window 是窗口的状态，可以是哈希表、计数器等
+// 具体类型根据题目定
+
+for (int right = 0; right < n; right++) {
+    // 1. 把 s[right] 加入窗口
+    window.add(s[right]);
+
+    // 2. 判断是否需要收缩左边界
+    while (window 不满足条件) {
+        // 把 s[left] 移出窗口
+        window.remove(s[left]);
+        left++;
+    }
+
+    // 3. 此时窗口 [left, right] 满足条件，更新答案
+    ans = max(ans, right - left + 1);  // 或其他逻辑
+}
+```
+
+关键逻辑：
+- `right` 只向右移动，负责**扩张**窗口
+- `left` 在需要时向右移动，负责**收缩**窗口
+- 每个元素最多进出窗口一次，总时间复杂度 O(n)
+
+---
+
+## 例题 1：最长无重复子串（LeetCode 3）
+
+> 给定字符串 s，找出其中不含重复字符的最长子串的长度。
+
+**分析**：窗口内不能有重复字符。当 `right` 指向的字符已经在窗口中时，收缩左边界直到重复消除。
+
+```cpp
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        unordered_map<char, int> window;  // 字符 → 出现次数
+        int left = 0, ans = 0;
+
+        for (int right = 0; right < (int)s.size(); right++) {
+            char c = s[right];
+            window[c]++;  // 扩张：加入右边界字符
+
+            // 窗口内出现重复，收缩左边界
+            while (window[c] > 1) {
+                window[s[left]]--;
+                left++;
+            }
+
+            // 此时 [left, right] 无重复字符
+            ans = max(ans, right - left + 1);
+        }
+
+        return ans;
+    }
+};
+```
+
+**走一遍示例**：`s = "abcabcbb"`
+
+```
+right=0, c='a': window={a:1}, 无重复, ans=1
+right=1, c='b': window={a:1,b:1}, 无重复, ans=2
+right=2, c='c': window={a:1,b:1,c:1}, 无重复, ans=3
+right=3, c='a': window={a:2,...}, 收缩: 移除s[0]='a', left=1, ans=3
+right=4, c='b': window={b:2,...}, 收缩: 移除s[1]='b', left=2, ans=3
+...
+最终 ans=3（"abc"）
+```
+
+时间复杂度 O(n)，空间 O(字符集大小)。
+
+---
+
+## 例题 2：长度最小的子数组（LeetCode 209）
+
+> 给定正整数数组 nums 和正整数 target，找出满足其和 ≥ target 的最小长度连续子数组。若不存在，返回 0。
+
+**分析**：求最短满足条件的窗口。当窗口和 ≥ target 时，尝试收缩左边界（看能不能更短）。
+
+```cpp
+#include <vector>
+#include <climits>
+using namespace std;
+
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int n = nums.size();
+        int left = 0, sum = 0;
+        int ans = INT_MAX;
+
+        for (int right = 0; right < n; right++) {
+            sum += nums[right];  // 扩张：加入右边界元素
+
+            // 窗口和 >= target，尝试收缩
+            while (sum >= target) {
+                ans = min(ans, right - left + 1);  // 更新最小长度
+                sum -= nums[left];  // 收缩：移除左边界元素
+                left++;
+            }
+        }
+
+        return (ans == INT_MAX) ? 0 : ans;
+    }
+};
+```
+
+**注意与例题 1 的差异**：
+- 例题 1 是「窗口不满足条件时收缩」
+- 例题 2 是「窗口满足条件时收缩」（因为要找最小窗口）
+
+这是两种不同的收缩策略，根据题目要求选择：
+
+| 目标 | 收缩时机 | 更新答案时机 |
+|------|----------|--------------|
+| 最长满足条件 | 不满足时收缩 | 收缩后（满足时）更新 |
+| 最短满足条件 | 满足时收缩 | 收缩前（满足时）更新 |
+
+---
+
+## 例题 3：找所有字母异位词（LeetCode 438）
+
+> 给定字符串 s 和 p，找出 s 中所有 p 的异位词的起始索引。
+
+**分析**：固定窗口大小为 `p.size()`，窗口内字符频率与 p 完全一致时记录答案。
+
+```cpp
+#include <string>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        vector<int> ans;
+        if (s.size() < p.size()) return ans;
+
+        // need: p 中每个字符需要的数量
+        // window: 当前窗口中每个字符的数量
+        vector<int> need(26, 0), window(26, 0);
+        for (char c : p) need[c - 'a']++;
+
+        int left = 0;
+        int valid = 0;  // 窗口中满足 need 的字符种数
+
+        for (int right = 0; right < (int)s.size(); right++) {
+            int c = s[right] - 'a';
+            window[c]++;
+            // 如果这个字符恰好达到需要的数量，valid++
+            if (window[c] == need[c]) valid++;
+
+            // 窗口大小超过 p，收缩左边界
+            if (right - left + 1 > (int)p.size()) {
+                int l = s[left] - 'a';
+                // 收缩前检查 valid 是否会减少
+                if (window[l] == need[l]) valid--;
+                window[l]--;
+                left++;
+            }
+
+            // 所有字符种数都满足
+            if (valid == 26) {
+                // 实际上只需要 need 中非零的字符都满足
+                // 这里用更简洁的向量比较
+            }
+        }
+
+        // 更简洁的实现：直接比较向量
+        return findAnagramsClean(s, p);
+    }
+
+    vector<int> findAnagramsClean(string s, string p) {
+        vector<int> ans;
+        int sn = s.size(), pn = p.size();
+        if (sn < pn) return ans;
+
+        vector<int> pCount(26, 0), sCount(26, 0);
+        for (char c : p) pCount[c - 'a']++;
+
+        // 初始化第一个窗口
+        for (int i = 0; i < pn; i++) sCount[s[i] - 'a']++;
+        if (sCount == pCount) ans.push_back(0);
+
+        // 滑动窗口
+        for (int i = pn; i < sn; i++) {
+            sCount[s[i] - 'a']++;           // 加入右端新字符
+            sCount[s[i - pn] - 'a']--;      // 移出左端旧字符
+            if (sCount == pCount) ans.push_back(i - pn + 1);
+        }
+
+        return ans;
+    }
+};
+```
+
+固定大小窗口更简单：每次右移一格，同时左端也移除一个元素，窗口大小始终为 `pn`。
+
+---
+
+## 滑动窗口 vs 前缀和 vs 双指针
+
+这三种技术经常让人困惑，核心区分：
+
+| 技术 | 适用场景 | 关键特征 |
+|------|----------|----------|
+| **滑动窗口** | 连续子数组，条件可增量维护 | 窗口大小可变，O(n) |
+| **前缀和** | 任意区间和的快速查询 | 预处理 O(n)，查询 O(1) |
+| **双指针（对撞）** | 有序数组，找两个数之和 | 一头一尾向中间逼近 |
+
+**判断用哪个**：
+
+- 需要查询任意区间 `[l, r]` 的和 → **前缀和**
+- 有序数组，找满足条件的两个元素 → **对撞双指针**
+- 连续区间，且状态能随窗口扩缩增量更新 → **滑动窗口**
+
+滑动窗口本质上也是双指针，只是两个指针都从左向右移动（而非对撞）。
+
+---
+
+## 小结
+
+滑动窗口的思维跃迁在于：
+
+**暴力**：枚举所有 `[i, j]` 区间，每次从头计算 → O(n²) 或更差  
+**优化**：维护一个窗口，扩张和收缩时增量更新状态 → O(n)
+
+关键是找到窗口状态的**增量维护方式**——能加一个元素、减一个元素，且每次 O(1)。一旦满足这个条件，滑动窗口就能用。
+
+遇到连续子数组/子串类问题，先问自己：「如果我维护一个 `[left, right]` 的窗口，状态如何随右端扩张和左端收缩而更新？」答得出来，就能用滑动窗口。

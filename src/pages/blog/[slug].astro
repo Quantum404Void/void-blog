@@ -7,18 +7,18 @@ export const getStaticPaths = (async () => {
   const posts = await getCollection('blog', ({ data }) => !data.draft)
   return posts.map(post => {
     const slug = post.id.replace(/\.mdx?$/, '')
-    return {
-      params: { slug },
-      props: { post },
-    }
+    return { params: { slug }, props: { post } }
   })
 }) satisfies GetStaticPaths
 
 const { post } = Astro.props
-const { Content } = await render(post)
+const { Content, headings } = await render(post)
 
 const wordCount = post.body?.length ?? 0
 const readingTime = Math.max(1, Math.round(wordCount / 600))
+
+// 只保留 h2/h3
+const tocHeadings = headings.filter(h => h.depth <= 3)
 ---
 
 <PostLayout
@@ -29,6 +29,7 @@ const readingTime = Math.max(1, Math.round(wordCount / 600))
   tags={post.data.tags}
   image={post.data.image}
   readingTime={readingTime}
+  headings={tocHeadings}
 >
   <Content />
 </PostLayout>

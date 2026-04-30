@@ -84,7 +84,21 @@ electron_builder_binaries_mirror=https://npmmirror.com/mirrors/electron-builder-
 
 之后所有项目的 `npm install electron` 都会走国内镜像，无需额外操作。
 
-## 方案四：手动下载后安装
+## 方案四：用 bun 或 pnpm（更现代的方式）
+
+bun 和 pnpm 都内置了更好的网络处理，配合镜像更稳定：
+
+```bash
+# bun（自动用更快的并发下载）
+bun add -d electron
+# 配合环境变量
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ bun add -d electron
+
+# pnpm（同样支持 .npmrc 的 electron_mirror）
+pnpm add -D electron
+```
+
+## 方案五：手动下载后安装
 
 网络实在不稳定时，可以手动下载二进制再安装：
 
