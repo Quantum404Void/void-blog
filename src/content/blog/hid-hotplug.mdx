@@ -1,0 +1,81 @@
+---
+title: "HID 设备热插拔检测：从 udev 到 node-hid"
+description: "在 Linux 上用 node-hid + usb 库实现可靠的 USB HID 设备热插拔检测，踩坑记录"
+pubDate: 2026-04-28
+tags: ["cpp", "hid", "linux", "nodejs", "electron"]
+---
+
+## 背景
+
+做键盘配置工具时，需要实时检测 HID 设备插拔。
+看起来很简单，实际上坑不少。
+
+## 方案对比
+
+| 方案 | 优点 | 缺点 |
+|------|------|------|
+| `udev` rules + inotify | 内核级，可靠 | 需要 root 权限规则 |
+| `node-hid` polling | 简单 | CPU 占用高 |
+| `usb` 库事件 | 无需 root，跨平台 | 依赖 libusb |
+| `usb` + `node-hid` 组合 | 最佳实践 ✅ | 需要两个依赖 |
+
+## 实现
+
+```typescript
+import usb from 'usb'
+import HID from 'node-hid'
+
+const TARGET_VID = 0x1234
+const TARGET_PID = 0x5678
+
+function findDevice() {
+  return HID.devices().find(
+    d => d.vendorId === TARGET_VID && d.productId === TARGET_PID
+  )
+}
+
+// usb 库监听插拔事件，比 polling 高效得多
+usb.on('attach', (device) => {
+  const desc = device.deviceDescriptor
+  if (desc.idVendor === TARGET_VID && desc.idProduct === TARGET_PID) {
+    // 插入后等 100ms 让系统枚举完毕，再尝试打开
+    setTimeout(() => {
+      const info = findDevice()
+      if (info) openDevice(info)
+    }, 100)
+  }
+})
+
+usb.on('detach', (device) => {
+  const desc = device.deviceDescriptor
+  if (desc.idVendor === TARGET_VID && desc.idProduct === TARGET_PID) {
+    closeDevice()
+  }
+})
+```
+
+## 踩坑
+
+### 1. 枚举竞争
+
+`attach` 事件触发时，`HID.devices()` 可能还找不到设备（内核还在枚举）。
+解决：加 100~200ms 延迟，必要时 retry 3 次。
+
+### 2. Linux udev 权限
+
+默认普通用户无法访问 `/dev/hidraw*`。
+需要添加 udev rule：
+
+```bash
+# /etc/udev/rules.d/99-hid.rules
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", MODE="0666"
+```
+
+### 3. Electron 沙箱冲突
+
+`node-hid` 需要 Node.js native module 权限，Electron 的 `sandbox: true` 会拦截。
+方案：在 **main process** 里跑 HID 逻辑，通过 IPC 传给 renderer。永远不要在 renderer 里直接调 native module。
+
+## 结论
+
+`usb` 事件 + `node-hid` 操作 + IPC 隔离，这套组合在生产环境用了半年，没出问题。

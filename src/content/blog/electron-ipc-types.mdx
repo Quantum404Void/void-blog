@@ -1,0 +1,88 @@
+---
+title: "Electron IPC 类型安全：从 any 到完全类型化"
+description: "用 TypeScript 泛型封装 Electron IPC，彻底消灭 any，preload 契约集中管理"
+pubDate: 2026-04-25
+tags: ["electron", "typescript", "ipc", "vue"]
+---
+
+## 问题
+
+Electron IPC 的默认写法是这样的：
+
+```typescript
+// main.ts — 地狱
+ipcMain.handle('get-config', async () => { /* ... */ })
+
+// renderer — 更地狱
+const result = await ipcRenderer.invoke('get-config') // any
+```
+
+字符串 channel 名散落全项目，参数类型全是 `any`，重构时改了 main 忘改 renderer，
+运行时才发现。这不是工程，这是赌博。
+
+## 解决思路
+
+定义一个**中心契约**，所有 IPC channel 的入参和返回值都在这里声明。
+
+```typescript
+// src/shared/ipc-contract.ts
+export interface IpcContract {
+  'config:get': {
+    request: void
+    response: AppConfig
+  }
+  'config:set': {
+    request: Partial<AppConfig>
+    response: { ok: boolean; error?: string }
+  }
+  'device:list': {
+    request: void
+    response: DeviceInfo[]
+  }
+  'device:connect': {
+    request: { vid: number; pid: number }
+    response: { ok: boolean }
+  }
+}
+```
+
+## 类型化 invoke 封装
+
+```typescript
+// src/preload/bridge.ts
+import { contextBridge, ipcRenderer } from 'electron'
+import type { IpcContract } from '../shared/ipc-contract'
+
+type Channel = keyof IpcContract
+type Req<C extends Channel> = IpcContract[C]['request']
+type Res<C extends Channel> = IpcContract[C]['response']
+
+const invoke = <C extends Channel>(
+  channel: C,
+  ...args: Req<C> extends void ? [] : [Req<C>]
+): Promise<Res<C>> => ipcRenderer.invoke(channel, ...args)
+
+contextBridge.exposeInMainWorld('bridge', { invoke })
+```
+
+## 使用效果
+
+```typescript
+// renderer — 完全类型化
+const config = await window.bridge.invoke('config:get')
+//    ^? AppConfig  ✅
+
+await window.bridge.invoke('device:connect', { vid: 0x1234, pid: 0x5678 })
+//                                            ^? 类型检查 ✅
+
+await window.bridge.invoke('config:get', { wrong: true })
+//                                        ^? TS Error ✅
+```
+
+TypeScript 在编译期就能抓住 channel 名拼写错误和参数类型不匹配。
+主进程那边同样可以用泛型封装 `ipcMain.handle`，实现双端类型安全。
+
+## 小结
+
+10 分钟的前期投入，换来整个项目 IPC 层零 `any`，重构时 TS 报错直接定位。
+强烈推荐。

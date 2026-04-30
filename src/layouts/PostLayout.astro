@@ -1,0 +1,90 @@
+---
+import BaseLayout from './BaseLayout.astro'
+
+interface Props {
+  title: string
+  description?: string
+  pubDate: Date
+  updatedDate?: Date
+  tags?: string[]
+  image?: string
+  readingTime?: number
+}
+
+const { title, description, pubDate, updatedDate, tags = [], image, readingTime } = Astro.props
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+---
+
+<BaseLayout {title} {description} {pubDate} {tags} {image}>
+  <div class="min-h-screen bg-[var(--color-void)]">
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.8)] backdrop-blur-xl">
+      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-6">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">
+          ~/void-blog
+        </a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <span class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-xs">{title}</span>
+        <div class="ml-auto flex items-center gap-4 text-xs text-[var(--color-text-muted)] font-mono">
+          {readingTime && <span>~{readingTime} min read</span>}
+        </div>
+      </div>
+    </nav>
+
+    <!-- Article -->
+    <main class="max-w-3xl mx-auto px-6 py-16">
+      <!-- Header -->
+      <header class="mb-12">
+        <!-- Tags -->
+        {tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-6">
+            {tags.map(tag => (
+              <a
+                href={`/void-blog/tags/${tag}/`}
+                class="font-mono text-xs px-3 py-1 rounded-full border border-[rgba(0,212,255,0.3)] text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.05)] hover:border-[rgba(0,212,255,0.6)] hover:bg-[rgba(0,212,255,0.1)] transition-all"
+              >
+                #{tag}
+              </a>
+            ))}
+          </div>
+        )}
+
+        <h1 class="text-3xl sm:text-4xl font-bold font-mono leading-tight mb-6 text-[var(--color-text-primary)]">
+          {title}
+        </h1>
+
+        {description && (
+          <p class="text-lg text-[var(--color-text-secondary)] mb-6 leading-relaxed">{description}</p>
+        )}
+
+        <div class="flex items-center gap-4 text-sm text-[var(--color-text-muted)] font-mono border-t border-[var(--color-void-border)] pt-4">
+          <time datetime={pubDate.toISOString()}>
+            <span class="text-[var(--color-neon-green)]">$</span> {formatDate(pubDate)}
+          </time>
+          {updatedDate && (
+            <span class="text-xs">
+              (updated: {formatDate(updatedDate)})
+            </span>
+          )}
+        </div>
+      </header>
+
+      <!-- Content -->
+      <article class="prose">
+        <slot />
+      </article>
+
+      <!-- Footer -->
+      <footer class="mt-16 pt-8 border-t border-[var(--color-void-border)]">
+        <a
+          href="/void-blog/"
+          class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2"
+        >
+          <span>←</span> cd ..
+        </a>
+      </footer>
+    </main>
+  </div>
+</BaseLayout>

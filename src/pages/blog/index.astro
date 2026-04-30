@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getCollection } from 'astro:content'
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .filter(p => !p.id.startsWith('about'))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+
+// Group by year
+const byYear = posts.reduce((acc, post) => {
+  const year = post.data.pubDate.getFullYear().toString()
+  if (!acc[year]) acc[year] = []
+  acc[year].push(post)
+  return acc
+}, {} as Record<string, typeof posts>)
+
+const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a))
+---
+
+<BaseLayout title="Blog" description="所有文章">
+  <div class="min-h-screen bg-[var(--color-void)]">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-6">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">
+          ~/void-blog
+        </a>
+        <span class="text-[var(--color-text-muted)] font-mono">/blog</span>
+        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">{posts.length} posts</div>
+      </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-16">
+      <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-12 flex items-center gap-3">
+        <span class="text-[var(--color-neon-green)]">$</span> ls -lt ~/blog
+      </h1>
+
+      {years.map(year => (
+        <section class="mb-12">
+          <h2 class="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-3">
+            <span class="w-8 h-px bg-[var(--color-void-border)]"></span>
+            {year}
+            <span class="flex-1 h-px bg-[var(--color-void-border)]"></span>
+          </h2>
+          <div class="space-y-1">
+            {byYear[year].map(post => (
+              <a
+                href={`/void-blog/blog/${post.id.replace(/\.mdx?$/, '')}/`}
+                class="group flex items-center gap-4 p-3 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all"
+              >
+                <time datetime={post.data.pubDate.toISOString()} class="font-mono text-xs text-[var(--color-text-muted)] shrink-0 w-20">
+                  {formatDate(post.data.pubDate)}
+                </time>
+                <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors truncate">
+                  {post.data.title}
+                </span>
+                <div class="ml-auto flex gap-1 shrink-0">
+                  {post.data.tags.slice(0, 2).map(tag => (
+                    <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </main>
+  </div>
+</BaseLayout>

@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getCollection } from 'astro:content'
+import type { GetStaticPaths } from 'astro'
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft)
+  const tags = [...new Set(posts.flatMap(p => p.data.tags))]
+  return tags.map(tag => ({
+    params: { tag },
+    props: {
+      posts: posts
+        .filter(p => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }))
+}) satisfies GetStaticPaths
+
+const { tag } = Astro.params
+const { posts } = Astro.props
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+---
+
+<BaseLayout title={`#${tag}`} description={`标签 #${tag} 下的所有文章`}>
+  <div class="min-h-screen bg-[var(--color-void)]">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)]">~/void-blog</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <a href="/void-blog/tags/" class="font-mono text-sm text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)]">tags</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <span class="font-mono text-sm text-[var(--color-neon-cyan)]">#{tag}</span>
+      </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-16">
+      <h1 class="font-mono text-2xl font-bold mb-2">
+        <span class="text-[var(--color-neon-cyan)]">#{tag}</span>
+      </h1>
+      <p class="font-mono text-xs text-[var(--color-text-muted)] mb-12">{posts.length} posts</p>
+
+      <div class="space-y-1">
+        {posts.map(post => (
+          <a
+            href={`/void-blog/blog/${post.id.replace(/.mdx?$/,'')}/`}
+            class="group flex items-center gap-4 p-3 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all"
+          >
+            <time datetime={post.data.pubDate.toISOString()} class="font-mono text-xs text-[var(--color-text-muted)] shrink-0 w-20">
+              {formatDate(post.data.pubDate)}
+            </time>
+            <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors">
+              {post.data.title}
+            </span>
+          </a>
+        ))}
+      </div>
+    </main>
+  </div>
+</BaseLayout>
