@@ -9,7 +9,7 @@ export async function GET(context: APIContext) {
 
   return rss({
     title: 'void.dev',
-    description: '王宇的技术博客 — C++、嵌入式、桌面应用、折腾记录',
+    description: '王宇的技术博客 — 代码、工具、系统、与一切值得折腾的东西',
     site: context.site!,
     items: posts.map(post => ({
       title: post.data.title,
