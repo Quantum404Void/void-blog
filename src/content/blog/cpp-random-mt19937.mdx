@@ -1,0 +1,293 @@
+---
+title: "C++ 现代随机数生成：用 mt19937 彻底告别 rand()"
+description: "深入讲解为什么 rand() 不够用，以及如何用 C++11 的 <random> 库正确生成高质量随机数，涵盖 mt19937、各种分布和线程安全。"
+pubDate: 2023-05-26
+tags: ["cpp", "c++11", "random"]
+draft: false
+---
+
+C++ 里生成随机数，很多人第一反应是 `rand()`。但在实际项目中，`rand()` 几乎是一个"应该被遗忘"的函数。C++11 引入的 `<random>` 库提供了一套工业级的随机数解决方案，本文带你彻底搞清楚怎么用。
+
+---
+
+## 为什么 `rand()` 不够用
+
+### 1. 固定种子，结果可预测
+
+```cpp
+srand(42);
+for (int i = 0; i < 5; ++i)
+    std::cout << rand() << " ";
+// 每次运行输出完全相同
+```
+
+很多人用 `srand(time(NULL))` 来解决这个问题，但 `time()` 精度只到秒——同一秒内启动的多个进程会得到完全相同的序列。
+
+### 2. 范围限制，分布不均
+
+```cpp
+// 生成 [0, 99] 的随机数
+int r = rand() % 100;
+```
+
+这行代码有个经典问题：`RAND_MAX` 通常是 32767，不能被 100 整除，导致小数字出现概率略高于大数字。数据量大时，这个偏差会被放大。
+
+### 3. 线程不安全
+
+`rand()` 内部维护全局状态，多线程同时调用会产生数据竞争，结果不可预期。
+
+### 4. 质量差
+
+`rand()` 通常基于线性同余生成器（LCG），统计质量较差，不适合科学计算、模拟或密码学相关场景。
+
+---
+
+## C++11 `<random>` 的正确打开方式
+
+`<random>` 库的设计把**随机引擎**和**分布**分开，这是它最核心的思想：
+
+- **引擎（Engine）**：负责产生均匀分布的原始随机比特
+- **分布（Distribution）**：把原始比特变换成你需要的数学分布
+
+```cpp
+#include <iostream>
+#include <random>
+
+int main() {
+    // 1. 用硬件熵源生成真随机种子
+    std::random_device rd;
+    
+    // 2. 用种子初始化 mt19937 引擎
+    std::mt19937 gen(rd());
+    
+    // 3. 定义分布：整数均匀分布 [1, 65535]
+    std::uniform_int_distribution<int> dis(1, 65535);
+    
+    // 4. 生成随机数
+    for (int i = 0; i < 5; ++i) {
+        std::cout << dis(gen) << " ";
+    }
+    std::cout << "\n";
+    
+    return 0;
+}
+```
+
+---
+
+## random_device：硬件熵源
+
+`std::random_device` 是一个非确定性随机数生成器，通常来自操作系统的熵池（Linux 下是 `/dev/urandom`，Windows 下是 `CryptGenRandom`）。
+
+```cpp
+std::random_device rd;
+unsigned int seed = rd(); // 每次调用返回一个随机数
+```
+
+**注意**：`random_device` 在某些嵌入式平台或旧 MinGW 编译器上可能退化为伪随机数生成器（质量与 rand() 无异）。可以通过检查 `rd.entropy()` 是否为 0 来判断：
+
+```cpp
+std::random_device rd;
+if (rd.entropy() == 0) {
+    // 退化模式，用其他种子策略
+    std::cerr << "警告：random_device 不支持真随机，使用时间戳作为备选种子\n";
+}
+```
+
+在大多数 Linux/macOS/MSVC 环境下不需要担心这个问题。
+
+---
+
+## mt19937：最常用的伪随机引擎
+
+`std::mt19937` 基于 **Mersenne Twister** 算法（1997 年提出），有以下特点：
+
+- 周期极长：$2^{19937} - 1$
+- 通过了大多数统计随机性测试
+- 速度快，适合大量生成
+- 32 位版本 `mt19937`，64 位版本 `mt19937_64`
+
+```cpp
+// 32 位引擎
+std::mt19937 gen32(seed);
+
+// 64 位引擎（适合需要大随机数的场景）
+std::mt19937_64 gen64(seed);
+```
+
+**初始化种子的最佳实践**：单个 `random_device` 值已经够用，如果追求极高质量，可以用 `seed_seq` 用多个值初始化：
+
+```cpp
+std::random_device rd;
+std::seed_seq seed_seq{rd(), rd(), rd(), rd(), rd()};
+std::mt19937 gen(seed_seq);
+```
+
+---
+
+## 常用分布类型
+
+### 整数均匀分布
+
+```cpp
+std::uniform_int_distribution<int> dis(1, 100); // [1, 100] 闭区间
+int r = dis(gen);
+```
+
+### 浮点均匀分布
+
+```cpp
+std::uniform_real_distribution<double> dis(0.0, 1.0); // [0.0, 1.0)
+double r = dis(gen);
+```
+
+### 正态分布（高斯分布）
+
+```cpp
+// 均值 0，标准差 1
+std::normal_distribution<double> dis(0.0, 1.0);
+double r = dis(gen);
+```
+
+适用于模拟噪声、物理量波动等场景。
+
+### 伯努利分布（抛硬币）
+
+```cpp
+// 70% 概率为 true
+std::bernoulli_distribution dis(0.7);
+bool result = dis(gen);
+```
+
+### 泊松分布
+
+```cpp
+// 平均每分钟 4 次事件
+std::poisson_distribution<int> dis(4.0);
+int events = dis(gen);
+```
+
+### 离散分布（自定义权重）
+
+```cpp
+// 三个选项，权重分别为 1, 2, 3（概率 1/6, 2/6, 3/6）
+std::discrete_distribution<int> dis({1, 2, 3});
+int choice = dis(gen); // 返回 0, 1 或 2
+```
+
+---
+
+## 线程安全注意事项
+
+`mt19937` 和分布对象**都不是线程安全的**，不能在多线程中共享。
+
+### 方案一：每线程独立引擎（推荐）
+
+```cpp
+#include <thread>
+#include <random>
+
+void worker(int thread_id) {
+    // 每个线程独立的引擎，用线程 id 区分种子
+    std::random_device rd;
+    std::mt19937 gen(rd() ^ (thread_id * 0x12345678));
+    std::uniform_int_distribution<int> dis(1, 100);
+    
+    for (int i = 0; i < 10; ++i) {
+        std::cout << dis(gen) << " ";
+    }
+}
+```
+
+### 方案二：thread_local 存储
+
+```cpp
+thread_local std::mt19937 gen(std::random_device{}());
+
+int random_int(int lo, int hi) {
+    std::uniform_int_distribution<int> dis(lo, hi);
+    return dis(gen);
+}
+```
+
+`thread_local` 让每个线程拥有自己的 `gen` 实例，安全且高效。
+
+### 方案三：互斥锁（不推荐，性能差）
+
+```cpp
+std::mutex mtx;
+std::mt19937 gen(std::random_device{}());
+
+int random_int_safe(int lo, int hi) {
+    std::lock_guard<std::mutex> lock(mtx);
+    std::uniform_int_distribution<int> dis(lo, hi);
+    return dis(gen);
+}
+```
+
+---
+
+## 完整工具函数示例
+
+```cpp
+#include <random>
+#include <stdexcept>
+
+// 线程安全的随机工具（thread_local 方案）
+namespace rng {
+
+// 获取线程本地引擎
+inline std::mt19937& engine() {
+    thread_local std::mt19937 gen(std::random_device{}());
+    return gen;
+}
+
+// 生成整数 [lo, hi]
+inline int randint(int lo, int hi) {
+    if (lo > hi) throw std::invalid_argument("lo > hi");
+    std::uniform_int_distribution<int> dis(lo, hi);
+    return dis(engine());
+}
+
+// 生成浮点数 [lo, hi)
+inline double randf(double lo = 0.0, double hi = 1.0) {
+    std::uniform_real_distribution<double> dis(lo, hi);
+    return dis(engine());
+}
+
+// 以概率 p 返回 true
+inline bool chance(double p) {
+    std::bernoulli_distribution dis(p);
+    return dis(engine());
+}
+
+} // namespace rng
+
+// 使用
+int main() {
+    for (int i = 0; i < 10; ++i) {
+        std::cout << rng::randint(1, 6) << " "; // 模拟骰子
+    }
+    std::cout << "\n";
+    
+    if (rng::chance(0.3)) {
+        std::cout << "30% 概率触发！\n";
+    }
+    
+    return 0;
+}
+```
+
+---
+
+## 小结
+
+| 对比项 | `rand()` | `<random>` |
+|--------|----------|------------|
+| 分布质量 | 差 | 高（可选） |
+| 指定分布 | 需手动换算 | 内置多种分布 |
+| 线程安全 | 否 | 手动管理（thread_local） |
+| 种子质量 | 差（time） | 好（random_device） |
+| 可读性 | 低 | 高 |
+
+从 C++11 开始，`<random>` 已经完全可以替代 `rand()`。下次写随机数相关代码时，记得用 `mt19937` + 对应分布，彻底告别那个"能用但很糟"的老朋友。

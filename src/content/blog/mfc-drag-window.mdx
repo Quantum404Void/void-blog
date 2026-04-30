@@ -1,0 +1,112 @@
+---
+title: "MFC 无标题栏窗口客户区拖动：三种方法对比"
+description: "MFC 对话框去掉标题栏后如何实现拖动移动窗口，三种方案完整实现与适用场景分析"
+pubDate: 2022-08-16
+tags: ["mfc", "cpp", "windows"]
+draft: false
+---
+
+## 背景
+
+MFC 自定义皮肤或无边框窗口设计中，通常会隐藏系统标题栏（`WS_CAPTION` 样式去掉）。但没了标题栏，用户就无法拖动窗口移动位置。需要手动处理鼠标消息，模拟标题栏拖动行为。
+
+以下三种方法都能实现，适用场景略有差异。
+
+## 方法一：拦截 WM_NCHITTEST（最简洁）
+
+Windows 在确定鼠标位于窗口哪个区域时，会发送 `WM_NCHITTEST` 消息。重写 `OnNcHitTest`，当鼠标在客户区时返回 `HTCAPTION`，让系统误以为鼠标在标题栏上，从而自动处理拖动。
+
+```cpp
+// .h 中声明
+afx_msg LRESULT OnNcHitTest(CPoint point);
+
+// .cpp 中实现
+LRESULT CMyDlg::OnNcHitTest(CPoint point) {
+    LRESULT hit = CDialogEx::OnNcHitTest(point);
+    // 鼠标在客户区时，谎报为标题栏
+    return (hit == HTCLIENT) ? HTCAPTION : hit;
+}
+```
+
+**优点**：代码最少，系统处理一切（含双击最大化逻辑）。  
+**缺点**：整个客户区都变成"标题栏"，客户区的右键菜单、双击等行为也会被系统接管，如果界面上有可交互控件，这些控件的点击可能会被拖动行为干扰。
+
+**适用场景**：客户区没有可交互控件，或者只有特定区域允许拖动（可以用 `CRect::PtInRect` 限制范围）。
+
+## 方法二：OnLButtonDown 发送系统消息（推荐）
+
+在鼠标左键按下时，主动向系统发送 `WM_NCLBUTTONDOWN` 消息，让系统接管后续的拖动逻辑。
+
+```cpp
+void CMyDlg::OnLButtonDown(UINT nFlags, CPoint point) {
+    CDialogEx::OnLButtonDown(nFlags, point);
+
+    // 通知系统：鼠标在标题栏按下，请处理拖动
+    PostMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
+    // 也可以用：SendMessage(WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+}
+```
+
+**优点**：只在 `LButtonDown` 时介入，不影响其他鼠标操作（右键、双击等不受影响）。  
+**缺点**：对某些透明/分层窗口（`WS_EX_LAYERED`）可能有兼容性问题。
+
+**适用场景**：大多数自定义皮肤窗口，是最常用的方案。
+
+## 方法三：OnMouseMove 手动 MoveWindow
+
+完全自己处理拖动逻辑：记录鼠标按下时的位置，在 `OnMouseMove` 中计算偏移量并移动窗口。
+
+```cpp
+// .h 中声明
+bool  m_bDragging = false;
+CPoint m_dragStart;
+
+// .cpp 中实现
+void CMyDlg::OnLButtonDown(UINT nFlags, CPoint point) {
+    CDialogEx::OnLButtonDown(nFlags, point);
+    m_bDragging = true;
+    m_dragStart = point;
+    SetCapture(); // 捕获鼠标，防止移出窗口后丢失消息
+}
+
+void CMyDlg::OnMouseMove(UINT nFlags, CPoint point) {
+    if (m_bDragging && (nFlags & MK_LBUTTON)) {
+        CPoint delta = point - m_dragStart;
+        CRect wndRect;
+        GetWindowRect(&wndRect);
+        MoveWindow(
+            wndRect.left + delta.x,
+            wndRect.top  + delta.y,
+            wndRect.Width(),
+            wndRect.Height()
+        );
+        // 注意：不更新 m_dragStart，因为 point 是客户区坐标，窗口移动后保持一致
+    }
+    CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void CMyDlg::OnLButtonUp(UINT nFlags, CPoint point) {
+    CDialogEx::OnLButtonUp(nFlags, point);
+    m_bDragging = false;
+    ReleaseCapture();
+}
+```
+
+**优点**：完全自主控制，可以加拖动范围限制、吸附到屏幕边缘等自定义逻辑。  
+**缺点**：代码量最多，需要处理 `SetCapture`/`ReleaseCapture`，否则鼠标移出窗口后拖动会卡住。
+
+**适用场景**：需要自定义拖动行为（限制范围、磁性吸附、拖动动画）。
+
+## 三种方法对比
+
+| 方法 | 代码量 | 控件交互 | 自定义空间 | 推荐场景 |
+|------|--------|----------|------------|----------|
+| OnNcHitTest | 最少 | 可能干扰 | 最小 | 全屏或无控件窗口 |
+| OnLButtonDown + PostMessage | 少 | 不影响 | 小 | **通用场景（首选）** |
+| OnMouseMove 手动 | 多 | 完全控制 | 最大 | 需要自定义拖动行为 |
+
+## 注意事项
+
+- **透明窗口**：使用 `WS_EX_LAYERED` + `SetLayeredWindowAttributes` 的透明窗口，方法二有时不生效，建议用方法三。
+- **多显示器**：`MoveWindow` 的坐标是屏幕绝对坐标，跨显示器拖动正常工作。
+- **子对话框**：如果是子窗口（非顶层），方法一/二移动的是父窗口，需注意层级关系。

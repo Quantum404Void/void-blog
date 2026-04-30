@@ -1,0 +1,270 @@
+---
+title: "C++ 实现程序开机自启动：注册表方式详解"
+description: "通过操作 Windows 注册表 Run 键实现程序开机自启动，包括 HKCU 与 HKLM 区别、完整封装代码、工作目录问题和 UAC 权限处理。"
+pubDate: 2022-12-26
+tags: ["windows", "cpp", "registry"]
+draft: false
+---
+
+Windows 程序实现开机自启动有多种方式：任务计划程序、服务、启动文件夹，以及最常见的**注册表 Run 键**。注册表方式简单可靠，不需要管理员权限（HKCU 路径），是桌面程序自启动的首选方案。
+
+---
+
+## 注册表路径说明
+
+Windows 有两个常用的自启动注册表路径：
+
+### HKEY_CURRENT_USER（HKCU）
+
+```
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+```
+
+- 仅对**当前用户**生效
+- **不需要管理员权限**（普通用户可读写）
+- 推荐用于普通桌面程序
+
+### HKEY_LOCAL_MACHINE（HKLM）
+
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+```
+
+- 对**所有用户**生效
+- **需要管理员权限**（UAC 提权）
+- 适用于系统级服务或需要全局自启的程序
+
+一般来说，优先选 HKCU，除非明确需要所有用户都自启动。
+
+---
+
+## 完整封装代码
+
+```cpp
+#include <windows.h>
+#include <tchar.h>
+#include <string>
+
+/**
+ * 设置或取消程序开机自启动
+ *
+ * @param enable   true 表示启用自启，false 表示取消
+ * @param appName  注册表键值名称（建议用程序名，唯一标识）
+ * @param exePath  程序完整路径（留空时自动获取当前 exe 路径）
+ * @return         操作是否成功
+ */
+bool SetAutoStart(bool enable, const TCHAR* appName, const TCHAR* exePath = nullptr) {
+    const TCHAR* regPath = 
+        _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+    
+    HKEY hKey = nullptr;
+    LONG result = RegOpenKeyEx(
+        HKEY_CURRENT_USER,  // 改为 HKEY_LOCAL_MACHINE 则全局生效（需管理员）
+        regPath,
+        0,
+        KEY_SET_VALUE,
+        &hKey
+    );
+    
+    if (result != ERROR_SUCCESS) {
+        return false;
+    }
+    
+    if (enable) {
+        // 获取当前 exe 路径（如果未指定）
+        TCHAR selfPath[MAX_PATH] = {0};
+        if (exePath == nullptr) {
+            GetModuleFileName(NULL, selfPath, MAX_PATH);
+            exePath = selfPath;
+        }
+        
+        // 写入注册表：值名称 = 程序路径
+        result = RegSetValueEx(
+            hKey,
+            appName,
+            0,
+            REG_SZ,
+            reinterpret_cast<const BYTE*>(exePath),
+            static_cast<DWORD>((_tcslen(exePath) + 1) * sizeof(TCHAR))
+        );
+    } else {
+        // 删除注册表值（取消自启）
+        result = RegDeleteValue(hKey, appName);
+        // ERROR_FILE_NOT_FOUND 表示本来就没有，也算成功
+        if (result == ERROR_FILE_NOT_FOUND) {
+            result = ERROR_SUCCESS;
+        }
+    }
+    
+    RegCloseKey(hKey);
+    return result == ERROR_SUCCESS;
+}
+
+/**
+ * 查询程序是否已设置自启动
+ */
+bool IsAutoStartEnabled(const TCHAR* appName) {
+    const TCHAR* regPath = 
+        _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+    
+    HKEY hKey = nullptr;
+    LONG result = RegOpenKeyEx(
+        HKEY_CURRENT_USER,
+        regPath,
+        0,
+        KEY_QUERY_VALUE,
+        &hKey
+    );
+    
+    if (result != ERROR_SUCCESS) return false;
+    
+    result = RegQueryValueEx(hKey, appName, nullptr, nullptr, nullptr, nullptr);
+    RegCloseKey(hKey);
+    
+    return result == ERROR_SUCCESS;
+}
+```
+
+### 使用示例
+
+```cpp
+int main() {
+    const TCHAR* APP_NAME = _T("MyApp");
+    
+    // 启用自启动
+    if (SetAutoStart(true, APP_NAME)) {
+        MessageBox(NULL, _T("已设置开机自启动"), _T("提示"), MB_OK);
+    }
+    
+    // 检查状态
+    if (IsAutoStartEnabled(APP_NAME)) {
+        // UI 上勾选"开机启动"复选框
+    }
+    
+    // 取消自启动
+    SetAutoStart(false, APP_NAME);
+    
+    return 0;
+}
+```
+
+---
+
+## 工作目录问题：必读！
+
+自启动的程序由系统（`explorer.exe`）启动，**工作目录（CWD）不是 exe 所在目录**，通常是 `C:\Windows\System32`。
+
+这会导致程序用相对路径读取配置文件、日志、资源时失败：
+
+```cpp
+// 这行代码在自启场景下会失败！
+FILE* f = fopen("config.ini", "r"); // 实际查找 C:\Windows\System32\config.ini
+```
+
+### 解决方案：启动时主动设置工作目录
+
+在程序入口（`WinMain` 或 `main`）的**第一行**加上：
+
+```cpp
+#include <windows.h>
+#include <string>
+
+void FixWorkingDirectory() {
+    // 获取 exe 完整路径
+    TCHAR exePath[MAX_PATH] = {0};
+    GetModuleFileName(NULL, exePath, MAX_PATH);
+    
+    // 提取目录部分（去掉文件名）
+    std::wstring dir(exePath);
+    size_t pos = dir.find_last_of(L"\\/");
+    if (pos != std::wstring::npos) {
+        dir = dir.substr(0, pos);
+    }
+    
+    // 设置工作目录
+    SetCurrentDirectory(dir.c_str());
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
+    FixWorkingDirectory(); // 第一件事！
+    
+    // 现在相对路径就以 exe 目录为基准了
+    // ...
+}
+```
+
+这个问题**非常容易被忽略**，在开发机上调试时一切正常（因为 IDE 默认把工作目录设为项目目录），但自启后立刻出现各种文件找不到的 bug。
+
+---
+
+## UAC 权限问题
+
+### HKCU 路径（无需提权）
+
+操作 `HKEY_CURRENT_USER` 不需要管理员权限，直接调用即可。绝大多数桌面程序应该用这个路径。
+
+### HKLM 路径（需要管理员权限）
+
+如果你的程序必须使用 `HKEY_LOCAL_MACHINE`，需要确保以管理员身份运行：
+
+**方法一**：在 manifest 中声明需要提权
+
+```xml
+<!-- app.manifest -->
+<requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+```
+
+这样启动程序时 Windows 会自动弹出 UAC 确认框。
+
+**方法二**：运行时检测并提权重启
+
+```cpp
+bool IsRunAsAdmin() {
+    BOOL isAdmin = FALSE;
+    PSID adminGroup = nullptr;
+    SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+    
+    if (AllocateAndInitializeSid(&ntAuthority, 2,
+        SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS,
+        0, 0, 0, 0, 0, 0, &adminGroup)) {
+        CheckTokenMembership(NULL, adminGroup, &isAdmin);
+        FreeSid(adminGroup);
+    }
+    return isAdmin == TRUE;
+}
+
+void RelaunchAsAdmin() {
+    TCHAR exePath[MAX_PATH];
+    GetModuleFileName(NULL, exePath, MAX_PATH);
+    
+    ShellExecute(NULL, _T("runas"), exePath, NULL, NULL, SW_SHOWNORMAL);
+    ExitProcess(0); // 退出当前进程
+}
+```
+
+---
+
+## 验证效果
+
+设置完成后，可以通过以下方式验证：
+
+1. **注册表编辑器**：`Win+R` → `regedit` → 导航到 `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`，确认键值存在。
+
+2. **任务管理器**：`Ctrl+Shift+Esc` → 启动 → 确认程序出现在列表中（Windows 8+）。
+
+3. **Autoruns 工具**（推荐）：Sysinternals 出品，能清晰显示所有自启项及其状态。
+
+---
+
+## 小结
+
+| 路径 | 作用范围 | 是否需要管理员 |
+|------|---------|-------------|
+| HKCU\...\Run | 当前用户 | 否 |
+| HKLM\...\Run | 所有用户 | 是 |
+
+核心要点：
+1. 优先用 HKCU，避免不必要的权限要求
+2. **一定要在启动时调用 `SetCurrentDirectory`**，这是最常见的自启 bug 来源
+3. 注册表键值名称要唯一，建议用程序名
+4. 提供 UI 让用户可以主动开关自启，不要强制静默启用

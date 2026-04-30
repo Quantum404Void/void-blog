@@ -1,0 +1,207 @@
+---
+title: "MFC 中 CString 与 WPARAM 之间的转换"
+description: "详解 MFC 消息传递中 CString 无法直接强转为 WPARAM 的原因，以及两种正确的转换方案，并介绍结构体指针传递的正确姿势。"
+pubDate: 2022-11-25
+tags: ["mfc", "cpp", "windows"]
+draft: false
+---
+
+在 MFC 开发中，经常需要通过 `PostMessage` / `SendMessage` 在窗口之间传递数据。当数据是一个 `CString` 时，很多人会想当然地强转——但这样做几乎必然出现内存错误或数据丢失。
+
+本文讲清楚为什么不能直接强转，以及两种正确的转换方案。
+
+---
+
+## 为什么不能直接强转
+
+`PostMessage` / `SendMessage` 的签名是：
+
+```cpp
+BOOL PostMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+```
+
+`WPARAM` 和 `LPARAM` 本质上都是 `UINT_PTR`（指针大小的整数），用来传递整数值或指针。
+
+`CString` 是一个**类对象**，不是简单的指针：
+
+```cpp
+CString str = _T("Hello");
+// 错误写法：
+PostMessage(hWnd, WM_MY_MSG, (WPARAM)(LPCTSTR)str, 0);
+```
+
+这行代码的问题在于：`(LPCTSTR)str` 确实能拿到字符串的内部缓冲区指针，但：
+
+1. **`PostMessage` 是异步的**：消息加入队列后，当前函数返回，`str` 局部变量被销毁，那个指针就变成了悬空指针。
+2. **对象不能直接塞进整数**：CString 的内存由 MFC 管理，跨消息边界传递裸指针是极不安全的。
+
+---
+
+## 方法一：AllocSysString / SysFreeString
+
+`BSTR` 是 COM 标准的字符串类型，分配在 COM 堆上，生命周期独立管理，适合跨消息传递。
+
+```cpp
+// === 发送方 ===
+CString strData = _T("要发送的内容");
+
+// 分配 BSTR（COM 堆，不会随局部变量销毁）
+BSTR bstr = strData.AllocSysString();
+
+// 通过 LPARAM 传指针（WPARAM 传类型标识也可）
+PostMessage(hTargetWnd, WM_MY_MSG, 0, (LPARAM)bstr);
+// 注意：PostMessage 后不能再用 bstr，所有权已转移给接收方
+```
+
+```cpp
+// === 接收方（消息处理函数）===
+LRESULT CMyWnd::OnMyMsg(WPARAM wParam, LPARAM lParam) {
+    BSTR bstr = (BSTR)lParam;
+    
+    // 从 BSTR 构造 CString
+    CString str(bstr);
+    
+    // 用完后必须释放！否则内存泄漏
+    SysFreeString(bstr);
+    
+    // 使用 str...
+    AfxMessageBox(str);
+    
+    return 0;
+}
+```
+
+**内存管理规则**：
+- 发送方调用 `AllocSysString()` 分配，**分配后不再持有所有权**
+- 接收方使用完毕后**必须调用 `SysFreeString()`** 释放
+- 如果消息可能不被接收（如目标窗口已销毁），发送方需要自己释放
+
+---
+
+## 方法二：GetBuffer / ReleaseBuffer
+
+这种方式是在发送前把 CString 的内容复制到一块动态分配的 `TCHAR` 数组，接收方读取后手动释放。
+
+```cpp
+// === 发送方 ===
+CString strData = _T("要发送的内容");
+int len = strData.GetLength() + 1; // +1 for null terminator
+
+// 分配独立内存
+TCHAR* buf = new TCHAR[len];
+_tcscpy_s(buf, len, strData.GetString());
+
+PostMessage(hTargetWnd, WM_MY_MSG, 0, (LPARAM)buf);
+// 同样：所有权转移，不再使用 buf
+```
+
+```cpp
+// === 接收方 ===
+LRESULT CMyWnd::OnMyMsg(WPARAM wParam, LPARAM lParam) {
+    TCHAR* buf = (TCHAR*)lParam;
+    
+    CString str(buf);
+    
+    // 释放内存
+    delete[] buf;
+    
+    AfxMessageBox(str);
+    return 0;
+}
+```
+
+> 备注：`GetBuffer(0)` 的用法是让 CString 暴露内部缓冲区，配合 `ReleaseBuffer()` 使用。但用于消息传递时，不应直接传 CString 的内部缓冲区——应该**复制**到独立内存再传递。
+
+---
+
+## 两种方案对比
+
+| 对比项 | AllocSysString | new TCHAR[] |
+|--------|---------------|-------------|
+| 内存来源 | COM 堆（SysAllocString） | C++ 堆（new） |
+| 释放方式 | `SysFreeString()` | `delete[]` |
+| 跨语言互操作 | 支持（COM 标准） | 仅限 C++ |
+| 推荐场景 | 与 COM 组件交互 | 纯 MFC 项目内部 |
+
+两种方式都能正确工作，纯 MFC 项目用 `new TCHAR[]` 更简单直接；如果项目涉及 COM 或 Automation，用 `BSTR` 更规范。
+
+---
+
+## 结构体传递：只能传指针
+
+如果要传递结构体，原理相同——只能传指针，不能传值（整数塞不下一个结构体）：
+
+```cpp
+// 定义消息数据结构
+struct MyMsgData {
+    int type;
+    int value;
+    TCHAR text[256];
+};
+
+// === 发送方 ===
+MyMsgData* data = new MyMsgData();
+data->type = 1;
+data->value = 42;
+_tcscpy_s(data->text, _T("Hello"));
+
+PostMessage(hTargetWnd, WM_MY_MSG, 0, (LPARAM)data);
+```
+
+```cpp
+// === 接收方 ===
+LRESULT CMyWnd::OnMyMsg(WPARAM wParam, LPARAM lParam) {
+    MyMsgData* data = reinterpret_cast<MyMsgData*>(lParam);
+    
+    // 使用数据
+    int val = data->value;
+    CString text(data->text);
+    
+    // 释放
+    delete data;
+    
+    return 0;
+}
+```
+
+**结构体大小限制**：`WPARAM`/`LPARAM` 只能传一个指针。如果数据太大，就申请堆内存传指针，不要试图把结构体强行塞进整数。
+
+---
+
+## PostMessage vs SendMessage 的选择
+
+这两个函数在字符串传递场景下有本质区别：
+
+### SendMessage（同步）
+
+```cpp
+// 阻塞直到接收方处理完消息才返回
+SendMessage(hTargetWnd, WM_MY_MSG, 0, (LPARAM)bstr);
+// 这里 bstr 已经被接收方释放，不要再用
+```
+
+优点：可以用栈变量，因为消息处理完前函数不返回。但如果是跨线程 `SendMessage`，且两个线程有消息循环交互，可能死锁。
+
+### PostMessage（异步）
+
+```cpp
+// 立刻返回，消息放入队列稍后处理
+PostMessage(hTargetWnd, WM_MY_MSG, 0, (LPARAM)bstr);
+// 此处 bstr 所有权已转移，不能再访问
+```
+
+优点：非阻塞，不会死锁。必须用堆内存，栈变量（局部变量）会在函数返回后被销毁，接收方读到的是垃圾。
+
+**实践建议**：
+- 同线程内通信 → `SendMessage` 更简单（可用局部 CString 直接传，不必堆分配）
+- 跨线程通信 → 必须 `PostMessage` + 堆内存
+
+---
+
+## 总结
+
+1. **不能直接把 CString 强转为 WPARAM**：指针悬空、对象不可序列化
+2. **AllocSysString / SysFreeString**：COM 堆管理，适合与 COM 交互
+3. **new / delete[]**：C++ 堆，纯 MFC 项目更简单
+4. **结构体只能传指针**，接收方负责释放
+5. **PostMessage 用堆内存，SendMessage 可以用栈**（同线程下）

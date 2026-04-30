@@ -1,0 +1,354 @@
+---
+title: "从零搭建 Vite + Vue3 + TypeScript + Element Plus + Pinia + Vue Router 项目"
+description: "手把手带你用 Vite 创建 Vue3 全家桶项目，涵盖按需导入、Pinia store、路由配置，以及常见坑的解决方案。"
+pubDate: 2024-08-27
+tags: ["vue", "vite", "typescript", "element-plus", "pinia"]
+draft: false
+---
+
+## 前言
+
+每次新开一个 Vue3 项目，都要把相同的依赖安装一遍、配置一遍。这篇文章把完整流程记录下来，方便以后查阅。
+
+技术栈：
+- **Vite 5** — 构建工具
+- **Vue 3** — 框架
+- **TypeScript** — 类型安全
+- **Element Plus** — UI 组件库
+- **Pinia** — 状态管理
+- **Vue Router 4** — 路由
+
+---
+
+## 1. 创建项目
+
+```bash
+npm create vite@latest my-app -- --template vue-ts
+cd my-app
+npm install
+```
+
+> `--template vue-ts` 直接跳过交互式选择，省时间。
+
+初始目录结构：
+
+```
+my-app/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── App.vue
+│   └── main.ts
+├── index.html
+├── vite.config.ts
+└── tsconfig.json
+```
+
+---
+
+## 2. 安装依赖
+
+一次性装完：
+
+```bash
+npm install vue-router@4 pinia element-plus @element-plus/icons-vue
+npm install -D unplugin-auto-import unplugin-vue-components
+```
+
+- `unplugin-auto-import` — 自动导入 Vue/Vue Router/Pinia 的 API
+- `unplugin-vue-components` — 自动按需导入 Element Plus 组件
+
+---
+
+## 3. Element Plus 按需导入配置
+
+修改 `vite.config.ts`：
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    // 自动导入 Vue、Vue Router、Pinia 的 Composition API
+    AutoImport({
+      imports: ['vue', 'vue-router', 'pinia'],
+      resolvers: [ElementPlusResolver()],
+      // 生成类型声明文件，避免 TS 报错
+      dts: 'src/auto-imports.d.ts',
+    }),
+    // 自动按需导入 Element Plus 组件
+    Components({
+      resolvers: [ElementPlusResolver()],
+      dts: 'src/components.d.ts',
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
+})
+```
+
+配置完成后，`<el-button>` 这类组件可以直接在模板里使用，无需手动 import。
+
+**⚠️ 常见坑：Element Plus 样式丢失**
+
+按需导入默认不会引入全局样式，如果遇到组件没有样式，在 `main.ts` 中加：
+
+```ts
+// main.ts — 只需要这一行兜底
+import 'element-plus/dist/index.css'
+```
+
+或者在 `vite.config.ts` 的 `ElementPlusResolver` 中启用样式注入：
+
+```ts
+ElementPlusResolver({ importStyle: 'sass' })
+```
+
+后者需要额外安装 `sass`，前者更省事。
+
+---
+
+## 4. Pinia 配置
+
+### 4.1 创建 Pinia 实例
+
+```ts
+// src/stores/index.ts
+import { createPinia } from 'pinia'
+
+export const pinia = createPinia()
+```
+
+### 4.2 定义 Store
+
+用 Composition API 风格（推荐，类型推断更好）：
+
+```ts
+// src/stores/user.ts
+import { defineStore } from 'pinia'
+
+export const useUserStore = defineStore('user', () => {
+  // state
+  const name = ref('')
+  const token = ref(localStorage.getItem('token') ?? '')
+  const isLoggedIn = computed(() => !!token.value)
+
+  // actions
+  function login(userToken: string, userName: string) {
+    token.value = userToken
+    name.value = userName
+    localStorage.setItem('token', userToken)
+  }
+
+  function logout() {
+    token.value = ''
+    name.value = ''
+    localStorage.removeItem('token')
+  }
+
+  return { name, token, isLoggedIn, login, logout }
+})
+```
+
+Options API 风格（更接近 Vuex 习惯）：
+
+```ts
+// src/stores/counter.ts
+import { defineStore } from 'pinia'
+
+export const useCounterStore = defineStore('counter', {
+  state: () => ({
+    count: 0,
+  }),
+  getters: {
+    doubled: (state) => state.count * 2,
+  },
+  actions: {
+    increment() {
+      this.count++
+    },
+  },
+})
+```
+
+---
+
+## 5. Vue Router 配置
+
+```ts
+// src/router/index.ts
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    redirect: '/home',
+  },
+  {
+    path: '/home',
+    name: 'Home',
+    component: () => import('@/views/HomeView.vue'), // 懒加载
+    meta: { title: '首页', requiresAuth: false },
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/DashboardView.vue'),
+    meta: { title: '控制台', requiresAuth: true },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFoundView.vue'),
+  },
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 返回时恢复滚动位置
+    if (savedPosition) return savedPosition
+    return { top: 0 }
+  },
+})
+
+export default router
+```
+
+### 5.1 路由守卫（含 Pinia）
+
+**⚠️ 常见坑：在路由守卫里使用 Pinia store**
+
+路由守卫在 `app.use(router)` 之后执行，此时 Pinia 实例必须已经挂载，否则会报 `getActivePinia was called with no active Pinia` 错误。
+
+解决方法：在守卫内部调用 store，而不是在模块顶层：
+
+```ts
+// src/router/index.ts（续）
+router.beforeEach((to, from, next) => {
+  // ✅ 正确：守卫内部调用，此时 pinia 已通过 app.use(pinia) 激活
+  const userStore = useUserStore()
+
+  document.title = (to.meta.title as string) ?? '我的应用'
+
+  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    next({ name: 'Login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
+})
+
+// ❌ 错误：模块顶层调用，pinia 实例还未挂载
+// const userStore = useUserStore()
+```
+
+---
+
+## 6. main.ts 完整写法
+
+```ts
+// src/main.ts
+import { createApp } from 'vue'
+import App from './App.vue'
+
+// 路由和状态管理
+import router from './router'
+import { pinia } from './stores'
+
+// Element Plus 全局样式兜底（按需导入时仍需要）
+import 'element-plus/dist/index.css'
+
+// Element Plus 图标（全局注册，按需也可以局部注册）
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
+const app = createApp(App)
+
+// 全局注册图标组件
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
+
+// 顺序很重要：pinia 必须在 router 之前注册
+// 否则路由守卫里无法正常使用 store
+app.use(pinia)
+app.use(router)
+
+app.mount('#app')
+```
+
+---
+
+## 7. App.vue 基础结构
+
+```vue
+<!-- src/App.vue -->
+<template>
+  <el-config-provider :locale="zhCn">
+    <RouterView />
+  </el-config-provider>
+</template>
+
+<script setup lang="ts">
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+</script>
+```
+
+使用 `el-config-provider` 切换 Element Plus 为中文，避免日期选择器等组件显示英文。
+
+---
+
+## 8. tsconfig.json 推荐配置
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/auto-imports.d.ts",
+    "src/components.d.ts"
+  ]
+}
+```
+
+注意把 `auto-imports.d.ts` 和 `components.d.ts` 加进 `include`，否则自动导入的类型不会被识别。
+
+---
+
+## 总结
+
+整个搭建流程中最容易踩坑的三个地方：
+
+| 问题 | 原因 | 解法 |
+|------|------|------|
+| Element Plus 样式丢失 | 按需导入未引入全局 CSS | `import 'element-plus/dist/index.css'` |
+| Pinia 守卫报错 | 守卫外部调用 store 时实例未激活 | 守卫内部调用 `useXxxStore()` |
+| TS 报找不到组件类型 | `components.d.ts` 未加入 tsconfig | 加进 `include` |
+
+项目骨架搭好之后，按业务需求在 `views/`、`stores/`、`components/` 里扩展就行了。

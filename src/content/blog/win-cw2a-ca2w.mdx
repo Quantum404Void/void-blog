@@ -1,0 +1,177 @@
+---
+title: "ATL 字符串转换：CW2A 与 CA2W 完全指南"
+description: "详解 ATL 宏 CW2A/CA2W 在 Unicode 与 ANSI 之间的字符串转换用法、头文件依赖、USES_CONVERSION 宏的作用与常见陷阱。"
+pubDate: 2023-06-09
+tags: ["C++", "Windows", "ATL", "字符串"]
+draft: false
+---
+
+## 背景
+
+Windows 应用从 Windows Vista 开始全面转向 Unicode（`wchar_t`/`WCHAR`），但仍存在大量场景需要在 Unicode（宽字节）与 ANSI（多字节/UTF-8）之间相互转换：
+
+- 调用只支持 `char*` 的第三方库（如 SQLite、curl）
+- 从注册表或文件读取 ANSI 字符串后传给 Unicode API
+- 与 COM 接口交换 `BSTR` 和 `std::string`
+
+ATL（Active Template Library）提供了一组轻量级转换宏，`CW2A` 和 `CA2W` 是其中最常用的两个。
+
+## 头文件与依赖
+
+```cpp
+#include <atlbase.h>   // ATL 基础
+#include <atlstr.h>    // CW2A / CA2W / CString 等字符串工具
+```
+
+在纯 Win32 项目（非 MFC）中，有时还需要：
+
+```cpp
+#include <atlconv.h>   // 早期 ATL 版本的转换宏
+```
+
+## USES_CONVERSION 宏
+
+老版 ATL（ATL 3.x）的转换宏依赖栈上的临时变量，必须在函数体开头声明：
+
+```cpp
+void OldStyleFunction(LPCWSTR wide)
+{
+    USES_CONVERSION;           // 声明所需的局部变量
+    LPCSTR ansi = W2A(wide);   // 老宏：W2A/A2W
+    printf("%s\n", ansi);
+}
+```
+
+**ATL 7.x（Visual Studio 2003+）之后，`CW2A`/`CA2W` 是类对象，不再需要 `USES_CONVERSION`。**
+
+现代写法：
+
+```cpp
+void ModernFunction(LPCWSTR wide)
+{
+    // 直接用，无需 USES_CONVERSION
+    CW2A ansi(wide);
+    printf("%s\n", static_cast<LPCSTR>(ansi));
+}
+```
+
+## CW2A：Unicode → ANSI/UTF-8
+
+`CW2A` = **C**onvert **W**ide (Unicode) **to** **A**NSI
+
+```cpp
+#include <atlstr.h>
+
+void DemoW2A()
+{
+    LPCWSTR wideStr = L"Hello, 世界";
+
+    // 默认：使用系统 ANSI 代码页（CP_ACP）
+    CW2A ansiStr(wideStr);
+    printf("ANSI: %s\n", static_cast<LPCSTR>(ansiStr));
+
+    // 显式指定 UTF-8（推荐！避免代码页问题）
+    CW2A utf8Str(wideStr, CP_UTF8);
+    printf("UTF-8: %s\n", static_cast<LPCSTR>(utf8Str));
+
+    // 也可以传给只接受 std::string 的接口
+    std::string stdStr(static_cast<LPCSTR>(utf8Str));
+}
+```
+
+## CA2W：ANSI/UTF-8 → Unicode
+
+`CA2W` = **C**onvert **A**NSI **to** **W**ide (Unicode)
+
+```cpp
+void DemoA2W()
+{
+    LPCSTR ansiStr = "Hello, World";
+
+    // 默认：系统 ANSI 代码页
+    CA2W wideStr(ansiStr);
+    wprintf(L"Wide: %s\n", static_cast<LPCWSTR>(wideStr));
+
+    // UTF-8 → Unicode（从文件、网络读取 UTF-8 内容时常用）
+    LPCSTR utf8Data = u8"你好，世界";
+    CA2W wideFromUtf8(utf8Data, CP_UTF8);
+    wprintf(L"From UTF-8: %s\n", static_cast<LPCWSTR>(wideFromUtf8));
+
+    // 转为 std::wstring
+    std::wstring ws(static_cast<LPCWSTR>(wideFromUtf8));
+}
+```
+
+## 与 CString 配合
+
+MFC/ATL 项目中经常与 `CString`（`CStringA`/`CStringW`）互转：
+
+```cpp
+// CStringW → std::string (UTF-8)
+CStringW cws = L"中文内容";
+CW2A utf8(cws, CP_UTF8);
+std::string result(utf8);
+
+// std::string (UTF-8) → CStringW
+std::string input = "UTF-8 content";
+CA2W wide(input.c_str(), CP_UTF8);
+CStringW output(wide);
+```
+
+## 完整转换速查表
+
+| 宏/类 | 方向 | 代码页参数 |
+|-------|------|-----------|
+| `CW2A` | `wchar_t*` → `char*` | 第二参数，默认 `CP_ACP` |
+| `CA2W` | `char*` → `wchar_t*` | 第二参数，默认 `CP_ACP` |
+| `CW2AEX<N>` | 同上，栈缓冲区 N 字节 | 同上 |
+| `CA2WEX<N>` | 同上，栈缓冲区 N 字节 | 同上 |
+| `W2A`（老宏）| 同 `CW2A` | 需要 `USES_CONVERSION` |
+| `A2W`（老宏）| 同 `CA2W` | 需要 `USES_CONVERSION` |
+
+## 常见陷阱
+
+### 1. 临时对象生命周期
+
+`CW2A` 是一个栈对象。不要这样写：
+
+```cpp
+// ❌ 危险：临时对象析构，指针悬空
+LPCSTR GetAnsi(LPCWSTR wide)
+{
+    return CW2A(wide); // 临时对象在此行结束后立即销毁！
+}
+
+// ✅ 正确：让调用方持有对象
+CW2A GetAnsi(LPCWSTR wide)
+{
+    return CW2A(wide);
+}
+// 或者直接在调用处使用：
+CW2A ansi(someWideStr);
+SomeFunc(ansi); // 对象在整个表达式期间有效
+```
+
+### 2. 代码页一致性
+
+混用 `CP_ACP` 和 `CP_UTF8` 会导致乱码。现代项目建议**始终使用 `CP_UTF8`**，并在 Visual Studio 项目属性中设置 `/utf-8` 编译选项。
+
+### 3. nullptr 不安全
+
+传入 `nullptr` 会导致断言或崩溃：
+
+```cpp
+// ✅ 安全写法
+if (pWide != nullptr)
+{
+    CW2A ansi(pWide, CP_UTF8);
+    // 使用 ansi
+}
+```
+
+## 总结
+
+- 现代 ATL（VS2003+）无需 `USES_CONVERSION`，直接用 `CW2A`/`CA2W`
+- 强烈推荐指定 `CP_UTF8` 作为代码页，避免平台差异
+- 注意 `CW2A` 是栈对象，不要返回其内部 `char*` 指针
+- 头文件 `<atlstr.h>` 即可，`<atlconv.h>` 是旧接口

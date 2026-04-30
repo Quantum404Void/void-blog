@@ -1,6 +1,24 @@
 
 export default new Map([
 ["src/content/blog/about.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fabout.mdx&astroContentModuleFlag=true")],
+["src/content/blog/algorithm-number-complement.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Falgorithm-number-complement.mdx&astroContentModuleFlag=true")],
+["src/content/blog/cef-lnk2038-iterator-debug-level.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fcef-lnk2038-iterator-debug-level.mdx&astroContentModuleFlag=true")],
+["src/content/blog/cpp-random-mt19937.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fcpp-random-mt19937.mdx&astroContentModuleFlag=true")],
+["src/content/blog/csharp-sendmessage-cpp.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fcsharp-sendmessage-cpp.mdx&astroContentModuleFlag=true")],
+["src/content/blog/duilib-static-build.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fduilib-static-build.mdx&astroContentModuleFlag=true")],
 ["src/content/blog/electron-ipc-types.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Felectron-ipc-types.mdx&astroContentModuleFlag=true")],
-["src/content/blog/hid-hotplug.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fhid-hotplug.mdx&astroContentModuleFlag=true")]]);
+["src/content/blog/element-plus-popover-hide.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Felement-plus-popover-hide.mdx&astroContentModuleFlag=true")],
+["src/content/blog/exe-dll-single-package.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fexe-dll-single-package.mdx&astroContentModuleFlag=true")],
+["src/content/blog/git-out-of-memory.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fgit-out-of-memory.mdx&astroContentModuleFlag=true")],
+["src/content/blog/hid-hotplug.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fhid-hotplug.mdx&astroContentModuleFlag=true")],
+["src/content/blog/load-balancing-algorithms.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fload-balancing-algorithms.mdx&astroContentModuleFlag=true")],
+["src/content/blog/mfc-cstring-wparam.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fmfc-cstring-wparam.mdx&astroContentModuleFlag=true")],
+["src/content/blog/mfc-dpi-adaptive.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fmfc-dpi-adaptive.mdx&astroContentModuleFlag=true")],
+["src/content/blog/mfc-drag-window.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fmfc-drag-window.mdx&astroContentModuleFlag=true")],
+["src/content/blog/npm-electron-install-fix.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fnpm-electron-install-fix.mdx&astroContentModuleFlag=true")],
+["src/content/blog/vite-vue3-ts-elementplus-pinia.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fvite-vue3-ts-elementplus-pinia.mdx&astroContentModuleFlag=true")],
+["src/content/blog/vmware-tools-install.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fvmware-tools-install.mdx&astroContentModuleFlag=true")],
+["src/content/blog/win-cw2a-ca2w.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fwin-cw2a-ca2w.mdx&astroContentModuleFlag=true")],
+["src/content/blog/win-postmessage-vector.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fwin-postmessage-vector.mdx&astroContentModuleFlag=true")],
+["src/content/blog/win-startup-registry.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fblog%2Fwin-startup-registry.mdx&astroContentModuleFlag=true")]]);
 		

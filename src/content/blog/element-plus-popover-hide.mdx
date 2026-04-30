@@ -1,0 +1,304 @@
+---
+title: "手动关闭多个 el-popover（不用 v-model:visible）"
+description: "通过 ref + Reflect.get 调用 hide() 方法手动关闭 Element Plus Popover，解释 Vue3 Proxy 导致无法直接调用实例方法的原因。"
+pubDate: 2024-10-25
+tags: ["vue", "element-plus", "vue3"]
+draft: false
+---
+
+## 问题背景
+
+列表里每一行都有一个 `el-popover`，点击行内按钮弹出，点击确认/取消后关闭。
+
+最直觉的做法是用 `v-model:visible` 绑定一个布尔值数组：
+
+```vue
+<el-popover
+  v-for="(item, index) in list"
+  :key="item.id"
+  v-model:visible="popoverVisible[index]"
+  trigger="click"
+/>
+```
+
+这样每一行都需要一个独立的响应式变量，而且打开一个 popover 时还要手动关闭其他的，逻辑变复杂。
+
+更麻烦的是，有时候 popover 是在子组件里渲染的，`visible` 的状态要通过 props/emit 传来传去，不值得。
+
+**想要的效果**：直接拿到组件实例，调用它的 `hide()` 方法，不维护任何 visible 状态。
+
+---
+
+## 方案一：单个 popover，ref + hide()
+
+先看最简单的情况——只有一个 popover。
+
+```vue
+<template>
+  <el-popover
+    ref="popoverRef"
+    :width="260"
+    trigger="click"
+    popper-class="modify-popover"
+  >
+    <template #default>
+      <p>确认要修改吗？</p>
+      <el-button size="small" @click="handleConfirm">确认</el-button>
+      <el-button size="small" @click="closePopover">取消</el-button>
+    </template>
+    <template #reference>
+      <el-button>修改</el-button>
+    </template>
+  </el-popover>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { ElPopover } from 'element-plus'
+
+const popoverRef = ref<InstanceType<typeof ElPopover>>()
+
+function closePopover() {
+  // ❌ 直接调用报错：popoverRef.value.hide is not a function
+  // popoverRef.value?.hide()
+
+  // ✅ 正确写法：通过 Reflect.get 取出方法再调用
+  const instance = popoverRef.value
+  if (instance) {
+    Reflect.get(instance, 'hide').call(instance)
+  }
+}
+
+function handleConfirm() {
+  // 做业务逻辑...
+  closePopover()
+}
+</script>
+```
+
+---
+
+## 为什么不能直接调 .hide()？
+
+这是 Vue3 响应式系统的副作用。
+
+Vue3 用 `Proxy` 实现响应式，当你把组件实例存进 `ref()` 时，它被套了一层 Proxy：
+
+```
+ref.value → Proxy → 真实组件实例
+```
+
+Proxy 会拦截属性访问。Element Plus 的 `hide` 方法定义在组件暴露的接口上，而通过 Proxy 访问时，这个方法并不在 Proxy 的拦截白名单里（或者方法内部的 `this` 指向出现了问题）。
+
+直接 `popoverRef.value.hide()` 有时候确实能访问到函数，但调用时 `this` 已经不是原始实例了，导致内部访问 `this.xxx` 失败。
+
+`Reflect.get(target, key)` 的作用是**绕开 Proxy 的拦截，直接从目标对象上取属性**，然后用 `.call(instance)` 把 `this` 绑定回真实实例。
+
+```ts
+// 等价于：在原始对象上取 hide，再以 instance 为 this 调用它
+const hideFn = Reflect.get(instance, 'hide')
+hideFn.call(instance)
+```
+
+---
+
+## 方案二：多个 popover，ref 数组
+
+列表场景下，需要存多个 popover 实例。
+
+```vue
+<template>
+  <div v-for="(item, index) in list" :key="item.id" class="list-item">
+    <span>{{ item.name }}</span>
+
+    <el-popover
+      :ref="(el) => setPopoverRef(el, index)"
+      :width="260"
+      trigger="click"
+    >
+      <template #default>
+        <p>确认修改「{{ item.name }}」？</p>
+        <div class="popover-actions">
+          <el-button size="small" type="primary" @click="handleConfirm(index)">
+            确认
+          </el-button>
+          <el-button size="small" @click="closePopover(index)">取消</el-button>
+        </div>
+      </template>
+      <template #reference>
+        <el-button size="small">修改</el-button>
+      </template>
+    </el-popover>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { ElPopover } from 'element-plus'
+
+interface ListItem {
+  id: number
+  name: string
+}
+
+const list = ref<ListItem[]>([
+  { id: 1, name: '项目 A' },
+  { id: 2, name: '项目 B' },
+  { id: 3, name: '项目 C' },
+])
+
+// 用对象（而不是数组）存 ref，避免列表增删时索引错位
+const popoverRefs = ref<Record<number, InstanceType<typeof ElPopover>>>({})
+
+function setPopoverRef(el: unknown, index: number) {
+  if (el) {
+    popoverRefs.value[index] = el as InstanceType<typeof ElPopover>
+  } else {
+    // el 为 null 时说明组件已卸载，清理引用
+    delete popoverRefs.value[index]
+  }
+}
+
+function closePopover(index: number) {
+  const instance = popoverRefs.value[index]
+  if (!instance) return
+  Reflect.get(instance, 'hide').call(instance)
+}
+
+function handleConfirm(index: number) {
+  const item = list.value[index]
+  console.log('确认修改：', item.name)
+  // 业务逻辑...
+  closePopover(index)
+}
+</script>
+
+<style scoped>
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.popover-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+</style>
+```
+
+### 为什么用对象而不是数组
+
+```ts
+// ❌ 用数组的问题：列表删除第 1 项后，索引全部错位
+const popoverRefs = ref<InstanceType<typeof ElPopover>[]>([])
+
+// ✅ 用对象存，key 是稳定的 index（或更好：item.id）
+const popoverRefs = ref<Record<number, InstanceType<typeof ElPopover>>>({})
+```
+
+如果列表项有稳定的 `id`，把 key 换成 `item.id` 更可靠：
+
+```ts
+function setPopoverRef(el: unknown, id: number) {
+  if (el) {
+    popoverRefs.value[id] = el as InstanceType<typeof ElPopover>
+  } else {
+    delete popoverRefs.value[id]
+  }
+}
+```
+
+---
+
+## 完整示例：带关闭其他 popover 的版本
+
+点击某一行时，先关闭所有已打开的 popover，再让当前的弹出（避免多个同时展示）：
+
+```vue
+<template>
+  <el-table :data="tableData">
+    <el-table-column prop="name" label="名称" />
+    <el-table-column label="操作" width="120">
+      <template #default="{ row, $index }">
+        <el-popover
+          :ref="(el) => setPopoverRef(el, row.id)"
+          placement="left"
+          :width="200"
+          trigger="click"
+          @show="closeOthers(row.id)"
+        >
+          <template #default>
+            <el-button
+              type="danger"
+              size="small"
+              @click="handleDelete(row, $index)"
+            >
+              确认删除
+            </el-button>
+          </template>
+          <template #reference>
+            <el-button type="text" size="small">删除</el-button>
+          </template>
+        </el-popover>
+      </template>
+    </el-table-column>
+  </el-table>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { ElPopover, ElMessage } from 'element-plus'
+
+const tableData = ref([
+  { id: 1, name: '记录 A' },
+  { id: 2, name: '记录 B' },
+  { id: 3, name: '记录 C' },
+])
+
+const popoverRefs = ref<Record<number, InstanceType<typeof ElPopover>>>({})
+
+function setPopoverRef(el: unknown, id: number) {
+  if (el) {
+    popoverRefs.value[id] = el as InstanceType<typeof ElPopover>
+  } else {
+    delete popoverRefs.value[id]
+  }
+}
+
+// 关闭除 excludeId 之外的所有 popover
+function closeOthers(excludeId: number) {
+  for (const [id, instance] of Object.entries(popoverRefs.value)) {
+    if (Number(id) !== excludeId && instance) {
+      Reflect.get(instance, 'hide').call(instance)
+    }
+  }
+}
+
+function handleDelete(row: { id: number; name: string }, index: number) {
+  // 关闭当前 popover
+  Reflect.get(popoverRefs.value[row.id], 'hide').call(popoverRefs.value[row.id])
+  tableData.value.splice(index, 1)
+  ElMessage.success(`已删除：${row.name}`)
+}
+</script>
+```
+
+`@show` 事件在 popover 打开时触发，此时关闭其他的，体验上比较自然。
+
+---
+
+## 小结
+
+| 场景 | 方案 |
+|------|------|
+| 单个 popover，手动关闭 | `ref` + `Reflect.get(instance, 'hide').call(instance)` |
+| 多个 popover，关闭指定一个 | `ref` 对象（key 用 id）+ 同上 |
+| 打开一个时关闭其他 | `@show` 事件里遍历关闭其他实例 |
+
+核心是两点：
+1. 不要维护 `visible` 数组，复杂度不值得。
+2. 直接 `.hide()` 因为 Vue3 Proxy 可能失效，用 `Reflect.get` 绕过去。

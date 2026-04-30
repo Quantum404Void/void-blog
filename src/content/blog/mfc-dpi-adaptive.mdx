@@ -1,0 +1,163 @@
+---
+title: "MFC 界面自适应不同分辨率"
+description: "MFC 对话框程序实现控件和字体随分辨率自动缩放的完整方案，附 DPI Awareness 配置说明"
+pubDate: 2022-08-17
+tags: ["mfc", "cpp", "windows", "dpi"]
+draft: false
+---
+
+## 背景
+
+开发 MFC 对话框程序时，在开发机上布局好的界面，换一台分辨率不同的电脑就会出现控件错位、字体过大或过小的问题。原因是对话框控件的位置和尺寸在设计时是固定的像素值，不会自动跟随屏幕分辨率缩放。
+
+## DPI Awareness
+
+在解决自适应前，先理解 DPI 感知（DPI Awareness）。Windows 默认会对未声明 DPI 感知的程序做 bitmap 拉伸，导致界面模糊。建议在程序入口显式声明：
+
+```cpp
+// 在 WinMain 或 InitInstance 的最开始调用
+SetProcessDPIAware(); // 需要 #include <windows.h>
+```
+
+或者在 manifest 中声明（更推荐的方式）：
+
+```xml
+<application xmlns="urn:schemas-microsoft-com:asm.v3">
+  <windowsSettings>
+    <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+  </windowsSettings>
+</application>
+```
+
+声明后 Windows 不再拉伸，但你需要自己处理缩放逻辑。
+
+## 实现方案
+
+核心思路：**记录初始尺寸，在窗口大小变化时按比例缩放所有控件**。
+
+### 1. 在头文件中添加成员变量
+
+```cpp
+class CMyDlg : public CDialogEx {
+    // ...
+private:
+    POINT m_oldSize;   // 记录对话框初始客户区尺寸
+    CFont m_MainUIFont; // 字体自适应用
+    void ReSize();     // 缩放函数
+};
+```
+
+### 2. OnInitDialog 中记录初始尺寸并居中
+
+```cpp
+BOOL CMyDlg::OnInitDialog() {
+    CDialogEx::OnInitDialog();
+
+    // 记录初始客户区大小
+    CRect rect;
+    GetClientRect(&rect);
+    m_oldSize.x = rect.Width();
+    m_oldSize.y = rect.Height();
+
+    // 获取屏幕可用区域（不含任务栏）
+    int screenW = GetSystemMetrics(SM_CXFULLSCREEN);
+    int screenH = GetSystemMetrics(SM_CYFULLSCREEN);
+
+    // 居中显示
+    CRect dlgRect;
+    GetWindowRect(&dlgRect);
+    int x = (screenW - dlgRect.Width()) / 2;
+    int y = (screenH - dlgRect.Height()) / 2;
+    MoveWindow(x, y, dlgRect.Width(), dlgRect.Height());
+
+    return TRUE;
+}
+```
+
+### 3. 实现 ReSize() 函数
+
+```cpp
+void CMyDlg::ReSize() {
+    CRect clientRect;
+    GetClientRect(&clientRect);
+
+    // 计算新旧尺寸比例
+    float scaleX = (float)clientRect.Width()  / m_oldSize.x;
+    float scaleY = (float)clientRect.Height() / m_oldSize.y;
+
+    // 遍历所有子控件
+    HWND hChild = ::GetWindow(m_hWnd, GW_CHILD);
+    while (hChild) {
+        int ctrlId = ::GetDlgCtrlID(hChild);
+        CRect ctrlRect;
+        GetDlgItem(ctrlId)->GetWindowRect(&ctrlRect);
+        ScreenToClient(&ctrlRect); // 转为客户区坐标
+
+        // 按比例计算新位置和尺寸
+        CRect newRect(
+            (long)(ctrlRect.left   * scaleX),
+            (long)(ctrlRect.top    * scaleY),
+            (long)(ctrlRect.right  * scaleX),
+            (long)(ctrlRect.bottom * scaleY)
+        );
+        GetDlgItem(ctrlId)->MoveWindow(newRect, TRUE);
+
+        // 字体自适应（Static 和 Button 控件）
+        char className[MAX_PATH] = {0};
+        GetClassNameA(hChild, className, MAX_PATH);
+        if (strcmp(className, "Static") == 0 || strcmp(className, "Button") == 0) {
+            CFont* pFont = GetDlgItem(ctrlId)->GetFont();
+            LOGFONT lf;
+            pFont->GetLogFont(&lf);
+
+            int newHeight = newRect.Height() * 4 / 5;
+            lf.lfHeight = newHeight;
+
+            CString text;
+            GetDlgItem(ctrlId)->GetWindowText(text);
+            int textLen = text.GetLength();
+            // 防止字体过宽导致文字超出控件
+            lf.lfWidth = (textLen > 0 && (textLen * 9) > newRect.Width())
+                ? newRect.Width() / textLen
+                : 9;
+
+            m_MainUIFont.DeleteObject();
+            m_MainUIFont.CreateFontIndirect(&lf);
+            GetDlgItem(ctrlId)->SetFont(&m_MainUIFont);
+            m_MainUIFont.Detach(); // 解除关联，防止 DeleteObject 影响控件
+        }
+
+        hChild = ::GetWindow(hChild, GW_HWNDNEXT);
+    }
+
+    // 更新记录的尺寸
+    m_oldSize.x = clientRect.Width();
+    m_oldSize.y = clientRect.Height();
+}
+```
+
+### 4. 在 OnSize 中调用
+
+```cpp
+void CMyDlg::OnSize(UINT nType, int cx, int cy) {
+    CDialogEx::OnSize(nType, cx, cy);
+
+    // 避免初始化阶段（m_oldSize 未赋值）触发
+    if (m_oldSize.x > 0 && m_oldSize.y > 0) {
+        ReSize();
+    }
+}
+```
+
+## 常见坑
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| 首次触发 OnSize 时崩溃 | m_oldSize 未初始化，除以 0 | 在 OnInitDialog 之后才允许 ReSize |
+| 字体越来越大 | 每次 ReSize 基于上一次缩放后的字体再缩放 | 重新从控件原始 LOGFONT 取，或单独记录初始字体大小 |
+| Edit 控件字体不更新 | GetClassNameA 返回 "Edit"，未在判断里 | 按需加入 Edit 的字体处理 |
+| 控件位置漂移 | ScreenToClient 在窗口移动后坐标不准 | 保证每次都重新 GetWindowRect + ScreenToClient |
+
+## 延伸
+
+如果项目对 DPI 支持要求更高，可以考虑用 Windows 10 引入的 Per-Monitor DPI Awareness v2（`DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2`），配合 `WM_DPICHANGED` 消息重新布局。不过 MFC 对此支持有限，现代项目更建议直接换 Qt 或 WinUI 3。

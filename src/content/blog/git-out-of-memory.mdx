@@ -1,0 +1,152 @@
+---
+title: "解决 git 报错：Fatal: Out of memory, malloc failed"
+description: "分析 git 大仓库操作时出现 Out of memory malloc failed 的根本原因，通过调整 pack.windowMemory、http.postBuffer 和 git repack 彻底解决。"
+pubDate: 2024-01-31
+tags: ["Git", "性能", "故障排查"]
+draft: false
+---
+
+## 问题现象
+
+在执行 `git clone`、`git push` 或 `git gc` 等操作时，终端抛出：
+
+```
+Fatal: Out of memory, malloc failed (tried to allocate 42446849 bytes)
+```
+
+或类似：
+
+```
+error: pack-objects died with strange error
+fatal: the remote end hung up unexpectedly
+```
+
+这个错误让人迷惑——服务器明明有几 GB 内存，为什么 git 会 OOM？
+
+## 根本原因分析
+
+### git 的打包机制（packfile）
+
+git 不是逐文件存储的，而是将对象打包成 `.pack` 文件以节省空间。打包时会进行**delta 压缩**：找出相似对象，只存储差异。
+
+delta 压缩的效果越好，需要加载到内存中的"滑动窗口"就越大：
+
+```
+pack.windowMemory（默认：0 = 无限制）
+    ↓
+git 尝试分配尽可能大的内存窗口
+    ↓
+系统内存不足 / 32位进程地址空间限制
+    ↓
+malloc 失败 → Fatal: Out of memory
+```
+
+### http.postBuffer 过小
+
+`git push` 通过 HTTP(S) 推送时，默认的 `http.postBuffer` 只有 **1MB**。推送大文件或大批量提交时，git 需要一次性缓冲整个 packfile，超出限制就会报错：
+
+```
+error: RPC failed; HTTP 413 curl 22 The requested URL returned error: 413
+```
+
+或：
+
+```
+fatal: the remote end hung up unexpectedly
+```
+
+## 解决方案
+
+### 步骤 1：限制打包内存窗口
+
+```bash
+git config --global pack.windowMemory 256m
+```
+
+这告诉 git 在 delta 压缩时，每个滑动窗口最多使用 256MB 内存，防止无限申请导致 OOM。
+
+也可以同时限制并发线程使用的内存：
+
+```bash
+git config --global pack.packSizeLimit 256m   # 单个 pack 文件最大尺寸
+git config --global pack.threads 1            # 限制并发打包线程数（内存紧张时）
+```
+
+### 步骤 2：增大 HTTP 推送缓冲区
+
+```bash
+# 将报错中 "tried to allocate N bytes" 的 N 设为上限，或直接设一个较大值
+git config --global http.postBuffer 52428800   # 50MB
+# 或者报错里的具体值
+git config --global http.postBuffer 42446849
+```
+
+### 步骤 3：重新打包仓库
+
+如果本地仓库已经积累了大量松散对象，执行 `repack` 重新整理：
+
+```bash
+# 重新打包，并自动清理不可达对象
+git repack -a -d -f --depth=250 --window=250
+```
+
+参数说明：
+- `-a`：将所有对象打入新 pack（包括已打包的）
+- `-d`：删除多余的旧 pack 文件
+- `-f`：强制重新 delta 压缩
+- `--depth=250`：delta 链最大深度
+- `--window=250`：比较窗口大小（影响压缩率与内存用量，内存紧张可调小）
+
+## 完整修复流程
+
+```bash
+# 1. 全局配置（一次性，永久生效）
+git config --global pack.windowMemory 256m
+git config --global http.postBuffer 52428800
+
+# 2. 清理当前仓库（可选，针对已有问题仓库）
+cd /path/to/your/repo
+git gc --aggressive --prune=now
+
+# 3. 如果 gc 也 OOM，改用更保守的参数
+git repack -a -d --depth=100 --window=100
+```
+
+## 验证配置
+
+```bash
+# 查看当前全局 git 配置
+git config --global --list | grep -E "pack|http"
+```
+
+输出应包含：
+
+```
+pack.windowmemory=256m
+http.postbuffer=52428800
+```
+
+## 其他可能原因
+
+| 现象 | 可能原因 | 解决方案 |
+|------|---------|---------|
+| clone 大仓库时 OOM | 单次获取 pack 太大 | `git clone --depth=1`（浅克隆）|
+| push 时 413 错误 | 服务端限制请求体大小 | 联系管理员调大 Nginx `client_max_body_size` |
+| Windows 32 位 git | 进程地址空间限制 | 换用 64 位 Git for Windows |
+| CI 容器内存过小 | 容器限额 512MB 以下 | 增大容器内存或用浅克隆 |
+
+## 延伸：仓库瘦身
+
+如果仓库因历史大文件而体积异常，除了调参外，还可以从根本上清除：
+
+```bash
+# 找出最大的对象
+git rev-list --objects --all | \
+  git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | \
+  sort -k3 -n | tail -20
+
+# 用 BFG Repo Cleaner 删除大文件历史
+java -jar bfg.jar --strip-blobs-bigger-than 100M .
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+```

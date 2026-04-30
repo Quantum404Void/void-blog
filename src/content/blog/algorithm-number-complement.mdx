@@ -1,0 +1,101 @@
+---
+title: "整数的补数：位运算掩码解法"
+description: "LeetCode 476 题，用掩码 XOR 实现整数补数，附 C++/Python/Java 三种实现及补数与补码的区别"
+pubDate: 2021-03-08
+tags: ["算法", "位运算", "leetcode"]
+draft: false
+---
+
+## 题目
+
+> 对整数的二进制表示取反（0 变 1，1 变 0），再转换为十进制，得到该整数的**补数**。  
+> 例如：5 的二进制是 `101`，取反后 `010` = 2，所以 5 的补数是 2。  
+> 注意：不含前导零。给定 `1 <= num < 2^31`，输出其补数。
+
+## 思路
+
+直觉是逐位翻转，但更优雅的方法是构造一个**掩码 mask**：
+
+1. 找到 `num` 的最高有效位，构造一个同等位数全为 `1` 的掩码。
+2. `num XOR mask` 即为补数（因为 `x XOR 1 = ~x`，`x XOR 0 = x`）。
+
+例如 `num = 5`（二进制 `101`）：
+- mask = `111`（十进制 7）
+- `5 XOR 7 = 101 XOR 111 = 010 = 2` ✓
+
+**如何构造 mask？**
+
+```
+mask 从 1 开始，不断左移并 OR，直到 mask >= num：
+mask = 1
+while mask < num:
+    mask = (mask << 1) | 1
+```
+
+或者等价地：
+
+```
+mask = (1 << bit_length(num)) - 1
+```
+
+## 实现
+
+### C++
+
+```cpp
+class Solution {
+public:
+    int findComplement(int num) {
+        // 构造掩码：找到 num 的最高位，mask 全为 1
+        unsigned int mask = 1;
+        while (mask < (unsigned int)num) {
+            mask = (mask << 1) | 1;
+        }
+        return num ^ mask;
+    }
+};
+```
+
+### Python
+
+```python
+class Solution:
+    def findComplement(self, num: int) -> int:
+        # bit_length() 返回二进制表示的位数
+        mask = (1 << num.bit_length()) - 1
+        return num ^ mask
+```
+
+### Java
+
+```java
+class Solution {
+    public int findComplement(int num) {
+        // Integer.highestOneBit 找最高位，构造掩码
+        int mask = Integer.highestOneBit(num);
+        mask = (mask << 1) - 1; // 例如 highestOneBit(5)=4，(4<<1)-1=7
+        return num ^ mask;
+    }
+}
+```
+
+## 复杂度
+
+- **时间**：O(log n)，循环次数等于 num 的二进制位数。
+- **空间**：O(1)。
+
+## 补数 vs 补码
+
+这两个概念容易混淆：
+
+| | 定义 | 例子（8 位） |
+|--|------|------------|
+| **补数**（本题）| 二进制取反，不含前导零 | 5 (`101`) → 2 (`010`) |
+| **反码** | 所有位取反（含符号位） | 5 (`00000101`) → `11111010` |
+| **补码** | 反码 + 1，用于表示负数 | -5 的补码 = `11111011` |
+
+本题的"补数"只对有效位取反，和计算机组成原理里的补码是不同概念。
+
+## 延伸
+
+同类题：[LeetCode 1009 - 十进制整数的反码](https://leetcode.cn/problems/complement-of-base-10-integer/)，本质相同，只是题目描述方式不同。
