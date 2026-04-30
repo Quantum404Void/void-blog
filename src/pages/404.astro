@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="404 — Not Found">
+  <div class="min-h-screen bg-[var(--color-void)] flex items-center justify-center p-6">
+    <div class="max-w-lg w-full font-mono">
+
+      <!-- Terminal window -->
+      <div class="border border-[var(--color-void-border)] rounded-xl overflow-hidden bg-[var(--color-void-card)]">
+
+        <!-- Title bar -->
+        <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-void-border)] bg-[var(--color-void-surface)]">
+          <div class="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
+          <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+          <div class="w-3 h-3 rounded-full bg-[#28c840]"></div>
+          <span class="ml-3 text-xs text-[var(--color-text-muted)]">void.dev — bash</span>
+        </div>
+
+        <!-- Terminal body -->
+        <div class="p-6 space-y-2 text-sm">
+          <p>
+            <span class="text-[var(--color-neon-green)]">void@dev</span>
+            <span class="text-[var(--color-text-muted)]">:</span>
+            <span class="text-[var(--color-neon-cyan)]">~</span>
+            <span class="text-[var(--color-text-muted)]">$</span>
+            <span class="text-[var(--color-text-primary)]"> cat {Astro.url.pathname}</span>
+          </p>
+          <p class="text-[var(--color-neon-pink)]">
+            cat: {Astro.url.pathname}: No such file or directory
+          </p>
+          <p>
+            <span class="text-[var(--color-neon-green)]">void@dev</span>
+            <span class="text-[var(--color-text-muted)]">:</span>
+            <span class="text-[var(--color-neon-cyan)]">~</span>
+            <span class="text-[var(--color-text-muted)]">$</span>
+            <span class="text-[var(--color-text-primary)]"> echo $?</span>
+          </p>
+          <p class="text-[var(--color-neon-pink)]">404</p>
+          <p>
+            <span class="text-[var(--color-neon-green)]">void@dev</span>
+            <span class="text-[var(--color-text-muted)]">:</span>
+            <span class="text-[var(--color-neon-cyan)]">~</span>
+            <span class="text-[var(--color-text-muted)]">$</span>
+            <span class="cursor-blink text-[var(--color-text-primary)]"> </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-8 flex flex-col sm:flex-row gap-3">
+        <a href="/void-blog/"
+           class="flex-1 text-center font-mono text-sm px-5 py-3 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-secondary)] hover:border-[rgba(0,255,136,0.4)] hover:text-[var(--color-neon-green)] transition-all">
+          cd ~
+        </a>
+        <a href="/void-blog/blog/"
+           class="flex-1 text-center font-mono text-sm px-5 py-3 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-secondary)] hover:border-[rgba(0,212,255,0.4)] hover:text-[var(--color-neon-cyan)] transition-all">
+          ls ~/blog
+        </a>
+        <a href="/void-blog/search/"
+           class="flex-1 text-center font-mono text-sm px-5 py-3 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-secondary)] hover:border-[rgba(180,76,255,0.4)] hover:text-[var(--color-neon-purple)] transition-all">
+          grep -r ...
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

@@ -2,21 +2,38 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
   .filter(p => !p.id.startsWith('about'))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 5)
 
-const allTags = [...new Set(
-  (await getCollection('blog')).flatMap(p => p.data.tags)
-)].slice(0, 12)
+const posts = allPosts
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 6)
+
+const allTags = [...new Set(allPosts.flatMap(p => p.data.tags))]
+
+// Tag weights for cloud
+const tagCounts = allPosts.flatMap(p => p.data.tags).reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1
+  return acc
+}, {} as Record<string, number>)
+const maxCount = Math.max(...Object.values(tagCounts))
+const tagCloud = Object.entries(tagCounts)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 18)
 
 const formatDate = (d: Date) =>
   d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+
+// Tag colors cycle
+const tagColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
+const getTagColor = (tag: string) => {
+  const idx = Math.abs(tag.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length
+  return tagColors[idx]
+}
 ---
 
 <BaseLayout title="void.dev">
-  <div class="min-h-screen bg-[var(--color-void)] scanline">
+  <div class="min-h-screen bg-[var(--color-void)]">
 
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
@@ -24,165 +41,217 @@ const formatDate = (d: Date) =>
         <a href="/void-blog/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
           void.dev
         </a>
-        <div class="ml-auto flex items-center gap-6 text-xs font-mono text-[var(--color-text-muted)]">
+        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
           <a href="/void-blog/blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</a>
           <a href="/void-blog/tags/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</a>
-          <a href="/void-blog/blog/about/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/about</a>
           <a href="/void-blog/search/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</a>
-          <a
-            href="https://github.com/Quantum505Void"
-            target="_blank"
-            rel="noopener"
-            class="hover:text-[var(--color-neon-green)] transition-colors"
-          >GitHub ↗</a>
+          <a href="/void-blog/blog/about/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/about</a>
+          <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener"
+             class="hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
         </div>
       </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-6">
+    <!-- Hero -->
+    <section class="relative py-24 border-b border-[var(--color-void-border)] overflow-hidden">
+      <!-- Background grid -->
+      <div class="absolute inset-0 opacity-[0.03]"
+           style="background-image: linear-gradient(var(--color-neon-green) 1px, transparent 1px), linear-gradient(90deg, var(--color-neon-green) 1px, transparent 1px); background-size: 40px 40px;"></div>
+      <!-- Corner glow -->
+      <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
+           style="background: radial-gradient(circle, var(--color-neon-purple), transparent 70%); transform: translate(30%, -30%);"></div>
+      <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
+           style="background: radial-gradient(circle, var(--color-neon-cyan), transparent 70%); transform: translate(-30%, 30%);"></div>
 
-      <!-- Hero -->
-      <section class="py-24 border-b border-[var(--color-void-border)]">
-        <div class="flex items-start gap-3 mb-6">
-          <span class="font-mono text-[var(--color-neon-green)] text-lg select-none">$_</span>
+      <div class="relative max-w-5xl mx-auto px-6">
+        <div class="flex items-start gap-4 mb-8">
+          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] animate-pulse shrink-0"
+               style="animation: pulse 1.5s ease-in-out infinite;"></div>
           <div>
-            <p class="font-mono text-xs text-[var(--color-text-muted)] mb-2 tracking-widest uppercase">
-              启动中
+            <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-3">
+              process started
             </p>
-            <h1 class="text-5xl sm:text-6xl font-bold font-mono leading-tight">
-              <span class="text-[var(--color-text-primary)]">void</span>
-              <span class="text-[var(--color-neon-green)] glow-green">.</span>
-              <span class="text-[var(--color-neon-cyan)]">dev</span>
+            <h1 class="text-5xl sm:text-7xl font-bold font-mono leading-none mb-6">
+              <span class="text-[var(--color-text-primary)]">void</span><span
+                class="gradient-text">.</span><span
+                class="text-[var(--color-neon-cyan)]">dev</span><span
+                class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
+            <div class="font-mono text-sm space-y-2 max-w-xl">
+              <p class="text-[var(--color-text-secondary)] animate-fade-up" style="animation-delay:0.1s">
+                <span class="text-[var(--color-neon-purple)]">interest</span>
+                <span class="text-[var(--color-text-muted)]"> = </span>
+                <span class="text-[var(--color-neon-cyan)]">["系统", "工具链", "桌面应用", "AI Agent", "...更多"]</span>
+              </p>
+              <p class="text-[var(--color-text-secondary)] animate-fade-up" style="animation-delay:0.2s">
+                <span class="text-[var(--color-neon-purple)]">status</span>
+                <span class="text-[var(--color-text-muted)]"> = </span>
+                <span class="text-[var(--color-neon-green)]">在线</span>
+                <span class="inline-block w-2 h-2 rounded-full bg-[var(--color-neon-green)] ml-2 align-middle"
+                      style="animation: pulse 1.5s ease-in-out infinite;"></span>
+              </p>
+            </div>
           </div>
         </div>
 
-        <div class="font-mono text-sm ml-9 space-y-1">
-          <p class="text-[var(--color-text-secondary)]">
-            <span class="text-[var(--color-neon-purple)]">role</span>
-            <span class="text-[var(--color-text-muted)]"> = </span>
-            <span class="text-[var(--color-neon-cyan)]">"代码、工具、系统、与一切值得折腾的东西"</span>
-          </p>
-          <p class="text-[var(--color-text-secondary)]">
-            <span class="text-[var(--color-neon-purple)]">interest</span>
-            <span class="text-[var(--color-text-muted)]"> = </span>
-            <span class="text-[var(--color-neon-cyan)]">["系统", "工具链", "桌面应用", "AI Agent", "...更多"]</span>
-          </p>
-          <p class="text-[var(--color-text-secondary)]">
-            <span class="text-[var(--color-neon-purple)]">status</span>
-            <span class="text-[var(--color-text-muted)]"> = </span>
-            <span class="text-[var(--color-neon-green)]">在线</span>
-            <span class="inline-block w-2 h-2 rounded-full bg-[var(--color-neon-green)] ml-2 align-middle" style="animation: pulse 1.5s ease-in-out infinite;"></span>
-          </p>
+        <!-- Stats bar -->
+        <div class="flex gap-8 font-mono text-xs text-[var(--color-text-muted)] animate-fade-up" style="animation-delay:0.3s">
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-neon-green)]">▸</span>
+            <span class="text-[var(--color-text-secondary)]">{allPosts.length}</span>
+            <span>篇文章</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-neon-cyan)]">▸</span>
+            <span class="text-[var(--color-text-secondary)]">{allTags.length}</span>
+            <span>个标签</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-neon-purple)]">▸</span>
+            <span class="text-[var(--color-text-secondary)]">2021</span>
+            <span>年至今</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content grid -->
+    <div class="max-w-5xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12">
+
+      <!-- Posts list -->
+      <section>
+        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+          <span class="text-[var(--color-neon-green)]">▶</span>
+          最新文章
+          <span class="flex-1 h-px bg-gradient-to-r from-[var(--color-void-border)] to-transparent"></span>
+        </h2>
+
+        <div class="space-y-2">
+          {posts.map((post, i) => {
+            const slug = post.id.replace(/\.mdx?$/, '')
+            const color = getTagColor(post.data.tags[0] ?? '')
+            return (
+              <a
+                href={`/void-blog/blog/${slug}/`}
+                class="group block p-4 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
+                style={`animation-delay: ${i * 0.05}s`}
+              >
+                <div class="flex items-start gap-4">
+                  <!-- Color accent bar -->
+                  <div class={`shrink-0 w-0.5 h-full self-stretch rounded-full mt-1 bg-[var(--color-${color})] opacity-50 group-hover:opacity-100 transition-opacity`}
+                       style={`background: var(--color-${color}); min-height: 2.5rem;`}></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-4">
+                      <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
+                        {post.data.title}
+                      </h3>
+                      <time datetime={post.data.pubDate.toISOString()}
+                            class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">
+                        {formatDate(post.data.pubDate)}
+                      </time>
+                    </div>
+                    {post.data.description && (
+                      <p class="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1 leading-relaxed">
+                        {post.data.description}
+                      </p>
+                    )}
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                      {post.data.tags.slice(0, 3).map(tag => (
+                        <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            )
+          })}
+        </div>
+
+        <div class="mt-6">
+          <a href="/void-blog/blog/"
+             class="inline-flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.3)] px-4 py-2 rounded-lg">
+            查看全部 {allPosts.length} 篇文章 →
+          </a>
         </div>
       </section>
 
-      <!-- Content grid -->
-      <div class="py-16 grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-12">
+      <!-- Sidebar -->
+      <aside class="space-y-8">
 
-        <!-- Posts -->
-        <section>
-          <h2 class="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-8 flex items-center gap-3">
-            <span class="text-[var(--color-neon-green)]">▶</span> 最新文章
+        <!-- Tag cloud -->
+        <div>
+          <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+            <span class="text-[var(--color-neon-purple)]">▶</span> 标签云
           </h2>
-
-          <div class="space-y-1">
-            {posts.map((post) => (
-              <a
-                href={`/void-blog/blog/${post.id.replace(/\.mdx?$/, '')}/`}
-                class="group flex items-start gap-4 p-4 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-200"
-              >
-                <time
-                  datetime={post.data.pubDate.toISOString()}
-                  class="font-mono text-xs text-[var(--color-text-muted)] pt-1 shrink-0 w-24"
-                >
-                  {formatDate(post.data.pubDate)}
-                </time>
-                <div class="min-w-0">
-                  <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors mb-1 leading-snug">
-                    {post.data.title}
-                  </h3>
-                  {post.data.description && (
-                    <p class="text-xs text-[var(--color-text-muted)] line-clamp-1">
-                      {post.data.description}
-                    </p>
-                  )}
-                  <div class="flex flex-wrap gap-1 mt-2">
-                    {post.data.tags.slice(0, 3).map(tag => (
-                      <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <span class="ml-auto text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)] transition-colors shrink-0 font-mono text-xs pt-1">
-                  →
-                </span>
-              </a>
-            ))}
-          </div>
-
-          <div class="mt-6">
-            <a
-              href="/void-blog/blog/"
-              class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors flex items-center gap-2"
-            >
-              查看全部文章 →
-            </a>
-          </div>
-        </section>
-
-        <!-- Sidebar -->
-        <aside class="space-y-8">
-          <!-- Tags cloud -->
-          <div>
-            <h2 class="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span class="text-[var(--color-neon-purple)]">▶</span> 标签
-            </h2>
-            <div class="flex flex-wrap gap-2">
-              {allTags.map(tag => (
+          <div class="flex flex-wrap gap-2">
+            {tagCloud.map(([tag, count]) => {
+              const weight = count / maxCount
+              const color = getTagColor(tag)
+              const size = weight > 0.7 ? 'text-sm' : weight > 0.4 ? 'text-xs' : 'text-[10px]'
+              return (
                 <a
                   href={`/void-blog/tags/${tag}/`}
-                  class="font-mono text-xs px-2.5 py-1 rounded border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-[rgba(0,212,255,0.4)] hover:text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.05)] transition-all"
+                  class={`font-mono ${size} px-2.5 py-1 rounded-lg border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.4)] hover:bg-[rgba(0,212,255,0.05)] transition-all`}
+                  title={`${count} 篇`}
                 >
                   #{tag}
                 </a>
-              ))}
-            </div>
+              )
+            })}
           </div>
+        </div>
 
-          <!-- About card -->
-          <div class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] font-mono text-xs">
-            <div class="text-[var(--color-neon-green)] mb-3 text-[10px] uppercase tracking-widest">关于本站</div>
-            <div class="space-y-2 text-[var(--color-text-muted)] leading-relaxed">
-              <p>不定期更新，记录真实踩坑、思考与折腾过程。</p>
-              <p>没有固定领域，只要值得写就写。</p>
-            </div>
+        <!-- About card -->
+        <div class="border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)]">
+          <div class="font-mono text-[10px] text-[var(--color-neon-green)] mb-3 uppercase tracking-[0.15em]">
+            关于本站
           </div>
+          <p class="text-xs text-[var(--color-text-muted)] leading-relaxed font-mono">
+            不定期更新，记录真实踩坑、思考与折腾过程。
+          </p>
+          <p class="text-xs text-[var(--color-text-muted)] leading-relaxed font-mono mt-2">
+            没有固定领域，只要值得写就写。
+          </p>
+          <div class="mt-4 pt-3 border-t border-[var(--color-void-border)] flex gap-3">
+            <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener"
+               class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors">
+              GitHub ↗
+            </a>
+            <a href="/void-blog/rss.xml"
+               class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors">
+              RSS ↗
+            </a>
+            <a href="/void-blog/search/"
+               class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors">
+              搜索 ↗
+            </a>
+          </div>
+        </div>
 
-          <!-- RSS link -->
-          <a
-            href="/void-blog/rss.xml"
-            class="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
-            </svg>
-            RSS 订阅
-          </a>
-        </aside>
-      </div>
-    </main>
+      </aside>
+    </div>
 
     <!-- Footer -->
-    <footer class="border-t border-[var(--color-void-border)] py-8">
-      <div class="max-w-5xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)] flex items-center justify-between flex-wrap gap-4">
-        <span>
-          构建于 <span class="text-[var(--color-neon-cyan)]">Astro 6</span> +
-          <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> +
-          <span class="text-[var(--color-neon-green)]">Vue 3</span>
-        </span>
-        <span>© 2026 王宇 | void.dev</span>
+    <footer class="border-t border-[var(--color-void-border)] py-10">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="font-mono text-[10px] text-[var(--color-text-muted)] text-center mb-4 opacity-30 select-none leading-relaxed">
+          {'░▒▓ void.dev ▓▒░'}
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-4 font-mono text-xs text-[var(--color-text-muted)]">
+          <span>
+            构建于 <span class="text-[var(--color-neon-cyan)]">Astro 6</span> ·
+            <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
+            <span class="text-[var(--color-neon-green)]">Vue 3</span>
+          </span>
+          <span>© 2021–2026 王宇</span>
+        </div>
       </div>
     </footer>
   </div>

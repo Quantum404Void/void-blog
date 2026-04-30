@@ -6,7 +6,9 @@ tags: ["AI", "agent", "LLM"]
 draft: false
 ---
 
-你第一次用 ChatGPT 的时候，大概会感叹：这玩意儿真聪明。但用久了你会发现一个根本限制——它只会**说**，不会**做**。
+import Mermaid from '../../components/Mermaid.astro'
+
+，大概会感叹：这玩意儿真聪明。但用久了你会发现一个根本限制——它只会**说**，不会**做**。
 
 你问它"帮我发封邮件"，它会给你写好草稿，然后说"你可以把这段文字复制到邮件客户端发送"。
 
@@ -87,6 +89,22 @@ Answer: 上海今天晴天，22°C，适合出行
 4. 循环直到任务完成或达到最大步数
 
 这个循环的关键洞察是：**让模型先想清楚再行动，行动结果再反哺思考**。
+
+<Mermaid code={`
+flowchart TD
+    U([用户输入]) --> T[Thought\n推理意图]
+    T --> D{需要工具?}
+    D -- 是 --> A[Action\n调用工具]
+    A --> O[Observation\n获得结果]
+    O --> T
+    D -- 否 --> R([输出答案])
+    style U fill:#1e1e30,stroke:#00ff88,color:#e8e8f0
+    style R fill:#1e1e30,stroke:#00ff88,color:#e8e8f0
+    style T fill:#13131f,stroke:#00d4ff,color:#e8e8f0
+    style A fill:#13131f,stroke:#b44cff,color:#e8e8f0
+    style O fill:#13131f,stroke:#b44cff,color:#e8e8f0
+    style D fill:#0f0f1a,stroke:#00d4ff,color:#e8e8f0
+`} />
 
 ---
 
