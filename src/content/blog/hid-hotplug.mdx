@@ -19,7 +19,7 @@ tags: ["cpp", "hid", "linux", "nodejs", "electron"]
 | `usb` 库事件 | 无需 root，跨平台 | 依赖 libusb |
 | `usb` + `node-hid` 组合 | 最佳实践 ✅ | 需要两个依赖 |
 
-## 实现
+## 基础实现
 
 ```typescript
 import usb from 'usb'
@@ -54,12 +54,341 @@ usb.on('detach', (device) => {
 })
 ```
 
+## 完整的 DeviceManager 类
+
+裸监听够用，但生产环境需要处理：设备偶尔断连、重连失败、多次重试……把这些逻辑封装进 `DeviceManager`，对外只暴露状态事件。
+
+```typescript
+// src/main/device-manager.ts
+import { EventEmitter } from 'events'
+import usb from 'usb'
+import HID from 'node-hid'
+
+interface DeviceManagerEvents {
+  connected: (devicePath: string) => void
+  disconnected: () => void
+  data: (report: Buffer) => void
+  error: (err: Error) => void
+}
+
+export class DeviceManager extends EventEmitter {
+  private vid: number
+  private pid: number
+  private device: HID.HID | null = null
+  private reconnectTimer: NodeJS.Timeout | null = null
+  private reconnectAttempt = 0
+  private readonly MAX_RETRY = 8
+  private destroyed = false
+
+  constructor(vid: number, pid: number) {
+    super()
+    this.vid = vid
+    this.pid = pid
+
+    usb.on('attach', this.onAttach)
+    usb.on('detach', this.onDetach)
+  }
+
+  // 指数退避：100ms → 200ms → 400ms → ... 最大 ~12.8s
+  private get retryDelay(): number {
+    return Math.min(100 * 2 ** this.reconnectAttempt, 12800)
+  }
+
+  private onAttach = (usbDevice: usb.Device) => {
+    const { idVendor, idProduct } = usbDevice.deviceDescriptor
+    if (idVendor !== this.vid || idProduct !== this.pid) return
+
+    // 清掉之前的重连 timer（插拔快时可能有残留）
+    this.clearReconnectTimer()
+    this.reconnectAttempt = 0
+
+    // 等内核枚举完毕
+    this.scheduleOpen(100)
+  }
+
+  private onDetach = (usbDevice: usb.Device) => {
+    const { idVendor, idProduct } = usbDevice.deviceDescriptor
+    if (idVendor !== this.vid || idProduct !== this.pid) return
+
+    this.close()
+    this.emit('disconnected')
+  }
+
+  private scheduleOpen(delayMs: number) {
+    this.reconnectTimer = setTimeout(() => this.tryOpen(), delayMs)
+  }
+
+  private clearReconnectTimer() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
+  }
+
+  private tryOpen() {
+    if (this.destroyed) return
+
+    const info = HID.devices().find(
+      d => d.vendorId === this.vid && d.productId === this.pid
+    )
+
+    if (!info || !info.path) {
+      // 还没枚举好，按指数退避继续重试
+      this.reconnectAttempt++
+      if (this.reconnectAttempt <= this.MAX_RETRY) {
+        console.warn(
+          `[DeviceManager] Device not found, retry ${this.reconnectAttempt}/${this.MAX_RETRY} in ${this.retryDelay}ms`
+        )
+        this.scheduleOpen(this.retryDelay)
+      } else {
+        this.emit('error', new Error('Device not found after max retries'))
+      }
+      return
+    }
+
+    try {
+      this.device = new HID.HID(info.path)
+      this.reconnectAttempt = 0
+      this.startReadLoop()
+      this.emit('connected', info.path)
+    } catch (err) {
+      // 打开失败也退避重试（比如权限问题短暂未就绪）
+      this.reconnectAttempt++
+      if (this.reconnectAttempt <= this.MAX_RETRY) {
+        this.scheduleOpen(this.retryDelay)
+      } else {
+        this.emit('error', err instanceof Error ? err : new Error(String(err)))
+      }
+    }
+  }
+
+  private startReadLoop() {
+    if (!this.device) return
+
+    // node-hid 异步读取：注册 data/error 回调，不阻塞主线程
+    this.device.on('data', (data: Buffer) => {
+      this.emit('data', data)
+    })
+
+    this.device.on('error', (err: Error) => {
+      // 设备被拔出时会触发 error，这是正常流程
+      this.close()
+      this.emit('disconnected')
+    })
+  }
+
+  open() {
+    // 主动打开（应用启动时调用一次）
+    this.tryOpen()
+  }
+
+  close() {
+    this.clearReconnectTimer()
+    if (this.device) {
+      try { this.device.close() } catch {}
+      this.device = null
+    }
+  }
+
+  destroy() {
+    this.destroyed = true
+    this.close()
+    usb.off('attach', this.onAttach)
+    usb.off('detach', this.onDetach)
+    this.removeAllListeners()
+  }
+}
+```
+
+使用：
+
+```typescript
+// src/main/index.ts
+const manager = new DeviceManager(0x1234, 0x5678)
+
+manager.on('connected', (path) => console.log('已连接:', path))
+manager.on('disconnected', () => console.log('已断开'))
+manager.on('data', (buf) => handleReport(buf))
+manager.on('error', (err) => console.error('HID 错误:', err))
+
+manager.open() // 启动时尝试首次打开
+
+// 应用退出时
+app.on('before-quit', () => manager.destroy())
+```
+
+## 数据接收循环：64 字节 HID 报告
+
+HID 设备通讯的基本单位是**报告（Report）**，通常是 64 字节（含 1 字节 report ID）。
+
+上面的 `startReadLoop` 用了 node-hid 的**异步事件模式**（推荐）。但也有同步阻塞读的用法——要小心：
+
+```typescript
+// ❌ 同步阻塞读：会卡住 Node.js 主线程
+function blockingReadLoop(device: HID.HID) {
+  while (true) {
+    const data = device.readSync() // 阻塞直到有数据
+    processReport(data)
+  }
+}
+
+// ✅ 异步非阻塞：用 on('data') 回调
+function asyncReadLoop(device: HID.HID) {
+  device.on('data', (data: Buffer) => {
+    // data.length 通常是 64（含 report ID 填充）
+    const reportId = data[0]
+    const payload = data.slice(1) // 实际数据从第 2 字节开始
+    processReport(reportId, payload)
+  })
+}
+
+function processReport(reportId: number, payload: Buffer) {
+  switch (reportId) {
+    case 0x01: // 按键事件
+      handleKeyEvent(payload)
+      break
+    case 0x02: // 状态响应
+      handleStatusResponse(payload)
+      break
+    default:
+      console.warn(`Unknown report ID: 0x${reportId.toString(16)}`)
+  }
+}
+```
+
+如果需要**发送数据**（Feature Report 或 Output Report）：
+
+```typescript
+// 发送 64 字节报告（第一字节是 report ID，通常是 0x00）
+function sendReport(device: HID.HID, reportId: number, data: number[]) {
+  const report = [reportId, ...data]
+  // 不足 64 字节的补零
+  while (report.length < 65) report.push(0) // node-hid 要求总长度包括 report ID
+  device.write(report)
+}
+```
+
+## Windows 上的差异
+
+Windows 的 USB 事件机制与 Linux/macOS 有本质不同：
+
+| | Linux | macOS | Windows |
+|--|-------|-------|---------|
+| 底层机制 | udev netlink | IOKit | `WM_DEVICECHANGE` 消息 |
+| `usb` 库支持 | ✅ libusb | ✅ libusb | ⚠️ 部分支持 |
+| HID 独占 | 否（hidraw） | 否 | 是（内核驱动独占） |
+
+**Windows 主要坑：**
+
+1. **`usb` 库事件不可靠**：libusb 在 Windows 上依赖 WinUSB/libusbK 驱动，但 HID 设备默认用 `hid.sys`，两者冲突，`usb.on('attach')` 可能根本不触发。
+
+2. **HID 独占问题**：Windows 的 HID 驱动独占设备，有时候 `new HID.HID(path)` 会因为系统或其他应用已持有句柄而失败。
+
+3. **推荐 Windows 方案**：不依赖 `usb` 库事件，改用轮询 + 短间隔：
+
+```typescript
+// Windows 专用：轮询方案（每 500ms 扫一次设备列表）
+class WindowsDeviceWatcher {
+  private timer: NodeJS.Timeout | null = null
+  private knownPaths = new Set<string>()
+
+  start(vid: number, pid: number, onAttach: (path: string) => void, onDetach: (path: string) => void) {
+    this.timer = setInterval(() => {
+      const current = new Set(
+        HID.devices()
+          .filter(d => d.vendorId === vid && d.productId === pid && d.path)
+          .map(d => d.path!)
+      )
+
+      // 新增
+      for (const p of current) {
+        if (!this.knownPaths.has(p)) onAttach(p)
+      }
+      // 移除
+      for (const p of this.knownPaths) {
+        if (!current.has(p)) onDetach(p)
+      }
+
+      this.knownPaths = current
+    }, 500)
+  }
+
+  stop() {
+    if (this.timer) clearInterval(this.timer)
+  }
+}
+```
+
+跨平台判断：
+
+```typescript
+const watcher = process.platform === 'win32'
+  ? new WindowsDeviceWatcher()
+  : new UsbEventWatcher() // 用 usb 库
+```
+
+## 多设备管理
+
+同 VID/PID 的多个设备怎么区分？靠 `path` 或 `serialNumber`。
+
+```typescript
+// 用 Map<path, HID.HID> 管理多个设备
+class MultiDeviceManager {
+  private devices = new Map<string, HID.HID>()
+
+  openAll(vid: number, pid: number) {
+    const infos = HID.devices().filter(
+      d => d.vendorId === vid && d.productId === pid && d.path
+    )
+
+    for (const info of infos) {
+      if (!info.path || this.devices.has(info.path)) continue
+
+      try {
+        const device = new HID.HID(info.path)
+        this.devices.set(info.path, device)
+
+        console.log(
+          `已打开设备: path=${info.path} serial=${info.serialNumber ?? '(无序列号)'}`
+        )
+
+        device.on('data', (data) => this.onData(info.path!, data))
+        device.on('error', () => this.onError(info.path!))
+      } catch (err) {
+        console.error(`打开设备失败: ${info.path}`, err)
+      }
+    }
+  }
+
+  private onData(path: string, data: Buffer) {
+    // 用 path 区分是哪个设备来的数据
+    console.log(`[${path}] 收到报告:`, data.toString('hex'))
+  }
+
+  private onError(path: string) {
+    const device = this.devices.get(path)
+    try { device?.close() } catch {}
+    this.devices.delete(path)
+    console.warn(`设备断开: ${path}`)
+  }
+
+  closeAll() {
+    for (const [path, device] of this.devices) {
+      try { device.close() } catch {}
+    }
+    this.devices.clear()
+  }
+}
+```
+
+> **注意**：`serialNumber` 不是所有设备都有，廉价设备可能是空字符串。优先用 `path`，它在单次系统会话内是唯一的；重启后 `path` 可能变，这时候才需要靠 `serialNumber`。
+
 ## 踩坑
 
 ### 1. 枚举竞争
 
 `attach` 事件触发时，`HID.devices()` 可能还找不到设备（内核还在枚举）。
-解决：加 100~200ms 延迟，必要时 retry 3 次。
+解决：加 100~200ms 延迟，必要时用指数退避重试（见 `DeviceManager`）。
 
 ### 2. Linux udev 权限
 
@@ -71,6 +400,8 @@ usb.on('detach', (device) => {
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", MODE="0666"
 ```
 
+重载规则：`sudo udevadm control --reload-rules && sudo udevadm trigger`
+
 ### 3. Electron 沙箱冲突
 
 `node-hid` 需要 Node.js native module 权限，Electron 的 `sandbox: true` 会拦截。
@@ -78,4 +409,4 @@ SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", MODE="06
 
 ## 结论
 
-`usb` 事件 + `node-hid` 操作 + IPC 隔离，这套组合在生产环境用了半年，没出问题。
+`usb` 事件 + `node-hid` 操作 + `DeviceManager` 封装（含指数退避重连），加上 IPC 隔离，这套组合在生产环境用了半年，没出问题。Windows 上要额外做轮询回退。

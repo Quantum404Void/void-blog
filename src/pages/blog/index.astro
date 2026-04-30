@@ -9,7 +9,6 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 const formatDate = (d: Date) =>
   d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
 
-// Group by year
 const byYear = posts.reduce((acc, post) => {
   const year = post.data.pubDate.getFullYear().toString()
   if (!acc[year]) acc[year] = []
@@ -18,56 +17,91 @@ const byYear = posts.reduce((acc, post) => {
 }, {} as Record<string, typeof posts>)
 
 const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a))
+
+const tagColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
+const getTagColor = (tag: string) => {
+  const idx = Math.abs(tag.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length
+  return tagColors[idx]
+}
 ---
 
-<BaseLayout title="Blog" description="所有文章">
+<BaseLayout title="全部文章" description="所有文章列表，按年份归档">
   <div class="min-h-screen bg-[var(--color-void)]">
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-6">
-        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">
-          ~/void-blog
-        </a>
-        <span class="text-[var(--color-text-muted)] font-mono">/blog</span>
-        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">{posts.length} 篇</div>
+      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-3">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">~/void-blog</a>
+        <span class="text-[var(--color-text-muted)] font-mono text-xs">/</span>
+        <span class="font-mono text-sm text-[var(--color-text-muted)]">blog</span>
+        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">
+          共 <span class="text-[var(--color-text-secondary)]">{posts.length}</span> 篇
+        </div>
       </div>
     </nav>
 
     <main class="max-w-3xl mx-auto px-6 py-16">
-      <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-12 flex items-center gap-3">
-        <span class="text-[var(--color-neon-green)]">$</span> 全部文章
-      </h1>
+      <div class="mb-12">
+        <h1 class="font-mono text-3xl font-bold mb-2">
+          <span class="text-[var(--color-neon-green)]">~/</span><span class="text-[var(--color-text-primary)]">blog</span>
+        </h1>
+        <p class="font-mono text-xs text-[var(--color-text-muted)]">
+          {years.length} 年 · {posts.length} 篇文章
+        </p>
+      </div>
 
       {years.map(year => (
-        <section class="mb-12">
-          <h2 class="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-3">
-            <span class="w-8 h-px bg-[var(--color-void-border)]"></span>
-            {year}
-            <span class="flex-1 h-px bg-[var(--color-void-border)]"></span>
-          </h2>
-          <div class="space-y-1">
-            {byYear[year].map(post => (
-              <a
-                href={`/void-blog/blog/${post.id.replace(/\.mdx?$/, '')}/`}
-                class="group flex items-center gap-4 p-3 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all"
-              >
-                <time datetime={post.data.pubDate.toISOString()} class="font-mono text-xs text-[var(--color-text-muted)] shrink-0 w-20">
-                  {formatDate(post.data.pubDate)}
-                </time>
-                <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors truncate">
-                  {post.data.title}
-                </span>
-                <div class="ml-auto flex gap-1 shrink-0">
-                  {post.data.tags.slice(0, 2).map(tag => (
-                    <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </a>
-            ))}
+        <section class="mb-14 relative">
+          <!-- Year marker -->
+          <div class="flex items-center gap-4 mb-5">
+            <span class="font-mono text-xs font-bold text-[var(--color-neon-cyan)] border border-[rgba(0,212,255,0.3)] px-3 py-1 rounded-full bg-[rgba(0,212,255,0.05)]">
+              {year}
+            </span>
+            <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.2)] to-transparent"></span>
+            <span class="font-mono text-[10px] text-[var(--color-text-muted)]">{byYear[year].length} 篇</span>
+          </div>
+
+          <div class="space-y-1 pl-1">
+            {byYear[year].map(post => {
+              const slug = post.id.replace(/\.mdx?$/, '')
+              const primaryColor = getTagColor(post.data.tags[0] ?? 'x')
+              return (
+                <a
+                  href={`/void-blog/blog/${slug}/`}
+                  class="group flex items-center gap-4 px-3 py-2.5 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-150"
+                >
+                  <!-- Color dot -->
+                  <span class={`shrink-0 w-1.5 h-1.5 rounded-full opacity-50 group-hover:opacity-100 transition-opacity`}
+                        style={`background: var(--color-${primaryColor})`}></span>
+
+                  <time datetime={post.data.pubDate.toISOString()}
+                        class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-16 tabular-nums">
+                    {post.data.pubDate.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+                  </time>
+
+                  <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors flex-1 truncate leading-snug">
+                    {post.data.title}
+                  </span>
+
+                  <div class="ml-auto flex gap-1.5 shrink-0">
+                    {post.data.tags.slice(0, 2).map(tag => (
+                      <span class="font-mono text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <span class="font-mono text-xs text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)] transition-colors shrink-0">→</span>
+                </a>
+              )
+            })}
           </div>
         </section>
       ))}
     </main>
+
+    <footer class="border-t border-[var(--color-void-border)] py-8">
+      <div class="max-w-3xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)]">
+        <a href="/void-blog/" class="hover:text-[var(--color-neon-green)] transition-colors">← 返回首页</a>
+      </div>
+    </footer>
   </div>
 </BaseLayout>
