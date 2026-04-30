@@ -28,13 +28,13 @@ const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a))
           ~/void-blog
         </a>
         <span class="text-[var(--color-text-muted)] font-mono">/blog</span>
-        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">{posts.length} posts</div>
+        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">{posts.length} 篇</div>
       </div>
     </nav>
 
     <main class="max-w-3xl mx-auto px-6 py-16">
       <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-12 flex items-center gap-3">
-        <span class="text-[var(--color-neon-green)]">$</span> ls -lt ~/blog
+        <span class="text-[var(--color-neon-green)]">$</span> 全部文章
       </h1>
 
       {years.map(year => (

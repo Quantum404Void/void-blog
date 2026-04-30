@@ -46,7 +46,7 @@ const formatDate = (d: Date) =>
           <span class="font-mono text-[var(--color-neon-green)] text-lg select-none">$_</span>
           <div>
             <p class="font-mono text-xs text-[var(--color-text-muted)] mb-2 tracking-widest uppercase">
-              init process
+              启动中
             </p>
             <h1 class="text-5xl sm:text-6xl font-bold font-mono leading-tight">
               <span class="text-[var(--color-text-primary)]">void</span>
@@ -70,7 +70,7 @@ const formatDate = (d: Date) =>
           <p class="text-[var(--color-text-secondary)]">
             <span class="text-[var(--color-neon-purple)]">status</span>
             <span class="text-[var(--color-text-muted)]"> = </span>
-            <span class="text-[var(--color-neon-green)]">online</span>
+            <span class="text-[var(--color-neon-green)]">在线</span>
             <span class="inline-block w-2 h-2 rounded-full bg-[var(--color-neon-green)] ml-2 align-middle" style="animation: pulse 1.5s ease-in-out infinite;"></span>
           </p>
         </div>
@@ -82,7 +82,7 @@ const formatDate = (d: Date) =>
         <!-- Posts -->
         <section>
           <h2 class="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-8 flex items-center gap-3">
-            <span class="text-[var(--color-neon-green)]">▶</span> latest posts
+            <span class="text-[var(--color-neon-green)]">▶</span> 最新文章
           </h2>
 
           <div class="space-y-1">
@@ -126,7 +126,7 @@ const formatDate = (d: Date) =>
               href="/void-blog/blog/"
               class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors flex items-center gap-2"
             >
-              ls -la ~/blog <span class="opacity-60">— all posts</span>
+              查看全部文章 →
             </a>
           </div>
         </section>
@@ -136,7 +136,7 @@ const formatDate = (d: Date) =>
           <!-- Tags cloud -->
           <div>
             <h2 class="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span class="text-[var(--color-neon-purple)]">▶</span> tags
+              <span class="text-[var(--color-neon-purple)]">▶</span> 标签
             </h2>
             <div class="flex flex-wrap gap-2">
               {allTags.map(tag => (
@@ -152,7 +152,7 @@ const formatDate = (d: Date) =>
 
           <!-- System info card -->
           <div class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] font-mono text-xs">
-            <div class="text-[var(--color-neon-green)] mb-3 text-[10px] uppercase tracking-widest">sys info</div>
+            <div class="text-[var(--color-neon-green)] mb-3 text-[10px] uppercase tracking-widest">系统信息</div>
             <div class="space-y-1.5 text-[var(--color-text-muted)]">
               <div><span class="text-[var(--color-text-secondary)]">os</span>    Ubuntu 24.04</div>
               <div><span class="text-[var(--color-text-secondary)]">arch</span>  x86_64</div>
@@ -170,7 +170,7 @@ const formatDate = (d: Date) =>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
             </svg>
-            RSS Feed
+            RSS 订阅
           </a>
         </aside>
       </div>
@@ -180,7 +180,7 @@ const formatDate = (d: Date) =>
     <footer class="border-t border-[var(--color-void-border)] py-8">
       <div class="max-w-5xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)] flex items-center justify-between flex-wrap gap-4">
         <span>
-          Built with <span class="text-[var(--color-neon-cyan)]">Astro 5</span> +
+          构建于 <span class="text-[var(--color-neon-cyan)]">Astro 6</span> +
           <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> +
           <span class="text-[var(--color-neon-green)]">Vue 3</span>
         </span>

@@ -28,7 +28,7 @@ const formatDate = (d: Date) =>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-xs">{title}</span>
         <div class="ml-auto flex items-center gap-4 text-xs text-[var(--color-text-muted)] font-mono">
-          {readingTime && <span>~{readingTime} min read</span>}
+          {readingTime && <span>约 {readingTime} 分钟</span>}
         </div>
       </div>
     </nav>
@@ -65,7 +65,7 @@ const formatDate = (d: Date) =>
           </time>
           {updatedDate && (
             <span class="text-xs">
-              (updated: {formatDate(updatedDate)})
+              (更新于 {formatDate(updatedDate)})
             </span>
           )}
         </div>
@@ -82,7 +82,7 @@ const formatDate = (d: Date) =>
           href="/void-blog/"
           class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2"
         >
-          <span>←</span> cd ..
+          <span>←</span> 返回首页
         </a>
       </footer>
     </main>
