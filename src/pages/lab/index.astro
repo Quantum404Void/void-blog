@@ -23,8 +23,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
       <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-        <span><span style="color:rgba(180,0,255,0.9)">9</span> 游戏</span>
-        <span><span style="color:rgba(0,212,255,0.9)">12</span> 工具</span>
+        <span><span style="color:rgba(180,0,255,0.9)">10</span> 游戏</span>
+        <span><span style="color:rgba(0,212,255,0.9)">13</span> 工具</span>
         <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
       </div>
       </div>
@@ -46,6 +46,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
             {href:'/void-blog/lab/tetris/', icon:'🧩', label:'Tetris', desc:'经典俄罗斯方块，霓虹重制', tag:'CLASSIC', color:'#b400ff'},
             {href:'/void-blog/lab/wordle/', icon:'📝', label:'Wordle', desc:'5字母猜词游戏，代码词库版', tag:'WORD', color:'#39ff14'},
             {href:'/void-blog/lab/flappy/', icon:'🐦', label:'Flappy Bird', desc:'赛博朋克风霓虹管道', tag:'CASUAL', color:'#ffa500'},
+            {href:'/void-blog/lab/life/', icon:'🔬', label:"Conway's Life", desc:'细胞自动机，点击绘制 · 预设图案', tag:'SIM', color:'#00ff88'},
           ].map(({href, icon, label, desc, tag, color}) => (
             <a href={href} class="group block border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
               style={`--hc:${color}`}
@@ -70,7 +71,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            {href:'/void-blog/lab/tools/compiler/', icon:'▶', label:'在线编译器', desc:'JS / TypeScript / Python · 纯浏览器运行，无需服务器', tag:'RUN', color:'#39ff14'},
             {href:'/void-blog/lab/tools/json/', icon:'{ }', label:'JSON 格式化', desc:'格式化 / 压缩 / 校验 JSON', tag:'FORMAT', color:'#00d4ff'},
             {href:'/void-blog/lab/tools/regex/', icon:'.*', label:'正则测试器', desc:'实时匹配 + 高亮 + 分组提取', tag:'REGEX', color:'#39ff14'},
             {href:'/void-blog/lab/tools/base64/', icon:'64', label:'Base64', desc:'编码 / 解码 / 文件转换', tag:'ENCODE', color:'#ff00aa'},
@@ -82,6 +82,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
             {href:'/void-blog/lab/tools/diff/', icon:'±', label:'Diff 对比', desc:'两段文本逐行差异对比', tag:'TEXT', color:'#39ff14'},
             {href:'/void-blog/lab/tools/ascii/', icon:'Aa', label:'ASCII Art', desc:'文字转 ASCII 艺术字', tag:'ART', color:'#39ff14'},
             {href:'/void-blog/lab/tools/baseconv/', icon:'0x', label:'进制转换', desc:'2/8/10/16 进制互转 + 位运算', tag:'BITS', color:'#00d4ff'},
+            {href:'/void-blog/lab/tools/brainfuck/', icon:'🧠', label:'Brainfuck', desc:'图灵完备 8 指令语言解释器 + 内存可视化', tag:'ESOTERIC', color:'#b44cff'},
+            {href:'/void-blog/lab/tools/netinfo/', icon:'📡', label:'网络诊断', desc:'IP 地理 · 延迟测试 · 浏览器信息', tag:'NET', color:'#00d4ff'},
           ].map(({href, icon, label, desc, tag, color}) => (
             <a href={href} class="group block border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
               onmouseover={`this.style.borderColor='${color}44';this.style.boxShadow='0 6px 24px ${color}12'`}

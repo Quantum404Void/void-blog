@@ -1,0 +1,205 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="Conway's Game of Life | void.dev">
+  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center p-4" style="font-family:var(--font-mono)">
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">~/void-blog</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <a href="/void-blog/lab/" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">lab</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <span class="font-mono text-xs text-[var(--color-neon-green)]">life</span>
+        <div class="ml-auto flex items-center gap-3">
+          <span id="gen-label" class="font-mono text-[10px] text-[var(--color-text-muted)]">gen: 0</span>
+          <span id="pop-label" class="font-mono text-[10px] text-[var(--color-text-muted)]">pop: 0</span>
+          <span id="fps-label" class="font-mono text-[10px] text-[var(--color-text-muted)]">fps: 0</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="pt-16 w-full max-w-4xl">
+      <div class="text-center mb-4">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-1">Conway's</p>
+        <h1 class="font-mono text-2xl font-bold mb-1" style="color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,0.4)">Game of Life</h1>
+        <p class="font-mono text-[11px] text-[var(--color-text-muted)]">点击/拖拽放置细胞 &nbsp;·&nbsp; Space 暂停/继续 &nbsp;·&nbsp; R 随机 &nbsp;·&nbsp; C 清空</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex flex-wrap gap-2 justify-center mb-3">
+        <button id="btn-play" class="font-mono text-xs px-4 py-1.5 rounded border transition-all" style="border-color:rgba(0,255,136,0.4);color:#00ff88;background:rgba(0,255,136,0.06)">▶ 开始</button>
+        <button id="btn-random" class="font-mono text-xs px-4 py-1.5 rounded border transition-all" style="border-color:rgba(0,212,255,0.4);color:#00d4ff;background:rgba(0,212,255,0.06)">⚡ 随机</button>
+        <button id="btn-clear" class="font-mono text-xs px-4 py-1.5 rounded border transition-all" style="border-color:rgba(136,136,170,0.3);color:rgba(136,136,170,0.7);background:transparent">✕ 清空</button>
+        <select id="pattern-select" class="font-mono text-[11px] px-3 py-1.5 rounded border outline-none" style="border-color:rgba(180,76,255,0.4);color:#b44cff;background:#0a0a0f">
+          <option value="">── 预设图案 ──</option>
+          <option value="glider">Glider</option>
+          <option value="blinker">Blinker</option>
+          <option value="pulsar">Pulsar</option>
+          <option value="glider-gun">Glider Gun</option>
+          <option value="r-pentomino">R-Pentomino</option>
+          <option value="diehard">Diehard</option>
+        </select>
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-[10px] text-[var(--color-text-muted)]">速度</span>
+          <input id="speed-slider" type="range" min="1" max="30" value="10" class="w-20 cursor-pointer" style="accent-color:#00ff88">
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="flex justify-center">
+        <canvas id="life-canvas" class="rounded-xl" style="cursor:crosshair;image-rendering:pixelated;border:1px solid rgba(0,255,136,0.15);box-shadow:0 0 40px rgba(0,255,136,0.06)"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+  (function(){
+    const CELL = 12, COLS = 70, ROWS = 50
+    const canvas = document.getElementById('life-canvas')
+    const ctx = canvas.getContext('2d')
+    canvas.width  = COLS * CELL
+    canvas.height = ROWS * CELL
+
+    let grid = new Uint8Array(COLS * ROWS)
+    let next = new Uint8Array(COLS * ROWS)
+    let running = false, gen = 0, speed = 10
+    let lastTime = 0, frameInterval = 1000 / speed
+    let drawing = false, drawValue = 1, animId = null
+
+    const idx = (x, y) => (((y % ROWS) + ROWS) % ROWS) * COLS + (((x % COLS) + COLS) % COLS)
+
+    const PATTERNS = {
+      glider: [[1,0],[2,1],[0,2],[1,2],[2,2]],
+      blinker: [[0,1],[1,1],[2,1]],
+      pulsar: [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0],[0,2],[5,2],[7,2],[12,2],[0,3],[5,3],[7,3],[12,3],[0,4],[5,4],[7,4],[12,4],[2,5],[3,5],[4,5],[8,5],[9,5],[10,5],[2,7],[3,7],[4,7],[8,7],[9,7],[10,7],[0,8],[5,8],[7,8],[12,8],[0,9],[5,9],[7,9],[12,9],[0,10],[5,10],[7,10],[12,10],[2,12],[3,12],[4,12],[8,12],[9,12],[10,12]],
+      'glider-gun': [[24,0],[22,1],[24,1],[12,2],[13,2],[20,2],[21,2],[34,2],[35,2],[11,3],[15,3],[20,3],[21,3],[34,3],[35,3],[0,4],[1,4],[10,4],[16,4],[20,4],[21,4],[0,5],[1,5],[10,5],[14,5],[16,5],[17,5],[22,5],[24,5],[10,6],[16,6],[24,6],[11,7],[15,7],[12,8],[13,8]],
+      'r-pentomino': [[1,0],[2,0],[0,1],[1,1],[1,2]],
+      diehard: [[6,0],[0,1],[1,1],[1,2],[5,2],[6,2],[7,2]],
+    }
+
+    function place(pattern, cx, cy) {
+      const cells = PATTERNS[pattern]
+      if (!cells) return
+      cells.forEach(([dx, dy]) => { grid[idx(cx+dx, cy+dy)] = 1 })
+    }
+
+    function step() {
+      let pop = 0
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          let n = 0
+          for (let dy = -1; dy <= 1; dy++)
+            for (let dx = -1; dx <= 1; dx++)
+              if (dx || dy) n += grid[idx(x+dx, y+dy)]
+          const alive = grid[idx(x,y)]
+          next[idx(x,y)] = alive ? (n===2||n===3?1:0) : (n===3?1:0)
+          if (next[idx(x,y)]) pop++
+        }
+      }
+      ;[grid, next] = [next, grid]
+      gen++
+      return pop
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0a0a0f'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      // Grid lines
+      ctx.strokeStyle = 'rgba(30,30,48,0.8)'
+      ctx.lineWidth = 0.5
+      for (let x = 0; x <= COLS; x++) { ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,canvas.height); ctx.stroke() }
+      for (let y = 0; y <= ROWS; y++) { ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(canvas.width,y*CELL); ctx.stroke() }
+      // Cells
+      let pop = 0
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          if (grid[idx(x,y)]) {
+            pop++
+            const grd = ctx.createRadialGradient(x*CELL+CELL/2, y*CELL+CELL/2, 0, x*CELL+CELL/2, y*CELL+CELL/2, CELL*0.8)
+            grd.addColorStop(0, 'rgba(0,255,136,0.95)')
+            grd.addColorStop(1, 'rgba(0,255,136,0.3)')
+            ctx.fillStyle = grd
+            ctx.beginPath()
+            ctx.roundRect(x*CELL+1, y*CELL+1, CELL-2, CELL-2, 2)
+            ctx.fill()
+          }
+        }
+      }
+      return pop
+    }
+
+    let fpsSmooth = 0
+    function loop(ts) {
+      animId = requestAnimationFrame(loop)
+      if (running && ts - lastTime >= frameInterval) {
+        const pop = step()
+        const fps = Math.round(1000 / Math.max(1, ts - lastTime))
+        fpsSmooth = fpsSmooth * 0.8 + fps * 0.2
+        lastTime = ts
+        const p = draw()
+        document.getElementById('gen-label').textContent = `gen: ${gen}`
+        document.getElementById('pop-label').textContent = `pop: ${p}`
+        document.getElementById('fps-label').textContent = `fps: ${Math.round(fpsSmooth)}`
+      } else if (!running) {
+        draw()
+      }
+    }
+
+    function randomize() {
+      grid.fill(0)
+      for (let i = 0; i < grid.length; i++) grid[i] = Math.random() < 0.3 ? 1 : 0
+      gen = 0
+    }
+
+    function cellAt(e) {
+      const r = canvas.getBoundingClientRect()
+      const scaleX = canvas.width / r.width
+      const scaleY = canvas.height / r.height
+      return [
+        Math.floor((e.clientX - r.left) * scaleX / CELL),
+        Math.floor((e.clientY - r.top)  * scaleY / CELL),
+      ]
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      const [x,y] = cellAt(e)
+      drawValue = grid[idx(x,y)] ? 0 : 1
+      grid[idx(x,y)] = drawValue
+      drawing = true
+    })
+    canvas.addEventListener('mousemove', e => {
+      if (!drawing) return
+      const [x,y] = cellAt(e)
+      grid[idx(x,y)] = drawValue
+    })
+    window.addEventListener('mouseup', () => drawing = false)
+
+    document.getElementById('btn-play').addEventListener('click', () => {
+      running = !running
+      document.getElementById('btn-play').textContent = running ? '⏸ 暂停' : '▶ 开始'
+    })
+    document.getElementById('btn-random').addEventListener('click', () => { randomize(); gen = 0 })
+    document.getElementById('btn-clear').addEventListener('click', () => { grid.fill(0); gen = 0 })
+    document.getElementById('speed-slider').addEventListener('input', e => {
+      speed = +e.target.value
+      frameInterval = 1000 / speed
+    })
+    document.getElementById('pattern-select').addEventListener('change', e => {
+      if (!e.target.value) return
+      grid.fill(0)
+      place(e.target.value, Math.floor(COLS/2)-5, Math.floor(ROWS/2)-5)
+      e.target.value = ''
+      gen = 0
+    })
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); document.getElementById('btn-play').click() }
+      if (e.code === 'KeyR') randomize()
+      if (e.code === 'KeyC') { grid.fill(0); gen = 0 }
+    })
+
+    randomize()
+    draw()
+    animId = requestAnimationFrame(loop)
+  })()
+  </script>
+</BaseLayout>

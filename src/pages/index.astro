@@ -145,19 +145,17 @@ const techStack = [
               <p class="animate-fade-up" style="animation-delay:0.1s;color:#c8c8e0">
                 <span style="color:#b400ff">interest</span>
                 <span style="color:#6666aa"> = </span>
-                <span style="color:#00d4ff">["系统", "工具链", "桌面应用", "AI Agent", "...更多"]</span>
+                <span id="hero-line-0" style="color:#00d4ff">["\u7cfb\u7edf", "\u5de5\u5177\u94fe", "\u684c\u9762\u5e94\u7528", "AI Agent", "...\u66f4\u591a"]</span>
               </p>
               <p class="animate-fade-up" style="animation-delay:0.2s;color:#c8c8e0">
                 <span style="color:#b400ff">stack</span>
                 <span style="color:#6666aa"> = </span>
-                <span style="color:#39ff14">["C++", "TypeScript", "Vue", "Electron", "Astro"]</span>
+                <span id="hero-line-1" style="color:#39ff14">["C++", "TypeScript", "Vue", "Electron", "Astro"]</span>
               </p>
               <p class="animate-fade-up" style="animation-delay:0.3s;color:#c8c8e0">
                 <span style="color:#b400ff">status</span>
                 <span style="color:#6666aa"> = </span>
-                <span style="color:#39ff14">在线</span>
-                <span class="inline-block w-2 h-2 rounded-full ml-2 align-middle"
-                      style="background:#39ff14;animation:pulse 1.5s ease-in-out infinite"></span>
+                <span id="hero-line-2" style="color:#39ff14">\u5728\u7ebf \u25cf</span>
               </p>
             </div>
           </div>
@@ -358,5 +356,28 @@ const techStack = [
       box-shadow: 0 0 8px color-mix(in srgb, currentColor 40%, transparent);
     }
   </style>
+
+  <script is:inline>
+  // Terminal typewriter on hero
+  document.addEventListener('DOMContentLoaded', () => {
+    const lines = [
+      { el: 'hero-line-0', text: 'interest = ["系统", "工具链", "桌面", "AI Agent"]', delay: 200 },
+      { el: 'hero-line-1', text: 'stack    = ["C++", "TypeScript", "Vue", "Astro"]',  delay: 600 },
+      { el: 'hero-line-2', text: 'status   = 在线 ●',                                  delay: 1000 },
+    ]
+    lines.forEach(({el, text, delay}) => {
+      const node = document.getElementById(el)
+      if (!node) return
+      node.textContent = ''
+      let i = 0
+      setTimeout(() => {
+        const timer = setInterval(() => {
+          node.textContent += text[i++]
+          if (i >= text.length) clearInterval(timer)
+        }, 18)
+      }, delay)
+    })
+  })
+  </script>
 
 </BaseLayout>
