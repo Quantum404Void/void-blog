@@ -10,32 +10,27 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="text-xs text-[var(--color-neon-cyan)]">compiler</span>
         <div class="ml-auto flex items-center gap-3 text-[10px] text-[var(--color-text-muted)]">
-          <span id="run-status" class="text-[var(--color-neon-green)]"></span>
-          <span>Powered by <a href="https://wandbox.org" target="_blank" class="hover:text-[var(--color-neon-cyan)] transition-colors">Wandbox</a></span>
+          <span id="run-status"></span>
+          <span id="engine-badge" class="px-2 py-0.5 rounded text-[9px] border" style="border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5)">local</span>
         </div>
       </div>
     </nav>
 
-    <!-- Main layout -->
     <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 48px)">
       <!-- Sidebar -->
       <div class="w-44 flex-shrink-0 border-r border-[var(--color-void-border)] flex flex-col overflow-y-auto" style="background:#05050f">
-        <!-- Language select -->
         <div class="p-3 border-b border-[var(--color-void-border)]">
           <p class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2">Language</p>
-          <div class="flex flex-col gap-1" id="lang-list">
-            <!-- JS injected -->
-          </div>
+          <div class="flex flex-col gap-1" id="lang-list"></div>
         </div>
-        <!-- Examples -->
         <div class="p-3 flex-1">
           <p class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2">Examples</p>
           <div class="flex flex-col gap-1" id="example-list"></div>
         </div>
-        <!-- Settings -->
         <div class="p-3 border-t border-[var(--color-void-border)]">
           <label class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">Stdin</label>
-          <textarea id="stdin-input" rows="3" placeholder="stdin..." style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-size:11px;border-radius:6px;padding:6px;outline:none;resize:none"></textarea>
+          <textarea id="stdin-input" rows="3" placeholder="stdin (Python only)..."
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-size:11px;border-radius:6px;padding:6px;outline:none;resize:none"></textarea>
         </div>
       </div>
 
@@ -48,33 +43,26 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
             <div class="w-3 h-3 rounded-full" style="background:#ffbd2e"></div>
             <div class="w-3 h-3 rounded-full" style="background:#27c93f"></div>
           </div>
-          <span id="editor-filename" class="text-[11px] text-[var(--color-text-muted)]">main.py</span>
+          <span id="editor-filename" class="text-[11px] text-[var(--color-text-muted)]">main.js</span>
           <div class="ml-auto flex items-center gap-2">
-            <button id="run-btn" onclick="runCode()"
+            <button id="run-btn"
               class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
-              style="background:rgba(57,255,20,0.12);border:1px solid rgba(57,255,20,0.4);color:#39ff14"
-              onmouseover="this.style.background='rgba(57,255,20,0.22)'"
-              onmouseout="this.style.background='rgba(57,255,20,0.12)'">
+              style="background:rgba(57,255,20,0.12);border:1px solid rgba(57,255,20,0.4);color:#39ff14">
               ▶ Run
               <kbd style="font-size:9px;opacity:0.5;padding:1px 4px;border:1px solid rgba(57,255,20,0.3);border-radius:3px">Ctrl+↵</kbd>
             </button>
-            <button onclick="clearOutput()" class="px-2 py-1.5 rounded text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)]">Clear</button>
-            <button onclick="copyCode()" class="px-2 py-1.5 rounded text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)]">Copy</button>
+            <button id="clear-btn" class="px-2 py-1.5 rounded text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)]">Clear</button>
+            <button id="copy-btn" class="px-2 py-1.5 rounded text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)]">Copy</button>
           </div>
         </div>
 
         <!-- Editor -->
         <div class="flex flex-1 overflow-hidden">
-          <!-- Line numbers -->
           <div id="line-numbers" class="select-none text-right px-3 py-4 text-[11px] leading-[1.6] overflow-hidden"
-            style="background:#06060e;color:rgba(136,136,170,0.4);min-width:3rem;border-right:1px solid var(--color-void-border)">
-            1
-          </div>
-          <!-- Code area -->
+            style="background:#06060e;color:rgba(136,136,170,0.4);min-width:3rem;border-right:1px solid var(--color-void-border)">1</div>
           <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
             class="flex-1 p-4 text-[12px] leading-[1.6] resize-none outline-none"
-            style="background:#06060e;color:#e8e8f0;caret-color:#00d4ff;tab-size:4"
-            oninput="updateLineNumbers()" onkeydown="handleKey(event)"></textarea>
+            style="background:#06060e;color:#e8e8f0;caret-color:#00d4ff;tab-size:2"></textarea>
         </div>
 
         <!-- Output -->
@@ -82,118 +70,178 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
           <div class="flex items-center gap-3 px-4 py-1.5 border-b border-[var(--color-void-border)]">
             <span style="font-size:10px;color:var(--color-text-muted)">OUTPUT</span>
             <span id="exec-time" style="font-size:10px;color:rgba(136,136,170,0.5)"></span>
+            <!-- Playground link for unsupported languages -->
+            <a id="playground-link" href="#" target="_blank" class="ml-auto hidden text-[10px] hover:opacity-100 transition-opacity"
+              style="color:rgba(0,212,255,0.6);text-decoration:none">
+              在官方 Playground 打开 ↗
+            </a>
           </div>
-          <pre id="output" class="flex-1 overflow-auto p-3 text-[12px] leading-relaxed" style="margin:0;color:#e8e8f0"></pre>
+          <pre id="output" class="flex-1 overflow-auto p-3 text-[12px] leading-relaxed" style="margin:0;color:#e8e8f0;white-space:pre-wrap;word-break:break-all"></pre>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Skulpt for Python (lazy loaded) -->
+  <!-- Babel standalone for TypeScript (lazy loaded) -->
+
   <script is:inline>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-// ── Language config ──────────────────────────────────────────────────────────
+// ── Language definitions ─────────────────────────────────────────────────────
+// engine: 'js' | 'python' | 'typescript' | 'playground'
 const LANGS = [
-  {id:'python',  label:'Python',     color:'#3776ab', compiler:'cpython-3.12.7', ext:'py',   icon:'🐍',
-   template:`# Python 3.12\nprint("Hello, World!")\n\n# 快速排序\ndef quicksort(arr):\n    if len(arr) <= 1: return arr\n    p = arr[len(arr)//2]\n    return quicksort([x for x in arr if x < p]) + [x for x in arr if x == p] + quicksort([x for x in arr if x > p])\n\nprint(quicksort([3,6,8,10,1,2,1]))`},
+  { id: 'javascript', label: 'JavaScript', color: '#f7df1e', icon: '🟨', ext: 'js', engine: 'js',
+    template: `// JavaScript — 浏览器 Worker 沙箱运行
+console.log("Hello, JavaScript!")
 
-  {id:'cpp',     label:'C++',        color:'#00d4ff', compiler:'gcc-13.2.0',     ext:'cpp',  icon:'⚙️',
-   template:`#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    cout << "Hello, C++!" << endl;\n    vector<int> v = {5, 2, 8, 1, 9, 3};\n    sort(v.begin(), v.end());\n    for (int x : v) cout << x << " ";\n    cout << endl;\n    return 0;\n}`},
+// 高阶函数
+const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x)
+const double = x => x * 2
+const addOne = x => x + 1
+const square = x => x * x
 
-  {id:'c',       label:'C',          color:'#a8b9cc', compiler:'gcc-13.2.0-c',   ext:'c',    icon:'🔧',
-   template:`#include <stdio.h>\n#include <stdlib.h>\n\nvoid bubble_sort(int arr[], int n) {\n    for (int i = 0; i < n-1; i++)\n        for (int j = 0; j < n-i-1; j++)\n            if (arr[j] > arr[j+1]) {\n                int t = arr[j]; arr[j] = arr[j+1]; arr[j+1] = t;\n            }\n}\n\nint main() {\n    int arr[] = {64, 34, 25, 12, 22, 11, 90};\n    int n = sizeof(arr)/sizeof(arr[0]);\n    bubble_sort(arr, n);\n    printf("Sorted: ");\n    for (int i = 0; i < n; i++) printf("%d ", arr[i]);\n    printf("\\n");\n    return 0;\n}`},
+const transform = pipe(double, addOne, square)
+console.log("pipe(double,addOne,square)(3) =", transform(3))
 
-  {id:'java',    label:'Java',       color:'#f89820', compiler:'openjdk-jdk-21+35', ext:'java', icon:'☕',
-   template:`import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, Java!");\n        List<Integer> list = Arrays.asList(5, 2, 8, 1, 9, 3);\n        Collections.sort(list);\n        System.out.println("Sorted: " + list);\n    }\n}`},
+// 异步
+const delay = ms => new Promise(r => setTimeout(r, ms))
+async function main() {
+  await delay(0)
+  const nums = [5, 2, 8, 1, 9, 3]
+  console.log("sorted:", nums.sort((a, b) => a - b))
+}
+main()` },
 
-  {id:'javascript', label:'JavaScript', color:'#f7df1e', compiler:'nodejs-20.17.0', ext:'js', icon:'🟨',
-   template:`// Node.js 20\nconsole.log("Hello, JavaScript!")\n\n// async/await\nasync function fetchData() {\n  const data = [1, 2, 3, 4, 5]\n  const result = await Promise.all(data.map(async x => x * x))\n  console.log("Squares:", result)\n}\n\nfetchData()`},
+  { id: 'typescript', label: 'TypeScript', color: '#3178c6', icon: '🔷', ext: 'ts', engine: 'typescript',
+    template: `// TypeScript — Babel 转译后在 Worker 沙箱运行
+interface Point { x: number; y: number }
 
-  {id:'typescript', label:'TypeScript', color:'#3178c6', compiler:'typescript-5.6.2', ext:'ts', icon:'🔷',
-   template:`// TypeScript 5.6
-const greet = (name: string): string => {
-  return \`Hello, \${name}!\`
+function distance(a: Point, b: Point): number {
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
 }
 
+console.log("distance:", distance({ x: 0, y: 0 }, { x: 3, y: 4 }))
+
+const greet = (name: string): string => \`Hello, \${name}!\`
 console.log(greet("TypeScript"))
 
-interface Point { x: number; y: number }
-const dist = (a: Point, b: Point): number =>
-  Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
-
-console.log("Distance:", dist({x:0,y:0}, {x:3,y:4}))`},
-
-  {id:'go',      label:'Go',         color:'#00add8', compiler:'go-1.23.2',      ext:'go',   icon:'🔵',
-   template:`package main\n\nimport (\n\t"fmt"\n\t"sort"\n)\n\nfunc main() {\n\tfmt.Println("Hello, Go!")\n\tnums := []int{5, 2, 8, 1, 9, 3}\n\tsort.Ints(nums)\n\tfmt.Println("Sorted:", nums)\n}`},
-
-  {id:'rust',    label:'Rust',       color:'#ce422b', compiler:'rust-1.82.0',    ext:'rs',   icon:'🦀',
-   template:`fn main() {\n    println!("Hello, Rust!");\n    let mut v = vec![5, 2, 8, 1, 9, 3];\n    v.sort();\n    println!("Sorted: {:?}", v);\n    \n    // 闭包\n    let squares: Vec<i32> = (1..=5).map(|x| x * x).collect();\n    println!("Squares: {:?}", squares);\n}`},
-
-  {id:'swift',   label:'Swift',      color:'#f05138', compiler:'swift-6.0.1',    ext:'swift', icon:'🍎',
-   template:`// Swift 6
-print("Hello, Swift!")
-
-let nums = [5, 2, 8, 1, 9, 3].sorted()
-print("Sorted: \(nums)")
-
-let squares = (1...5).map { $0 * $0 }
-print("Squares: \(squares)")
-
-// 闭包
-func compose<T>(_ f: @escaping (T) -> T, _ g: @escaping (T) -> T) -> (T) -> T {
-    return { f(g($0)) }
+type Result<T> = { ok: true; value: T } | { ok: false; error: string }
+function divide(a: number, b: number): Result<number> {
+  if (b === 0) return { ok: false, error: "division by zero" }
+  return { ok: true, value: a / b }
 }
-let addOne = { (x: Int) in x + 1 }
-let double = { (x: Int) in x * 2 }
-let addOneThenDouble = compose(double, addOne)
-print("compose(double, addOne)(3) =", addOneThenDouble(3))`},
+console.log(divide(10, 2))
+console.log(divide(5, 0))` },
 
-  {id:'ruby',    label:'Ruby',       color:'#cc342d', compiler:'ruby-3.3.11',   ext:'rb',   icon:'💎',
-   template:`puts "Hello, Ruby!"
-nums = [5, 2, 8, 1, 9, 3].sort
-puts "Sorted: #{nums}"
-squares = (1..5).map { |x| x**2 }
-puts "Squares: #{squares}"`},
+  { id: 'python', label: 'Python', color: '#3776ab', icon: '🐍', ext: 'py', engine: 'python',
+    template: `# Python — Skulpt 在浏览器内运行（标准库子集）
+print("Hello, Python!")
 
-  {id:'php',     label:'PHP',        color:'#4f5b93', compiler:'php-8.3.12',     ext:'php',  icon:'🐘',
-   template:`<?php
-echo "Hello, PHP 8.3!\n";
-$nums = [5, 2, 8, 1, 9, 3];
-sort($nums);
-echo "Sorted: " . implode(", ", $nums) . "\n";
-$squares = array_map(fn($x) => $x * $x, range(1, 5));
-echo "Squares: " . implode(", ", $squares) . "\n";
+def quicksort(arr):
+    if len(arr) <= 1: return arr
+    p = arr[len(arr) // 2]
+    return quicksort([x for x in arr if x < p]) + \
+           [x for x in arr if x == p] + \
+           quicksort([x for x in arr if x > p])
 
-// PHP 8 named arguments
-function makeTag(string $tag, string $content, string $class = ''): string {
-    $cls = $class ? " class=\"$class\"" : '';
-    return "<$tag$cls>$content</$tag>";
-}
-echo makeTag(content: 'Hello', tag: 'p') . "\n";`},
+print(quicksort([3, 6, 8, 10, 1, 2, 1]))
 
-  {id:'bash',    label:'Bash',       color:'#89e051', compiler:'bash',           ext:'sh',   icon:'💻',
-   template:`#!/bin/bash\necho "Hello, Bash!"\n\n# 数组操作\narr=(5 2 8 1 9 3)\necho "Original: \${arr[@]}"\n\n# 冒泡排序\nn=\${#arr[@]}\nfor ((i=0; i<n; i++)); do\n  for ((j=0; j<n-i-1; j++)); do\n    if [ "\${arr[j]}" -gt "\${arr[$((j+1))]}" ]; then\n      tmp="\${arr[j]}"; arr[j]="\${arr[$((j+1))]}"; arr[$((j+1))]="\$tmp"\n    fi\n  done\ndone\necho "Sorted: \${arr[@]}"`},
+# 类
+class Animal:
+    def __init__(self, name):
+        self.name = name
+    def speak(self):
+        return f"{self.name} makes a sound"
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name} says Woof!"
+
+for a in [Dog("Rex"), Animal("Cat")]:
+    print(a.speak())` },
+
+  { id: 'cpp', label: 'C++', color: '#00d4ff', icon: '⚙️', ext: 'cpp', engine: 'playground',
+    playgroundUrl: 'https://cpp.sh/?source=',
+    template: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    cout << "Hello, C++!" << endl;
+    vector<int> v = {5, 2, 8, 1, 9, 3};
+    sort(v.begin(), v.end());
+    for (int x : v) cout << x << " ";
+    cout << endl;
+    return 0;
+}` },
+
+  { id: 'go', label: 'Go', color: '#00add8', icon: '🔵', ext: 'go', engine: 'playground',
+    playgroundUrl: 'https://go.dev/play/',
+    template: `package main
+
+import (
+\t"fmt"
+\t"sort"
+)
+
+func main() {
+\tfmt.Println("Hello, Go!")
+\tnums := []int{5, 2, 8, 1, 9, 3}
+\tsort.Ints(nums)
+\tfmt.Println("Sorted:", nums)
+}` },
+
+  { id: 'rust', label: 'Rust', color: '#ce422b', icon: '🦀', ext: 'rs', engine: 'playground',
+    playgroundUrl: 'https://play.rust-lang.org/?code=',
+    template: `fn main() {
+    println!("Hello, Rust!");
+    let mut v = vec![5, 2, 8, 1, 9, 3];
+    v.sort();
+    println!("Sorted: {:?}", v);
+    let squares: Vec<i32> = (1..=5).map(|x| x * x).collect();
+    println!("Squares: {:?}", squares);
+}` },
+
+  { id: 'java', label: 'Java', color: '#f89820', icon: '☕', ext: 'java', engine: 'playground',
+    playgroundUrl: 'https://onecompiler.com/java',
+    template: `import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, Java!");
+        List<Integer> list = Arrays.asList(5, 2, 8, 1, 9, 3);
+        Collections.sort(list);
+        System.out.println("Sorted: " + list);
+    }
+}` },
 ]
 
-// Compiler name → Wandbox compiler identifier mapping
-const WANDBOX_COMPILERS = {
-  'cpython-3.12.7': 'cpython-3.12.7',
-  'gcc-13.2.0':     'gcc-13.2.0',
-  'gcc-13.2.0-c':   'gcc-13.2.0-c',
-  'openjdk-jdk-21+35': 'openjdk-jdk-21+35',
-  'nodejs-20.17.0': 'nodejs-20.17.0',
-  'go-1.23.2':      'go-1.23.2',
-  'rust-1.82.0':    'rust-1.82.0',
-  'kotlin-2.0.21':  'kotlin-2.0.21',
-  'ruby-3.3.0':     'ruby-3.3.0',
-  'php-7.4.28':     'php-7.4.28',
-  'bash':           'bash',
+const EXAMPLES = {
+  javascript: [
+    { name: '斐波那契', code: `function fib(n) {\n  const memo = {}\n  function _fib(n) {\n    if (n <= 1) return n\n    if (memo[n]) return memo[n]\n    return (memo[n] = _fib(n-1) + _fib(n-2))\n  }\n  return _fib(n)\n}\nfor (let i = 0; i < 10; i++) console.log(\`fib(\${i}) = \${fib(i)}\`)` },
+    { name: 'Promise 链', code: `const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))\n\nPromise.resolve(1)\n  .then(v => { console.log('step 1:', v); return delay(0, v + 1) })\n  .then(v => { console.log('step 2:', v); return v * 2 })\n  .then(v => console.log('done:', v))` },
+    { name: '正则匹配', code: `const text = "2024-01-15 and 2025-12-31 are dates"\nconst re = /\\d{4}-\\d{2}-\\d{2}/g\nconst matches = text.match(re)\nconsole.log("Found dates:", matches)` },
+  ],
+  typescript: [
+    { name: '泛型工具', code: `type DeepReadonly<T> = {\n  readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K]\n}\n\ntype Maybe<T> = T | null | undefined\nfunction unwrap<T>(val: Maybe<T>, fallback: T): T {\n  return val ?? fallback\n}\nconsole.log(unwrap(null, "default"))\nconsole.log(unwrap(42, 0))` },
+    { name: '枚举 + 判别联合', code: `type Shape =\n  | { kind: 'circle'; r: number }\n  | { kind: 'rect'; w: number; h: number }\n\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case 'circle': return Math.PI * s.r ** 2\n    case 'rect': return s.w * s.h\n  }\n}\nconsole.log(area({ kind: 'circle', r: 5 }).toFixed(2))\nconsole.log(area({ kind: 'rect', w: 4, h: 6 }))` },
+  ],
+  python: [
+    { name: '装饰器', code: `import time\n\ndef timer(fn):\n    def wrapper(*args, **kwargs):\n        t = time.time()\n        result = fn(*args, **kwargs)\n        print(f"{fn.__name__} took {time.time()-t:.4f}s")\n        return result\n    return wrapper\n\n@timer\ndef slow_sum(n):\n    return sum(range(n))\n\nprint(slow_sum(100000))` },
+    { name: '列表推导', code: `matrix = [[i*j for j in range(1,6)] for i in range(1,6)]\nfor row in matrix:\n    print(' '.join(f'{v:3}' for v in row))\n\nflat = [x for row in matrix for x in row if x % 2 == 0]\nprint("偶数:", flat[:10])` },
+    { name: '生成器', code: `def fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\ngen = fibonacci()\nfor _ in range(10):\n    print(next(gen), end=' ')\nprint()` },
+  ],
 }
 
+// ── State ─────────────────────────────────────────────────────────────────────
 let currentLang = LANGS[0]
 let running = false
+let skulptReady = false
+let babelReady = false
 
-// ── DOM ───────────────────────────────────────────────────────────────────────
+// ── DOM refs ──────────────────────────────────────────────────────────────────
 const editor      = document.getElementById('editor')
 const output      = document.getElementById('output')
 const lineNums    = document.getElementById('line-numbers')
@@ -201,9 +249,11 @@ const runBtn      = document.getElementById('run-btn')
 const runStatus   = document.getElementById('run-status')
 const execTime    = document.getElementById('exec-time')
 const langLabel   = document.getElementById('editor-filename')
+const engineBadge = document.getElementById('engine-badge')
+const pgLink      = document.getElementById('playground-link')
 const stdinInput  = document.getElementById('stdin-input')
 
-// ── Language list ─────────────────────────────────────────────────────────────
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 function renderLangList() {
   const list = document.getElementById('lang-list')
   list.innerHTML = ''
@@ -211,7 +261,10 @@ function renderLangList() {
     const btn = document.createElement('button')
     btn.className = 'text-left text-[11px] px-2 py-1.5 rounded-lg transition-all w-full flex items-center gap-2'
     btn.style.cssText = `border:1px solid transparent;color:${lang.color}80;background:transparent`
-    btn.innerHTML = `<span>${lang.icon}</span> ${lang.label}`
+    btn.innerHTML = `<span>${lang.icon}</span><span>${lang.label}</span>`
+    if (lang.engine === 'playground') {
+      btn.innerHTML += `<span style="font-size:9px;opacity:0.4;margin-left:auto">↗</span>`
+    }
     btn.onclick = () => selectLang(lang)
     btn.dataset.langId = lang.id
     list.appendChild(btn)
@@ -222,207 +275,276 @@ function renderLangList() {
 function selectLang(lang) {
   const prevLang = currentLang
   currentLang = lang
-  // Update button styles
   document.querySelectorAll('#lang-list button').forEach(btn => {
-    const isActive = btn.dataset.langId === lang.id
-    btn.style.background = isActive ? lang.color + '18' : 'transparent'
-    btn.style.borderColor = isActive ? lang.color + '55' : 'transparent'
-    btn.style.color = isActive ? lang.color : lang.color + '80'
-    btn.style.boxShadow = isActive ? `0 0 6px ${lang.color}22` : ''
+    const active = btn.dataset.langId === lang.id
+    btn.style.background = active ? lang.color + '18' : 'transparent'
+    btn.style.borderColor = active ? lang.color + '55' : 'transparent'
+    btn.style.color = active ? lang.color : lang.color + '80'
   })
   langLabel.textContent = `main.${lang.ext}`
-  // Always load template when switching language (or editor empty)
-  if (!editor.value || !prevLang || editor.value === prevLang.template) {
+
+  // Engine badge
+  const engineLabel = { js: 'Worker', typescript: 'Babel→Worker', python: 'Skulpt', playground: 'Playground' }
+  engineBadge.textContent = engineLabel[lang.engine]
+
+  // Playground link
+  if (lang.engine === 'playground') {
+    pgLink.classList.remove('hidden')
+    pgLink.href = lang.playgroundUrl + (lang.playgroundUrl.endsWith('/') ? '' : encodeURIComponent(editor.value || lang.template))
+  } else {
+    pgLink.classList.add('hidden')
+  }
+
+  // Load template if switching language or empty
+  if (!editor.value || editor.value === prevLang.template) {
     editor.value = lang.template
     updateLineNumbers()
   }
-  // Render examples
+
   renderExamples(lang)
+
+  // Preload engines
+  if (lang.engine === 'python' && !skulptReady) loadSkulpt()
+  if (lang.engine === 'typescript' && !babelReady) loadBabel()
 }
 
 function renderExamples(lang) {
   const list = document.getElementById('example-list')
   list.innerHTML = ''
-  const examples = LANG_EXAMPLES[lang.id] || []
-  examples.forEach(ex => {
+  const exs = EXAMPLES[lang.id] || []
+  exs.forEach(ex => {
     const btn = document.createElement('button')
     btn.className = 'text-left text-[10px] px-2 py-1.5 rounded border transition-all w-full'
     btn.style.cssText = `border-color:${lang.color}25;color:${lang.color}80;background:transparent`
     btn.textContent = ex.name
     btn.onmouseover = () => { btn.style.borderColor = lang.color + '55'; btn.style.color = lang.color }
-    btn.onmouseout = () => { btn.style.borderColor = lang.color + '25'; btn.style.color = lang.color + '80' }
+    btn.onmouseout  = () => { btn.style.borderColor = lang.color + '25'; btn.style.color = lang.color + '80' }
     btn.onclick = () => { editor.value = ex.code; updateLineNumbers() }
     list.appendChild(btn)
   })
+
+  if (lang.engine === 'playground') {
+    const hint = document.createElement('div')
+    hint.className = 'text-[10px] mt-2'
+    hint.style.color = 'rgba(255,165,0,0.6)'
+    hint.textContent = '点击 "在官方 Playground 打开" 运行'
+    list.appendChild(hint)
+  }
 }
 
-// ── Examples per language ─────────────────────────────────────────────────────
-const LANG_EXAMPLES = {
-  python: [
-    {name:'Hello World', code:`print("Hello, World!")`},
-    {name:'递归斐波那契', code:`from functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n <= 1: return n\n    return fib(n-1) + fib(n-2)\n\nfor i in range(15):\n    print(f"fib({i}) = {fib(i)}")`},
-    {name:'列表推导', code:`# 列表推导与生成器\nsquares = [x**2 for x in range(10) if x % 2 == 0]\nprint("Even squares:", squares)\n\n# 嵌套列表推导\nmatrix = [[i*j for j in range(1,4)] for i in range(1,4)]\nfor row in matrix:\n    print(row)`},
-    {name:'类与继承', code:`class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return f"{self.name} makes a sound"\n\nclass Dog(Animal):\n    def speak(self):\n        return f"{self.name} says Woof!"\n\nclass Cat(Animal):\n    def speak(self):\n        return f"{self.name} says Meow!"\n\nfor animal in [Dog("Rex"), Cat("Whiskers"), Animal("Generic")]:\n    print(animal.speak())`},
-  ],
-  cpp: [
-    {name:'Hello World', code:`#include <iostream>\nusing namespace std;\nint main() { cout << "Hello, C++!" << endl; return 0; }`},
-    {name:'STL 算法', code:`#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <numeric>\nusing namespace std;\n\nint main() {\n    vector<int> v = {5,2,8,1,9,3,7,4,6};\n    sort(v.begin(), v.end());\n    cout << "Sorted: ";\n    for (int x : v) cout << x << " ";\n    cout << "\\nSum: " << accumulate(v.begin(),v.end(),0) << endl;\n    auto it = lower_bound(v.begin(),v.end(),6);\n    cout << "lower_bound(6) at index: " << (it-v.begin()) << endl;\n    return 0;\n}`},
-    {name:'Lambda & 智能指针', code:`#include <iostream>\n#include <memory>\n#include <functional>\n#include <vector>\nusing namespace std;\n\nstruct Node { int val; Node(int v) : val(v) { cout << "Node(" << v << ") created\\n"; } ~Node() { cout << "Node(" << val << ") destroyed\\n"; } };\n\nint main() {\n    auto ptr = make_shared<Node>(42);\n    cout << "Value: " << ptr->val << ", use_count: " << ptr.use_count() << "\\n";\n    auto copy = ptr;\n    cout << "use_count after copy: " << ptr.use_count() << "\\n";\n    \n    vector<int> v = {3,1,4,1,5,9,2,6};\n    sort(v.begin(), v.end(), [](int a, int b){ return a > b; });\n    for (int x : v) cout << x << " ";\n    return 0;\n}`},
-  ],
-  javascript: [
-    {name:'Hello World', code:`console.log("Hello, JavaScript!")`},
-    {name:'Promise链', code:`const delay = ms => new Promise(r => setTimeout(r, ms))\n\nasync function main() {\n  console.log("Start")\n  await delay(0)\n  const results = await Promise.all([1,2,3].map(async n => {\n    await delay(0)\n    return n * n\n  }))\n  console.log("Squares:", results)\n  console.log("Done")\n}\n\nmain()`},
-    {name:'闭包与柯里化', code:`// 柯里化\nconst curry = fn => {\n  const arity = fn.length\n  return function curried(...args) {\n    if (args.length >= arity) return fn(...args)\n    return (...more) => curried(...args, ...more)\n  }\n}\n\nconst add = curry((a, b, c) => a + b + c)\nconsole.log(add(1)(2)(3))  // 6\nconsole.log(add(1, 2)(3))  // 6\nconsole.log(add(1)(2, 3))  // 6\n\n// 记忆化\nconst memo = fn => {\n  const cache = new Map()\n  return (...args) => {\n    const key = JSON.stringify(args)\n    if (cache.has(key)) return cache.get(key)\n    const result = fn(...args)\n    cache.set(key, result)\n    return result\n  }\n}\n\nconst fib = memo(n => n <= 1 ? n : fib(n-1) + fib(n-2))\nconsole.log([...Array(10)].map((_,i) => fib(i)))`},
-  ],
-  go: [
-    {name:'Hello World', code:`package main\nimport "fmt"\nfunc main() { fmt.Println("Hello, Go!") }`},
-    {name:'Goroutine', code:`package main\n\nimport (\n\t"fmt"\n\t"sync"\n)\n\nfunc worker(id int, wg *sync.WaitGroup) {\n\tdefer wg.Done()\n\tfmt.Printf("Worker %d starting\\n", id)\n\t// 模拟工作\n\tsum := 0\n\tfor i := 0; i < 1000; i++ { sum += i }\n\tfmt.Printf("Worker %d done, sum=%d\\n", id, sum)\n}\n\nfunc main() {\n\tvar wg sync.WaitGroup\n\tfor i := 1; i <= 3; i++ {\n\t\twg.Add(1)\n\t\tgo worker(i, &wg)\n\t}\n\twg.Wait()\n\tfmt.Println("All workers done")\n}`},
-  ],
-  rust: [
-    {name:'Hello World', code:`fn main() { println!("Hello, Rust!"); }`},
-    {name:'所有权与借用', code:`fn main() {\n    let s1 = String::from("hello");\n    let len = calculate_length(&s1); // 借用\n    println!("'{}' has {} chars", s1, len);\n    \n    let mut s = String::from("hello");\n    change(&mut s);\n    println!("Changed: {}", s);\n    \n    // 切片\n    let words = "hello world";\n    let first = first_word(words);\n    println!("First word: {}", first);\n}\n\nfn calculate_length(s: &String) -> usize { s.len() }\nfn change(s: &mut String) { s.push_str(", world"); }\nfn first_word(s: &str) -> &str {\n    let bytes = s.as_bytes();\n    for (i, &byte) in bytes.iter().enumerate() {\n        if byte == b' ' { return &s[..i]; }\n    }\n    &s[..]\n}`},
-  ],
+// ── Lazy load engines ─────────────────────────────────────────────────────────
+function loadSkulpt() {
+  if (document.getElementById('skulpt-script')) return
+  const s1 = document.createElement('script')
+  s1.id = 'skulpt-script'
+  s1.src = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js'
+  s1.onload = () => {
+    const s2 = document.createElement('script')
+    s2.src = 'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js'
+    s2.onload = () => { skulptReady = true }
+    document.head.appendChild(s2)
+  }
+  document.head.appendChild(s1)
 }
-// Fill in minimal examples for others
-LANG_EXAMPLES['swift'] = [
-  {name:'Hello World', code:`print("Hello, Swift!")`},
-  {name:'枚举与模式匹配', code:`enum Shape {
-    case circle(radius: Double)
-    case rectangle(width: Double, height: Double)
-    case triangle(base: Double, height: Double)
 
-    var area: Double {
-        switch self {
-        case .circle(let r): return Double.pi * r * r
-        case .rectangle(let w, let h): return w * h
-        case .triangle(let b, let h): return 0.5 * b * h
-        }
+function loadBabel() {
+  if (document.getElementById('babel-script')) return
+  const s = document.createElement('script')
+  s.id = 'babel-script'
+  s.src = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js'
+  s.onload = () => { babelReady = true }
+  document.head.appendChild(s)
+}
+
+// ── Run engines ───────────────────────────────────────────────────────────────
+function runJS(code) {
+  return new Promise((resolve) => {
+    const lines = []
+    // Web Worker 沙箱
+    const workerCode = `
+self.console = {
+  log:   (...a) => self.postMessage({ type:'log',   text: a.map(v => typeof v === 'object' ? JSON.stringify(v,null,2) : String(v)).join(' ') }),
+  error: (...a) => self.postMessage({ type:'error', text: a.map(v => String(v)).join(' ') }),
+  warn:  (...a) => self.postMessage({ type:'warn',  text: a.map(v => String(v)).join(' ') }),
+  info:  (...a) => self.postMessage({ type:'log',   text: a.map(v => String(v)).join(' ') }),
+}
+self.onmessage = function(e) {
+  try {
+    const fn = new Function(e.data)
+    const result = fn()
+    if (result instanceof Promise) {
+      result.then(() => self.postMessage({ type:'done', exit:0 }))
+            .catch(err => { self.postMessage({ type:'error', text: String(err) }); self.postMessage({ type:'done', exit:1 }) })
+    } else {
+      self.postMessage({ type:'done', exit:0 })
     }
-}
-
-let shapes: [Shape] = [.circle(radius: 5), .rectangle(width: 4, height: 6), .triangle(base: 3, height: 8)]
-for shape in shapes {
-    print("Area: \(String(format: "%.2f", shape.area))")
-}`},
-]
-
-;['c','java','ruby','php','bash','typescript'].forEach(id => {
-  if (!LANG_EXAMPLES[id]) {
-    const lang = LANGS.find(l => l.id === id)
-    LANG_EXAMPLES[id] = [{name:'默认示例', code: lang?.template || ''}]
-  }
-})
-
-// ── Editor utilities ──────────────────────────────────────────────────────────
-function updateLineNumbers() {
-  const lines = (editor.value.match(/\n/g) || []).length + 1
-  lineNums.innerHTML = Array.from({length: lines}, (_, i) => i+1).join('\n')
-}
-
-function handleKey(e) {
-  // Ctrl+Enter: run
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    e.preventDefault(); runCode(); return
-  }
-  // Tab: indent
-  if (e.key === 'Tab') {
-    e.preventDefault()
-    const s = editor.selectionStart, en = editor.selectionEnd
-    editor.value = editor.value.substring(0, s) + '    ' + editor.value.substring(en)
-    editor.selectionStart = editor.selectionEnd = s + 4
-    updateLineNumbers()
+  } catch(err) {
+    self.postMessage({ type:'error', text: String(err) })
+    self.postMessage({ type:'done', exit:1 })
   }
 }
+`
+    const blob = new Blob([workerCode], { type: 'application/javascript' })
+    const url = URL.createObjectURL(blob)
+    const worker = new Worker(url)
+    const timeout = setTimeout(() => {
+      worker.terminate(); URL.revokeObjectURL(url)
+      resolve({ lines: [...lines, '[超时：5秒限制]'], exit: 1 })
+    }, 5000)
 
-function copyCode() {
-  navigator.clipboard.writeText(editor.value).then(() => {
-    const btn = document.querySelector('button[onclick="copyCode()"]')
-    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500) }
+    worker.onmessage = (e) => {
+      if (e.data.type === 'done') {
+        clearTimeout(timeout); worker.terminate(); URL.revokeObjectURL(url)
+        resolve({ lines, exit: e.data.exit })
+      } else {
+        const color = e.data.type === 'error' ? '\x1b[31m' : (e.data.type === 'warn' ? '\x1b[33m' : '')
+        lines.push((color ? `<span style="color:${e.data.type==='error'?'#ff6b6b':'#ffa500'}">` : '') + escHtml(e.data.text) + (color ? '</span>' : ''))
+      }
+    }
+    worker.onerror = (e) => {
+      clearTimeout(timeout); worker.terminate(); URL.revokeObjectURL(url)
+      resolve({ lines: [...lines, `<span style="color:#ff6b6b">${escHtml(e.message)}</span>`], exit: 1 })
+    }
+    worker.postMessage(code)
   })
 }
 
-function clearOutput() {
-  output.textContent = ''
-  execTime.textContent = ''
-  runStatus.textContent = ''
+function runTS(code) {
+  return new Promise((resolve, reject) => {
+    if (!babelReady || !window.Babel) { reject(new Error('Babel 加载中，请稍候再试')); return }
+    let compiled
+    try {
+      compiled = window.Babel.transform(code, {
+        presets: ['typescript'],
+        filename: 'main.ts',
+      }).code
+    } catch (e) {
+      resolve({ lines: [`<span style="color:#ff6b6b">TS 编译错误: ${escHtml(e.message)}</span>`], exit: 1 })
+      return
+    }
+    runJS(compiled).then(resolve)
+  })
 }
 
-// ── Run code via Wandbox ──────────────────────────────────────────────────────
+function runPython(code) {
+  return new Promise((resolve, reject) => {
+    if (!skulptReady || !window.Sk) { reject(new Error('Skulpt 加载中，请稍候再试')); return }
+    const lines = []
+    window.Sk.configure({
+      output: (text) => lines.push(escHtml(text)),
+      read: (x) => {
+        if (window.Sk.builtinFiles?.files[x] === undefined) throw new Error(`文件未找到: ${x}`)
+        return window.Sk.builtinFiles.files[x]
+      },
+      inputfun: () => Promise.resolve(stdinInput.value || ''),
+      __future__: window.Sk.python3,
+    })
+    window.Sk.misceval.asyncToPromise(() =>
+      window.Sk.importMainWithBody('<stdin>', false, code, true)
+    ).then(() => {
+      resolve({ lines, exit: 0 })
+    }).catch((e) => {
+      const msg = e.toString ? e.toString() : String(e)
+      resolve({ lines: [...lines, `<span style="color:#ff6b6b">${escHtml(msg)}</span>`], exit: 1 })
+    })
+  })
+}
+
+// ── Main run ──────────────────────────────────────────────────────────────────
 async function runCode() {
   if (running) return
+  const lang = currentLang
+
+  if (lang.engine === 'playground') {
+    const url = lang.playgroundUrl + (lang.playgroundUrl.endsWith('/') ? '' : encodeURIComponent(editor.value))
+    window.open(url, '_blank')
+    return
+  }
+
   running = true
   clearOutput()
   runBtn.disabled = true
-  runStatus.textContent = '⟳ Running...'
-  runStatus.style.color = '#ffa500'
-
-  const code = editor.value
-  const lang = currentLang
-  const stdin = stdinInput.value
+  setStatus('⟳ Running...', '#ffa500')
   const t0 = Date.now()
 
-  // TypeScript: transpile client-side using eval trick or just run as JS
-  let compiler = lang.compiler
-  let finalCode = code
-
-  // TypeScript: use Wandbox native TypeScript compiler (no stripping needed)
-  // compiler is already set to 'typescript-5.6.2' from LANGS config
-
   try {
-    const payload = { compiler, code: finalCode, stdin }
-    const resp = await fetch('https://wandbox.org/api/compile.json', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
+    let result
+    if (lang.engine === 'js')         result = await runJS(editor.value)
+    else if (lang.engine === 'typescript') result = await runTS(editor.value)
+    else if (lang.engine === 'python') result = await runPython(editor.value)
 
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-    const data = await resp.json()
     const elapsed = Date.now() - t0
-
-    const out = data.program_output || ''
-    const err = (data.program_error || '') + (data.compiler_error || '')
-
-    if (out) {
-      output.innerHTML += `<span style="color:#e8e8f0">${escapeHtml(out)}</span>`
+    if (result.lines.length) {
+      output.innerHTML = result.lines.join('')
+    } else {
+      output.innerHTML = '<span style="color:rgba(136,136,170,0.4)">(no output)</span>'
     }
-    if (err) {
-      output.innerHTML += `<span style="color:#ff6b6b">${escapeHtml(err)}</span>`
-    }
-    if (!out && !err) {
-      output.innerHTML += `<span style="color:rgba(136,136,170,0.5)">(no output)</span>`
-    }
-
-    const exitCode = data.status
-    execTime.textContent = `exit ${exitCode} · ${elapsed}ms`
-    runStatus.textContent = exitCode == '0' ? '✓ OK' : '✕ Error'
-    runStatus.style.color = exitCode == '0' ? '#39ff14' : '#ff4466'
-
-  } catch(e) {
-    output.innerHTML = `<span style="color:#ff4466">✕ Network error: ${escapeHtml(e.message)}\n\nNote: This compiler uses Wandbox API. Check your internet connection.</span>`
-    runStatus.textContent = '✕ Failed'
-    runStatus.style.color = '#ff4466'
+    execTime.textContent = `exit ${result.exit} · ${elapsed}ms`
+    setStatus(result.exit === 0 ? '✓ OK' : '✕ Error', result.exit === 0 ? '#39ff14' : '#ff4466')
+  } catch (e) {
+    output.innerHTML = `<span style="color:#ff6b6b">${escHtml(e.message)}</span>`
+    setStatus('✕ Failed', '#ff4466')
   }
 
   running = false
   runBtn.disabled = false
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+function setStatus(text, color) {
+  runStatus.textContent = text
+  runStatus.style.color = color
 }
 
-// Expose for HTML onclick
-window.runCode = runCode
-window.clearOutput = clearOutput
-window.copyCode = copyCode
+function clearOutput() {
+  output.innerHTML = ''
+  execTime.textContent = ''
+  runStatus.textContent = ''
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+// ── Editor utilities ──────────────────────────────────────────────────────────
+function updateLineNumbers() {
+  const lines = (editor.value.match(/\n/g) || []).length + 1
+  lineNums.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('\n')
+}
+
+editor.addEventListener('input', updateLineNumbers)
+editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop })
+editor.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); return }
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    const s = editor.selectionStart, en = editor.selectionEnd
+    editor.value = editor.value.substring(0, s) + '  ' + editor.value.substring(en)
+    editor.selectionStart = editor.selectionEnd = s + 2
+    updateLineNumbers()
+  }
+})
+
+runBtn.onclick = runCode
+document.getElementById('clear-btn').onclick = clearOutput
+document.getElementById('copy-btn').onclick = () => {
+  navigator.clipboard.writeText(editor.value).then(() => {
+    const btn = document.getElementById('copy-btn')
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500)
+  })
+}
+
+// Update playground link when editor changes
+editor.addEventListener('input', () => {
+  if (currentLang.engine === 'playground' && currentLang.playgroundUrl) {
+    pgLink.href = currentLang.playgroundUrl + (currentLang.playgroundUrl.endsWith('/') ? '' : encodeURIComponent(editor.value))
+  }
+})
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderLangList()
-updateLineNumbers()
-editor.addEventListener('scroll', () => {
-  lineNums.scrollTop = editor.scrollTop
-})
+// Preload JS is always ready; preload Python/TS on first selection
+loadSkulpt()   // start loading early
+loadBabel()
 
 })
   </script>
