@@ -4,7 +4,7 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
 ---
 
 <BaseLayout title="在线编译器 | void.dev">
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col" style="font-family:var(--font-mono)">
+  <div style="height:100dvh;display:flex;flex-direction:column;background:var(--color-void);font-family:var(--font-mono);overflow:hidden">
 
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.92)] backdrop-blur-xl">
@@ -27,7 +27,7 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
       </div>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 48px)">
+    <div style="display:flex;flex:1;overflow:hidden;min-height:0">
 
       <!-- Sidebar -->
       <div class="w-44 flex-shrink-0 border-r border-[var(--color-void-border)] flex flex-col" style="background:#05050f">
@@ -47,7 +47,7 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
       </div>
 
       <!-- Editor + Output -->
-      <div class="flex-1 flex flex-col overflow-hidden">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
 
         <!-- Toolbar -->
         <div class="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-void-border)]" style="background:#07071a">
@@ -73,7 +73,7 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
         </div>
 
         <!-- Monaco Editor -->
-        <div id="monaco-container" class="flex-1" style="min-height:0"></div>
+        <div id="monaco-container" style="flex:1;min-height:0;overflow:hidden"></div>
 
         <!-- Output -->
         <div style="height:220px;background:#030308;border-top:1px solid var(--color-void-border);display:flex;flex-direction:column">

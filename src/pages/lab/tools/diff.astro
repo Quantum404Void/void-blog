@@ -127,221 +127,172 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
       const aLines = a === '' ? [] : a.split('\n')
       const bLines = b === '' ? [] : b.split('\n')
       const m = aLines.length, n = bLines.length
-      const dp = Array.from({length: m + 1}, () => new Array(n + 1).fill(0))
+      const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1))
       for (let x = 1; x <= m; x++)
         for (let y = 1; y <= n; y++)
           dp[x][y] = aLines[x-1] === bLines[y-1]
             ? dp[x-1][y-1] + 1
             : Math.max(dp[x-1][y], dp[x][y-1])
-
       const ops = []
       let x = m, y = n
       while (x > 0 || y > 0) {
         if (x > 0 && y > 0 && aLines[x-1] === bLines[y-1]) {
-          ops.unshift({type: 'equal', line: aLines[x-1], left: aLines[x-1], right: bLines[y-1]}); x--; y--
+          ops.unshift({type:'equal', left:aLines[x-1], right:bLines[y-1]}); x--; y--
         } else if (y > 0 && (x === 0 || dp[x][y-1] >= dp[x-1][y])) {
-          ops.unshift({type: 'add', line: bLines[y-1], left: '', right: bLines[y-1]}); y--
+          ops.unshift({type:'add', left:null, right:bLines[y-1]}); y--
         } else {
-          ops.unshift({type: 'del', line: aLines[x-1], left: aLines[x-1], right: ''}); x--
+          ops.unshift({type:'del', left:aLines[x-1], right:null}); x--
         }
       }
       return ops
     }
 
-    function escapeHtml(s) {
+    function esc(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     }
 
     function runDiff() {
-      const left = document.getElementById('left-input').value
+      const left  = document.getElementById('left-input').value
       const right = document.getElementById('right-input').value
-
       if (!left && !right) {
         document.getElementById('diff-output').innerHTML = ''
         document.getElementById('stat-add').textContent = '0'
         document.getElementById('stat-del').textContent = '0'
-        document.getElementById('stat-eq').textContent = '0'
+        document.getElementById('stat-eq').textContent  = '0'
         return
       }
-
       const ops = diffLines(left, right)
-      const adds = ops.filter(o => o.type === 'add').length
-      const dels = ops.filter(o => o.type === 'del').length
-      const eqs = ops.filter(o => o.type === 'equal').length
-      document.getElementById('stat-add').textContent = adds
-      document.getElementById('stat-del').textContent = dels
-      document.getElementById('stat-eq').textContent = eqs
-
-      if (currentMode === 'unified') {
-        renderUnified(ops)
-      } else {
-        renderSplit(ops)
-      }
+      document.getElementById('stat-add').textContent = ops.filter(o=>o.type==='add').length
+      document.getElementById('stat-del').textContent = ops.filter(o=>o.type==='del').length
+      document.getElementById('stat-eq').textContent  = ops.filter(o=>o.type==='equal').length
+      currentMode === 'unified' ? renderUnified(ops) : renderSplit(ops)
     }
 
-    const CONTEXT = 3
+    const CTX = 3
+
+    // 预计算每个 op 的左右行号
+    function calcLineNums(ops) {
+      let lN = 0, rN = 0
+      return ops.map(op => {
+        if (op.type === 'equal') { lN++; rN++; return {l:lN, r:rN} }
+        if (op.type === 'del')   { lN++;          return {l:lN, r:null} }
+        /* add */                  rN++;          return {l:null, r:rN}
+      })
+    }
+
+    function lineHtml(type, text, lNum, rNum) {
+      const bg    = type==='add' ? 'rgba(57,255,20,0.08)' : type==='del' ? 'rgba(255,80,80,0.1)' : ''
+      const color = type==='add' ? '#6dff80' : type==='del' ? '#ff8888' : 'var(--color-text-muted)'
+      const sign  = type==='add' ? '+' : type==='del' ? '-' : ' '
+      const signColor = type==='add' ? '#39ff14' : type==='del' ? '#ff6b6b' : 'transparent'
+      return `<div class="diff-line" style="background:${bg}">
+        <span class="diff-gutter" style="color:rgba(136,136,170,0.35)">${lNum!==null?lNum:''}</span>
+        <span class="diff-gutter" style="color:rgba(136,136,170,0.25)">${rNum!==null?rNum:''}</span>
+        <span class="diff-gutter" style="color:${signColor};font-weight:bold">${sign}</span>
+        <span class="diff-content" style="color:${color}">${esc(text??'')}</span>
+      </div>`
+    }
 
     function renderUnified(ops) {
       const el = document.getElementById('diff-output')
-      if (!ops.length) { el.innerHTML = '<div style="padding:16px;color:var(--color-text-muted);font-size:13px">无内容</div>'; return }
+      if (!ops.length) { el.innerHTML = '<div style="padding:16px;color:var(--color-text-muted)">无内容</div>'; return }
 
-      // Group consecutive equals for collapsing
+      const lineNums = calcLineNums(ops)
+
+      // 分组折叠
       const groups = []
-      let cur = null
-      ops.forEach(op => {
-        if (!cur || cur.type !== op.type) { cur = {type: op.type, lines: [op]}; groups.push(cur) }
-        else cur.lines.push(op)
-      })
+      for (const op of ops) {
+        const last = groups[groups.length-1]
+        if (last && last.type === op.type) last.lines.push(op)
+        else groups.push({type:op.type, lines:[op]})
+      }
 
-      let html = ''
-      let lineNum = 0
-      groups.forEach((g, gi) => {
-        if (g.type === 'equal') {
-          const lines = g.lines
-          if (lines.length <= CONTEXT * 2 + 1) {
-            lines.forEach(op => {
-              lineNum++
-              html += `<div class="diff-line diff-eq">
-                <span class="diff-gutter" style="color:rgba(57,255,20,0.3)">${lineNum}</span>
-                <span class="diff-gutter" style="color:rgba(57,255,20,0.2)"> </span>
-                <span class="diff-content" style="color:var(--color-text-muted)">${escapeHtml(op.line)}</span>
-              </div>`
-            })
-          } else {
-            // show first CONTEXT
-            lines.slice(0, CONTEXT).forEach(op => {
-              lineNum++
-              html += `<div class="diff-line diff-eq">
-                <span class="diff-gutter" style="color:rgba(57,255,20,0.3)">${lineNum}</span>
-                <span class="diff-gutter" style="color:rgba(57,255,20,0.2)"> </span>
-                <span class="diff-content" style="color:var(--color-text-muted)">${escapeHtml(op.line)}</span>
-              </div>`
-            })
-            const skipCount = lines.length - CONTEXT * 2
-            const skipStart = lineNum + 1
-            lineNum += skipCount
-            html += `<div class="collapsed-hint" onclick="expandGroup(${gi})">… 折叠了 ${skipCount} 行相同内容（第 ${skipStart}-${lineNum} 行，点击展开）</div>`
-            // show last CONTEXT
-            lines.slice(-CONTEXT).forEach(op => {
-              lineNum++
-              html += `<div class="diff-line diff-eq">
-                <span class="diff-gutter" style="color:rgba(57,255,20,0.3)">${lineNum}</span>
-                <span class="diff-gutter" style="color:rgba(57,255,20,0.2)"> </span>
-                <span class="diff-content" style="color:var(--color-text-muted)">${escapeHtml(op.line)}</span>
-              </div>`
-            })
+      let opIdx = 0, html = ''
+      groups.forEach(g => {
+        const gLen = g.lines.length
+        if (g.type === 'equal' && gLen > CTX * 2 + 1) {
+          for (let j = 0; j < CTX; j++, opIdx++) {
+            const {l,r} = lineNums[opIdx]
+            html += lineHtml('eq', g.lines[j].left, l, r)
           }
-        } else if (g.type === 'del') {
-          g.lines.forEach(op => {
-            lineNum++
-            html += `<div class="diff-line diff-del">
-              <span class="diff-gutter" style="color:rgba(255,100,100,0.6)">${lineNum}</span>
-              <span class="diff-gutter" style="color:#ff6b6b;font-weight:bold">-</span>
-              <span class="diff-content" style="color:#ff6b6b">${escapeHtml(op.line)}</span>
-            </div>`
-          })
+          const skip = gLen - CTX * 2
+          const skipStart = opIdx
+          opIdx += skip
+          html += `<div class="collapsed-hint" data-start="${skipStart}" data-count="${skip}" onclick="expandAll()">… 折叠了 ${skip} 行相同内容（点击展开）</div>`
+          for (let j = 0; j < CTX; j++, opIdx++) {
+            const {l,r} = lineNums[opIdx]
+            html += lineHtml('eq', g.lines[gLen-CTX+j].left, l, r)
+          }
         } else {
-          g.lines.forEach(op => {
-            lineNum++
-            html += `<div class="diff-line diff-add">
-              <span class="diff-gutter" style="color:rgba(57,255,20,0.5)">${lineNum}</span>
-              <span class="diff-gutter" style="color:#39ff14;font-weight:bold">+</span>
-              <span class="diff-content" style="color:#39ff14">${escapeHtml(op.line)}</span>
-            </div>`
-          })
+          for (const op of g.lines) {
+            const {l,r} = lineNums[opIdx++]
+            html += lineHtml(op.type==='equal'?'eq':op.type, op.type==='del'?op.left:op.right, l, r)
+          }
         }
       })
       el.innerHTML = html
-      // store ops for expand
       el._ops = ops
-      el._groups = groups
+      el._lineNums = lineNums
     }
 
-    function expandGroup(gi) {
-      // Re-render without collapsing that group - simple approach: just re-render all expanded
+    function expandAll() {
       const el = document.getElementById('diff-output')
-      const ops = el._ops
+      const ops = el._ops, lineNums = el._lineNums
       if (!ops) return
       let html = ''
-      let lineNum = 0
-      ops.forEach(op => {
-        lineNum++
-        if (op.type === 'equal') {
-          html += `<div class="diff-line diff-eq">
-            <span class="diff-gutter" style="color:rgba(57,255,20,0.3)">${lineNum}</span>
-            <span class="diff-gutter" style="color:rgba(57,255,20,0.2)"> </span>
-            <span class="diff-content" style="color:var(--color-text-muted)">${escapeHtml(op.line)}</span>
-          </div>`
-        } else if (op.type === 'del') {
-          html += `<div class="diff-line diff-del">
-            <span class="diff-gutter" style="color:rgba(255,100,100,0.6)">${lineNum}</span>
-            <span class="diff-gutter" style="color:#ff6b6b;font-weight:bold">-</span>
-            <span class="diff-content" style="color:#ff6b6b">${escapeHtml(op.line)}</span>
-          </div>`
-        } else {
-          html += `<div class="diff-line diff-add">
-            <span class="diff-gutter" style="color:rgba(57,255,20,0.5)">${lineNum}</span>
-            <span class="diff-gutter" style="color:#39ff14;font-weight:bold">+</span>
-            <span class="diff-content" style="color:#39ff14">${escapeHtml(op.line)}</span>
-          </div>`
-        }
+      ops.forEach((op, i) => {
+        const {l,r} = lineNums[i]
+        html += lineHtml(op.type==='equal'?'eq':op.type, op.type==='del'?op.left:op.right, l, r)
       })
       el.innerHTML = html
     }
 
     function renderSplit(ops) {
       const el = document.getElementById('diff-output')
-      if (!ops.length) { el.innerHTML = '<div style="padding:16px;color:var(--color-text-muted);font-size:13px">无内容</div>'; return }
+      if (!ops.length) { el.innerHTML = '<div style="padding:16px;color:var(--color-text-muted)">无内容</div>'; return }
 
-      // 并排模式：先把 del/add 序列两两对齐
-      // 策略：遇到连续 del+add 块，按行号对齐；多余的用空行填充
       const rows = []
       let i = 0
       while (i < ops.length) {
         if (ops[i].type === 'equal') {
-          rows.push({ type: 'equal', left: ops[i].line, right: ops[i].line })
-          i++
+          rows.push({type:'equal', left:ops[i].left, right:ops[i].right}); i++
         } else {
-          // 收集连续的 del 和 add
           const dels = [], adds = []
-          while (i < ops.length && ops[i].type === 'del') { dels.push(ops[i].line); i++ }
-          while (i < ops.length && ops[i].type === 'add') { adds.push(ops[i].line); i++ }
+          while (i < ops.length && ops[i].type === 'del')  { dels.push(ops[i].left);  i++ }
+          while (i < ops.length && ops[i].type === 'add')  { adds.push(ops[i].right); i++ }
           const maxLen = Math.max(dels.length, adds.length)
-          for (let j = 0; j < maxLen; j++) {
-            rows.push({
-              type: 'change',
-              left:  j < dels.length ? dels[j] : null,
-              right: j < adds.length ? adds[j] : null,
-            })
-          }
+          for (let j = 0; j < maxLen; j++)
+            rows.push({type:'change', left:j<dels.length?dels[j]:null, right:j<adds.length?adds[j]:null})
         }
       }
 
-      let leftNum = 0, rightNum = 0
-      let html = `<div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(57,255,20,0.04)">
-        <div style="padding:6px 12px;font-size:10px;color:rgba(57,255,20,0.5);border-right:1px solid rgba(57,255,20,0.12)">LEFT（原始）</div>
-        <div style="padding:6px 12px;font-size:10px;color:rgba(57,255,20,0.5)">RIGHT（修改）</div>
+      let lN = 0, rN = 0
+      let html = `<div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(57,255,20,0.12)">
+        <div style="padding:5px 12px;font-size:10px;color:rgba(57,255,20,0.45);border-right:1px solid rgba(57,255,20,0.1)">LEFT（原始）</div>
+        <div style="padding:5px 12px;font-size:10px;color:rgba(57,255,20,0.45)">RIGHT（修改）</div>
       </div>`
 
-      rows.forEach(p => {
-        if (p.type === 'equal') {
-          leftNum++; rightNum++
-          html += `<div class="split-row">
-            <div class="split-cell" style="color:var(--color-text-muted)"><span class="diff-gutter" style="opacity:0.3">${leftNum}</span> ${escapeHtml(p.left)}</div>
-            <div class="split-cell" style="color:var(--color-text-muted)"><span class="diff-gutter" style="opacity:0.3">${rightNum}</span> ${escapeHtml(p.right)}</div>
+      rows.forEach(row => {
+        if (row.type === 'equal') {
+          lN++; rN++
+          html += `<div style="display:grid;grid-template-columns:1fr 1fr;font-size:12px;line-height:1.6">
+            <div class="split-cell" style="color:var(--color-text-muted)"><span class="diff-gutter" style="opacity:0.3">${lN}</span> ${esc(row.left)}</div>
+            <div class="split-cell" style="color:var(--color-text-muted)"><span class="diff-gutter" style="opacity:0.3">${rN}</span> ${esc(row.right)}</div>
           </div>`
         } else {
-          if (p.left !== null) leftNum++
-          if (p.right !== null) rightNum++
-          const lNum = p.left !== null ? leftNum : ''
-          const rNum = p.right !== null ? rightNum : ''
-          html += `<div class="split-row">
-            <div class="split-cell" style="color:${p.left!==null?'#ff8888':'transparent'};background:${p.left!==null?'rgba(255,100,100,0.08)':'rgba(255,100,100,0.02)'}">${p.left!==null?`<span class="diff-gutter" style="color:rgba(255,100,100,0.4)">${lNum}</span> <span style="opacity:0.5">-</span> ${escapeHtml(p.left)}`:'<span style="opacity:0.15">~</span>'}</div>
-            <div class="split-cell" style="color:${p.right!==null?'#39ff14':'transparent'};background:${p.right!==null?'rgba(57,255,20,0.06)':'rgba(57,255,20,0.01)'}">${p.right!==null?`<span class="diff-gutter" style="color:rgba(57,255,20,0.4)">${rNum}</span> <span style="opacity:0.5">+</span> ${escapeHtml(p.right)}`:'<span style="opacity:0.15">~</span>'}</div>
-          </div>`
+          const hasL = row.left !== null, hasR = row.right !== null
+          if (hasL) lN++
+          if (hasR) rN++
+          const lCell = hasL
+            ? `<div class="split-cell" style="background:rgba(255,80,80,0.08);color:#ff9999"><span class="diff-gutter" style="color:rgba(255,100,100,0.4)">${lN}</span> <span style="color:rgba(255,80,80,0.5)">-</span> ${esc(row.left)}</div>`
+            : `<div class="split-cell" style="background:rgba(255,80,80,0.03)"><span style="color:rgba(136,136,170,0.15)">　</span></div>`
+          const rCell = hasR
+            ? `<div class="split-cell" style="background:rgba(57,255,20,0.07);color:#7dff90"><span class="diff-gutter" style="color:rgba(57,255,20,0.4)">${rN}</span> <span style="color:rgba(57,255,20,0.5)">+</span> ${esc(row.right)}</div>`
+            : `<div class="split-cell" style="background:rgba(57,255,20,0.02)"><span style="color:rgba(136,136,170,0.15)">　</span></div>`
+          html += `<div style="display:grid;grid-template-columns:1fr 1fr;font-size:12px;line-height:1.6">${lCell}${rCell}</div>`
         }
       })
       el.innerHTML = html
     }
-  </script>
+</script>
 </BaseLayout>
