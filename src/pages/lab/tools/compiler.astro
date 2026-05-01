@@ -5,19 +5,30 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
 
 <BaseLayout title="在线编译器 | void.dev">
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col" style="font-family:var(--font-mono)">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.9)] backdrop-blur-xl">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.92)] backdrop-blur-xl">
       <div class="max-w-full px-4 h-12 flex items-center gap-3">
         <a href="/void-blog/lab/" class="text-xs text-[var(--color-neon-green)] hover:opacity-80 transition-opacity">~/lab</a>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="text-xs text-[var(--color-neon-cyan)]">compiler</span>
-        <div class="ml-auto flex items-center gap-3 text-[10px] text-[var(--color-text-muted)]">
-          <span id="run-status"></span>
-          <span class="px-2 py-0.5 rounded border" style="border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5)">Wandbox</span>
+        <div class="ml-auto flex items-center gap-3">
+          <!-- Theme picker -->
+          <select id="theme-select" class="text-[10px] px-2 py-1 rounded border outline-none cursor-pointer"
+            style="background:#0a0a0f;border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.6)">
+            <option value="vs-dark">VS Dark</option>
+            <option value="vs">VS Light</option>
+            <option value="hc-black">High Contrast</option>
+          </select>
+          <span id="run-status" class="text-[11px]"></span>
+          <span class="px-2 py-0.5 rounded border text-[10px]"
+            style="border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5)">Wandbox</span>
         </div>
       </div>
     </nav>
 
     <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 48px)">
+
       <!-- Sidebar -->
       <div class="w-44 flex-shrink-0 border-r border-[var(--color-void-border)] flex flex-col" style="background:#05050f">
         <div class="p-3 border-b border-[var(--color-void-border)]">
@@ -31,12 +42,14 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
         <div class="p-3 border-t border-[var(--color-void-border)]">
           <label class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">Stdin</label>
           <textarea id="stdin-input" rows="3" placeholder="standard input..."
-            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-size:11px;border-radius:6px;padding:6px;outline:none;resize:none"></textarea>
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-size:11px;border-radius:6px;padding:6px;outline:none;resize:none;font-family:var(--font-mono)"></textarea>
         </div>
       </div>
 
       <!-- Editor + Output -->
       <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Toolbar -->
         <div class="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-void-border)]" style="background:#07071a">
           <div class="flex gap-1.5">
             <div class="w-3 h-3 rounded-full" style="background:#ff5f56"></div>
@@ -44,47 +57,50 @@ const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
             <div class="w-3 h-3 rounded-full" style="background:#27c93f"></div>
           </div>
           <span id="editor-filename" class="text-[11px] text-[var(--color-text-muted)]">main.cpp</span>
+          <span id="compiler-ver" class="text-[10px]" style="color:rgba(136,136,170,0.35)"></span>
           <div class="ml-auto flex items-center gap-2">
             <button id="run-btn"
-              class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold"
+              class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-opacity"
               style="background:rgba(57,255,20,0.12);border:1px solid rgba(57,255,20,0.4);color:#39ff14">
               ▶ Run
               <kbd style="font-size:9px;opacity:0.5;padding:1px 4px;border:1px solid rgba(57,255,20,0.3);border-radius:3px">Ctrl+↵</kbd>
             </button>
-            <button id="clear-btn" class="px-2 py-1.5 rounded text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)]">Clear</button>
-            <button id="copy-btn"  class="px-2 py-1.5 rounded text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)]">Copy</button>
+            <button id="clear-btn" class="px-2 py-1.5 rounded text-[10px] border transition-colors"
+              style="color:var(--color-text-muted);border-color:var(--color-void-border)">Clear</button>
+            <button id="copy-btn" class="px-2 py-1.5 rounded text-[10px] border transition-colors"
+              style="color:var(--color-text-muted);border-color:var(--color-void-border)">Copy</button>
           </div>
         </div>
 
-        <div class="flex flex-1 overflow-hidden">
-          <div id="line-numbers" class="select-none text-right px-3 py-4 text-[11px] leading-[1.6] overflow-hidden"
-            style="background:#06060e;color:rgba(136,136,170,0.4);min-width:3rem;border-right:1px solid var(--color-void-border)">1</div>
-          <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
-            class="flex-1 p-4 text-[12px] leading-[1.6] resize-none outline-none"
-            style="background:#06060e;color:#e8e8f0;caret-color:#00d4ff;tab-size:2"></textarea>
-        </div>
+        <!-- Monaco Editor -->
+        <div id="monaco-container" class="flex-1" style="min-height:0"></div>
 
+        <!-- Output -->
         <div style="height:220px;background:#030308;border-top:1px solid var(--color-void-border);display:flex;flex-direction:column">
           <div class="flex items-center gap-3 px-4 py-1.5 border-b border-[var(--color-void-border)]">
             <span style="font-size:10px;color:var(--color-text-muted)">OUTPUT</span>
             <span id="exec-time" style="font-size:10px;color:rgba(136,136,170,0.5)"></span>
-            <span id="compiler-ver" style="font-size:10px;color:rgba(136,136,170,0.3);margin-left:auto"></span>
           </div>
-          <pre id="output" class="flex-1 overflow-auto p-3 text-[12px] leading-relaxed" style="margin:0;color:#e8e8f0;white-space:pre-wrap;word-break:break-all"></pre>
+          <pre id="output" class="flex-1 overflow-auto p-3 text-[12px] leading-relaxed"
+            style="margin:0;color:#e8e8f0;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono)"></pre>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Monaco CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+
   <script define:vars={{ workerUrl }}>
     window.__WORKER_URL__ = workerUrl
   </script>
+
   <script is:inline>
 document.addEventListener('DOMContentLoaded', function () {
 
 // ── Languages ─────────────────────────────────────────────────────────────────
 const LANGS = [
-  { id:'cpp', label:'C++', color:'#00599c', icon:'⚙️', ext:'cpp', compiler:'gcc-head',
+  { id:'cpp',        label:'C++',        color:'#00599c', icon:'⚙️',  ext:'cpp',  monacoLang:'cpp',        compiler:'gcc-head',
     template:`#include <iostream>
 #include <vector>
 #include <algorithm>
@@ -98,7 +114,6 @@ int main() {
     for (int x : v) cout << x << " ";
     cout << endl;
 
-    // Lambda
     auto square = [](int x) { return x * x; };
     for (int x : v) cout << square(x) << " ";
     cout << endl;
@@ -106,7 +121,7 @@ int main() {
     return 0;
 }` },
 
-  { id:'c', label:'C', color:'#a8b9cc', icon:'🔵', ext:'c', compiler:'gcc-head-c',
+  { id:'c',          label:'C',          color:'#a8b9cc', icon:'🔵',  ext:'c',    monacoLang:'c',          compiler:'gcc-head-c',
     template:`#include <stdio.h>
 #include <stdlib.h>
 
@@ -128,22 +143,19 @@ int main() {
     return 0;
 }` },
 
-  { id:'python', label:'Python', color:'#3776ab', icon:'🐍', ext:'py', compiler:'cpython-3.13.8',
+  { id:'python',     label:'Python',     color:'#3776ab', icon:'🐍',  ext:'py',   monacoLang:'python',     compiler:'cpython-3.13.8',
     template:`import sys
 from collections import Counter
 
 print("Hello, Python!", sys.version.split()[0])
 
-# 标准库
 data = "hello world hello python world hello"
 print(Counter(data.split()).most_common(3))
 
-# 推导式
 nums = [5, 2, 8, 1, 9, 3]
 print(sorted(nums))
 print([x**2 for x in sorted(nums)])
 
-# 数据类
 from dataclasses import dataclass
 
 @dataclass
@@ -154,33 +166,26 @@ class Point:
 
 print(Point(3, 4).dist())` },
 
-  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨', ext:'js', compiler:'nodejs-20.17.0',
+  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨',  ext:'js',   monacoLang:'javascript', compiler:'nodejs-20.17.0',
     template:`console.log("Hello, JavaScript!", process.version)
 
-// ES2024 features
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x)
 const double = x => x * 2
 const addOne = x => x + 1
 const square = x => x * x
 console.log("pipe:", pipe(double, addOne, square)(3))
 
-// Async/await
-async function fetchData() {
+async function main() {
   const nums = [5, 2, 8, 1, 9, 3]
   nums.sort((a, b) => a - b)
   const squares = await Promise.all(nums.map(async x => x * x))
   console.log("sorted:", nums)
   console.log("squares:", squares)
 }
-fetchData()
+main()` },
 
-// Destructuring
-const {name, age, ...rest} = {name: "Alice", age: 30, role: "admin"}
-console.log(name, age, rest)` },
-
-  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷', ext:'ts', compiler:'typescript-5.6.2',
-    template:`// TypeScript — 真实 tsc 编译
-interface Point { x: number; y: number }
+  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷',  ext:'ts',   monacoLang:'typescript', compiler:'typescript-5.6.2',
+    template:`interface Point { x: number; y: number }
 
 function distance(a: Point, b: Point): number {
   return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
@@ -193,15 +198,9 @@ function divide(a: number, b: number): Result<number> {
   return { ok: true, value: a / b }
 }
 console.log(divide(10, 2))
-console.log(divide(5, 0))
+console.log(divide(5, 0))` },
 
-// Mapped types
-type Optional<T> = { [K in keyof T]?: T[K] }
-interface User { name: string; age: number }
-const u: Optional<User> = { name: "Alice" }
-console.log(u)` },
-
-  { id:'go', label:'Go', color:'#00add8', icon:'🐹', ext:'go', compiler:'go-1.23.2',
+  { id:'go',         label:'Go',         color:'#00add8', icon:'🐹',  ext:'go',   monacoLang:'go',         compiler:'go-1.23.2',
     template:`package main
 
 import (
@@ -223,13 +222,12 @@ func fibonacci(n int) []int {
 func main() {
     fmt.Println("Hello, Go!")
     fmt.Println(fibonacci(10))
-
     nums := []int{5, 2, 8, 1, 9, 3}
     sort.Ints(nums)
     fmt.Println(nums)
 }` },
 
-  { id:'rust', label:'Rust', color:'#dea584', icon:'🦀', ext:'rs', compiler:'rust-1.82.0',
+  { id:'rust',       label:'Rust',       color:'#dea584', icon:'🦀',  ext:'rs',   monacoLang:'rust',       compiler:'rust-1.82.0',
     template:`fn fibonacci(n: u32) -> u64 {
     match n {
         0 => 0,
@@ -240,20 +238,17 @@ func main() {
 
 fn main() {
     println!("Hello, Rust!");
-
     let mut v: Vec<i32> = vec![5, 2, 8, 1, 9, 3];
     v.sort();
     println!("{:?}", v);
-
     let squares: Vec<i32> = v.iter().map(|x| x * x).collect();
     println!("{:?}", squares);
-
     for i in 0..8 {
         println!("fib({}) = {}", i, fibonacci(i));
     }
 }` },
 
-  { id:'java', label:'Java', color:'#f89820', icon:'☕', ext:'java', compiler:'openjdk-jdk-22+36',
+  { id:'java',       label:'Java',       color:'#f89820', icon:'☕',  ext:'java', monacoLang:'java',       compiler:'openjdk-jdk-22+36',
     template:`import java.util.*;
 import java.util.stream.*;
 
@@ -265,33 +260,25 @@ class Main {
 
     public static void main(String[] args) {
         System.out.println("Hello, Java!");
-
         List<Integer> nums = Arrays.asList(5, 2, 8, 1, 9, 3);
         List<Integer> sorted = nums.stream().sorted().collect(Collectors.toList());
         System.out.println(sorted);
-
-        List<Integer> squares = sorted.stream()
-            .map(x -> x * x)
-            .collect(Collectors.toList());
+        List<Integer> squares = sorted.stream().map(x -> x * x).collect(Collectors.toList());
         System.out.println(squares);
-
         for (int i = 0; i < 8; i++)
             System.out.printf("fib(%d) = %d%n", i, fibonacci(i));
     }
 }` },
 
-  { id:'ruby', label:'Ruby', color:'#cc342d', icon:'💎', ext:'rb', compiler:'ruby-4.0.2',
+  { id:'ruby',       label:'Ruby',       color:'#cc342d', icon:'💎',  ext:'rb',   monacoLang:'ruby',       compiler:'ruby-4.0.2',
     template:`puts "Hello, Ruby! #{RUBY_VERSION}"
 
-# 枚举
 nums = (1..10).to_a
 puts nums.select(&:odd?).map { |x| x ** 2 }.inspect
 
-# Hash
 scores = {alice: 95, bob: 82, carol: 91}
 puts scores.sort_by { |_, v| -v }.first(2).inspect
 
-# 类
 class Animal
   def initialize(name) = @name = name
   def speak = "#{@name} makes a sound"
@@ -303,7 +290,7 @@ end
 
 [Dog.new("Rex"), Animal.new("Cat")].each { |a| puts a.speak }` },
 
-  { id:'lua', label:'Lua', color:'#00599c', icon:'🌙', ext:'lua', compiler:'lua-5.4.7',
+  { id:'lua',        label:'Lua',        color:'#7a6baa', icon:'🌙',  ext:'lua',  monacoLang:'lua',        compiler:'lua-5.4.7',
     template:`print("Hello, Lua! " .. _VERSION)
 
 local nums = {5, 2, 8, 1, 9, 3}
@@ -311,7 +298,6 @@ table.sort(nums)
 for _, v in ipairs(nums) do io.write(v .. " ") end
 print()
 
--- 闭包
 local function counter(start)
   local n = start
   return function() n = n + 1; return n end
@@ -319,15 +305,13 @@ end
 local c = counter(0)
 print(c(), c(), c())
 
--- 元表
 local Vec = {}
 Vec.__index = Vec
 function Vec.new(x, y) return setmetatable({x=x, y=y}, Vec) end
 function Vec:len() return math.sqrt(self.x^2 + self.y^2) end
-local v = Vec.new(3, 4)
-print("len =", v:len())` },
+print("len =", Vec.new(3, 4):len())` },
 
-  { id:'sql', label:'SQLite', color:'#e38c00', icon:'🗄️', ext:'sql', compiler:'sqlite-3.46.1',
+  { id:'sql',        label:'SQLite',     color:'#e38c00', icon:'🗄️', ext:'sql',  monacoLang:'sql',        compiler:'sqlite-3.46.1',
     template:`CREATE TABLE users (
   id   INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -339,38 +323,36 @@ INSERT INTO users (name, age, dept) VALUES
   ('Alice', 30, 'Engineering'),
   ('Bob',   25, 'Marketing'),
   ('Carol', 35, 'Engineering'),
-  ('Dave',  28, 'Marketing'),
-  ('Eve',   32, 'Engineering');
+  ('Dave',  28, 'Marketing');
 
 SELECT * FROM users ORDER BY age;
 
-SELECT dept, COUNT(*) AS cnt, AVG(age) AS avg_age
+SELECT dept, COUNT(*) AS cnt, ROUND(AVG(age),1) AS avg_age
 FROM users GROUP BY dept;` },
 ]
 
 // ── Examples ──────────────────────────────────────────────────────────────────
 const EXAMPLES = {
   cpp: [
-    { name:'模板',    code:`#include <iostream>\n#include <vector>\nusing namespace std;\ntemplate<typename T>\nT maxVal(const vector<T>& v){\n    T m=v[0];\n    for(const auto& x:v) if(x>m) m=x;\n    return m;\n}\nint main(){\n    vector<int> v={3,1,4,1,5,9,2,6};\n    cout<<"max="<<maxVal(v)<<endl;\n}` },
+    { name:'模板',     code:`#include <iostream>\n#include <vector>\nusing namespace std;\ntemplate<typename T>\nT maxVal(const vector<T>& v){\n    T m=v[0];\n    for(const auto& x:v) if(x>m) m=x;\n    return m;\n}\nint main(){\n    vector<int> v={3,1,4,1,5,9,2,6};\n    cout<<"max="<<maxVal(v)<<endl;\n}` },
     { name:'智能指针', code:`#include <iostream>\n#include <memory>\nusing namespace std;\nstruct Node{int val;shared_ptr<Node> next;Node(int v):val(v){}};\nint main(){\n    auto h=make_shared<Node>(1);\n    h->next=make_shared<Node>(2);\n    h->next->next=make_shared<Node>(3);\n    for(auto p=h;p;p=p->next) cout<<p->val<<" ";\n    cout<<endl;\n}` },
-    { name:'Lambda',  code:`#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\nint main(){\n    vector<int> v={5,2,8,1,9,3};\n    sort(v.begin(),v.end(),[](int a,int b){return a>b;});\n    for(int x:v) cout<<x<<" ";\n    cout<<endl;\n}` },
+    { name:'Lambda',   code:`#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\nint main(){\n    vector<int> v={5,2,8,1,9,3};\n    sort(v.begin(),v.end(),[](int a,int b){return a>b;});\n    for(int x:v) cout<<x<<" ";\n    cout<<endl;\n}` },
   ],
   c: [
-    { name:'指针',    code:`#include <stdio.h>\nvoid swap(int* a,int* b){int t=*a;*a=*b;*b=t;}\nint main(){\n    int x=10,y=20;\n    swap(&x,&y);\n    printf("x=%d y=%d\n",x,y);\n    return 0;\n}` },
-    { name:'结构体',  code:`#include <stdio.h>\n#include <string.h>\ntypedef struct{char name[32];int age;}Person;\nint main(){\n    Person p;\n    strcpy(p.name,"Alice");\n    p.age=30;\n    printf("%s is %d years old\n",p.name,p.age);\n    return 0;\n}` },
+    { name:'指针',   code:`#include <stdio.h>\nvoid swap(int* a,int* b){int t=*a;*a=*b;*b=t;}\nint main(){\n    int x=10,y=20;\n    swap(&x,&y);\n    printf("x=%d y=%d\\n",x,y);\n    return 0;\n}` },
+    { name:'结构体', code:`#include <stdio.h>\n#include <string.h>\ntypedef struct{char name[32];int age;}Person;\nint main(){\n    Person p;\n    strcpy(p.name,"Alice");\n    p.age=30;\n    printf("%s is %d\\n",p.name,p.age);\n    return 0;\n}` },
   ],
   python: [
-    { name:'装饰器',  code:`import time\ndef timer(fn):\n    def w(*a,**k):\n        t=time.time()\n        r=fn(*a,**k)\n        print(f"{fn.__name__} took {time.time()-t:.4f}s")\n        return r\n    return w\n@timer\ndef s(n): return sum(range(n))\nprint(s(1000000))` },
-    { name:'生成器',  code:`def fib():\n    a,b=0,1\n    while True:\n        yield a\n        a,b=b,a+b\ng=fib()\nprint([next(g) for _ in range(12)])` },
-    { name:'推导式',  code:`m=[[i*j for j in range(1,6)] for i in range(1,6)]\nfor r in m: print(" ".join(f"{v:3}" for v in r))\nflat=[x for r in m for x in r if x%2==0]\nprint("even:",flat[:8])` },
+    { name:'装饰器', code:`import time\ndef timer(fn):\n    def w(*a,**k):\n        t=time.time()\n        r=fn(*a,**k)\n        print(f"{fn.__name__} {time.time()-t:.4f}s")\n        return r\n    return w\n@timer\ndef s(n): return sum(range(n))\nprint(s(1000000))` },
+    { name:'生成器', code:`def fib():\n    a,b=0,1\n    while True:\n        yield a\n        a,b=b,a+b\ng=fib()\nprint([next(g) for _ in range(12)])` },
+    { name:'推导式', code:`m=[[i*j for j in range(1,6)] for i in range(1,6)]\nfor r in m: print(" ".join(f"{v:3}" for v in r))` },
   ],
   javascript: [
     { name:'斐波那契', code:`const fib=(n,m={})=>n<=1?n:m[n]??(m[n]=fib(n-1,m)+fib(n-2,m))\nfor(let i=0;i<12;i++) console.log(\`fib(\${i})=\${fib(i)}\`)` },
-    { name:'Promise', code:`const delay=(ms,v)=>new Promise(r=>setTimeout(()=>r(v),ms))\nPromise.resolve(1)\n  .then(v=>{console.log("step1:",v);return delay(0,v+1)})\n  .then(v=>{console.log("step2:",v);return v*10})\n  .then(v=>console.log("done:",v))` },
-    { name:'解构',    code:`const {name,age,...rest}={name:"Alice",age:30,role:"admin",city:"BJ"}\nconsole.log(name,age,rest)\nconst [h,...t]=[1,2,3,4,5]\nconsole.log(h,t)` },
+    { name:'Promise',  code:`const delay=(ms,v)=>new Promise(r=>setTimeout(()=>r(v),ms))\nPromise.resolve(1)\n  .then(v=>{console.log("step1:",v);return delay(0,v+1)})\n  .then(v=>{console.log("step2:",v);return v*10})\n  .then(v=>console.log("done:",v))` },
   ],
   typescript: [
-    { name:'泛型',     code:`function identity<T>(x:T):T{return x}\nconsole.log(identity<string>("hello"))\nconsole.log(identity<number>(42))\n\ntype Pair<A,B>={first:A;second:B}\nconst p:Pair<string,number>={first:"age",second:30}\nconsole.log(p)` },
+    { name:'泛型',     code:`function identity<T>(x:T):T{return x}\nconsole.log(identity<string>("hello"))\nconsole.log(identity<number>(42))` },
     { name:'判别联合', code:`type Shape=|{kind:"circle";r:number}|{kind:"rect";w:number;h:number}\nfunction area(s:Shape):number{\n  switch(s.kind){\n    case"circle":return Math.PI*s.r**2\n    case"rect":return s.w*s.h\n  }\n}\nconsole.log(area({kind:"circle",r:5}).toFixed(2))\nconsole.log(area({kind:"rect",w:4,h:6}))` },
   ],
   go: [
@@ -378,41 +360,76 @@ const EXAMPLES = {
     { name:'channel', code:`package main\nimport "fmt"\nfunc sum(s []int,c chan int){t:=0;for _,v:=range s{t+=v};c<-t}\nfunc main(){\n    s:=[]int{7,2,8,-9,4,0}\n    c:=make(chan int)\n    go sum(s[:3],c);go sum(s[3:],c)\n    x,y:=<-c,<-c\n    fmt.Println(x,y,x+y)\n}` },
   ],
   rust: [
-    { name:'所有权',  code:`fn main(){\n    let s1=String::from("hello");\n    let s2=s1.clone();\n    println!("{} {}",s1,s2);\n    let v=vec![1,2,3];\n    for i in &v{print!("{} ",i);}\n    println!();\n}` },
-    { name:'枚举',    code:`#[derive(Debug)]\nenum Shape{Circle(f64),Rect(f64,f64)}\nimpl Shape{\n    fn area(&self)->f64{\n        match self{\n            Shape::Circle(r)=>std::f64::consts::PI*r*r,\n            Shape::Rect(w,h)=>w*h,\n        }\n    }\n}\nfn main(){\n    let shapes=vec![Shape::Circle(3.0),Shape::Rect(4.0,5.0)];\n    for s in &shapes{println!("{:?} area={:.2}",s,s.area());}\n}` },
+    { name:'所有权', code:`fn main(){\n    let s1=String::from("hello");\n    let s2=s1.clone();\n    println!("{} {}",s1,s2);\n}` },
+    { name:'枚举',   code:`#[derive(Debug)]\nenum Shape{Circle(f64),Rect(f64,f64)}\nimpl Shape{\n    fn area(&self)->f64{\n        match self{\n            Shape::Circle(r)=>std::f64::consts::PI*r*r,\n            Shape::Rect(w,h)=>w*h,\n        }\n    }\n}\nfn main(){\n    let shapes=vec![Shape::Circle(3.0),Shape::Rect(4.0,5.0)];\n    for s in &shapes{println!("{:?} area={:.2}",s,s.area());}\n}` },
   ],
   java: [
-    { name:'Stream',  code:`import java.util.*;\nclass Main{\n    public static void main(String[] args){\n        Map<String,Integer> m=new HashMap<>();\n        m.put("Alice",90);m.put("Bob",85);m.put("Carol",92);\n        m.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())\n            .forEach(e->System.out.println(e.getKey()+": "+e.getValue()));\n    }\n}` },
-    { name:'接口',    code:`import java.util.*;\nclass Main{\n    interface Shape{double area();}\n    record Circle(double r)implements Shape{public double area(){return Math.PI*r*r;}}\n    record Rect(double w,double h)implements Shape{public double area(){return w*h;}}\n    public static void main(String[] args){\n        List.of(new Circle(3),new Rect(4,5))\n            .forEach(s->System.out.printf("%.2f%n",s.area()));\n    }\n}` },
+    { name:'Stream', code:`import java.util.*;\nclass Main{\n    public static void main(String[] args){\n        Map<String,Integer> m=new HashMap<>();\n        m.put("Alice",90);m.put("Bob",85);m.put("Carol",92);\n        m.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())\n            .forEach(e->System.out.println(e.getKey()+": "+e.getValue()));\n    }\n}` },
+    { name:'接口',   code:`import java.util.*;\nclass Main{\n    interface Shape{double area();}\n    record Circle(double r)implements Shape{public double area(){return Math.PI*r*r;}}\n    record Rect(double w,double h)implements Shape{public double area(){return w*h;}}\n    public static void main(String[] args){\n        List.of(new Circle(3),new Rect(4,5))\n            .forEach(s->System.out.printf("%.2f%n",s.area()));\n    }\n}` },
   ],
   ruby: [
-    { name:'枚举',    code:`(1..10).each_slice(3){|g| p g}\nputs (1..10).select(&:even?).map{|x|x**2}.inspect` },
-    { name:'Mixin',   code:`module Greetable\n  def greet = "Hi, I am #{name}"\nend\nclass Person\n  include Greetable\n  attr_reader :name\n  def initialize(name) = @name=name\nend\nputs Person.new("Alice").greet` },
+    { name:'枚举', code:`(1..10).each_slice(3){|g| p g}\nputs (1..10).select(&:even?).map{|x|x**2}.inspect` },
+    { name:'Mixin', code:`module Greetable\n  def greet = "Hi, I am #{name}"\nend\nclass Person\n  include Greetable\n  attr_reader :name\n  def initialize(name) = @name=name\nend\nputs Person.new("Alice").greet` },
   ],
   lua: [
-    { name:'递归',    code:`local function fact(n)\n  if n<=1 then return 1 end\n  return n*fact(n-1)\nend\nfor i=1,10 do print(i.."! = "..fact(i)) end` },
-    { name:'字符串',  code:`local s="Hello, Lua!"\nprint(string.upper(s))\nprint(string.sub(s,1,5))\nfor w in string.gmatch("one two three","(%a+)") do print(w) end` },
+    { name:'递归',   code:`local function fact(n)\n  if n<=1 then return 1 end\n  return n*fact(n-1)\nend\nfor i=1,10 do print(i.."! = "..fact(i)) end` },
+    { name:'字符串', code:`local s="Hello, Lua!"\nprint(string.upper(s))\nfor w in string.gmatch("one two three","(%a+)") do print(w) end` },
   ],
   sql: [
-    { name:'JOIN',    code:`CREATE TABLE dept(id INT,name TEXT);\nCREATE TABLE emp(id INT,name TEXT,dept_id INT,salary INT);\nINSERT INTO dept VALUES(1,'Eng'),(2,'Mkt');\nINSERT INTO emp VALUES(1,'Alice',1,9000),(2,'Bob',2,7000),(3,'Carol',1,8500);\nSELECT e.name,d.name AS dept,e.salary FROM emp e JOIN dept d ON e.dept_id=d.id ORDER BY salary DESC;` },
-    { name:'GROUP BY',code:`CREATE TABLE sales(product TEXT,amount INT);\nINSERT INTO sales VALUES('A',100),('B',200),('A',150),('B',180),('A',120);\nSELECT product,SUM(amount) AS total,ROUND(AVG(amount),1) AS avg FROM sales GROUP BY product ORDER BY total DESC;` },
+    { name:'JOIN',    code:`CREATE TABLE dept(id INT,name TEXT);\nCREATE TABLE emp(id INT,name TEXT,dept_id INT,salary INT);\nINSERT INTO dept VALUES(1,'Eng'),(2,'Mkt');\nINSERT INTO emp VALUES(1,'Alice',1,9000),(2,'Bob',2,7000),(3,'Carol',1,8500);\nSELECT e.name,d.name dept,e.salary FROM emp e JOIN dept d ON e.dept_id=d.id ORDER BY salary DESC;` },
+    { name:'GROUP BY',code:`CREATE TABLE sales(product TEXT,amount INT);\nINSERT INTO sales VALUES('A',100),('B',200),('A',150),('B',180),('A',120);\nSELECT product,SUM(amount) total,ROUND(AVG(amount),1) avg FROM sales GROUP BY product ORDER BY total DESC;` },
   ],
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let currentLang = LANGS[0]
 let running     = false
+let monacoEditor = null
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
-const editor      = document.getElementById('editor')
 const output      = document.getElementById('output')
-const lineNums    = document.getElementById('line-numbers')
 const runBtn      = document.getElementById('run-btn')
 const runStatus   = document.getElementById('run-status')
 const execTime    = document.getElementById('exec-time')
 const compilerVer = document.getElementById('compiler-ver')
 const langLabel   = document.getElementById('editor-filename')
 const stdinInput  = document.getElementById('stdin-input')
+const themeSelect = document.getElementById('theme-select')
+
+// ── Monaco init ───────────────────────────────────────────────────────────────
+require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' } })
+require(['vs/editor/editor.main'], function () {
+  monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+    value: LANGS[0].template,
+    language: LANGS[0].monacoLang,
+    theme: 'vs-dark',
+    fontSize: 13,
+    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
+    fontLigatures: true,
+    lineHeight: 22,
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    renderLineHighlight: 'gutter',
+    cursorBlinking: 'smooth',
+    smoothScrolling: true,
+    padding: { top: 16, bottom: 16 },
+    tabSize: 2,
+    wordWrap: 'off',
+    automaticLayout: true,
+    suggest: { showKeywords: true },
+  })
+
+  // Ctrl+Enter → Run
+  monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCode)
+
+  // Theme picker
+  themeSelect.addEventListener('change', () => {
+    monaco.editor.setTheme(themeSelect.value)
+  })
+
+  // Init sidebar
+  renderLangList()
+})
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 function renderLangList() {
@@ -439,11 +456,12 @@ function selectLang(lang) {
     btn.style.borderColor = active ? lang.color + '40' : 'transparent'
     btn.style.color       = active ? lang.color : lang.color + '60'
   })
-  langLabel.textContent = `main.${lang.ext}`
+  langLabel.textContent   = `main.${lang.ext}`
   compilerVer.textContent = lang.compiler
-  if (!editor.value || editor.value === prev.template) {
-    editor.value = lang.template
-    updateLineNumbers()
+  if (monacoEditor) {
+    const cur = monacoEditor.getValue()
+    if (!cur || cur === prev.template) monacoEditor.setValue(lang.template)
+    monaco.editor.setModelLanguage(monacoEditor.getModel(), lang.monacoLang)
   }
   renderExamples(lang)
 }
@@ -451,85 +469,63 @@ function selectLang(lang) {
 function renderExamples(lang) {
   const list = document.getElementById('example-list')
   list.innerHTML = ''
-  const exs = EXAMPLES[lang.id] || []
-  exs.forEach(ex => {
+  ;(EXAMPLES[lang.id] || []).forEach(ex => {
     const btn = document.createElement('button')
-    btn.className = 'text-left text-[10px] px-2 py-1 rounded transition-colors w-full'
-    btn.style.cssText = 'color:rgba(136,136,170,0.6);background:transparent;cursor:pointer;border:1px solid transparent'
+    btn.className = 'text-left text-[10px] px-2 py-1 rounded w-full border border-transparent transition-colors'
+    btn.style.cssText = 'color:rgba(136,136,170,0.6);background:transparent;cursor:pointer'
     btn.textContent = ex.name
-    btn.onmouseenter = () => btn.style.color = 'rgba(0,212,255,0.8)'
-    btn.onmouseleave = () => btn.style.color = 'rgba(136,136,170,0.6)'
-    btn.onclick = () => {
-      editor.value = ex.code
-      updateLineNumbers()
-    }
+    btn.onmouseenter = () => { btn.style.color='rgba(0,212,255,0.8)'; btn.style.borderColor='rgba(0,212,255,0.2)' }
+    btn.onmouseleave = () => { btn.style.color='rgba(136,136,170,0.6)'; btn.style.borderColor='transparent' }
+    btn.onclick = () => monacoEditor && monacoEditor.setValue(ex.code)
     list.appendChild(btn)
   })
 }
 
 // ── Wandbox API ───────────────────────────────────────────────────────────────
 async function runWandbox(code, compiler, stdin) {
-  // 优先走 CF Worker 代理（解决 CORS），没有则直接请求 Wandbox
   const base = (window.__WORKER_URL__ || '').replace(/\/+$/, '')
   const url  = base ? base + '/api/compile.json' : 'https://wandbox.org/api/compile.json'
-
   let resp
   try {
     resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        compiler,
-        code,
-        stdin: stdin || '',
-        'compiler-option-raw': '',
-        options: '',
-      }),
+      body: JSON.stringify({ compiler, code, stdin: stdin || '', 'compiler-option-raw': '', options: '' }),
       signal: AbortSignal.timeout(30000),
     })
   } catch (e) {
     const msg = e.name === 'AbortError' ? '编译超时（30s）' : '网络错误: ' + e.message
     return { lines: [`<span style="color:#ff6b6b">${escHtml(msg)}</span>`], exit: 1 }
   }
-
-  if (!resp.ok) {
-    return { lines: [`<span style="color:#ff6b6b">服务错误 HTTP ${resp.status}</span>`], exit: 1 }
-  }
+  if (!resp.ok) return { lines: [`<span style="color:#ff6b6b">HTTP ${resp.status}</span>`], exit: 1 }
 
   const data = await resp.json()
   const lines = []
-
-  if (data.compiler_message && data.compiler_message.trim()) {
-    // compiler_message 包含警告/错误，黄色显示
+  if (data.compiler_message?.trim())
     lines.push('<span style="color:rgba(255,200,0,0.85)">' + escHtml(data.compiler_message.trimEnd()) + '</span>')
-  }
-  if (data.program_output && data.program_output.trim()) {
+  if (data.program_output?.trim())
     lines.push(escHtml(data.program_output))
-  }
-  if (data.program_error && data.program_error.trim()) {
+  if (data.program_error?.trim())
     lines.push('<span style="color:#ff6b6b">' + escHtml(data.program_error.trimEnd()) + '</span>')
-  }
-  if (!lines.length) {
+  if (!lines.length)
     lines.push('<span style="color:rgba(136,136,170,0.4)">(no output)</span>')
-  }
-
-  const exit = (data.status === '0' || data.status === 0) ? 0 : 1
-  return { lines, exit }
+  return { lines, exit: (data.status === '0' || data.status === 0) ? 0 : 1 }
 }
 
 // ── Run ───────────────────────────────────────────────────────────────────────
 async function runCode() {
-  if (running) return
+  if (running || !monacoEditor) return
   running = true
   output.innerHTML = '<span style="color:rgba(136,136,170,0.3)">Compiling…</span>'
   execTime.textContent = ''
   runStatus.textContent = '⟳'
   runStatus.style.color = '#ffa500'
   runBtn.disabled = true
+  runBtn.style.opacity = '0.6'
 
   const t0 = Date.now()
   try {
-    const result = await runWandbox(editor.value, currentLang.compiler, stdinInput.value)
+    const result = await runWandbox(monacoEditor.getValue(), currentLang.compiler, stdinInput.value)
     const ms = Date.now() - t0
     output.innerHTML = result.lines.join('\n')
     execTime.textContent = `exit ${result.exit} · ${ms}ms`
@@ -537,48 +533,29 @@ async function runCode() {
     runStatus.style.color = result.exit === 0 ? '#39ff14' : '#ff4466'
   } catch (e) {
     output.innerHTML = `<span style="color:#ff6b6b">${escHtml(e.message)}</span>`
-    runStatus.textContent = '✕'
-    runStatus.style.color = '#ff4466'
+    runStatus.textContent = '✕'; runStatus.style.color = '#ff4466'
   }
   running = false
   runBtn.disabled = false
+  runBtn.style.opacity = '1'
 }
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
 
-// ── Editor ────────────────────────────────────────────────────────────────────
-function updateLineNumbers() {
-  const n = (editor.value.match(/\n/g) || []).length + 1
-  lineNums.innerHTML = Array.from({ length: n }, (_, i) => i + 1).join('\n')
-}
-editor.addEventListener('input', updateLineNumbers)
-editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop })
-editor.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); return }
-  if (e.key === 'Tab') {
-    e.preventDefault()
-    const s = editor.selectionStart, en = editor.selectionEnd
-    editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(en)
-    editor.selectionStart = editor.selectionEnd = s + 2
-    updateLineNumbers()
-  }
-})
-
+// ── Toolbar buttons ───────────────────────────────────────────────────────────
 runBtn.onclick = runCode
 document.getElementById('clear-btn').onclick = () => {
   output.innerHTML = ''; execTime.textContent = ''; runStatus.textContent = ''
 }
 document.getElementById('copy-btn').onclick = () => {
-  navigator.clipboard.writeText(editor.value).then(() => {
+  const code = monacoEditor ? monacoEditor.getValue() : ''
+  navigator.clipboard.writeText(code).then(() => {
     const b = document.getElementById('copy-btn')
     b.textContent = 'Copied!'; setTimeout(() => b.textContent = 'Copy', 1500)
   })
 }
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-renderLangList()
 
 })
   </script>
