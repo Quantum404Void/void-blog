@@ -128,7 +128,7 @@ int main() {
     return 0;
 }` },
 
-  { id:'python', label:'Python', color:'#3776ab', icon:'🐍', ext:'py', compiler:'cpython-head',
+  { id:'python', label:'Python', color:'#3776ab', icon:'🐍', ext:'py', compiler:'cpython-3.13.8',
     template:`import sys
 from collections import Counter
 
@@ -154,7 +154,7 @@ class Point:
 
 print(Point(3, 4).dist())` },
 
-  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨', ext:'js', compiler:'nodejs-head',
+  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨', ext:'js', compiler:'nodejs-20.17.0',
     template:`console.log("Hello, JavaScript!", process.version)
 
 // ES2024 features
@@ -178,7 +178,7 @@ fetchData()
 const {name, age, ...rest} = {name: "Alice", age: 30, role: "admin"}
 console.log(name, age, rest)` },
 
-  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷', ext:'ts', compiler:'typescript-head',
+  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷', ext:'ts', compiler:'typescript-5.6.2',
     template:`// TypeScript — 真实 tsc 编译
 interface Point { x: number; y: number }
 
@@ -201,7 +201,7 @@ interface User { name: string; age: number }
 const u: Optional<User> = { name: "Alice" }
 console.log(u)` },
 
-  { id:'go', label:'Go', color:'#00add8', icon:'🐹', ext:'go', compiler:'go-head',
+  { id:'go', label:'Go', color:'#00add8', icon:'🐹', ext:'go', compiler:'go-1.23.2',
     template:`package main
 
 import (
@@ -229,7 +229,7 @@ func main() {
     fmt.Println(nums)
 }` },
 
-  { id:'rust', label:'Rust', color:'#dea584', icon:'🦀', ext:'rs', compiler:'rust-head',
+  { id:'rust', label:'Rust', color:'#dea584', icon:'🦀', ext:'rs', compiler:'rust-1.82.0',
     template:`fn fibonacci(n: u32) -> u64 {
     match n {
         0 => 0,
@@ -253,11 +253,11 @@ fn main() {
     }
 }` },
 
-  { id:'java', label:'Java', color:'#f89820', icon:'☕', ext:'java', compiler:'openjdk-head',
+  { id:'java', label:'Java', color:'#f89820', icon:'☕', ext:'java', compiler:'openjdk-jdk-22+36',
     template:`import java.util.*;
 import java.util.stream.*;
 
-public class Main {
+class Main {
     static int fibonacci(int n) {
         if (n <= 1) return n;
         return fibonacci(n - 1) + fibonacci(n - 2);
@@ -280,7 +280,7 @@ public class Main {
     }
 }` },
 
-  { id:'ruby', label:'Ruby', color:'#cc342d', icon:'💎', ext:'rb', compiler:'ruby-head',
+  { id:'ruby', label:'Ruby', color:'#cc342d', icon:'💎', ext:'rb', compiler:'ruby-4.0.2',
     template:`puts "Hello, Ruby! #{RUBY_VERSION}"
 
 # 枚举
@@ -303,7 +303,7 @@ end
 
 [Dog.new("Rex"), Animal.new("Cat")].each { |a| puts a.speak }` },
 
-  { id:'lua', label:'Lua', color:'#00599c', icon:'🌙', ext:'lua', compiler:'lua-head',
+  { id:'lua', label:'Lua', color:'#00599c', icon:'🌙', ext:'lua', compiler:'lua-5.4.7',
     template:`print("Hello, Lua! " .. _VERSION)
 
 local nums = {5, 2, 8, 1, 9, 3}
@@ -327,7 +327,7 @@ function Vec:len() return math.sqrt(self.x^2 + self.y^2) end
 local v = Vec.new(3, 4)
 print("len =", v:len())` },
 
-  { id:'sql', label:'SQLite', color:'#e38c00', icon:'🗄️', ext:'sql', compiler:'sqlite-head',
+  { id:'sql', label:'SQLite', color:'#e38c00', icon:'🗄️', ext:'sql', compiler:'sqlite-3.46.1',
     template:`CREATE TABLE users (
   id   INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -382,8 +382,8 @@ const EXAMPLES = {
     { name:'枚举',    code:`#[derive(Debug)]\nenum Shape{Circle(f64),Rect(f64,f64)}\nimpl Shape{\n    fn area(&self)->f64{\n        match self{\n            Shape::Circle(r)=>std::f64::consts::PI*r*r,\n            Shape::Rect(w,h)=>w*h,\n        }\n    }\n}\nfn main(){\n    let shapes=vec![Shape::Circle(3.0),Shape::Rect(4.0,5.0)];\n    for s in &shapes{println!("{:?} area={:.2}",s,s.area());}\n}` },
   ],
   java: [
-    { name:'Stream',  code:`import java.util.*;\npublic class Main{\n    public static void main(String[] args){\n        Map<String,Integer> m=new HashMap<>();\n        m.put("Alice",90);m.put("Bob",85);m.put("Carol",92);\n        m.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())\n            .forEach(e->System.out.println(e.getKey()+": "+e.getValue()));\n    }\n}` },
-    { name:'接口',    code:`import java.util.*;\npublic class Main{\n    interface Shape{double area();}\n    record Circle(double r)implements Shape{public double area(){return Math.PI*r*r;}}\n    record Rect(double w,double h)implements Shape{public double area(){return w*h;}}\n    public static void main(String[] args){\n        List.of(new Circle(3),new Rect(4,5))\n            .forEach(s->System.out.printf("%.2f%n",s.area()));\n    }\n}` },
+    { name:'Stream',  code:`import java.util.*;\nclass Main{\n    public static void main(String[] args){\n        Map<String,Integer> m=new HashMap<>();\n        m.put("Alice",90);m.put("Bob",85);m.put("Carol",92);\n        m.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())\n            .forEach(e->System.out.println(e.getKey()+": "+e.getValue()));\n    }\n}` },
+    { name:'接口',    code:`import java.util.*;\nclass Main{\n    interface Shape{double area();}\n    record Circle(double r)implements Shape{public double area(){return Math.PI*r*r;}}\n    record Rect(double w,double h)implements Shape{public double area(){return w*h;}}\n    public static void main(String[] args){\n        List.of(new Circle(3),new Rect(4,5))\n            .forEach(s->System.out.printf("%.2f%n",s.area()));\n    }\n}` },
   ],
   ruby: [
     { name:'枚举',    code:`(1..10).each_slice(3){|g| p g}\nputs (1..10).select(&:even?).map{|x|x**2}.inspect` },
