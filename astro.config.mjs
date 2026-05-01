@@ -10,7 +10,7 @@ import cloudflare from '@astrojs/cloudflare';
 import keystatic from '@keystatic/astro';
 
 export default defineConfig({
-  site: 'https://void-blog.pages.dev',
+  site: 'https://void.redx.space',
   output: 'server',
   adapter: cloudflare(),
   integrations: [
@@ -26,21 +26,21 @@ export default defineConfig({
         theme_color: '#0a0a0f',
         background_color: '#0a0a0f',
         display: 'standalone',
-        start_url: '/void-blog/',
-        scope: '/void-blog/',
+        start_url: '/',
+        scope: '/',
         icons: [
           {
-            src: '/void-blog/icons/pwa-192x192.png',
+            src: '/icons/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/void-blog/icons/pwa-512x512.png',
+            src: '/icons/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/void-blog/icons/pwa-512x512.png',
+            src: '/icons/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
@@ -50,7 +50,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{css,js,html,svg,png,ico,txt}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        navigateFallback: '/void-blog/404.html',
+        navigateFallback: '/404.html',
         navigateFallbackDenylist: [/^\/\_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
           {
