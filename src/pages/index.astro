@@ -31,62 +31,6 @@ const getTagColor = (tag: string) => {
   return tagColors[idx]
 }
 
-// Tech stack data
-const techStack = [
-  {
-    key: 'lang',
-    color: 'neon-green',
-    items: [
-      { name: 'C++', color: 'neon-cyan' },
-      { name: 'C#', color: 'neon-purple' },
-      { name: 'TypeScript', color: 'neon-cyan' },
-      { name: 'Python', color: 'neon-green' },
-      { name: 'Rust (学习中)', color: 'neon-pink' },
-    ],
-  },
-  {
-    key: 'framework',
-    color: 'neon-cyan',
-    items: [
-      { name: 'Vue 3', color: 'neon-green' },
-      { name: 'React', color: 'neon-cyan' },
-      { name: 'Electron', color: 'neon-purple' },
-      { name: 'Astro', color: 'neon-pink' },
-      { name: 'Qt', color: 'neon-cyan' },
-    ],
-  },
-  {
-    key: 'tools',
-    color: 'neon-purple',
-    items: [
-      { name: 'Vite', color: 'neon-purple' },
-      { name: 'CMake', color: 'neon-green' },
-      { name: 'Git', color: 'neon-pink' },
-      { name: 'Docker', color: 'neon-cyan' },
-      { name: 'GitHub Actions', color: 'neon-green' },
-    ],
-  },
-  {
-    key: 'infra',
-    color: 'neon-pink',
-    items: [
-      { name: 'Linux', color: 'neon-green' },
-      { name: 'Windows', color: 'neon-cyan' },
-      { name: 'VMware', color: 'neon-purple' },
-      { name: 'Nginx', color: 'neon-pink' },
-    ],
-  },
-  {
-    key: 'ai',
-    color: 'neon-cyan',
-    items: [
-      { name: 'OpenClaw', color: 'neon-green' },
-      { name: 'LangChain', color: 'neon-cyan' },
-      { name: 'Dify', color: 'neon-purple' },
-      { name: 'RAG', color: 'neon-pink' },
-    ],
-  },
-]
 ---
 
 <BaseLayout title="void.dev">
@@ -178,40 +122,6 @@ const techStack = [
             <span style="color:#e8e8f0;font-weight:bold">2021</span>
             <span>年至今</span>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Tech Stack section -->
-    <section class="border-b border-[var(--color-void-border)] py-10 overflow-hidden">
-      <div class="max-w-5xl mx-auto px-6">
-        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
-          <span class="text-[var(--color-neon-green)]">▶</span>
-          tech_stack.json
-          <span class="flex-1 h-px bg-gradient-to-r from-[var(--color-void-border)] to-transparent"></span>
-        </p>
-        <div class="space-y-3 font-mono text-sm">
-          {techStack.map((row) => (
-            <div class="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-              <span class={`text-[var(--color-${row.color})] shrink-0 w-24 text-right`}>{row.key}</span>
-              <span class="text-[var(--color-text-muted)] shrink-0">=</span>
-              <div class="flex flex-wrap gap-1.5">
-                {row.items.map((item, idx) => {
-                  const neonColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
-                  const c = item.color || neonColors[idx % neonColors.length]
-                  return (
-                    <span
-                      class="tech-badge px-2.5 py-0.5 rounded-full text-xs border font-mono cursor-default transition-all duration-200"
-                      style={`color: var(--color-${c}); border-color: color-mix(in srgb, var(--color-${c}) 30%, transparent); background: color-mix(in srgb, var(--color-${c}) 8%, transparent);`}
-                      data-color={c}
-                    >
-                      {item.name}
-                    </span>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
