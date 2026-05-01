@@ -36,7 +36,6 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
 
       <!-- Editor + Output -->
       <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Toolbar -->
         <div class="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-void-border)]" style="background:#07071a">
           <div class="flex gap-1.5">
             <div class="w-3 h-3 rounded-full" style="background:#ff5f56"></div>
@@ -56,7 +55,6 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
           </div>
         </div>
 
-        <!-- Editor -->
         <div class="flex flex-1 overflow-hidden">
           <div id="line-numbers" class="select-none text-right px-3 py-4 text-[11px] leading-[1.6] overflow-hidden"
             style="background:#06060e;color:rgba(136,136,170,0.4);min-width:3rem;border-right:1px solid var(--color-void-border)">1</div>
@@ -65,7 +63,6 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
             style="background:#06060e;color:#e8e8f0;caret-color:#00d4ff;tab-size:2"></textarea>
         </div>
 
-        <!-- Output -->
         <div style="height:200px;background:#030308;border-top:1px solid var(--color-void-border);display:flex;flex-direction:column">
           <div class="flex items-center gap-3 px-4 py-1.5 border-b border-[var(--color-void-border)]">
             <span style="font-size:10px;color:var(--color-text-muted)">OUTPUT</span>
@@ -82,17 +79,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ── Languages ─────────────────────────────────────────────────────────────────
 const LANGS = [
-  {
-    id: 'javascript', label: 'JavaScript', color: '#f7df1e', icon: '🟨', ext: 'js', engine: 'worker',
-    template:
-`// JavaScript — Worker 沙箱，支持 async/await、ES2024
+  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨', ext:'js',  engine:'worker',
+    template:`// JavaScript — Worker 沙箱，支持 ES2024 + async/await
 console.log("Hello, JavaScript!")
 
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x)
 const double = x => x * 2
 const addOne = x => x + 1
 const square = x => x * x
-console.log("pipe:", pipe(double, addOne, square)(3)) // (3*2+1)^2 = 49
+console.log("pipe(double,addOne,square)(3) =", pipe(double, addOne, square)(3))
 
 async function main() {
   const nums = [5, 2, 8, 1, 9, 3]
@@ -101,12 +96,10 @@ async function main() {
   const squares = await Promise.all(nums.map(async x => x * x))
   console.log("squares:", squares)
 }
-main()`,
-  },
-  {
-    id: 'typescript', label: 'TypeScript', color: '#3178c6', icon: '🔷', ext: 'ts', engine: 'babel',
-    template:
-`// TypeScript — Babel 转译后在 Worker 中运行
+main()` },
+
+  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷', ext:'ts',  engine:'babel',
+    template:`// TypeScript — Babel 转译后 Worker 运行
 interface Point { x: number; y: number }
 
 function distance(a: Point, b: Point): number {
@@ -120,67 +113,141 @@ function divide(a: number, b: number): Result<number> {
   return { ok: true, value: a / b }
 }
 console.log(divide(10, 2))
-console.log(divide(5, 0))
+console.log(divide(5, 0))` },
 
-const greet = (name: string) => \`Hello, \${name}!\`
-console.log(greet("TypeScript"))`,
-  },
-  {
-    id: 'python', label: 'Python', color: '#3776ab', icon: '🐍', ext: 'py', engine: 'skulpt',
-    template:
-`# Python — Skulpt 在浏览器内运行（Python 3 子集）
+  { id:'python', label:'Python', color:'#3776ab', icon:'🐍', ext:'py',   engine:'skulpt',
+    template:`# Python — Skulpt (Python 3 子集)
 print("Hello, Python!")
 
 def quicksort(arr):
     if len(arr) <= 1: return arr
     p = arr[len(arr) // 2]
-    left  = [x for x in arr if x < p]
-    mid   = [x for x in arr if x == p]
-    right = [x for x in arr if x > p]
-    return quicksort(left) + mid + quicksort(right)
+    return quicksort([x for x in arr if x < p]) + \
+           [x for x in arr if x == p] + \
+           quicksort([x for x in arr if x > p])
 
 print(quicksort([3, 6, 8, 10, 1, 2, 1]))
 
-class Animal:
-    def __init__(self, name):
-        self.name = name
-    def speak(self):
-        return f"{self.name} makes a sound"
+class Dog:
+    def __init__(self, name): self.name = name
+    def speak(self): return f"{self.name} says Woof!"
 
-class Dog(Animal):
-    def speak(self):
-        return f"{self.name} says Woof!"
+print(Dog("Rex").speak())` },
 
-for a in [Dog("Rex"), Animal("Cat")]:
-    print(a.speak())`,
-  },
+  { id:'ruby', label:'Ruby', color:'#cc342d', icon:'💎', ext:'rb',   engine:'opal',
+    template:`# Ruby — Opal.js (Ruby→JS)
+puts "Hello, Ruby!"
+
+[1, 2, 3, 4, 5].each { |x| puts x * x }
+
+class Animal
+  def initialize(name)
+    @name = name
+  end
+  def speak = "#{@name} makes a sound"
+end
+
+class Dog < Animal
+  def speak = "#{@name} says Woof!"
+end
+
+[Dog.new("Rex"), Animal.new("Cat")].each { |a| puts a.speak }` },
+
+  { id:'lua', label:'Lua', color:'#000080', icon:'🌙', ext:'lua',  engine:'fengari',
+    template:`-- Lua 5.3 — Fengari (纯 JS 实现)
+print("Hello, Lua!")
+
+local nums = {5, 2, 8, 1, 9, 3}
+table.sort(nums)
+for _, v in ipairs(nums) do io.write(v .. " ") end
+print()
+
+-- 闭包
+local function counter(start)
+  local n = start
+  return function() n = n + 1; return n end
+end
+
+local c = counter(0)
+print(c(), c(), c())
+
+-- 元表
+local Vec = {}
+Vec.__index = Vec
+function Vec.new(x, y) return setmetatable({x=x, y=y}, Vec) end
+function Vec:len() return math.sqrt(self.x^2 + self.y^2) end
+local v = Vec.new(3, 4)
+print("len =", v:len())` },
+
+  { id:'sql', label:'SQL', color:'#e38c00', icon:'🗄️', ext:'sql',  engine:'sqljs',
+    template:`-- SQL — SQLite (sql.js WASM，纯浏览器运行)
+CREATE TABLE users (
+  id   INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  age  INTEGER,
+  dept TEXT
+);
+
+INSERT INTO users (name, age, dept) VALUES
+  ('Alice', 30, 'Engineering'),
+  ('Bob',   25, 'Marketing'),
+  ('Carol', 35, 'Engineering'),
+  ('Dave',  28, 'Marketing'),
+  ('Eve',   32, 'Engineering');
+
+-- 全表
+SELECT * FROM users ORDER BY age;
+
+-- 条件查询
+SELECT name, age FROM users WHERE dept = 'Engineering' ORDER BY age;
+
+-- 聚合
+SELECT dept, COUNT(*) AS cnt, AVG(age) AS avg_age
+FROM users GROUP BY dept;` },
 ]
 
+// ── Examples ──────────────────────────────────────────────────────────────────
 const EXAMPLES = {
   javascript: [
-    { name: '斐波那契',   code: `function fib(n, memo = {}) {\n  if (n <= 1) return n\n  if (memo[n]) return memo[n]\n  return (memo[n] = fib(n-1, memo) + fib(n-2, memo))\n}\nfor (let i = 0; i < 12; i++) console.log(\`fib(\${i}) = \${fib(i)}\`)` },
-    { name: 'Promise 链', code: `const delay = (ms, v) => new Promise(r => setTimeout(() => r(v), ms))\nPromise.resolve(1)\n  .then(v => { console.log("step 1:", v); return delay(0, v + 1) })\n  .then(v => { console.log("step 2:", v); return v * 10 })\n  .then(v => console.log("done:", v))` },
-    { name: '正则',       code: `const text = "2024-01-15 and 2025-12-31 are dates"\nconst re = /\\d{4}-\\d{2}-\\d{2}/g\nconsole.log("dates:", [...text.matchAll(re)].map(m => m[0]))` },
-    { name: '解构赋值',   code: `const user = { name: "Alice", age: 30, roles: ["admin", "user"] }\nconst { name, age, roles: [primary] } = user\nconsole.log(name, age, primary)\nconst [first, ...rest] = [1, 2, 3, 4, 5]\nconsole.log(first, rest)` },
+    { name:'斐波那契',  code:`function fib(n, m={}) {\n  if (n<=1) return n\n  return m[n] ?? (m[n] = fib(n-1,m) + fib(n-2,m))\n}\nfor(let i=0;i<12;i++) console.log(\`fib(\${i})=\${fib(i)}\`)` },
+    { name:'Promise链', code:`const delay=(ms,v)=>new Promise(r=>setTimeout(()=>r(v),ms))\nPromise.resolve(1)\n  .then(v=>{console.log("step1:",v);return delay(0,v+1)})\n  .then(v=>{console.log("step2:",v);return v*10})\n  .then(v=>console.log("done:",v))` },
+    { name:'正则',      code:`const text="2024-01-15 and 2025-12-31"\nconst re=/\\d{4}-\\d{2}-\\d{2}/g\nconsole.log([...text.matchAll(re)].map(m=>m[0]))` },
+    { name:'解构',      code:`const {name,age,...rest}={name:"Alice",age:30,role:"admin",city:"BJ"}\nconsole.log(name,age,rest)\nconst [h,...t]=[1,2,3,4,5]\nconsole.log(h,t)` },
   ],
   typescript: [
-    { name: '泛型',       code: `function identity<T>(x: T): T { return x }\nconsole.log(identity<string>("hello"))\nconsole.log(identity<number>(42))\n\ntype Pair<A, B> = { first: A; second: B }\nconst p: Pair<string, number> = { first: "age", second: 30 }\nconsole.log(p)` },
-    { name: '判别联合',   code: `type Shape =\n  | { kind: "circle"; r: number }\n  | { kind: "rect"; w: number; h: number }\n\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case "circle": return Math.PI * s.r ** 2\n    case "rect":   return s.w * s.h\n  }\n}\nconsole.log(area({ kind: "circle", r: 5 }).toFixed(2))\nconsole.log(area({ kind: "rect", w: 4, h: 6 }))` },
-    { name: 'Mapped Types', code: `type Readonly2<T> = { readonly [K in keyof T]: T[K] }\ntype Optional<T> = { [K in keyof T]?: T[K] }\n\ninterface User { name: string; age: number; email: string }\ntype RO = Readonly2<User>\ntype Opt = Optional<User>\n\nconst u: Opt = { name: "Alice" }\nconsole.log(u)` },
+    { name:'泛型',      code:`function identity<T>(x:T):T{return x}\nconsole.log(identity<string>("hello"))\nconsole.log(identity<number>(42))\n\ntype Pair<A,B>={first:A;second:B}\nconst p:Pair<string,number>={first:"age",second:30}\nconsole.log(p)` },
+    { name:'判别联合',  code:`type Shape=|{kind:"circle";r:number}|{kind:"rect";w:number;h:number}\nfunction area(s:Shape):number{\n  switch(s.kind){\n    case"circle":return Math.PI*s.r**2\n    case"rect":return s.w*s.h\n  }\n}\nconsole.log(area({kind:"circle",r:5}).toFixed(2))\nconsole.log(area({kind:"rect",w:4,h:6}))` },
+    { name:'工具类型',  code:`type Optional<T>={[K in keyof T]?:T[K]}\ninterface User{name:string;age:number;email:string}\nconst u:Optional<User>={name:"Alice"}\nconsole.log(u)\n\ntype Readonly2<T>={readonly[K in keyof T]:T[K]}\nconst ro:Readonly2<User>={name:"Bob",age:25,email:"b@b.com"}\nconsole.log(ro)` },
   ],
   python: [
-    { name: '装饰器',     code: `import time\n\ndef timer(fn):\n    def wrapper(*args, **kwargs):\n        t = time.time()\n        result = fn(*args, **kwargs)\n        print(f"{fn.__name__} took {time.time()-t:.4f}s")\n        return result\n    return wrapper\n\n@timer\ndef slow_sum(n):\n    return sum(range(n))\n\nprint(slow_sum(100000))` },
-    { name: '生成器',     code: `def fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\ngen = fibonacci()\nfor _ in range(12):\n    print(next(gen), end=" ")\nprint()` },
-    { name: '列表推导',   code: `matrix = [[i * j for j in range(1, 6)] for i in range(1, 6)]\nfor row in matrix:\n    print(" ".join(f"{v:3}" for v in row))\n\nflat = [x for row in matrix for x in row if x % 2 == 0]\nprint("偶数:", flat[:8])` },
-    { name: '类继承',     code: `class Shape:\n    def area(self): return 0\n\nclass Circle(Shape):\n    def __init__(self, r): self.r = r\n    def area(self): return 3.14159 * self.r ** 2\n\nclass Rect(Shape):\n    def __init__(self, w, h): self.w, self.h = w, h\n    def area(self): return self.w * self.h\n\nfor s in [Circle(5), Rect(4, 6)]:\n    print(f"{type(s).__name__}: area = {s.area():.2f}")` },
+    { name:'装饰器',    code:`import time\ndef timer(fn):\n    def w(*a,**k):\n        t=time.time()\n        r=fn(*a,**k)\n        print(f"{fn.__name__} {time.time()-t:.4f}s")\n        return r\n    return w\n@timer\ndef s(n): return sum(range(n))\nprint(s(100000))` },
+    { name:'生成器',    code:`def fib():\n    a,b=0,1\n    while True:\n        yield a\n        a,b=b,a+b\ng=fib()\nfor _ in range(12): print(next(g),end=" ")\nprint()` },
+    { name:'列表推导',  code:`m=[[i*j for j in range(1,6)] for i in range(1,6)]\nfor r in m: print(" ".join(f"{v:3}" for v in r))\nflat=[x for r in m for x in r if x%2==0]\nprint("偶数:",flat[:8])` },
+  ],
+  ruby: [
+    { name:'枚举方法',  code:`nums=(1..10).to_a\nputs nums.select{|x|x.odd?}.map{|x|x**2}.inspect\nputs nums.reduce(0){|s,x|s+x}` },
+    { name:'Hash',      code:`scores={alice:95,bob:82,carol:91,dave:78}\nputs scores.sort_by{|_,v|-v}.first(3).inspect\nputs scores.select{|_,v|v>=90}.inspect` },
+    { name:'模块Mixin', code:`module Greetable\n  def greet = "Hi, I am #{name}"\nend\nclass Person\n  include Greetable\n  attr_reader :name\n  def initialize(name) = @name=name\nend\nputs Person.new("Alice").greet` },
+  ],
+  lua: [
+    { name:'递归',      code:`local function fact(n)\n  if n<=1 then return 1 end\n  return n*fact(n-1)\nend\nfor i=1,10 do print(i.."! = "..fact(i)) end` },
+    { name:'字符串',    code:`local s="Hello, Lua!"\nprint(string.upper(s))\nprint(string.sub(s,1,5))\nprint(string.format("len=%d",#s))\nlocal t={}\nfor w in string.gmatch("one two three","(%a+)") do t[#t+1]=w end\nprint(table.concat(t,", "))` },
+  ],
+  sql: [
+    { name:'JOIN',      code:`CREATE TABLE dept(id INT,name TEXT);\nCREATE TABLE emp(id INT,name TEXT,dept_id INT,salary INT);\nINSERT INTO dept VALUES(1,'Engineering'),(2,'Marketing');\nINSERT INTO emp VALUES(1,'Alice',1,9000),(2,'Bob',2,7000),(3,'Carol',1,8500),(4,'Dave',2,6500);\nSELECT e.name,d.name AS dept,e.salary FROM emp e JOIN dept d ON e.dept_id=d.id ORDER BY e.salary DESC;` },
+    { name:'GROUP BY',  code:`CREATE TABLE sales(product TEXT,amount INT,month INT);\nINSERT INTO sales VALUES('A',100,1),('B',200,1),('A',150,2),('B',180,2),('A',120,3);\nSELECT product,SUM(amount) AS total,ROUND(AVG(amount),1) AS avg FROM sales GROUP BY product ORDER BY total DESC;` },
+    { name:'子查询',    code:`CREATE TABLE emp(name TEXT,salary INT,dept TEXT);\nINSERT INTO emp VALUES('Alice',9000,'Eng'),('Bob',7000,'Mkt'),('Carol',8500,'Eng'),('Dave',6500,'Mkt');\nSELECT name,salary FROM emp WHERE salary>(SELECT AVG(salary) FROM emp);\nSELECT dept,MAX(salary) AS max_sal FROM emp GROUP BY dept;` },
   ],
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let currentLang = LANGS[0]
-let running = false
-let skulptLoaded = false
-let babelLoaded  = false
+let currentLang   = LANGS[0]
+let running       = false
+let skulptLoaded  = false
+let babelLoaded   = false
+let opalLoaded    = false
+let fengariLoaded = false
+let sqljsReady    = false
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
 const editor      = document.getElementById('editor')
@@ -214,13 +281,13 @@ function selectLang(lang) {
   currentLang = lang
   document.querySelectorAll('#lang-list button').forEach(btn => {
     const active = btn.dataset.langId === lang.id
-    btn.style.background  = active ? lang.color + '18' : 'transparent'
-    btn.style.borderColor = active ? lang.color + '55' : 'transparent'
-    btn.style.color       = active ? lang.color : lang.color + '80'
+    btn.style.background  = active ? lang.color+'18' : 'transparent'
+    btn.style.borderColor = active ? lang.color+'55' : 'transparent'
+    btn.style.color       = active ? lang.color : lang.color+'80'
   })
   langLabel.textContent = `main.${lang.ext}`
-  const engineMap = { worker: 'Worker', babel: 'Babel→Worker', skulpt: 'Skulpt' }
-  engineLabel.textContent = engineMap[lang.engine]
+  const engineNames = { worker:'Worker', babel:'Babel→Worker', skulpt:'Skulpt', opal:'Opal.js', fengari:'Fengari', sqljs:'sql.js' }
+  engineLabel.textContent = engineNames[lang.engine] || lang.engine
   stdinInput.style.opacity = lang.engine === 'skulpt' ? '1' : '0.3'
 
   if (!editor.value || editor.value === prev.template) {
@@ -229,8 +296,10 @@ function selectLang(lang) {
   }
   renderExamples(lang)
 
-  if (lang.engine === 'skulpt' && !skulptLoaded) loadSkulpt()
-  if (lang.engine === 'babel'  && !babelLoaded)  loadBabel()
+  if (lang.engine === 'skulpt'  && !skulptLoaded)  loadSkulpt()
+  if (lang.engine === 'babel'   && !babelLoaded)   loadBabel()
+  if (lang.engine === 'opal'    && !opalLoaded)    loadOpal()
+  if (lang.engine === 'fengari' && !fengariLoaded) loadFengari()
 }
 
 function renderExamples(lang) {
@@ -248,118 +317,229 @@ function renderExamples(lang) {
   })
 }
 
-// ── Lazy load ─────────────────────────────────────────────────────────────────
+// ── Loaders ───────────────────────────────────────────────────────────────────
 function loadScript(src, id) {
   return new Promise((resolve, reject) => {
     if (document.getElementById(id)) { resolve(); return }
     const s = document.createElement('script')
     s.id = id; s.src = src
-    s.onload = resolve; s.onerror = reject
+    s.onload = resolve; s.onerror = () => reject(new Error('Failed: ' + src))
     document.head.appendChild(s)
   })
 }
+
 function loadSkulpt() {
   loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js', 'skulpt-core')
     .then(() => loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js', 'skulpt-stdlib'))
     .then(() => { skulptLoaded = true })
-    .catch(() => {})
+    .catch(console.warn)
 }
 function loadBabel() {
-  loadScript('https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js', 'babel-standalone')
+  loadScript('https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js', 'babel-js')
     .then(() => { babelLoaded = true })
-    .catch(() => {})
+    .catch(console.warn)
+}
+function loadOpal() {
+  // Opal runtime only — use built-in compile from compiler bundle
+  loadScript('https://cdn.jsdelivr.net/npm/opal-runtime@1.8.2/dist/opal.min.js', 'opal-runtime')
+    .then(() => loadScript('https://cdn.jsdelivr.net/npm/opal-compiler@1.8.2/dist/compiler.min.js', 'opal-compiler'))
+    .then(() => { opalLoaded = true })
+    .catch(console.warn)
+}
+function loadFengari() {
+  loadScript('https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js', 'fengari-js')
+    .then(() => { fengariLoaded = true })
+    .catch(console.warn)
+}
+function loadSqljs() {
+  loadScript('https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.js', 'sqljs-js')
+    .then(() => {
+      window.initSqlJs({ locateFile: f => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${f}` })
+        .then(SQL => { window._SQL = SQL; sqljsReady = true })
+        .catch(console.warn)
+    })
+    .catch(console.warn)
 }
 
-// ── Engines ───────────────────────────────────────────────────────────────────
+// ── Engine: JS Worker sandbox ─────────────────────────────────────────────────
 function runInWorker(code) {
   return new Promise(resolve => {
     const lines = []
-    const workerSrc = `
-self.console = {
-  log:   (...a) => self.postMessage({t:'log',   s: a.map(x => typeof x==='object'?JSON.stringify(x,null,2):String(x)).join(' ')}),
-  warn:  (...a) => self.postMessage({t:'warn',  s: a.map(x=>String(x)).join(' ')}),
-  error: (...a) => self.postMessage({t:'error', s: a.map(x=>String(x)).join(' ')}),
-  info:  (...a) => self.postMessage({t:'log',   s: a.map(x=>String(x)).join(' ')}),
+    const src = `
+self.console={
+  log:  (...a)=>self.postMessage({t:'log',  s:a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join(' ')}),
+  warn: (...a)=>self.postMessage({t:'warn', s:a.map(x=>String(x)).join(' ')}),
+  error:(...a)=>self.postMessage({t:'err',  s:a.map(x=>String(x)).join(' ')}),
+  info: (...a)=>self.postMessage({t:'log',  s:a.map(x=>String(x)).join(' ')}),
 }
-self.onmessage = function(e) {
-  try {
-    const fn = new Function(e.data)
-    const r = fn()
-    if (r && typeof r.then === 'function') {
-      r.then(()  => self.postMessage({t:'done', exit:0}))
-       .catch(er => { self.postMessage({t:'error',s:String(er)}); self.postMessage({t:'done',exit:1}) })
-    } else {
-      self.postMessage({t:'done', exit:0})
-    }
-  } catch(er) {
-    self.postMessage({t:'error', s:String(er)})
-    self.postMessage({t:'done', exit:1})
-  }
+self.onmessage=function(e){
+  try{
+    const fn=new Function(e.data)
+    const r=fn()
+    if(r&&typeof r.then==='function'){
+      r.then(()=>self.postMessage({t:'done',exit:0}))
+       .catch(er=>{self.postMessage({t:'err',s:String(er)});self.postMessage({t:'done',exit:1})})
+    }else{self.postMessage({t:'done',exit:0})}
+  }catch(er){self.postMessage({t:'err',s:String(er)});self.postMessage({t:'done',exit:1})}
 }`
-    const blob   = new Blob([workerSrc], { type: 'application/javascript' })
-    const blobUrl = URL.createObjectURL(blob)
-    const worker  = new Worker(blobUrl)
-    const timer   = setTimeout(() => {
-      worker.terminate(); URL.revokeObjectURL(blobUrl)
-      resolve({ lines: [...lines, '<span style="color:#ffa500">[超时：5s 限制]</span>'], exit: 1 })
+    const url = URL.createObjectURL(new Blob([src], { type:'application/javascript' }))
+    const w = new Worker(url)
+    const timer = setTimeout(() => {
+      w.terminate(); URL.revokeObjectURL(url)
+      resolve({ lines:[...lines,'<span style="color:#ffa500">[超时: 5s]</span>'], exit:1 })
     }, 5000)
-    worker.onmessage = ({ data }) => {
-      if (data.t === 'done') {
-        clearTimeout(timer); worker.terminate(); URL.revokeObjectURL(blobUrl)
-        resolve({ lines, exit: data.exit })
+    w.onmessage = ({data}) => {
+      if (data.t==='done') {
+        clearTimeout(timer); w.terminate(); URL.revokeObjectURL(url)
+        resolve({ lines, exit:data.exit })
       } else {
-        const color = data.t === 'error' ? '#ff6b6b' : data.t === 'warn' ? '#ffa500' : null
-        lines.push(color ? `<span style="color:${color}">${escHtml(data.s)}</span>` : escHtml(data.s))
+        const c = data.t==='err'?'#ff6b6b':data.t==='warn'?'#ffa500':null
+        lines.push(c ? `<span style="color:${c}">${escHtml(data.s)}</span>` : escHtml(data.s))
       }
     }
-    worker.onerror = err => {
-      clearTimeout(timer); worker.terminate(); URL.revokeObjectURL(blobUrl)
-      resolve({ lines: [...lines, `<span style="color:#ff6b6b">${escHtml(err.message)}</span>`], exit: 1 })
+    w.onerror = err => {
+      clearTimeout(timer); w.terminate(); URL.revokeObjectURL(url)
+      resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(err.message)}</span>`], exit:1 })
     }
-    worker.postMessage(code)
+    w.postMessage(code)
   })
 }
 
-function runBabel(tsCode) {
+// ── Engine: Babel ─────────────────────────────────────────────────────────────
+function runBabel(ts) {
   return new Promise(resolve => {
     if (!babelLoaded || !window.Babel) {
-      resolve({ lines: ['<span style="color:#ffa500">Babel 加载中，请稍候再试…</span>'], exit: 1 }); return
+      resolve({ lines:['<span style="color:#ffa500">Babel 加载中，请稍候…</span>'], exit:1 }); return
     }
-    let compiled
+    let js
     try {
-      compiled = window.Babel.transform(tsCode, {
-        presets: [['typescript', {}]],
-        filename: 'main.ts',
-      }).code
-    } catch (e) {
-      resolve({ lines: [`<span style="color:#ff6b6b">TS 编译错误: ${escHtml(e.message)}</span>`], exit: 1 }); return
+      js = window.Babel.transform(ts, { presets:[['typescript',{}]], filename:'main.ts' }).code
+    } catch(e) {
+      resolve({ lines:[`<span style="color:#ff6b6b">TS 错误: ${escHtml(e.message)}</span>`], exit:1 }); return
     }
-    runInWorker(compiled).then(resolve)
+    runInWorker(js).then(resolve)
   })
 }
 
-function runSkulpt(pyCode) {
+// ── Engine: Skulpt ────────────────────────────────────────────────────────────
+function runSkulpt(py) {
   return new Promise(resolve => {
     if (!skulptLoaded || !window.Sk) {
-      resolve({ lines: ['<span style="color:#ffa500">Skulpt 加载中，请稍候再试…</span>'], exit: 1 }); return
+      resolve({ lines:['<span style="color:#ffa500">Skulpt 加载中，请稍候…</span>'], exit:1 }); return
     }
     const lines = []
     window.Sk.configure({
-      output: text => lines.push(escHtml(text)),
+      output: t => lines.push(escHtml(t)),
       read: x => {
-        if (window.Sk.builtinFiles?.files[x] == null) throw new Error('File not found: ' + x)
+        if (window.Sk.builtinFiles?.files[x]==null) throw new Error('File not found: '+x)
         return window.Sk.builtinFiles.files[x]
       },
-      inputfun: () => Promise.resolve(stdinInput.value || ''),
+      inputfun: () => Promise.resolve(stdinInput.value||''),
       __future__: window.Sk.python3,
     })
-    window.Sk.misceval.asyncToPromise(() =>
-      window.Sk.importMainWithBody('<stdin>', false, pyCode, true)
-    ).then(() => {
-      resolve({ lines, exit: 0 })
-    }).catch(e => {
-      resolve({ lines: [...lines, `<span style="color:#ff6b6b">${escHtml(e.toString())}</span>`], exit: 1 })
-    })
+    window.Sk.misceval.asyncToPromise(
+      () => window.Sk.importMainWithBody('<stdin>', false, py, true)
+    ).then(() => resolve({ lines, exit:0 }))
+     .catch(e => resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(e.toString())}</span>`], exit:1 }))
+  })
+}
+
+// ── Engine: Opal (Ruby) ───────────────────────────────────────────────────────
+function runOpal(rb) {
+  return new Promise(resolve => {
+    if (!opalLoaded || !window.Opal) {
+      resolve({ lines:['<span style="color:#ffa500">Opal.js 加载中，请稍候…</span>'], exit:1 }); return
+    }
+    const lines = []
+    try {
+      // 重定向 stdout
+      const stdout = window.Opal.gvars.$stdout || window.Opal.gvars['$stdout']
+      window.Opal.gvars['$stdout'] = {
+        $write: t => { lines.push(escHtml(String(t))); return String(t).length },
+        $flush: () => window.Opal.nil,
+      }
+      const js = window.Opal.compile(rb, { requirable:false })
+      // eslint-disable-next-line no-new-func
+      new Function('Opal', js)(window.Opal)
+      resolve({ lines, exit:0 })
+    } catch(e) {
+      resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(e.message||String(e))}</span>`], exit:1 })
+    }
+  })
+}
+
+// ── Engine: Fengari (Lua) ─────────────────────────────────────────────────────
+function runFengari(lua) {
+  return new Promise(resolve => {
+    if (!fengariLoaded || !window.fengari) {
+      resolve({ lines:['<span style="color:#ffa500">Fengari 加载中，请稍候…</span>'], exit:1 }); return
+    }
+    const lines = []
+    try {
+      const { lua:L, lauxlib, lualib } = window.fengari
+      const state = lauxlib.luaL_newstate()
+      lualib.luaL_openlibs(state)
+      // override print
+      L.lua_pushcfunction(state, S => {
+        const n = L.lua_gettop(S); const parts = []
+        for (let i=1;i<=n;i++) {
+          L.lua_getglobal(S, L.to_luastring('tostring'))
+          L.lua_pushvalue(S, i); L.lua_call(S, 1, 1)
+          parts.push(L.lua_tojsstring(S, -1)); L.lua_pop(S, 1)
+        }
+        lines.push(escHtml(parts.join('\t'))); return 0
+      })
+      L.lua_setglobal(state, L.to_luastring('print'))
+      const enc = new TextEncoder()
+      const status = lauxlib.luaL_dostring(state, enc.encode(lua))
+      if (status !== 0) {
+        const err = L.lua_tojsstring(state, -1)
+        resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(err)}</span>`], exit:1 })
+      } else {
+        resolve({ lines, exit:0 })
+      }
+    } catch(e) {
+      resolve({ lines:[`<span style="color:#ff6b6b">${escHtml(e.message)}</span>`], exit:1 })
+    }
+  })
+}
+
+// ── Engine: sql.js (SQLite) ───────────────────────────────────────────────────
+function runSqljs(sql) {
+  return new Promise(resolve => {
+    function exec() {
+      if (!window._SQL) {
+        resolve({ lines:['<span style="color:#ffa500">sql.js 加载中…</span>'], exit:1 }); return
+      }
+      try {
+        const db = new window._SQL.Database()
+        const stmts = sql.split(';').map(s=>s.trim()).filter(Boolean)
+        const lines = []
+        for (const stmt of stmts) {
+          const res = db.exec(stmt+';')
+          if (res.length) {
+            for (const r of res) {
+              lines.push('<span style="color:rgba(0,212,255,0.8)">'+escHtml(r.columns.join(' │ '))+'</span>')
+              lines.push('<span style="color:rgba(255,255,255,0.15)">'+('─'.repeat(40))+'</span>')
+              for (const row of r.values)
+                lines.push(escHtml(row.map(v=>v===null?'NULL':String(v)).join(' │ ')))
+              lines.push('')
+            }
+          }
+        }
+        db.close()
+        resolve({ lines:lines.length?lines:['<span style="color:rgba(136,136,170,0.4)">(no rows)</span>'], exit:0 })
+      } catch(e) {
+        resolve({ lines:[`<span style="color:#ff6b6b">${escHtml(e.message)}</span>`], exit:1 })
+      }
+    }
+    if (sqljsReady) { exec(); return }
+    let waited = 0
+    const poll = setInterval(() => {
+      waited += 200
+      if (sqljsReady) { clearInterval(poll); exec() }
+      else if (waited > 15000) { clearInterval(poll); resolve({ lines:['<span style="color:#ff6b6b">sql.js 加载超时</span>'], exit:1 }) }
+    }, 200)
   })
 }
 
@@ -367,7 +547,7 @@ function runSkulpt(pyCode) {
 async function runCode() {
   if (running) return
   running = true
-  output.innerHTML = '<span style="color:rgba(136,136,170,0.4)">Running…</span>'
+  output.innerHTML = '<span style="color:rgba(136,136,170,0.3)">Running…</span>'
   execTime.textContent = ''
   runStatus.textContent = '⟳'
   runStatus.style.color = '#ffa500'
@@ -375,25 +555,27 @@ async function runCode() {
 
   const t0 = Date.now()
   try {
+    const e = currentLang.engine
     let result
-    if      (currentLang.engine === 'worker') result = await runInWorker(editor.value)
-    else if (currentLang.engine === 'babel')  result = await runBabel(editor.value)
-    else if (currentLang.engine === 'skulpt') result = await runSkulpt(editor.value)
+    if      (e==='worker')  result = await runInWorker(editor.value)
+    else if (e==='babel')   result = await runBabel(editor.value)
+    else if (e==='skulpt')  result = await runSkulpt(editor.value)
+    else if (e==='opal')    result = await runOpal(editor.value)
+    else if (e==='fengari') result = await runFengari(editor.value)
+    else if (e==='sqljs')   result = await runSqljs(editor.value)
 
     const ms = Date.now() - t0
     output.innerHTML = result.lines.length
       ? result.lines.join('')
       : '<span style="color:rgba(136,136,170,0.4)">(no output)</span>'
     execTime.textContent = `exit ${result.exit} · ${ms}ms`
-    runStatus.textContent = result.exit === 0 ? '✓ OK' : '✕ Error'
-    runStatus.style.color = result.exit === 0 ? '#39ff14' : '#ff4466'
-  } catch (e) {
+    runStatus.textContent = result.exit===0 ? '✓ OK' : '✕ Error'
+    runStatus.style.color = result.exit===0 ? '#39ff14' : '#ff4466'
+  } catch(e) {
     output.innerHTML = `<span style="color:#ff6b6b">${escHtml(e.message)}</span>`
-    runStatus.textContent = '✕'
-    runStatus.style.color = '#ff4466'
+    runStatus.textContent = '✕'; runStatus.style.color = '#ff4466'
   }
-  running = false
-  runBtn.disabled = false
+  running = false; runBtn.disabled = false
 }
 
 function escHtml(s) {
@@ -408,31 +590,32 @@ function updateLineNumbers() {
 editor.addEventListener('input', updateLineNumbers)
 editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop })
 editor.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); return }
-  if (e.key === 'Tab') {
+  if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); runCode(); return }
+  if (e.key==='Tab') {
     e.preventDefault()
-    const s = editor.selectionStart, en = editor.selectionEnd
-    editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(en)
-    editor.selectionStart = editor.selectionEnd = s + 2
+    const s=editor.selectionStart, en=editor.selectionEnd
+    editor.value=editor.value.slice(0,s)+'  '+editor.value.slice(en)
+    editor.selectionStart=editor.selectionEnd=s+2
     updateLineNumbers()
   }
 })
 
 runBtn.onclick = runCode
 document.getElementById('clear-btn').onclick = () => {
-  output.innerHTML = ''; execTime.textContent = ''; runStatus.textContent = ''
+  output.innerHTML=''; execTime.textContent=''; runStatus.textContent=''
 }
 document.getElementById('copy-btn').onclick = () => {
   navigator.clipboard.writeText(editor.value).then(() => {
-    const b = document.getElementById('copy-btn')
-    b.textContent = 'Copied!'; setTimeout(() => b.textContent = 'Copy', 1500)
+    const b=document.getElementById('copy-btn')
+    b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy',1500)
   })
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderLangList()
-loadBabel()    // 提前加载，切换时已就绪
+loadBabel()
 loadSkulpt()
+loadSqljs()   // sql.js 有 WASM 需要时间初始化，提前加载
 
 })
   </script>
