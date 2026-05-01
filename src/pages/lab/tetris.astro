@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import BaseLayout from '../../layouts/BaseLayout.astro'
 ---
 
@@ -6,9 +7,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
     <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:opacity-80 transition-all">~/void-blog</a>
+        <a href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:opacity-80 transition-all">~/void-blog</a>
         <span class="text-[var(--color-text-muted)]">/</span>
-        <a href="/void-blog/lab/" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-all">lab</a>
+        <a href="/lab/" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-all">lab</a>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="font-mono text-xs text-[rgba(180,0,255,0.9)]">tetris</span>
       </div>

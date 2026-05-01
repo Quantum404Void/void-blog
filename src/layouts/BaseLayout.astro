@@ -58,14 +58,14 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
     />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/void-blog/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="void.dev" />
-    <link rel="apple-touch-icon" href="/void-blog/icons/pwa-192x192.png" />
+    <link rel="apple-touch-icon" href="/icons/pwa-192x192.png" />
     <meta name="theme-color" content="#0a0a0f" />
 
     <!-- View Transitions -->
@@ -115,7 +115,7 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
 
         // G 跳转首页
         if (key === 'g' || key === 'G') {
-          const homeLink = document.querySelector<HTMLAnchorElement>('a[href="/void-blog/"]')
+          const homeLink = document.querySelector<HTMLAnchorElement>('a[href="/"]')
           if (homeLink) window.location.href = homeLink.href
         }
       })
@@ -298,7 +298,7 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
           <div style="color:#00d4ff;font-size:1.5rem;font-weight:bold;text-shadow:0 0 20px #00d4ff">↑↑↓↓←→←→BA</div>
           <div style="color:#39ff14;margin-top:0.75rem;font-size:0.875rem">您发现了弩蛋！</div>
           <div style="color:#8888aa;margin-top:2rem;font-size:0.75rem">去玩游战 →</div>
-          <a href="/void-blog/lab/" style="margin-top:0.5rem;color:#b400ff;font-size:1rem;border:1px solid rgba(180,0,255,0.5);padding:0.5rem 1.5rem;border-radius:8px;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(180,0,255,0.15)'" onmouseout="this.style.background='transparent'">▶ PLAY SNAKE</a>
+          <a href="/lab/" style="margin-top:0.5rem;color:#b400ff;font-size:1rem;border:1px solid rgba(180,0,255,0.5);padding:0.5rem 1.5rem;border-radius:8px;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(180,0,255,0.15)'" onmouseout="this.style.background='transparent'">▶ PLAY SNAKE</a>
           <div style="color:#444;margin-top:2rem;font-size:0.625rem">点击任意位置关闭</div>
         `
         // 点击关闭

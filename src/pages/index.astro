@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
 
@@ -39,16 +40,16 @@ const getTagColor = (tag: string) => {
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
-        <a href="/void-blog/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
+        <a href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
           void.dev
         </a>
         <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
-          <a href="/void-blog/blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</a>
-          <a href="/void-blog/tags/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</a>
-          <a href="/void-blog/search/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</a>
-          <a href="/void-blog/blog/about/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/about</a>
-          <a href="/void-blog/stats/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</a>
-          <a href="/void-blog/lab/" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.9)">~/lab</a>
+          <a href="/blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</a>
+          <a href="/tags/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</a>
+          <a href="/search/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</a>
+          <a href="/blog/about/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/about</a>
+          <a href="/stats/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</a>
+          <a href="/lab/" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.9)">~/lab</a>
           <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener"
              class="hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-1">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -143,7 +144,7 @@ const getTagColor = (tag: string) => {
             const color = getTagColor(post.data.tags[0] ?? '')
             return (
               <a
-                href={`/void-blog/blog/${slug}/`}
+                href={`/blog/${slug}/`}
                 class="group block p-4 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
                 style={`animation-delay: ${i * 0.05}s`}
               >
@@ -181,7 +182,7 @@ const getTagColor = (tag: string) => {
         </div>
 
         <div class="mt-6">
-          <a href="/void-blog/blog/"
+          <a href="/blog/"
              class="inline-flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.3)] px-4 py-2 rounded-lg">
             查看全部 {allPosts.length} 篇文章 →
           </a>
@@ -204,10 +205,10 @@ const getTagColor = (tag: string) => {
           <div class="pt-3 mt-2 border-t border-[var(--color-void-border)] flex flex-wrap gap-x-4 gap-y-1.5">
             {[
               {href:'https://github.com/Quantum505Void', label:'GitHub'},
-              {href:'/void-blog/rss.xml', label:'RSS'},
-              {href:'/void-blog/search/', label:'Search'},
-              {href:'/void-blog/stats/', label:'Stats'},
-              {href:'/void-blog/lab/', label:'Lab'},
+              {href:'/rss.xml', label:'RSS'},
+              {href:'/search/', label:'Search'},
+              {href:'/stats/', label:'Stats'},
+              {href:'/lab/', label:'Lab'},
             ].map(({href, label}) => (
               <a href={href} target={href.startsWith('http')?'_blank':undefined} rel={href.startsWith('http')?'noopener':undefined}
                  class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">
@@ -227,7 +228,7 @@ const getTagColor = (tag: string) => {
               .sort((a, b) => b[1] - a[1])
               .slice(0, 10)
               .map(([tag]) => (
-                <a href={`/void-blog/tags/${tag}/`}
+                <a href={`/tags/${tag}/`}
                    class="font-mono text-[10px] px-2 py-0.5 rounded border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all">
                   #{tag}
                 </a>

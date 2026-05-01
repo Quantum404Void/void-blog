@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
 import type { GetStaticPaths } from 'astro'
@@ -27,9 +28,9 @@ const formatDate = (d: Date) =>
   <div class="min-h-screen bg-[var(--color-void)]">
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4">
-        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)]">~/void-blog</a>
+        <a href="/" class="font-mono text-sm text-[var(--color-neon-green)]">~/void-blog</a>
         <span class="text-[var(--color-text-muted)]">/</span>
-        <a href="/void-blog/tags/" class="font-mono text-sm text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)]">tags</a>
+        <a href="/tags/" class="font-mono text-sm text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)]">tags</a>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="font-mono text-sm text-[var(--color-neon-cyan)]">#{tag}</span>
       </div>
@@ -44,7 +45,7 @@ const formatDate = (d: Date) =>
       <div class="space-y-1">
         {posts.map(post => (
           <a
-            href={`/void-blog/blog/${post.id.replace(/.mdx?$/,'')}/`}
+            href={`/blog/${post.id.replace(/.mdx?$/,'')}/`}
             class="group flex items-center gap-4 p-3 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all"
           >
             <time datetime={post.data.pubDate.toISOString()} class="font-mono text-xs text-[var(--color-text-muted)] shrink-0 w-20">

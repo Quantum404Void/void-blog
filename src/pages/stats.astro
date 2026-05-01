@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Chart from '../components/Chart.vue'
 import { getCollection } from 'astro:content'
@@ -115,15 +116,15 @@ const tagChartOptions = {
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
-        <a href="/void-blog/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
+        <a href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
           void.dev
         </a>
         <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
-          <a href="/void-blog/blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</a>
-          <a href="/void-blog/tags/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</a>
-          <a href="/void-blog/search/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</a>
-          <a href="/void-blog/stats/" class="text-[var(--color-neon-cyan)]">~/stats</a>
-          <a href="/void-blog/lab/" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.8)">~/lab</a>
+          <a href="/blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</a>
+          <a href="/tags/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</a>
+          <a href="/search/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</a>
+          <a href="/stats/" class="text-[var(--color-neon-cyan)]">~/stats</a>
+          <a href="/lab/" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.8)">~/lab</a>
         </div>
       </div>
     </nav>
@@ -194,7 +195,7 @@ const tagChartOptions = {
             const slug = p.id.replace(/\.mdx?$/, '')
             return (
               <a
-                href={`/void-blog/blog/${slug}/`}
+                href={`/blog/${slug}/`}
                 class="group flex items-center gap-4 py-2 px-2 rounded-lg hover:bg-[var(--color-void-muted)] transition-colors"
               >
                 <time class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-24">
@@ -219,7 +220,7 @@ const tagChartOptions = {
     <!-- Footer -->
     <footer class="border-t border-[var(--color-void-border)] py-8 mt-8">
       <div class="max-w-5xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)] text-center">
-        <a href="/void-blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">← 返回首页</a>
+        <a href="/" class="hover:text-[var(--color-neon-cyan)] transition-colors">← 返回首页</a>
       </div>
     </footer>
   </div>

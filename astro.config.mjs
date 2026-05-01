@@ -6,10 +6,13 @@ import tailwindcss from '@tailwindcss/vite';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import AstroPWA from '@vite-pwa/astro';
+import cloudflare from '@astrojs/cloudflare';
+import keystatic from '@keystatic/astro';
 
 export default defineConfig({
-  site: 'https://quantum505void.github.io',
-  base: '/void-blog',
+  site: 'https://void-blog.pages.dev',
+  output: 'server',
+  adapter: cloudflare(),
   integrations: [
     vue(),
     mdx(),
@@ -71,6 +74,7 @@ export default defineConfig({
         ],
       },
     }),
+    keystatic(),
   ],
   vite: {
     plugins: [tailwindcss()],

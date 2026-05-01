@@ -31,7 +31,7 @@ const formatDate = (d: Date) =>
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.8)] backdrop-blur-xl">
       <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-6">
-        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">
+        <a href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">
           ~/void-blog
         </a>
         <span class="text-[var(--color-text-muted)]">/</span>
@@ -53,7 +53,7 @@ const formatDate = (d: Date) =>
             <div class="flex flex-wrap gap-2 mb-6">
               {tags.map(tag => (
                 <a
-                  href={`/void-blog/tags/${tag}/`}
+                  href={`/tags/${tag}/`}
                   class="font-mono text-xs px-3 py-1 rounded-full border border-[rgba(0,212,255,0.3)] text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.05)] hover:border-[rgba(0,212,255,0.6)] hover:bg-[rgba(0,212,255,0.1)] transition-all"
                 >
                   #{tag}
@@ -92,7 +92,7 @@ const formatDate = (d: Date) =>
           <div class="grid grid-cols-2 gap-4 font-mono text-xs">
             {prevPost ? (
               <a
-                href={`/void-blog/blog/${prevPost.slug}/`}
+                href={`/blog/${prevPost.slug}/`}
                 class="prev-post-link group flex flex-col gap-1 p-4 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all"
               >
                 <span class="text-[var(--color-text-muted)] text-[10px] uppercase tracking-widest">← 上一篇</span>
@@ -101,7 +101,7 @@ const formatDate = (d: Date) =>
             ) : <div />}
             {nextPost ? (
               <a
-                href={`/void-blog/blog/${nextPost.slug}/`}
+                href={`/blog/${nextPost.slug}/`}
                 class="next-post-link group flex flex-col gap-1 p-4 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all text-right"
               >
                 <span class="text-[var(--color-text-muted)] text-[10px] uppercase tracking-widest">下一篇 →</span>
@@ -123,7 +123,7 @@ const formatDate = (d: Date) =>
               <div class="space-y-2">
                 {related.map(r => (
                   <a
-                    href={`/void-blog/blog/${r.slug}/`}
+                    href={`/blog/${r.slug}/`}
                     class="group flex items-start gap-3 p-3 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all"
                   >
                     <span class="text-[var(--color-neon-purple)] font-mono text-xs mt-0.5">▸</span>
@@ -152,12 +152,12 @@ const formatDate = (d: Date) =>
             </div>
             <div class="flex gap-3 font-mono text-[10px] text-[var(--color-text-muted)]">
               <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener" class="hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
-              <a href="/void-blog/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS</a>
+              <a href="/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS</a>
             </div>
           </div>
 
           <a
-            href="/void-blog/"
+            href="/"
             class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2"
           >
             <span>←</span> 返回首页

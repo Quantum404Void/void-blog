@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 ---
 
@@ -49,15 +50,15 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 
       <!-- Actions -->
       <div class="mt-8 flex flex-col sm:flex-row gap-3">
-        <a href="/void-blog/"
+        <a href="/"
            class="flex-1 text-center font-mono text-sm px-5 py-3 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-secondary)] hover:border-[rgba(0,255,136,0.4)] hover:text-[var(--color-neon-green)] transition-all">
           cd ~
         </a>
-        <a href="/void-blog/blog/"
+        <a href="/blog/"
            class="flex-1 text-center font-mono text-sm px-5 py-3 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-secondary)] hover:border-[rgba(0,212,255,0.4)] hover:text-[var(--color-neon-cyan)] transition-all">
           ls ~/blog
         </a>
-        <a href="/void-blog/search/"
+        <a href="/search/"
            class="flex-1 text-center font-mono text-sm px-5 py-3 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-secondary)] hover:border-[rgba(180,76,255,0.4)] hover:text-[var(--color-neon-purple)] transition-all">
           grep -r ...
         </a>

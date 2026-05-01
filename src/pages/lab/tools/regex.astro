@@ -1,11 +1,12 @@
 ---
+export const prerender = true
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 ---
 <BaseLayout title="正则工具 | void.dev">
   <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
     <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
       <span style="color:var(--color-neon-green)">❯</span>
-      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='var(--color-neon-green)'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <a href="/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='var(--color-neon-green)'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
       <span class="mx-2">/</span>
       <span style="color:var(--color-neon-green)">regex</span>
     </nav>

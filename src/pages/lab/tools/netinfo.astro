@@ -1,13 +1,14 @@
 ---
+export const prerender = true
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 ---
 <BaseLayout title="网络诊断 | void.dev">
   <div class="min-h-screen bg-[var(--color-void)]" style="font-family:var(--font-mono)">
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <a href="/void-blog/" class="text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">~/void-blog</a>
+        <a href="/" class="text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">~/void-blog</a>
         <span class="text-[var(--color-text-muted)]">/</span>
-        <a href="/void-blog/lab/" class="text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">lab</a>
+        <a href="/lab/" class="text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">lab</a>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="text-xs text-[var(--color-neon-cyan)]">netinfo</span>
       </div>
