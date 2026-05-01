@@ -119,13 +119,13 @@ const techStack = [
     <!-- Hero -->
     <section class="relative py-24 border-b border-[var(--color-void-border)] overflow-hidden">
       <!-- Background grid -->
-      <div class="absolute inset-0 opacity-[0.03]"
+      <div class="absolute inset-0 opacity-[0.06]"
            style="background-image: linear-gradient(var(--color-neon-green) 1px, transparent 1px), linear-gradient(90deg, var(--color-neon-green) 1px, transparent 1px); background-size: 40px 40px;"></div>
-      <!-- Corner glow -->
-      <div class="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
-           style="background: radial-gradient(circle, var(--color-neon-purple), transparent 70%); transform: translate(30%, -30%);"></div>
-      <div class="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
-           style="background: radial-gradient(circle, var(--color-neon-cyan), transparent 70%); transform: translate(-30%, 30%);"></div>
+      <!-- Corner glow 加强 -->
+      <div class="absolute top-0 right-0 rounded-full" style="width:600px;height:600px;background:radial-gradient(circle, rgba(180,76,255,0.12), transparent 70%);transform:translate(30%,-30%);pointer-events:none"></div>
+      <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
+      <!-- Center ambient -->
+      <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
       <div class="relative max-w-5xl mx-auto px-6">
         <div class="flex items-start gap-4 mb-8">

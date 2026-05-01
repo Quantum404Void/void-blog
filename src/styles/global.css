@@ -37,6 +37,14 @@
     font-family: var(--font-sans);
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
+    /* 细微 scanline 终端质感 */
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.06) 3px,
+      rgba(0,0,0,0.06) 4px
+    );
   }
 
   /* 交互元素统一指针样式 */
