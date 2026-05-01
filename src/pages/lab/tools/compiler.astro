@@ -220,6 +220,7 @@ function renderLangList() {
 }
 
 function selectLang(lang) {
+  const prevLang = currentLang
   currentLang = lang
   // Update button styles
   document.querySelectorAll('#lang-list button').forEach(btn => {
@@ -230,7 +231,8 @@ function selectLang(lang) {
     btn.style.boxShadow = isActive ? `0 0 6px ${lang.color}22` : ''
   })
   langLabel.textContent = `main.${lang.ext}`
-  if (!editor.value || editor.value === currentLang?.template) {
+  // Always load template when switching language (or editor empty)
+  if (!editor.value || !prevLang || editor.value === prevLang.template) {
     editor.value = lang.template
     updateLineNumbers()
   }

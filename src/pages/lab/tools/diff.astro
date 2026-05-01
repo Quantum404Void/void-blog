@@ -293,34 +293,51 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
       const el = document.getElementById('diff-output')
       if (!ops.length) { el.innerHTML = '<div style="padding:16px;color:var(--color-text-muted);font-size:13px">无内容</div>'; return }
 
-      // 并排模式：把连续的 del+add 配对对齐
-      const pairs = []
+      // 并排模式：先把 del/add 序列两两对齐
+      // 策略：遇到连续 del+add 块，按行号对齐；多余的用空行填充
+      const rows = []
       let i = 0
       while (i < ops.length) {
         if (ops[i].type === 'equal') {
-          pairs.push({left: ops[i].line, right: ops[i].line, type: 'equal'})
+          rows.push({ type: 'equal', left: ops[i].line, right: ops[i].line })
           i++
         } else {
+          // 收集连续的 del 和 add
           const dels = [], adds = []
           while (i < ops.length && ops[i].type === 'del') { dels.push(ops[i].line); i++ }
           while (i < ops.length && ops[i].type === 'add') { adds.push(ops[i].line); i++ }
           const maxLen = Math.max(dels.length, adds.length)
           for (let j = 0; j < maxLen; j++) {
-            pairs.push({ left: dels[j] ?? null, right: adds[j] ?? null, type: 'change' })
+            rows.push({
+              type: 'change',
+              left:  j < dels.length ? dels[j] : null,
+              right: j < adds.length ? adds[j] : null,
+            })
           }
         }
       }
+
+      let leftNum = 0, rightNum = 0
       let html = `<div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(57,255,20,0.04)">
         <div style="padding:6px 12px;font-size:10px;color:rgba(57,255,20,0.5);border-right:1px solid rgba(57,255,20,0.12)">LEFT（原始）</div>
         <div style="padding:6px 12px;font-size:10px;color:rgba(57,255,20,0.5)">RIGHT（修改）</div>
       </div>`
-      pairs.forEach(p => {
+
+      rows.forEach(p => {
         if (p.type === 'equal') {
-          html += `<div class="split-row"><div class="split-cell" style="color:var(--color-text-muted)">${escapeHtml(p.left)}</div><div class="split-cell" style="color:var(--color-text-muted)">${escapeHtml(p.right)}</div></div>`
-        } else {
+          leftNum++; rightNum++
           html += `<div class="split-row">
-            <div class="split-cell" style="color:${p.left!==null?'#ff8888':'var(--color-text-muted)'};background:${p.left!==null?'rgba(255,100,100,0.07)':'transparent'}">${p.left!==null?'<span style="opacity:0.4">- </span>'+escapeHtml(p.left):'<span style="opacity:0.2">·</span>'}</div>
-            <div class="split-cell" style="color:${p.right!==null?'#39ff14':'var(--color-text-muted)'};background:${p.right!==null?'rgba(57,255,20,0.06)':'transparent'}">${p.right!==null?'<span style="opacity:0.4">+ </span>'+escapeHtml(p.right):'<span style="opacity:0.2">·</span>'}</div>
+            <div class="split-cell" style="color:var(--color-text-muted)"><span class="diff-gutter" style="opacity:0.3">${leftNum}</span> ${escapeHtml(p.left)}</div>
+            <div class="split-cell" style="color:var(--color-text-muted)"><span class="diff-gutter" style="opacity:0.3">${rightNum}</span> ${escapeHtml(p.right)}</div>
+          </div>`
+        } else {
+          if (p.left !== null) leftNum++
+          if (p.right !== null) rightNum++
+          const lNum = p.left !== null ? leftNum : ''
+          const rNum = p.right !== null ? rightNum : ''
+          html += `<div class="split-row">
+            <div class="split-cell" style="color:${p.left!==null?'#ff8888':'transparent'};background:${p.left!==null?'rgba(255,100,100,0.08)':'rgba(255,100,100,0.02)'}">${p.left!==null?`<span class="diff-gutter" style="color:rgba(255,100,100,0.4)">${lNum}</span> <span style="opacity:0.5">-</span> ${escapeHtml(p.left)}`:'<span style="opacity:0.15">~</span>'}</div>
+            <div class="split-cell" style="color:${p.right!==null?'#39ff14':'transparent'};background:${p.right!==null?'rgba(57,255,20,0.06)':'rgba(57,255,20,0.01)'}">${p.right!==null?`<span class="diff-gutter" style="color:rgba(57,255,20,0.4)">${rNum}</span> <span style="opacity:0.5">+</span> ${escapeHtml(p.right)}`:'<span style="opacity:0.15">~</span>'}</div>
           </div>`
         }
       })
