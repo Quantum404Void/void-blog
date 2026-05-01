@@ -3,6 +3,8 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches: [main]
+  repository_dispatch:
+    types: [content-updated]
   workflow_dispatch:
 
 jobs:
@@ -12,7 +14,19 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout framework
+        uses: actions/checkout@v4
+
+      - name: Checkout content
+        uses: actions/checkout@v4
+        with:
+          repository: Quantum505Void/void-blog-content
+          path: _content
+
+      - name: Sync posts into src/content/blog
+        run: |
+          rsync -av --delete _content/posts/ src/content/blog/
+          rm -rf _content
 
       - uses: actions/setup-node@v4
         with:
