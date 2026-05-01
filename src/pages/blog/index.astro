@@ -52,10 +52,10 @@ const getTagColor = (tag: string) => {
         <section class="mb-14 relative">
           <!-- Year marker -->
           <div class="flex items-center gap-4 mb-5">
-            <span class="font-mono text-xs font-bold text-[var(--color-neon-cyan)] border border-[rgba(0,212,255,0.3)] px-3 py-1 rounded-full bg-[rgba(0,212,255,0.05)]">
+            <span class="font-mono text-sm font-bold text-[var(--color-neon-cyan)] glow-cyan border border-[rgba(0,212,255,0.4)] px-4 py-1.5 rounded-full bg-[rgba(0,212,255,0.08)] tracking-widest">
               {year}
             </span>
-            <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.2)] to-transparent"></span>
+            <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.3)] to-transparent"></span>
             <span class="font-mono text-[10px] text-[var(--color-text-muted)]">{byYear[year].length} 篇</span>
           </div>
 
@@ -66,22 +66,33 @@ const getTagColor = (tag: string) => {
               return (
                 <a
                   href={`/void-blog/blog/${slug}/`}
-                  class="group flex items-center gap-4 px-3 py-2.5 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-150"
+                  class="group relative flex items-center gap-4 px-3 py-2.5 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-150 overflow-hidden"
                 >
+                  <!-- Left color bar animation -->
+                  <span class="absolute left-0 top-0 bottom-0 w-0 group-hover:w-[3px] rounded-l-lg transition-all duration-200"
+                        style={`background: var(--color-${primaryColor})`}></span>
+
                   <!-- Color dot -->
                   <span class={`shrink-0 w-1.5 h-1.5 rounded-full opacity-50 group-hover:opacity-100 transition-opacity`}
                         style={`background: var(--color-${primaryColor})`}></span>
 
                   <time datetime={post.data.pubDate.toISOString()}
-                        class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-16 tabular-nums">
+                        class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-16 tabular-nums text-right">
                     {post.data.pubDate.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
                   </time>
 
-                  <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors flex-1 truncate leading-snug">
-                    {post.data.title}
-                  </span>
+                  <div class="flex-1 min-w-0">
+                    <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors block truncate leading-snug">
+                      {post.data.title}
+                    </span>
+                    {post.data.description && (
+                      <span class="font-mono text-[10px] text-[var(--color-text-secondary)] block truncate mt-0.5 leading-snug opacity-70 group-hover:opacity-100 transition-opacity">
+                        {post.data.description}
+                      </span>
+                    )}
+                  </div>
 
-                  <div class="ml-auto flex gap-1.5 shrink-0">
+                  <div class="flex gap-1.5 shrink-0">
                     {post.data.tags.slice(0, 2).map(tag => (
                       <span class="font-mono text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
                         #{tag}
@@ -89,7 +100,7 @@ const getTagColor = (tag: string) => {
                     ))}
                   </div>
 
-                  <span class="font-mono text-xs text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)] transition-colors shrink-0">→</span>
+                  <span class="font-mono text-xs text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)] transition-colors shrink-0 ml-auto">→</span>
                 </a>
               )
             })}

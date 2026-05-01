@@ -6,6 +6,51 @@ tags: ["网络", "代理", "协议"]
 draft: false
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const protocolBarData = {
+  labels: ['Shadowsocks', 'V2Ray VMess', 'VLESS+Reality', 'Hysteria2', 'Trojan'],
+  datasets: [
+    {
+      label: '速度',
+      data: [4, 3, 4, 5, 4],
+      backgroundColor: 'rgba(0,212,255,0.2)',
+      borderColor: 'rgba(0,212,255,0.9)',
+      borderWidth: 2,
+    },
+    {
+      label: '抗封锁',
+      data: [1, 4, 5, 4, 4],
+      backgroundColor: 'rgba(57,255,20,0.2)',
+      borderColor: 'rgba(57,255,20,0.9)',
+      borderWidth: 2,
+    },
+    {
+      label: '配置简便',
+      data: [5, 3, 3, 3, 3],
+      backgroundColor: 'rgba(255,0,170,0.2)',
+      borderColor: 'rgba(255,0,170,0.9)',
+      borderWidth: 2,
+    },
+  ],
+}
+
+export const protocolBarOptions = {
+  indexAxis: 'y',
+  scales: {
+    x: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { color: 'rgba(30,30,48,0.8)' },
+      border: { display: false },
+    },
+    y: {
+      ticks: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { display: false },
+      border: { display: false },
+    },
+  },
+}
+
 ## 代理 vs VPN：不是同一件事
 
 很多人混用这两个词，但它们工作在不同的网络层：
@@ -79,6 +124,8 @@ Client → VLESS/VMess 流量
 | VLESS + Reality | 快 | 最强 | 中 | 推荐，无需域名 |
 | Hysteria2 | 最快 | 强 | 中 | 网络质量差 / 追求速度 |
 | Trojan | 快 | 强 | 中 | 有域名时的好选择 |
+
+<Chart client:only="vue" type="bar" data={protocolBarData} options={protocolBarOptions} height={260} />
 
 ---
 

@@ -1,0 +1,310 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="ASCII Art | void.dev">
+  <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
+    <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
+      <span style="color:#39ff14">❯</span>
+      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='#39ff14'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <span class="mx-2">/</span>
+      <span style="color:#39ff14">ascii</span>
+    </nav>
+
+    <div class="p-6 max-w-5xl mx-auto">
+      <h1 class="text-2xl font-bold mb-2" style="color:#39ff14;text-shadow:0 0 20px rgba(57,255,20,0.6)">
+        Aa ASCII Art
+      </h1>
+      <p class="mb-8 text-sm" style="color:var(--color-text-muted)">文字转 ASCII 艺术字 · 多种字体风格</p>
+
+      <!-- Controls -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="sm:col-span-3">
+          <label class="block text-xs mb-2" style="color:#39ff14;letter-spacing:0.1em">INPUT TEXT (max 25 chars)</label>
+          <input id="art-input" type="text" maxlength="25" placeholder="HELLO WORLD" spellcheck="false"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(57,255,20,0.3);color:var(--color-text-primary);font-family:var(--font-mono);font-size:15px;border-radius:10px;padding:12px 16px;outline:none;letter-spacing:2px"
+            onfocus="this.style.borderColor='rgba(57,255,20,0.8)';this.style.boxShadow='0 0 14px rgba(57,255,20,0.12)'"
+            onblur="this.style.borderColor='rgba(57,255,20,0.3)';this.style.boxShadow='none'" />
+        </div>
+        <div>
+          <label class="block text-xs mb-2" style="color:rgba(57,255,20,0.6);letter-spacing:0.1em">FONT</label>
+          <div class="flex gap-2">
+            <button id="font-small" class="art-btn art-btn-active" onclick="setFont('small')">Small</button>
+            <button id="font-block" class="art-btn" onclick="setFont('block')">Block ██</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs mb-2" style="color:rgba(57,255,20,0.6);letter-spacing:0.1em">COLOR</label>
+          <div class="flex gap-2 flex-wrap">
+            {[
+              {id:'col-green', val:'#39ff14', label:'Green'},
+              {id:'col-cyan',  val:'#00d4ff', label:'Cyan'},
+              {id:'col-purple',val:'#b400ff', label:'Purple'},
+              {id:'col-white', val:'#f0f0f0', label:'White'},
+              {id:'col-pink',  val:'#ff00aa', label:'Pink'},
+            ].map(({id, val, label}) => (
+              <button id={id} class="color-dot" onclick={`setColor('${val}','${id}')`}
+                style={`width:22px;height:22px;border-radius:50%;background:${val};border:2px solid transparent;cursor:pointer;transition:all 0.15s`}
+                title={label}></button>
+            ))}
+          </div>
+        </div>
+        <div class="flex items-end">
+          <button id="copy-btn" onclick="copyOutput()"
+            style="font-family:var(--font-mono);font-size:12px;padding:8px 18px;border-radius:8px;border:1px solid rgba(57,255,20,0.4);background:rgba(57,255,20,0.08);color:#39ff14;cursor:pointer;transition:all 0.2s;white-space:nowrap"
+            onmouseover="this.style.background='rgba(57,255,20,0.18)'"
+            onmouseout="this.style.background='rgba(57,255,20,0.08)'">⎘ 复制</button>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div style="background:rgba(0,0,0,0.45);border:1px solid rgba(57,255,20,0.2);border-radius:12px;overflow:hidden">
+        <div class="flex items-center justify-between px-4 py-2" style="border-bottom:1px solid rgba(57,255,20,0.1);background:rgba(0,0,0,0.2)">
+          <span class="text-xs" style="color:rgba(57,255,20,0.4)">OUTPUT</span>
+          <span id="char-count" class="text-xs" style="color:rgba(255,255,255,0.2)">0/25</span>
+        </div>
+        <div style="overflow-x:auto;padding:1.5rem">
+          <pre id="art-output"
+            style="font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.3;white-space:pre;margin:0;min-height:80px;color:#39ff14;text-shadow:0 0 8px rgba(57,255,20,0.5)"></pre>
+        </div>
+      </div>
+
+      <div class="mt-3 text-xs" style="color:rgba(255,255,255,0.15);text-align:right">
+        FIGlet-inspired · client-side rendering
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .art-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(57,255,20,0.25);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .art-btn:hover, .art-btn-active {
+    background: rgba(57,255,20,0.1) !important;
+    border-color: rgba(57,255,20,0.6) !important;
+    color: #39ff14 !important;
+  }
+  .color-dot-active {
+    border-color: #fff !important;
+    box-shadow: 0 0 8px rgba(255,255,255,0.4) !important;
+  }
+</style>
+
+<script is:inline>
+(function () {
+  /* ── SMALL font: 4 rows, variable width per char ─────────────────────── */
+  var SMALL = {
+    ' ': ['   ','   ','   ','   '],
+    'A': [' _  ','/_\\ ','(_) ','    '],
+    'B': ['|_) ','|_) ','|   ','    '],
+    'C': [' _  ','/ ) ','\\_) ','    '],
+    'D': ['|\\ ','| \\','|_/','   '],
+    'E': ['|__ ','|_  ','|__ ','    '],
+    'F': ['|__ ','|_  ','|   ','    '],
+    'G': [' _  ','/ _ ','\\_| ','    '],
+    'H': ['| | ','|-| ','|_| ','    '],
+    'I': ['_ ','| ','| ','  '],
+    'J': [' _',' |','\\|','  '],
+    'K': ['|/  ','|<  ','|\\ ','    '],
+    'L': ['|   ','|   ','|__ ','    '],
+    'M': ['|\\/|','|  |','|  |','    '],
+    'N': ['|\\ ','| \\','|  ','   '],
+    'O': [' _  ','/ \\ ','\\_/ ','    '],
+    'P': ['|_) ','|   ','|   ','    '],
+    'Q': [' _   ','/ \\  ','\\_X  ','     '],
+    'R': ['|_) ','| \\ ','|   ','    '],
+    'S': [' _  ','(_/ ',' _) ','    '],
+    'T': ['___ ',' |  ',' |  ','    '],
+    'U': ['| | ','| | ','\\|/ ','    '],
+    'V': ['\\  / ',' \\/  ','     ','     '],
+    'W': ['\\  / ','\\/\\/ ','     ','     '],
+    'X': ['\\/ ','/\\ ','   ','   '],
+    'Y': ['\\/ ',' |  ','    ','    '],
+    'Z': ['__ ',' / ','/__','   '],
+    '0': [' _  ','/ \\ ','\\_/ ','    '],
+    '1': [' _',' |',' |','  '],
+    '2': [' _  ',' _) ','/_  ','    '],
+    '3': [' _  ',' _) ',' _) ','    '],
+    '4': ['|_| ','  | ','    ','    '],
+    '5': [' _  ','|_  ',' _) ','    '],
+    '6': [' _  ','|_  ','(_) ','    '],
+    '7': ['__  ',' /  ','/   ','    '],
+    '8': [' _  ','(_) ','(_) ','    '],
+    '9': [' _  ','(_) ',' _) ','    '],
+    '.': ['  ',' .','  ','  '],
+    '!': ['| ','| ',' .','  '],
+    '?': [' _ ',' _)','  ','   '],
+    '-': ['   ','---','   ','   '],
+  };
+
+  /* ── BLOCK font: 5 rows, 6 wide per char ─────────────────────────────── */
+  var BLOCK = {
+    ' ': ['      ','      ','      ','      ','      '],
+    'A': [' ████ ','█    █','██████','█    █','█    █'],
+    'B': ['█████ ','█    █','█████ ','█    █','█████ '],
+    'C': [' ████ ','█     ','█     ','█     ',' ████ '],
+    'D': ['████  ','█   █ ','█   █ ','█   █ ','████  '],
+    'E': ['██████','█     ','█████ ','█     ','██████'],
+    'F': ['██████','█     ','█████ ','█     ','█     '],
+    'G': [' ████ ','█     ','█  ███','█    █',' █████'],
+    'H': ['█    █','█    █','██████','█    █','█    █'],
+    'I': ['██████','  ██  ','  ██  ','  ██  ','██████'],
+    'J': ['  ████','   █  ','   █  ','█  █  ',' ██   '],
+    'K': ['█   █ ','█  █  ','████  ','█  █  ','█   █ '],
+    'L': ['█     ','█     ','█     ','█     ','██████'],
+    'M': ['█    █','██  ██','█ ██ █','█    █','█    █'],
+    'N': ['█    █','██   █','█ █  █','█  █ █','█    █'],
+    'O': [' ████ ','█    █','█    █','█    █',' ████ '],
+    'P': ['█████ ','█    █','█████ ','█     ','█     '],
+    'Q': [' ████ ','█    █','█  █ █','█   ██',' █████'],
+    'R': ['█████ ','█    █','█████ ','█  █  ','█   █ '],
+    'S': [' ████ ','█     ',' ████ ','     █',' ████ '],
+    'T': ['██████','  ██  ','  ██  ','  ██  ','  ██  '],
+    'U': ['█    █','█    █','█    █','█    █',' ████ '],
+    'V': ['█    █','█    █','█    █',' █  █ ','  ██  '],
+    'W': ['█    █','█    █','█ ██ █','██  ██','█    █'],
+    'X': ['█    █',' █  █ ','  ██  ',' █  █ ','█    █'],
+    'Y': ['█    █',' █  █ ','  ██  ','  ██  ','  ██  '],
+    'Z': ['██████','    █ ','  ██  ',' █    ','██████'],
+    '0': [' ████ ','█   ██','█  █ █','██   █',' ████ '],
+    '1': ['  ██  ',' ███  ','  ██  ','  ██  ','██████'],
+    '2': [' ████ ','     █','  ███ ',' █    ','██████'],
+    '3': [' ████ ','     █','  ███ ','     █',' ████ '],
+    '4': ['█    █','█    █','██████','     █','     █'],
+    '5': ['██████','█     ','█████ ','     █','█████ '],
+    '6': [' ████ ','█     ','█████ ','█    █',' ████ '],
+    '7': ['██████','    █ ','   █  ','  █   ','  █   '],
+    '8': [' ████ ','█    █',' ████ ','█    █',' ████ '],
+    '9': [' ████ ','█    █',' █████','     █',' ████ '],
+    '.': ['      ','      ','      ','  ██  ','  ██  '],
+    '!': ['  ██  ','  ██  ','  ██  ','      ','  ██  '],
+    '?': [' ████ ','     █','  ███ ','      ','  ██  '],
+    '-': ['      ','      ','████  ','      ','      '],
+  };
+
+  var currentFont = 'small';
+  var currentColor = '#39ff14';
+
+  function render() {
+    var raw = document.getElementById('art-input').value;
+    var text = raw.toUpperCase().slice(0, 25);
+    var cc = document.getElementById('char-count');
+    if (cc) cc.textContent = text.length + '/25';
+
+    var font = currentFont === 'block' ? BLOCK : SMALL;
+    var rows = currentFont === 'block' ? 5 : 4;
+    var chars = text.split('');
+
+    // Normalize each char's rows to same width
+    var charData = chars.map(function (ch) {
+      var data = font[ch] || font[' '] || ['?','?','?','?'];
+      var maxW = 0;
+      for (var i = 0; i < rows; i++) {
+        var len = (data[i] || '').length;
+        if (len > maxW) maxW = len;
+      }
+      var normalized = [];
+      for (var i = 0; i < rows; i++) {
+        var s = data[i] || '';
+        while (s.length < maxW) s += ' ';
+        normalized.push(s);
+      }
+      return normalized;
+    });
+
+    var lines = [];
+    for (var r = 0; r < rows; r++) {
+      var line = '';
+      for (var i = 0; i < charData.length; i++) {
+        if (i > 0) line += currentFont === 'block' ? ' ' : '';
+        line += charData[i][r];
+      }
+      lines.push(line);
+    }
+
+    var out = document.getElementById('art-output');
+    if (out) {
+      out.textContent = lines.join('\n');
+      out.style.color = currentColor;
+      var hex = currentColor.replace('#', '');
+      var r2 = parseInt(hex.slice(0,2),16);
+      var g2 = parseInt(hex.slice(2,4),16);
+      var b2 = parseInt(hex.slice(4,6),16);
+      out.style.textShadow = '0 0 8px rgba('+r2+','+g2+','+b2+',0.55)';
+    }
+  }
+
+  function setFont(name) {
+    currentFont = name;
+    document.getElementById('font-small').classList.remove('art-btn-active');
+    document.getElementById('font-block').classList.remove('art-btn-active');
+    document.getElementById('font-' + name).classList.add('art-btn-active');
+    render();
+  }
+
+  function setColor(val, id) {
+    currentColor = val;
+    document.querySelectorAll('.color-dot').forEach(function (el) {
+      el.classList.remove('color-dot-active');
+      el.style.border = '2px solid transparent';
+    });
+    var el = document.getElementById(id);
+    if (el) {
+      el.classList.add('color-dot-active');
+      el.style.border = '2px solid #fff';
+    }
+    render();
+  }
+
+  function copyOutput() {
+    var out = document.getElementById('art-output');
+    var btn = document.getElementById('copy-btn');
+    if (!out || !btn) return;
+    navigator.clipboard.writeText(out.textContent || '').then(function () {
+      btn.textContent = '✓ 已复制';
+      setTimeout(function () { btn.textContent = '⎘ 复制'; }, 1500);
+    }).catch(function () {
+      var ta = document.createElement('textarea');
+      ta.value = out.textContent || '';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✓ 已复制';
+      setTimeout(function () { btn.textContent = '⎘ 复制'; }, 1500);
+    });
+  }
+
+  var input = document.getElementById('art-input');
+  if (input) {
+    input.addEventListener('input', function () {
+      var val = this.value.toUpperCase();
+      if (val !== this.value) this.value = val;
+      render();
+    });
+  }
+
+  // Init active color dot
+  var greenDot = document.getElementById('col-green');
+  if (greenDot) {
+    greenDot.classList.add('color-dot-active');
+    greenDot.style.border = '2px solid #fff';
+  }
+
+  // Expose globals for onclick
+  window.setFont = setFont;
+  window.setColor = setColor;
+  window.copyOutput = copyOutput;
+
+  // Init with sample text
+  if (input) { input.value = 'HELLO'; render(); }
+})();
+</script>

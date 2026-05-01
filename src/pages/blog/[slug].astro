@@ -19,6 +19,27 @@ const readingTime = Math.max(1, Math.round(wordCount / 600))
 
 // 只保留 h2/h3
 const tocHeadings = headings.filter(h => h.depth <= 3)
+
+// 相关文章：按 tags 排序，取前 3 篇
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .filter(p => !p.id.startsWith('about') && p.id !== post.id)
+
+const postTags = new Set(post.data.tags ?? [])
+const related = allPosts
+  .map(p => ({
+    post: p,
+    score: (p.data.tags ?? []).filter(t => postTags.has(t)).length,
+  }))
+  .filter(x => x.score > 0)
+  .sort((a, b) => b.score - a.score || b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf())
+  .slice(0, 3)
+  .map(x => x.post)
+
+// 前后篇导航
+const sortedAll = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+const curIdx = sortedAll.findIndex(p => p.id === post.id)
+const prevPost = curIdx < sortedAll.length - 1 ? sortedAll[curIdx + 1] : null
+const nextPost = curIdx > 0 ? sortedAll[curIdx - 1] : null
 ---
 
 <PostLayout
@@ -30,6 +51,9 @@ const tocHeadings = headings.filter(h => h.depth <= 3)
   image={post.data.image}
   readingTime={readingTime}
   headings={tocHeadings}
+  related={related.map(p => ({ slug: p.id.replace(/\.mdx?$/, ''), title: p.data.title, tags: p.data.tags ?? [] }))}
+  prevPost={prevPost ? { slug: prevPost.id.replace(/\.mdx?$/, ''), title: prevPost.data.title } : null}
+  nextPost={nextPost ? { slug: nextPost.id.replace(/\.mdx?$/, ''), title: nextPost.data.title } : null}
 >
   <Content />
 </PostLayout>

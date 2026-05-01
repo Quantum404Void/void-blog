@@ -6,9 +6,59 @@ tags: ["算法", "滑动窗口", "leetcode", "cpp"]
 draft: false
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const complexityData = {
+  labels: ['n=10', 'n=100', 'n=500', 'n=1000', 'n=5000'],
+  datasets: [
+    {
+      label: 'O(n) 滑动窗口',
+      data: [10, 100, 500, 1000, 5000],
+      borderColor: 'rgba(0,212,255,1)',
+      backgroundColor: 'rgba(0,212,255,0.15)',
+      tension: 0.4,
+      fill: true,
+      pointBackgroundColor: 'rgba(0,212,255,1)',
+      pointRadius: 4,
+    },
+    {
+      label: 'O(n²) 暴力枚举',
+      data: [100, 10000, 250000, 1000000, 25000000],
+      borderColor: 'rgba(255,0,170,1)',
+      backgroundColor: 'rgba(255,0,170,0.12)',
+      tension: 0.4,
+      fill: true,
+      pointBackgroundColor: 'rgba(255,0,170,1)',
+      pointRadius: 4,
+    }
+  ]
+}
+
+export const complexityOptions = {
+  scales: {
+    x: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { color: 'rgba(30,30,48,0.8)' },
+      border: { display: false },
+    },
+    y: {
+      type: 'logarithmic',
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { color: 'rgba(30,30,48,0.8)' },
+      border: { display: false },
+    }
+  }
+}
+
 有一类题，暴力解法显而易见，O(n²) 甚至 O(n³)，但总觉得有更好的办法——答案往往是滑动窗口。
 
 滑动窗口的本质是一种**避免重复计算**的思维：通过维护一个可伸缩的区间 `[left, right]`，用 O(1) 的代价在每次移动时更新状态，把嵌套循环压缩成单次遍历。
+
+**直觉上的差距有多大？** 下图展示随输入规模增长，两种算法的操作次数对比（对数坐标）：
+
+<Chart client:only="vue" type="line" data={complexityData} options={complexityOptions} height={260} />
+
+当 n=5000 时，暴力枚举需要 2500 万次操作，而滑动窗口只需要 5000 次——差距达 **5000 倍**。
 
 ---
 

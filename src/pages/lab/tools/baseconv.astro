@@ -1,0 +1,217 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="进制转换 | void.dev">
+  <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
+    <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
+      <span style="color:#00d4ff">❯</span>
+      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='#00d4ff'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <span class="mx-2">/</span>
+      <span style="color:#00d4ff">baseconv</span>
+    </nav>
+
+    <div class="p-6 max-w-3xl mx-auto">
+      <h1 class="text-2xl font-bold mb-2" style="color:#00d4ff;text-shadow:0 0 20px rgba(0,212,255,0.6)">
+        0x 进制转换
+      </h1>
+      <p class="mb-8 text-sm" style="color:var(--color-text-muted)">2 / 8 / 10 / 16 进制互转 · 32-bit 位图 · 位运算</p>
+
+      <!-- 4 input boxes -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-xs mb-2" style="color:#00d4ff;letter-spacing:0.1em">BIN (二进制)</label>
+          <input id="inp-bin" type="text" placeholder="1010" spellcheck="false"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.25);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:10px;padding:10px 14px;outline:none"
+            onfocus="this.style.borderColor='rgba(0,212,255,0.7)';this.style.boxShadow='0 0 12px rgba(0,212,255,0.15)'"
+            onblur="this.style.borderColor='rgba(0,212,255,0.25)';this.style.boxShadow='none'" />
+        </div>
+        <div>
+          <label class="block text-xs mb-2" style="color:#00d4ff;letter-spacing:0.1em">OCT (八进制)</label>
+          <input id="inp-oct" type="text" placeholder="17" spellcheck="false"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.25);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:10px;padding:10px 14px;outline:none"
+            onfocus="this.style.borderColor='rgba(0,212,255,0.7)';this.style.boxShadow='0 0 12px rgba(0,212,255,0.15)'"
+            onblur="this.style.borderColor='rgba(0,212,255,0.25)';this.style.boxShadow='none'" />
+        </div>
+        <div>
+          <label class="block text-xs mb-2" style="color:#00d4ff;letter-spacing:0.1em">DEC (十进制)</label>
+          <input id="inp-dec" type="text" placeholder="-123" spellcheck="false"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.25);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:10px;padding:10px 14px;outline:none"
+            onfocus="this.style.borderColor='rgba(0,212,255,0.7)';this.style.boxShadow='0 0 12px rgba(0,212,255,0.15)'"
+            onblur="this.style.borderColor='rgba(0,212,255,0.25)';this.style.boxShadow='none'" />
+        </div>
+        <div>
+          <label class="block text-xs mb-2" style="color:#00d4ff;letter-spacing:0.1em">HEX (十六进制)</label>
+          <input id="inp-hex" type="text" placeholder="0xFF" spellcheck="false"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.25);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:10px;padding:10px 14px;outline:none"
+            onfocus="this.style.borderColor='rgba(0,212,255,0.7)';this.style.boxShadow='0 0 12px rgba(0,212,255,0.15)'"
+            onblur="this.style.borderColor='rgba(0,212,255,0.25)';this.style.boxShadow='none'" />
+        </div>
+      </div>
+
+      <!-- Bitmap -->
+      <div class="mb-6 rounded-xl p-5" style="background:rgba(0,0,0,0.35);border:1px solid rgba(0,212,255,0.15)">
+        <div class="text-xs mb-3" style="color:rgba(0,212,255,0.6);letter-spacing:0.15em">32-BIT MAP</div>
+        <div id="bitmap" class="font-mono text-sm mb-3" style="letter-spacing:4px;min-height:22px;display:flex;flex-wrap:wrap;gap:8px"></div>
+        <div class="text-xs flex flex-wrap gap-6" style="color:var(--color-text-muted)">
+          <span>Signed int32: <span id="info-signed" style="color:#00d4ff">0</span></span>
+          <span>Unsigned: <span id="info-unsigned" style="color:rgba(0,212,255,0.7)">0</span></span>
+        </div>
+      </div>
+
+      <!-- Bitwise ops -->
+      <div class="rounded-xl p-5" style="background:rgba(0,0,0,0.35);border:1px solid rgba(0,212,255,0.15)">
+        <div class="text-xs mb-4" style="color:rgba(0,212,255,0.6);letter-spacing:0.15em">位运算 (十进制输入)</div>
+        <div class="flex gap-4 mb-4 flex-wrap">
+          <div>
+            <label class="block text-xs mb-1" style="color:var(--color-text-muted)">A</label>
+            <input id="bw-a" type="text" placeholder="42" spellcheck="false"
+              style="width:120px;background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.2);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:8px;padding:8px 12px;outline:none"
+              onfocus="this.style.borderColor='rgba(0,212,255,0.6)'" onblur="this.style.borderColor='rgba(0,212,255,0.2)'" />
+          </div>
+          <div>
+            <label class="block text-xs mb-1" style="color:var(--color-text-muted)">B</label>
+            <input id="bw-b" type="text" placeholder="15" spellcheck="false"
+              style="width:120px;background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.2);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:8px;padding:8px 12px;outline:none"
+              onfocus="this.style.borderColor='rgba(0,212,255,0.6)'" onblur="this.style.borderColor='rgba(0,212,255,0.2)'" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            {id:'bw-and',label:'A & B (AND)'},
+            {id:'bw-or', label:'A | B (OR)'},
+            {id:'bw-xor',label:'A ^ B (XOR)'},
+            {id:'bw-nota',label:'~A (NOT)'},
+          ].map(({id, label}) => (
+            <div style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:10px 12px">
+              <div class="text-xs mb-1" style="color:rgba(0,212,255,0.5)">{label}</div>
+              <div id={id} class="text-sm font-bold" style="color:#00d4ff;min-height:18px">—</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', function () {
+(function () {
+  var activeSource = null;
+
+  function getU32fromDec(v) {
+    var n = parseInt(v, 10);
+    if (isNaN(n)) return NaN;
+    return n >>> 0;
+  }
+
+  function updateBitmap(u32) {
+    var bits = (u32 >>> 0).toString(2).padStart(32, '0');
+    var container = document.getElementById('bitmap');
+    if (!container) return;
+    container.innerHTML = '';
+    for (var i = 0; i < 4; i++) {
+      var group = document.createElement('span');
+      group.style.cssText = 'display:inline-flex;gap:2px';
+      for (var j = 0; j < 8; j++) {
+        var bit = bits[i * 8 + j];
+        var cell = document.createElement('span');
+        cell.textContent = bit === '1' ? '■' : '□';
+        cell.style.cssText = bit === '1'
+          ? 'color:#00d4ff;text-shadow:0 0 6px #00d4ff'
+          : 'color:rgba(0,212,255,0.18)';
+        group.appendChild(cell);
+      }
+      container.appendChild(group);
+    }
+  }
+
+  function updateAll(val, source) {
+    if (isNaN(val)) return;
+    var u32 = val >>> 0;
+    var signed = val | 0;
+
+    if (source !== 'bin') {
+      var el = document.getElementById('inp-bin');
+      if (el) el.value = u32.toString(2);
+    }
+    if (source !== 'oct') {
+      var el = document.getElementById('inp-oct');
+      if (el) el.value = u32.toString(8);
+    }
+    if (source !== 'dec') {
+      var el = document.getElementById('inp-dec');
+      if (el) el.value = signed.toString(10);
+    }
+    if (source !== 'hex') {
+      var el = document.getElementById('inp-hex');
+      if (el) el.value = '0x' + u32.toString(16).toUpperCase();
+    }
+
+    updateBitmap(u32);
+    var si = document.getElementById('info-signed');
+    var ui = document.getElementById('info-unsigned');
+    if (si) si.textContent = signed.toString();
+    if (ui) ui.textContent = u32.toString();
+  }
+
+  function handleInput(source) {
+    var el = document.getElementById('inp-' + source);
+    if (!el) return;
+    var raw = el.value.trim();
+    var val = NaN;
+    if (source === 'bin') {
+      var cleaned = raw.replace(/[^01]/g, '');
+      val = cleaned ? parseInt(cleaned, 2) : NaN;
+    } else if (source === 'oct') {
+      val = raw ? parseInt(raw, 8) : NaN;
+    } else if (source === 'dec') {
+      val = raw ? parseInt(raw, 10) : NaN;
+    } else if (source === 'hex') {
+      var h = raw.replace(/^0x/i, '');
+      val = h ? parseInt(h, 16) : NaN;
+    }
+    updateAll(val, source);
+  }
+
+  ['bin', 'oct', 'dec', 'hex'].forEach(function (id) {
+    var el = document.getElementById('inp-' + id);
+    if (el) el.addEventListener('input', function () { handleInput(id); });
+  });
+
+  function updateBitwise() {
+    var aEl = document.getElementById('bw-a');
+    var bEl = document.getElementById('bw-b');
+    if (!aEl || !bEl) return;
+    var a = parseInt(aEl.value.trim(), 10);
+    var b = parseInt(bEl.value.trim(), 10);
+    var andEl = document.getElementById('bw-and');
+    var orEl  = document.getElementById('bw-or');
+    var xorEl = document.getElementById('bw-xor');
+    var notEl = document.getElementById('bw-nota');
+    if (!isNaN(a) && !isNaN(b)) {
+      if (andEl) andEl.textContent = (a & b).toString();
+      if (orEl)  orEl.textContent  = (a | b).toString();
+      if (xorEl) xorEl.textContent = (a ^ b).toString();
+    } else {
+      if (andEl) andEl.textContent = '—';
+      if (orEl)  orEl.textContent  = '—';
+      if (xorEl) xorEl.textContent = '—';
+    }
+    if (!isNaN(a)) {
+      if (notEl) notEl.textContent = (~a).toString();
+    } else {
+      if (notEl) notEl.textContent = '—';
+    }
+  }
+
+  var bwA = document.getElementById('bw-a');
+  var bwB = document.getElementById('bw-b');
+  if (bwA) bwA.addEventListener('input', updateBitwise);
+  if (bwB) bwB.addEventListener('input', updateBitwise);
+
+  // Init with 255
+  var decEl = document.getElementById('inp-dec');
+  if (decEl) { decEl.value = '255'; handleInput('dec'); }
+})();
+}); // DOMContentLoaded
+</script>

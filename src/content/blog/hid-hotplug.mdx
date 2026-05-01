@@ -5,6 +5,69 @@ pubDate: 2026-04-28
 tags: ["cpp", "hid", "linux", "nodejs", "electron"]
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const solutionCompareData = {
+  labels: ['实现复杂度', 'CPU 占用', '可靠性', '跨平台', '无需 root'],
+  datasets: [
+    {
+      label: 'udev + inotify',
+      data: [4, 1, 5, 1, 1],
+      backgroundColor: 'rgba(255,0,170,0.25)',
+      borderColor: 'rgba(255,0,170,0.8)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(255,0,170,1)',
+      pointRadius: 4,
+    },
+    {
+      label: 'node-hid polling',
+      data: [1, 5, 3, 5, 5],
+      backgroundColor: 'rgba(255,165,0,0.2)',
+      borderColor: 'rgba(255,165,0,0.8)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(255,165,0,1)',
+      pointRadius: 4,
+    },
+    {
+      label: 'usb 库事件',
+      data: [3, 1, 4, 3, 5],
+      backgroundColor: 'rgba(57,255,20,0.2)',
+      borderColor: 'rgba(57,255,20,0.8)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(57,255,20,1)',
+      pointRadius: 4,
+    },
+    {
+      label: 'usb + node-hid 组合 ✅',
+      data: [4, 1, 5, 4, 5],
+      backgroundColor: 'rgba(0,212,255,0.2)',
+      borderColor: 'rgba(0,212,255,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(0,212,255,1)',
+      pointRadius: 4,
+    },
+  ]
+}
+
+export const solutionCompareOptions = {
+  scales: {
+    r: {
+      min: 0,
+      max: 5,
+      ticks: {
+        display: false,
+        stepSize: 1,
+      },
+      grid: { color: 'rgba(136,136,170,0.25)' },
+      angleLines: { color: 'rgba(136,136,170,0.25)' },
+      pointLabels: {
+        color: '#c8c8d8',
+        font: { family: 'JetBrains Mono', size: 11 },
+      },
+    }
+  }
+}
+
 ## 背景
 
 做键盘配置工具时，需要实时检测 HID 设备插拔。
@@ -18,6 +81,12 @@ tags: ["cpp", "hid", "linux", "nodejs", "electron"]
 | `node-hid` polling | 简单 | CPU 占用高 |
 | `usb` 库事件 | 无需 root，跨平台 | 依赖 libusb |
 | `usb` + `node-hid` 组合 | 最佳实践 ✅ | 需要两个依赖 |
+
+**四种方案综合评分对比：**
+
+<Chart client:only="vue" type="radar" data={solutionCompareData} options={solutionCompareOptions} height={280} />
+
+> 分数 1-5，越高越好。CPU 占用邠分评为高分（占用越低 → 得分越高）。
 
 ## 基础实现
 

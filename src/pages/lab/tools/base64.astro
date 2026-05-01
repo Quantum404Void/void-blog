@@ -1,0 +1,247 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="Base64 工具 | void.dev">
+  <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
+    <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
+      <span style="color:#ff00aa">❯</span>
+      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='#ff00aa'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <span class="mx-2">/</span>
+      <span style="color:#ff00aa">base64</span>
+    </nav>
+
+    <div class="p-6 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-2" style="color:#ff00aa;text-shadow:0 0 20px rgba(255,0,170,0.6)">
+        &#91;&#93; Base64 编解码
+      </h1>
+      <p class="mb-6 text-sm" style="color:var(--color-text-muted)">文本 · 文件 · URL Safe</p>
+
+      <!-- Mode tabs -->
+      <div class="flex gap-2 mb-6">
+        <button id="tab-text" class="mode-tab active-tab">📝 文本模式</button>
+        <button id="tab-file" class="mode-tab">📁 文件模式</button>
+      </div>
+
+      <!-- Text mode -->
+      <div id="panel-text">
+        <!-- Direction toggle -->
+        <div class="flex gap-3 items-center mb-4">
+          <span class="text-sm" style="color:var(--color-text-muted)">方向：</span>
+          <label class="radio-label">
+            <input type="radio" name="direction" value="encode" checked style="accent-color:#ff00aa" /> 文本 → Base64
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="direction" value="decode" style="accent-color:#ff00aa" /> Base64 → 文本
+          </label>
+          <label class="radio-label ml-4" style="color:var(--color-text-muted)">
+            <input type="checkbox" id="url-safe" style="accent-color:#ff00aa" /> URL Safe
+          </label>
+        </div>
+
+        <div class="grid gap-4" style="grid-template-columns:1fr 1fr">
+          <div>
+            <label class="block text-xs mb-2" style="color:var(--color-text-muted)">INPUT</label>
+            <textarea id="text-input" rows="10" placeholder="输入内容..." spellcheck="false"
+              style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:12px;padding:14px;outline:none;resize:vertical"
+              onfocus="this.style.borderColor='rgba(255,0,170,0.5)'" onblur="this.style.borderColor='var(--color-void-border)'"></textarea>
+          </div>
+          <div style="position:relative">
+            <label class="block text-xs mb-2" style="color:var(--color-text-muted)">OUTPUT</label>
+            <div class="flex gap-2" style="position:absolute;top:0;right:0">
+              <button id="text-copy" class="action-btn">复制</button>
+              <button id="text-download" class="action-btn">下载</button>
+            </div>
+            <textarea id="text-output" rows="10" readonly spellcheck="false"
+              style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:12px;padding:14px;outline:none;resize:vertical"></textarea>
+          </div>
+        </div>
+        <div id="text-status" class="mt-3 text-xs px-3 py-2 rounded-lg" style="background:var(--color-void-card);border:1px solid var(--color-void-border);color:var(--color-text-muted)">
+          就绪
+        </div>
+      </div>
+
+      <!-- File mode -->
+      <div id="panel-file" style="display:none">
+        <div id="drop-zone"
+          style="border:2px dashed rgba(255,0,170,0.3);border-radius:16px;padding:48px;text-align:center;cursor:pointer;transition:all 0.3s"
+          onmouseenter="this.style.borderColor='rgba(255,0,170,0.7)';this.style.background='rgba(255,0,170,0.05)'"
+          onmouseleave="this.style.borderColor='rgba(255,0,170,0.3)';this.style.background='transparent'">
+          <div style="font-size:40px;margin-bottom:12px">📁</div>
+          <div style="color:var(--color-text-secondary);margin-bottom:8px">拖拽文件到这里</div>
+          <div style="color:var(--color-text-muted);font-size:12px;margin-bottom:16px">或点击选择文件</div>
+          <input id="file-input" type="file" style="display:none" />
+          <button onclick="document.getElementById('file-input').click()" class="action-btn">选择文件</button>
+        </div>
+
+        <div id="file-result" style="display:none;margin-top:16px">
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-xs" style="color:var(--color-text-muted)">BASE64 DATA URL</label>
+            <div class="flex gap-2">
+              <button id="file-copy" class="action-btn">复制</button>
+              <button id="file-download" class="action-btn">下载 .txt</button>
+            </div>
+          </div>
+          <textarea id="file-output" rows="8" readonly spellcheck="false"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:12px;border-radius:12px;padding:14px;outline:none;resize:vertical;word-break:break-all"></textarea>
+          <div id="file-info" class="mt-2 text-xs" style="color:var(--color-text-muted)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .mode-tab {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,0,170,0.25);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-tab:hover, .active-tab {
+    background: rgba(255,0,170,0.1) !important;
+    border-color: rgba(255,0,170,0.6) !important;
+    color: #ff00aa !important;
+  }
+  .radio-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .action-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,0,170,0.3);
+    background: rgba(255,0,170,0.08);
+    color: #ff00aa;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn:hover {
+    background: rgba(255,0,170,0.2);
+    border-color: rgba(255,0,170,0.7);
+  }
+</style>
+
+<script>
+  // Tab switching
+  document.getElementById('tab-text')!.addEventListener('click', () => {
+    document.getElementById('panel-text')!.style.display = 'block'
+    document.getElementById('panel-file')!.style.display = 'none'
+    document.getElementById('tab-text')!.classList.add('active-tab')
+    document.getElementById('tab-file')!.classList.remove('active-tab')
+  })
+  document.getElementById('tab-file')!.addEventListener('click', () => {
+    document.getElementById('panel-text')!.style.display = 'none'
+    document.getElementById('panel-file')!.style.display = 'block'
+    document.getElementById('tab-file')!.classList.add('active-tab')
+    document.getElementById('tab-text')!.classList.remove('active-tab')
+  })
+
+  function applyUrlSafe(s: string) {
+    return s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  }
+  function reverseUrlSafe(s: string) {
+    s = s.replace(/-/g, '+').replace(/_/g, '/')
+    while (s.length % 4) s += '='
+    return s
+  }
+
+  function doTextConvert() {
+    const input = (document.getElementById('text-input') as HTMLTextAreaElement).value
+    const direction = (document.querySelector('input[name="direction"]:checked') as HTMLInputElement).value
+    const urlSafe = (document.getElementById('url-safe') as HTMLInputElement).checked
+    const status = document.getElementById('text-status')!
+
+    try {
+      let result: string
+      if (direction === 'encode') {
+        result = btoa(unescape(encodeURIComponent(input)))
+        if (urlSafe) result = applyUrlSafe(result)
+      } else {
+        let s = input.trim()
+        if (urlSafe) s = reverseUrlSafe(s)
+        result = decodeURIComponent(escape(atob(s)))
+      }
+      ;(document.getElementById('text-output') as HTMLTextAreaElement).value = result
+      status.textContent = `✓ ${direction === 'encode' ? '编码' : '解码'}完成，${result.length} 字符`
+      status.style.color = 'var(--color-text-secondary)'
+    } catch (e: any) {
+      ;(document.getElementById('text-output') as HTMLTextAreaElement).value = ''
+      status.textContent = `✗ ${e.message}`
+      status.style.color = '#ff4466'
+    }
+  }
+
+  document.getElementById('text-input')!.addEventListener('input', doTextConvert)
+  document.querySelectorAll('input[name="direction"]').forEach(r => r.addEventListener('change', doTextConvert))
+  document.getElementById('url-safe')!.addEventListener('change', doTextConvert)
+
+  document.getElementById('text-copy')!.addEventListener('click', () => {
+    const val = (document.getElementById('text-output') as HTMLTextAreaElement).value
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = document.getElementById('text-copy')!
+      btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制', 1500)
+    })
+  })
+
+  document.getElementById('text-download')!.addEventListener('click', () => {
+    const val = (document.getElementById('text-output') as HTMLTextAreaElement).value
+    const blob = new Blob([val], {type:'text/plain'})
+    const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'base64-output.txt'})
+    a.click()
+  })
+
+  // File mode
+  function handleFile(file: File) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const dataUrl = e.target!.result as string
+      ;(document.getElementById('file-output') as HTMLTextAreaElement).value = dataUrl
+      document.getElementById('file-result')!.style.display = 'block'
+      document.getElementById('file-info')!.textContent =
+        `文件：${file.name} · 大小：${(file.size/1024).toFixed(2)} KB · 类型：${file.type || '未知'}`
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const dropZone = document.getElementById('drop-zone')!
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); (e.currentTarget as HTMLElement).style.background = 'rgba(255,0,170,0.1)' })
+  dropZone.addEventListener('dragleave', () => { dropZone.style.background = 'transparent' })
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault()
+    dropZone.style.background = 'transparent'
+    const file = e.dataTransfer?.files[0]
+    if (file) handleFile(file)
+  })
+
+  document.getElementById('file-input')!.addEventListener('change', (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (file) handleFile(file)
+  })
+
+  document.getElementById('file-copy')!.addEventListener('click', () => {
+    const val = (document.getElementById('file-output') as HTMLTextAreaElement).value
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = document.getElementById('file-copy')!
+      btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制', 1500)
+    })
+  })
+
+  document.getElementById('file-download')!.addEventListener('click', () => {
+    const val = (document.getElementById('file-output') as HTMLTextAreaElement).value
+    const blob = new Blob([val], {type:'text/plain'})
+    const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'base64-dataurl.txt'})
+    a.click()
+  })
+</script>

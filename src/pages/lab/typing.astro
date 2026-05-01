@@ -1,0 +1,232 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+const snippets = [
+  `function debounce(fn, delay) {\n  let timer\n  return (...args) => {\n    clearTimeout(timer)\n    timer = setTimeout(() => fn(...args), delay)\n  }\n}`,
+  `const quickSort = (arr) => {\n  if (arr.length <= 1) return arr\n  const pivot = arr[arr.length >> 1]\n  const left = arr.filter(x => x < pivot)\n  const right = arr.filter(x => x > pivot)\n  return [...quickSort(left), pivot, ...quickSort(right)]\n}`,
+  `async function fetchWithRetry(url, retries = 3) {\n  for (let i = 0; i < retries; i++) {\n    try {\n      const res = await fetch(url)\n      if (res.ok) return await res.json()\n    } catch (e) {\n      if (i === retries - 1) throw e\n      await new Promise(r => setTimeout(r, 1000 * (i + 1)))\n    }\n  }\n}`,
+  `const memo = (fn) => {\n  const cache = new Map()\n  return (...args) => {\n    const key = JSON.stringify(args)\n    if (cache.has(key)) return cache.get(key)\n    const result = fn(...args)\n    cache.set(key, result)\n    return result\n  }\n}`,
+  `class EventEmitter {\n  #listeners = new Map()\n  on(event, fn) {\n    const list = this.#listeners.get(event) ?? []\n    this.#listeners.set(event, [...list, fn])\n    return () => this.off(event, fn)\n  }\n  emit(event, ...args) {\n    this.#listeners.get(event)?.forEach(fn => fn(...args))\n  }\n}`,
+  `const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x)\nconst compose = (...fns) => pipe(...fns.reverse())\n\nconst transform = pipe(\n  x => x * 2,\n  x => x + 1,\n  x => x ** 2\n)`,
+  `function* range(start, end, step = 1) {\n  for (let i = start; i < end; i += step) {\n    yield i\n  }\n}\n\nconst evens = [...range(0, 20, 2)]\nconsole.log(evens)`,
+  `const useLocalStorage = (key, initial) => {\n  const [value, setValue] = useState(() => {\n    try {\n      const item = localStorage.getItem(key)\n      return item ? JSON.parse(item) : initial\n    } catch { return initial }\n  })\n  const set = (v) => {\n    setValue(v)\n    localStorage.setItem(key, JSON.stringify(v))\n  }\n  return [value, set]\n}`,
+]
+---
+
+<BaseLayout title="Code Typing | void.dev">
+  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-4xl mx-auto px-6 h-14 flex items-center gap-4">
+        <a href="/void-blog/lab/" class="font-mono text-sm text-[var(--color-neon-green)] transition-all">~/lab</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <span class="font-mono text-xs text-[var(--color-neon-pink)]">typing</span>
+        <div class="ml-auto flex items-center gap-6 font-mono text-xs">
+          <span class="text-[var(--color-text-muted)]">WPM: <span id="wpm" class="text-[var(--color-neon-cyan)] font-bold">--</span></span>
+          <span class="text-[var(--color-text-muted)]">ACC: <span id="acc" class="text-[var(--color-neon-green)] font-bold">--</span></span>
+          <span class="text-[var(--color-text-muted)]">TIME: <span id="timer" class="text-[var(--color-neon-purple)] font-bold">60</span>s</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-6 py-12 flex-1 flex flex-col">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-pink)] mb-2" style="text-shadow:0 0 20px rgba(255,0,170,0.5)">Code Typing</h1>
+        <p class="font-mono text-xs text-[var(--color-text-muted)]">打完一段代码，测你的 WPM</p>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        {['WPM','ACC','ERRORS','TIME'].map((label, i) => (
+          <div class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] text-center">
+            <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{label}</div>
+            <div id={`stat-${label.toLowerCase()}`} class="font-mono text-xl font-bold" style={`color:${['#00d4ff','#39ff14','#ff00aa','#b400ff'][i]}`}>--</div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Code display -->
+      <div class="flex-1 border border-[var(--color-void-border)] rounded-xl bg-[var(--color-void-card)] p-6 mb-4 relative overflow-auto" style="min-height:200px">
+        <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span class="text-[var(--color-neon-pink)]">▶</span> snippet.ts
+          <span class="ml-auto text-[rgba(255,255,255,0.1)] text-xs" id="snippet-idx">1/8</span>
+        </div>
+        <pre id="code-display" class="font-mono text-sm leading-relaxed whitespace-pre-wrap" style="color:#e8e8f0;outline:none" tabindex="0"></pre>
+      </div>
+
+      <!-- Input -->
+      <div class="relative">
+        <textarea
+          id="typing-input"
+          class="w-full font-mono text-sm rounded-xl border p-4 resize-none"
+          style="background:rgba(0,0,0,0.4);border-color:rgba(255,0,170,0.2);color:#e8e8f0;outline:none;height:120px;caret-color:#ff00aa;transition:border-color 0.2s"
+          placeholder="开始打字...（聚焦后自动计时）"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        ></textarea>
+        <div class="absolute bottom-4 right-4 flex gap-3">
+          <button id="btn-next" class="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-[rgba(255,0,170,0.3)] text-[rgba(255,0,170,0.7)] hover:bg-[rgba(255,0,170,0.1)] transition-all">下一段 →</button>
+          <button id="btn-reset" class="font-mono text-[10px] px-3 py-1.5 rounded-lg border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-void-muted)] transition-all">重置 R</button>
+        </div>
+      </div>
+
+      <!-- Result overlay -->
+      <div id="result-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(10,10,15,0.92)">
+        <div class="border border-[rgba(0,212,255,0.3)] rounded-2xl p-10 text-center font-mono" style="background:#13131f;min-width:320px;box-shadow:0 0 40px rgba(0,212,255,0.1)">
+          <div class="text-3xl mb-4">🏁</div>
+          <div class="text-[var(--color-neon-cyan)] text-2xl font-bold mb-1">RESULT</div>
+          <div class="grid grid-cols-2 gap-4 mt-6 mb-8">
+            <div><div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-1">WPM</div><div id="result-wpm" class="text-3xl font-bold text-[var(--color-neon-cyan)]">--</div></div>
+            <div><div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-1">ACC</div><div id="result-acc" class="text-3xl font-bold text-[var(--color-neon-green)]">--</div></div>
+            <div><div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-1">ERRORS</div><div id="result-errors" class="text-3xl font-bold text-[var(--color-neon-pink)]">--</div></div>
+            <div><div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-1">CHARS</div><div id="result-chars" class="text-3xl font-bold text-[var(--color-neon-purple)]">--</div></div>
+          </div>
+          <button id="result-retry" class="w-full font-mono text-sm px-6 py-3 rounded-xl border border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.1)] transition-all">再来一次 ↺</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script define:vars={{ snippets }}>
+    const input = document.getElementById('typing-input')
+    const display = document.getElementById('code-display')
+    const wpmEl = document.getElementById('wpm')
+    const accEl = document.getElementById('acc')
+    const timerEl = document.getElementById('timer')
+    const statWpm = document.getElementById('stat-wpm')
+    const statAcc = document.getElementById('stat-acc')
+    const statErrors = document.getElementById('stat-errors')
+    const statTime = document.getElementById('stat-time')
+    const snippetIdx = document.getElementById('snippet-idx')
+    const resultOverlay = document.getElementById('result-overlay')
+
+    let currentSnippet = 0
+    let target = ''
+    let startTime = 0
+    let timerInterval = null
+    let timeLeft = 60
+    let errors = 0
+    let started = false
+    let finished = false
+
+    function getSnippet() {
+      return snippets[currentSnippet % snippets.length]
+    }
+
+    function renderDisplay(typed) {
+      const chars = target.split('')
+      let html = ''
+      chars.forEach((ch, i) => {
+        const t = typed[i]
+        const display_ch = ch === '\n' ? '↵\n' : ch === ' ' ? '·' : ch
+        if (t === undefined) {
+          html += `<span style="color:rgba(232,232,240,0.4)">${escHtml(display_ch)}</span>`
+        } else if (t === ch) {
+          html += `<span style="color:#39ff14">${escHtml(display_ch)}</span>`
+        } else {
+          html += `<span style="color:#ff00aa;text-decoration:underline;background:rgba(255,0,170,0.1)">${escHtml(display_ch)}</span>`
+        }
+      })
+      // cursor
+      if (typed.length < chars.length) {
+        const pos = typed.length
+        html = html.substring(0, html.lastIndexOf('</span>', html.indexOf(`>${escHtml(target[pos] === '\n' ? '↵\n' : target[pos] === ' ' ? '·' : target[pos])}</span>`) + 1) + 1) 
+        // simpler: inject cursor marker
+      }
+      display.innerHTML = html
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    }
+
+    function calcWpm(typed) {
+      if (!startTime) return 0
+      const elapsed = (Date.now() - startTime) / 1000 / 60
+      const words = typed.length / 5
+      return Math.round(words / Math.max(elapsed, 0.01))
+    }
+
+    function calcAcc(typed) {
+      let correct = 0
+      typed.split('').forEach((ch, i) => { if (ch === target[i]) correct++ })
+      return typed.length ? Math.round(correct / typed.length * 100) : 100
+    }
+
+    function startTimer() {
+      timeLeft = 60; started = true
+      startTime = Date.now()
+      timerInterval = setInterval(() => {
+        timeLeft--
+        timerEl.textContent = String(timeLeft)
+        statTime.textContent = String(timeLeft) + 's'
+        if (timeLeft <= 0) endGame()
+      }, 1000)
+    }
+
+    function endGame() {
+      finished = true
+      clearInterval(timerInterval)
+      const typed = input.value
+      const wpm = calcWpm(typed)
+      const acc = calcAcc(typed)
+      document.getElementById('result-wpm').textContent = String(wpm)
+      document.getElementById('result-acc').textContent = acc + '%'
+      document.getElementById('result-errors').textContent = String(errors)
+      document.getElementById('result-chars').textContent = String(typed.length)
+      resultOverlay.classList.remove('hidden')
+    }
+
+    function reset() {
+      clearInterval(timerInterval)
+      target = getSnippet()
+      input.value = ''
+      errors = 0; started = false; finished = false; timeLeft = 60; startTime = 0
+      wpmEl.textContent = '--'; accEl.textContent = '--'; timerEl.textContent = '60'
+      statWpm.textContent = '--'; statAcc.textContent = '--'
+      statErrors.textContent = '--'; statTime.textContent = '--'
+      snippetIdx.textContent = `${(currentSnippet % snippets.length) + 1}/${snippets.length}`
+      resultOverlay.classList.add('hidden')
+      renderDisplay('')
+      input.focus()
+    }
+
+    input.addEventListener('input', () => {
+      if (finished) return
+      if (!started) startTimer()
+      const typed = input.value
+      // count errors
+      errors = 0
+      typed.split('').forEach((ch, i) => { if (ch !== target[i]) errors++ })
+      const wpm = calcWpm(typed)
+      const acc = calcAcc(typed)
+      wpmEl.textContent = String(wpm)
+      accEl.textContent = acc + '%'
+      statWpm.textContent = String(wpm)
+      statAcc.textContent = acc + '%'
+      statErrors.textContent = String(errors)
+
+      // style input border
+      input.style.borderColor = errors > 0 ? 'rgba(255,0,170,0.5)' : 'rgba(57,255,20,0.3)'
+
+      renderDisplay(typed)
+
+      // auto advance
+      if (typed === target) {
+        currentSnippet++
+        reset()
+      }
+    })
+
+    document.getElementById('btn-reset').addEventListener('click', reset)
+    document.getElementById('btn-next').addEventListener('click', () => { currentSnippet++; reset() })
+    document.getElementById('result-retry').addEventListener('click', reset)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' && document.activeElement !== input) reset()
+    })
+
+    reset()
+  </script>
+</BaseLayout>

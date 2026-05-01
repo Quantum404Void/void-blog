@@ -1,0 +1,226 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Chart from '../components/Chart.vue'
+import { getCollection } from 'astro:content'
+
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .filter(p => !p.id.startsWith('about'))
+  .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
+
+// 按年月统计
+const byMonth: Record<string, number> = {}
+for (const p of allPosts) {
+  const key = p.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }).replace('/', '-')
+  byMonth[key] = (byMonth[key] || 0) + 1
+}
+
+// 只取有文章的月份，按时间排序
+const monthLabels = Object.keys(byMonth).sort()
+const monthCounts = monthLabels.map(k => byMonth[k])
+
+// 按年统计
+const byYear: Record<string, number> = {}
+for (const p of allPosts) {
+  const y = String(p.data.pubDate.getFullYear())
+  byYear[y] = (byYear[y] || 0) + 1
+}
+const yearLabels = Object.keys(byYear).sort()
+const yearCounts = yearLabels.map(k => byYear[k])
+
+// Tag 分布
+const tagCounts: Record<string, number> = {}
+for (const p of allPosts) {
+  for (const t of (p.data.tags ?? [])) {
+    tagCounts[t] = (tagCounts[t] || 0) + 1
+  }
+}
+const top12Tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 12)
+
+// 最近 7 天文章数
+const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+const recentCount = allPosts.filter(p => p.data.pubDate.valueOf() > sevenDaysAgo.valueOf()).length
+const totalWords = allPosts.reduce((s, p) => s + (p.body?.length ?? 0), 0)
+const totalReadingMin = Math.round(totalWords / 600)
+
+// 图表数据
+const yearChartData = {
+  labels: yearLabels,
+  datasets: [{
+    label: '文章数',
+    data: yearCounts,
+    backgroundColor: yearLabels.map((_, i) => {
+      const colors = ['rgba(0,212,255,0.7)', 'rgba(57,255,20,0.7)', 'rgba(180,0,255,0.7)', 'rgba(255,0,170,0.7)', 'rgba(255,165,0,0.7)']
+      return colors[i % colors.length]
+    }),
+    borderColor: yearLabels.map((_, i) => {
+      const colors = ['rgba(0,212,255,1)', 'rgba(57,255,20,1)', 'rgba(180,0,255,1)', 'rgba(255,0,170,1)', 'rgba(255,165,0,1)']
+      return colors[i % colors.length]
+    }),
+    borderWidth: 1,
+    borderRadius: 6,
+  }]
+}
+
+const yearChartOptions = {
+  plugins: { legend: { display: false } },
+  scales: {
+    x: {
+      ticks: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 11 } },
+      grid: { display: false },
+      border: { display: false },
+    },
+    y: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 },
+      grid: { color: 'rgba(30,30,48,0.8)' },
+      border: { display: false },
+    }
+  }
+}
+
+const tagChartData = {
+  labels: top12Tags.map(([t]) => `#${t}`),
+  datasets: [{
+    label: '文章数',
+    data: top12Tags.map(([, c]) => c),
+    backgroundColor: 'rgba(0,212,255,0.18)',
+    borderColor: 'rgba(0,212,255,0.8)',
+    borderWidth: 2,
+    pointBackgroundColor: 'rgba(0,212,255,1)',
+    pointRadius: 3,
+    fill: true,
+    tension: 0.3,
+  }]
+}
+
+const tagChartOptions = {
+  indexAxis: 'y' as const,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 },
+      grid: { color: 'rgba(30,30,48,0.8)' },
+      border: { display: false },
+    },
+    y: {
+      ticks: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { display: false },
+      border: { display: false },
+    }
+  }
+}
+---
+
+<BaseLayout title="统计看板 | void.dev">
+  <div class="min-h-screen bg-[var(--color-void)]">
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
+        <a href="/void-blog/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
+          void.dev
+        </a>
+        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
+          <a href="/void-blog/blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</a>
+          <a href="/void-blog/tags/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</a>
+          <a href="/void-blog/search/" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</a>
+          <a href="/void-blog/stats/" class="text-[var(--color-neon-cyan)]">~/stats</a>
+          <a href="/void-blog/lab/" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.8)">~/lab</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <!-- Header -->
+      <div class="mb-12">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-3">analytics</p>
+        <h1 class="font-mono text-3xl font-bold text-[var(--color-text-primary)] mb-2">
+          <span class="text-[var(--color-neon-cyan)]">~/</span>stats
+        </h1>
+        <p class="font-mono text-sm text-[var(--color-text-muted)]">博客数据概览</p>
+      </div>
+
+      <!-- 概览卡片 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
+        {[
+          { label: '总文章数', value: allPosts.length, color: 'neon-cyan', icon: '▸', badge: recentCount > 0 ? `+${recentCount} 本周` : null },
+          { label: '累计字数', value: `${(totalWords / 1000).toFixed(1)}k`, color: 'neon-green', icon: '▸', badge: null },
+          { label: '阅读时长', value: `${totalReadingMin} min`, color: 'neon-purple', icon: '▸', badge: null },
+          { label: '标签数量', value: Object.keys(tagCounts).length, color: 'neon-pink', icon: '▸', badge: null },
+        ].map(({ label, value, color, icon, badge }) => (
+          <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-5">
+            <div class={`font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2 flex items-center gap-1`}>
+              <span class={`text-[var(--color-${color})]`}>{icon}</span>
+              {label}
+            </div>
+            <div class="flex items-end gap-2">
+              <div class={`font-mono text-2xl font-bold text-[var(--color-${color})]`}>{value}</div>
+              {badge && (
+                <span class="font-mono text-[9px] px-1.5 py-0.5 rounded-full bg-[rgba(0,255,136,0.12)] text-[var(--color-neon-green)] border border-[rgba(0,255,136,0.25)] mb-1 whitespace-nowrap">
+                  {badge}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- 图表区域 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- 年度分布 -->
+        <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+          <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+            <span class="text-[var(--color-neon-green)]">▶</span> 年度文章分布
+          </h2>
+          <Chart client:only="vue" type="bar" data={yearChartData} options={yearChartOptions} height={220} />
+        </div>
+
+        <!-- Tag 分布 -->
+        <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+          <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+            <span class="text-[var(--color-neon-cyan)]">▶</span> 热门标签 Top 12
+          </h2>
+          <Chart client:only="vue" type="bar" data={tagChartData} options={tagChartOptions} height={280} />
+        </div>
+
+      </div>
+
+      <!-- 文章时间线 -->
+      <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <span class="text-[var(--color-neon-purple)]">▶</span> 文章时间线
+        </h2>
+        <div class="space-y-0.5 max-h-80 overflow-y-auto pr-2 timeline-scroll">
+          {allPosts.slice().reverse().map(p => {
+            const slug = p.id.replace(/\.mdx?$/, '')
+            return (
+              <a
+                href={`/void-blog/blog/${slug}/`}
+                class="group flex items-center gap-4 py-2 px-2 rounded-lg hover:bg-[var(--color-void-muted)] transition-colors"
+              >
+                <time class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-24">
+                  {p.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                </time>
+                <span class="font-mono text-xs text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors line-clamp-1 flex-1">
+                  {p.data.title}
+                </span>
+                <div class="hidden sm:flex flex-wrap gap-1 shrink-0">
+                  {(p.data.tags ?? []).slice(0, 2).map(t => (
+                    <span class="font-mono text-[9px] text-[var(--color-text-muted)] bg-[var(--color-void-muted)] px-1.5 py-0.5 rounded-full">#{t}</span>
+                  ))}
+                </div>
+              </a>
+            )
+          })}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-[var(--color-void-border)] py-8 mt-8">
+      <div class="max-w-5xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)] text-center">
+        <a href="/void-blog/" class="hover:text-[var(--color-neon-cyan)] transition-colors">← 返回首页</a>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>

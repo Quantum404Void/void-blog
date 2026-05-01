@@ -1,0 +1,305 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="颜色工具 | void.dev">
+  <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
+    <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
+      <span style="color:var(--color-neon-purple)">❯</span>
+      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='var(--color-neon-purple)'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <span class="mx-2">/</span>
+      <span style="color:var(--color-neon-purple)">color</span>
+    </nav>
+
+    <div class="p-6 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-2" style="color:var(--color-neon-purple);text-shadow:0 0 20px rgba(180,0,255,0.6)">
+        🎨 颜色工具
+      </h1>
+      <p class="mb-6 text-sm" style="color:var(--color-text-muted)">颜色转换 · 对比度 · 渐变 · 历史</p>
+
+      <div class="grid gap-6" style="grid-template-columns:1fr 1fr">
+        <!-- Left: picker + formats -->
+        <div>
+          <div class="p-5 rounded-xl mb-4" style="background:var(--color-void-card);border:1px solid var(--color-void-border)">
+            <div class="flex gap-4 items-center mb-4">
+              <input id="color-picker" type="color" value="#b400ff"
+                style="width:72px;height:72px;border:none;background:none;cursor:pointer;border-radius:12px;padding:0" />
+              <div id="color-preview" style="flex:1;height:72px;border-radius:12px;border:1px solid var(--color-void-border);background:#b400ff"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-xs" style="color:var(--color-text-muted)">手动输入（任意格式）</label>
+              <input id="color-manual" type="text" value="#b400ff" placeholder="#hex / rgb() / hsl()"
+                style="width:100%;margin-top:4px;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:8px;padding:8px 12px;outline:none"
+                onfocus="this.style.borderColor='rgba(180,0,255,0.5)'" onblur="this.style.borderColor='var(--color-void-border)'" />
+            </div>
+
+            <div class="grid gap-2">
+              {[['HEX','color-hex'],['RGB','color-rgb'],['HSL','color-hsl'],['RGBA','color-rgba']].map(([label,id]) => (
+                <div class="flex items-center gap-2">
+                  <span class="text-xs w-12" style="color:var(--color-text-muted)">{label}</span>
+                  <input id={id} readonly type="text"
+                    style="flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:5px 10px;outline:none"
+                    onclick={`navigator.clipboard.writeText(this.value).then(()=>{this.style.borderColor='rgba(180,0,255,0.8)';setTimeout(()=>this.style.borderColor='var(--color-void-border)',800)})`} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="p-4 rounded-xl" style="background:var(--color-void-card);border:1px solid var(--color-void-border)">
+            <div class="text-xs mb-3" style="color:var(--color-text-muted)">最近颜色（点击恢复）</div>
+            <div id="color-history" class="flex gap-2 flex-wrap"></div>
+          </div>
+        </div>
+
+        <!-- Right: contrast + gradient -->
+        <div>
+          <!-- Contrast -->
+          <div class="p-5 rounded-xl mb-4" style="background:var(--color-void-card);border:1px solid var(--color-void-border)">
+            <div class="text-xs mb-3" style="color:var(--color-text-muted)">WCAG 对比度计算</div>
+            <div class="grid gap-2 mb-3" style="grid-template-columns:1fr 1fr">
+              <div>
+                <label class="text-xs" style="color:var(--color-text-muted)">颜色 A</label>
+                <div class="flex gap-2 mt-1">
+                  <input id="contrast-a-picker" type="color" value="#b400ff"
+                    style="width:36px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;padding:0" />
+                  <input id="contrast-a" type="text" value="#b400ff"
+                    style="flex:1;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:5px 8px;outline:none" />
+                </div>
+              </div>
+              <div>
+                <label class="text-xs" style="color:var(--color-text-muted)">颜色 B</label>
+                <div class="flex gap-2 mt-1">
+                  <input id="contrast-b-picker" type="color" value="#ffffff"
+                    style="width:36px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;padding:0" />
+                  <input id="contrast-b" type="text" value="#ffffff"
+                    style="flex:1;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:5px 8px;outline:none" />
+                </div>
+              </div>
+            </div>
+            <div id="contrast-preview" style="height:40px;border-radius:8px;border:1px solid var(--color-void-border);background:#b400ff;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;margin-bottom:10px">
+              Sample Text 示例文字
+            </div>
+            <div id="contrast-result" class="text-sm" style="color:var(--color-text-secondary)">计算中...</div>
+          </div>
+
+          <!-- Gradient -->
+          <div class="p-5 rounded-xl" style="background:var(--color-void-card);border:1px solid var(--color-void-border)">
+            <div class="text-xs mb-3" style="color:var(--color-text-muted)">CSS 渐变生成</div>
+            <div class="grid gap-2 mb-3" style="grid-template-columns:1fr 1fr">
+              <div>
+                <label class="text-xs" style="color:var(--color-text-muted)">起始色</label>
+                <div class="flex gap-2 mt-1">
+                  <input id="grad-a-picker" type="color" value="#b400ff"
+                    style="width:36px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;padding:0" />
+                  <input id="grad-a" type="text" value="#b400ff"
+                    style="flex:1;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:5px 8px;outline:none" />
+                </div>
+              </div>
+              <div>
+                <label class="text-xs" style="color:var(--color-text-muted)">结束色</label>
+                <div class="flex gap-2 mt-1">
+                  <input id="grad-b-picker" type="color" value="#00d4ff"
+                    style="width:36px;height:32px;border:none;background:none;cursor:pointer;border-radius:6px;padding:0" />
+                  <input id="grad-b" type="text" value="#00d4ff"
+                    style="flex:1;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:12px;border-radius:6px;padding:5px 8px;outline:none" />
+                </div>
+              </div>
+            </div>
+            <div id="grad-preview" style="height:48px;border-radius:8px;border:1px solid var(--color-void-border);background:linear-gradient(135deg,#b400ff,#00d4ff);margin-bottom:10px"></div>
+            <div class="relative">
+              <input id="grad-code" readonly type="text"
+                style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-secondary);font-family:var(--font-mono);font-size:11px;border-radius:6px;padding:6px 70px 6px 10px;outline:none"
+                value="linear-gradient(135deg, #b400ff, #00d4ff)" />
+              <button id="grad-copy" onclick="copyGrad()"
+                style="position:absolute;right:4px;top:3px;background:rgba(180,0,255,0.15);border:1px solid rgba(180,0,255,0.3);color:var(--color-neon-purple);font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer">
+                复制
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Color conversion utilities
+  function hexToRgb(hex: string): [number,number,number] | null {
+    hex = hex.replace('#','')
+    if (hex.length === 3) hex = hex.split('').map(c => c+c).join('')
+    if (hex.length !== 6) return null
+    const n = parseInt(hex, 16)
+    return [n>>16&255, n>>8&255, n&255]
+  }
+  function rgbToHex(r: number, g: number, b: number) {
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('')
+  }
+  function rgbToHsl(r: number, g: number, b: number): [number,number,number] {
+    r/=255; g/=255; b/=255
+    const max = Math.max(r,g,b), min = Math.min(r,g,b)
+    let h=0, s=0, l=(max+min)/2
+    if (max !== min) {
+      const d = max-min; s = l>0.5 ? d/(2-max-min) : d/(max+min)
+      switch(max) {
+        case r: h=((g-b)/d+(g<b?6:0))/6; break
+        case g: h=((b-r)/d+2)/6; break
+        case b: h=((r-g)/d+4)/6; break
+      }
+    }
+    return [Math.round(h*360), Math.round(s*100), Math.round(l*100)]
+  }
+
+  function parseColor(s: string): [number,number,number] | null {
+    s = s.trim()
+    if (s.startsWith('#')) return hexToRgb(s)
+    let m = s.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
+    if (m) return [parseInt(m[1]),parseInt(m[2]),parseInt(m[3])]
+    m = s.match(/hsl\s*\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%/)
+    if (m) {
+      const [h,s,l] = [parseInt(m[1])/360, parseInt(m[2])/100, parseInt(m[3])/100]
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if(t<0) t+=1; if(t>1) t-=1
+        if(t<1/6) return p+(q-p)*6*t
+        if(t<1/2) return q
+        if(t<2/3) return p+(q-p)*(2/3-t)*6
+        return p
+      }
+      const q = l<0.5 ? l*(1+s) : l+s-l*s
+      const p = 2*l-q
+      return [Math.round(hue2rgb(p,q,h+1/3)*255), Math.round(hue2rgb(p,q,h)*255), Math.round(hue2rgb(p,q,h-1/3)*255)]
+    }
+    return null
+  }
+
+  function luminance(r: number, g: number, b: number) {
+    const srgb = [r,g,b].map(v => { v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4) })
+    return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2]
+  }
+
+  function contrast(c1: [number,number,number], c2: [number,number,number]) {
+    const [l1, l2] = [luminance(...c1), luminance(...c2)]
+    return (Math.max(l1,l2)+0.05) / (Math.min(l1,l2)+0.05)
+  }
+
+  let history: string[] = JSON.parse(localStorage.getItem('color-history') || '[]')
+
+  function addHistory(hex: string) {
+    history = [hex, ...history.filter(c => c !== hex)].slice(0, 8)
+    localStorage.setItem('color-history', JSON.stringify(history))
+    renderHistory()
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('color-history')!
+    el.innerHTML = history.map(c => `
+      <div onclick="setColor('${c}')"
+        style="width:36px;height:36px;border-radius:8px;background:${c};cursor:pointer;border:2px solid rgba(255,255,255,0.1);transition:transform 0.1s"
+        onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='scale(1)'"
+        title="${c}"></div>
+    `).join('')
+  }
+
+  function setColor(hex: string) {
+    ;(document.getElementById('color-picker') as HTMLInputElement).value = hex
+    ;(document.getElementById('color-manual') as HTMLInputElement).value = hex
+    updateFromHex(hex)
+  }
+
+  function updateFromHex(hex: string) {
+    const rgb = hexToRgb(hex)
+    if (!rgb) return
+    const [r,g,b] = rgb
+    const [h,s,l] = rgbToHsl(r,g,b)
+    ;(document.getElementById('color-hex') as HTMLInputElement).value = hex
+    ;(document.getElementById('color-rgb') as HTMLInputElement).value = `rgb(${r}, ${g}, ${b})`
+    ;(document.getElementById('color-hsl') as HTMLInputElement).value = `hsl(${h}, ${s}%, ${l}%)`
+    ;(document.getElementById('color-rgba') as HTMLInputElement).value = `rgba(${r}, ${g}, ${b}, 1)`
+    document.getElementById('color-preview')!.style.background = hex
+    addHistory(hex)
+    updateContrast()
+    updateGrad()
+  }
+
+  document.getElementById('color-picker')!.addEventListener('input', (e) => {
+    const hex = (e.target as HTMLInputElement).value
+    ;(document.getElementById('color-manual') as HTMLInputElement).value = hex
+    updateFromHex(hex)
+  })
+
+  document.getElementById('color-manual')!.addEventListener('input', (e) => {
+    const val = (e.target as HTMLInputElement).value.trim()
+    const rgb = parseColor(val)
+    if (rgb) {
+      const hex = rgbToHex(...rgb)
+      ;(document.getElementById('color-picker') as HTMLInputElement).value = hex
+      updateFromHex(hex)
+    }
+  })
+
+  // Contrast
+  function updateContrast() {
+    const aVal = (document.getElementById('contrast-a') as HTMLInputElement).value
+    const bVal = (document.getElementById('contrast-b') as HTMLInputElement).value
+    const ca = parseColor(aVal), cb = parseColor(bVal)
+    if (!ca || !cb) return
+    const ratio = contrast(ca, cb)
+    const preview = document.getElementById('contrast-preview')!
+    preview.style.background = `rgb(${ca.join(',')})`
+    preview.style.color = `rgb(${cb.join(',')})`
+    const aa = ratio >= 4.5, aaa = ratio >= 7, aalarge = ratio >= 3
+    document.getElementById('contrast-result')!.innerHTML = `
+      <span style="color:#ffa500;font-size:18px;font-weight:700">${ratio.toFixed(2)}:1</span>
+      &nbsp;&nbsp;
+      <span style="color:${aaa?'#00ff88':'var(--color-text-muted)'}">AAA ${aaa?'✓':'✗'}</span>
+      &nbsp;
+      <span style="color:${aa?'#00ff88':'var(--color-text-muted)'}">AA ${aa?'✓':'✗'}</span>
+      &nbsp;
+      <span style="color:${aalarge?'#00ff88':'var(--color-text-muted)'}">AA Large ${aalarge?'✓':'✗'}</span>
+    `
+  }
+
+  ['contrast-a','contrast-b'].forEach(id => {
+    document.getElementById(id)!.addEventListener('input', updateContrast)
+  })
+  ;[['contrast-a-picker','contrast-a'],['contrast-b-picker','contrast-b']].forEach(([picker,text]) => {
+    document.getElementById(picker)!.addEventListener('input', (e) => {
+      ;(document.getElementById(text) as HTMLInputElement).value = (e.target as HTMLInputElement).value
+      updateContrast()
+    })
+  })
+
+  // Gradient
+  function updateGrad() {
+    const a = (document.getElementById('grad-a') as HTMLInputElement).value
+    const b = (document.getElementById('grad-b') as HTMLInputElement).value
+    const css = `linear-gradient(135deg, ${a}, ${b})`
+    document.getElementById('grad-preview')!.style.background = css
+    ;(document.getElementById('grad-code') as HTMLInputElement).value = css
+  }
+  ;[['grad-a-picker','grad-a'],['grad-b-picker','grad-b']].forEach(([picker,text]) => {
+    document.getElementById(picker)!.addEventListener('input', (e) => {
+      ;(document.getElementById(text) as HTMLInputElement).value = (e.target as HTMLInputElement).value
+      updateGrad()
+    })
+  })
+  ;['grad-a','grad-b'].forEach(id => document.getElementById(id)!.addEventListener('input', updateGrad))
+
+  function copyGrad() {
+    const val = (document.getElementById('grad-code') as HTMLInputElement).value
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = document.getElementById('grad-copy')!
+      btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制', 1500)
+    })
+  }
+
+  // expose to inline onclick
+  ;(window as any).setColor = setColor
+  ;(window as any).copyGrad = copyGrad
+
+  // init
+  renderHistory()
+  updateFromHex('#b400ff')
+  updateContrast()
+  updateGrad()
+</script>

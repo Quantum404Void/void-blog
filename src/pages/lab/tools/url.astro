@@ -1,0 +1,349 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="URL 工具 | void.dev">
+  <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
+    <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
+      <span style="color:#00d4ff">❯</span>
+      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='#00d4ff'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <span class="mx-2">/</span>
+      <span style="color:#00d4ff">url</span>
+    </nav>
+
+    <div class="p-6 max-w-5xl mx-auto">
+      <h1 class="text-2xl font-bold mb-2" style="color:#00d4ff;text-shadow:0 0 20px rgba(0,212,255,0.6)">
+        🔗 URL 工具
+      </h1>
+      <p class="mb-8 text-sm" style="color:var(--color-text-muted)">URL 解析 · 编解码 · 构建</p>
+
+      <!-- Tab Navigation -->
+      <div class="flex gap-2 mb-6 flex-wrap">
+        <button class="tab-btn active-tab" data-tab="parse" onclick="switchTab('parse')">解析</button>
+        <button class="tab-btn" data-tab="encode" onclick="switchTab('encode')">编码 / 解码</button>
+        <button class="tab-btn" data-tab="build" onclick="switchTab('build')">构建 URL</button>
+      </div>
+
+      <!-- Tab: Parse -->
+      <div id="tab-parse" class="tab-content">
+        <div class="mb-4">
+          <label class="block text-xs mb-2" style="color:var(--color-text-muted)">输入 URL</label>
+          <input id="parse-input" type="text" placeholder="https://example.com:8080/path?a=1&b=2#section"
+            class="w-full px-4 py-3 rounded-lg text-sm outline-none"
+            style="background:var(--color-void-card);border:1px solid rgba(0,212,255,0.3);color:var(--color-text-primary);caret-color:#00d4ff"
+            oninput="parseURL()" />
+        </div>
+        <div id="parse-error" class="hidden mb-4 px-4 py-2 rounded text-sm" style="background:rgba(255,0,0,0.1);color:#ff6b6b;border:1px solid rgba(255,0,0,0.2)"></div>
+        <div id="parse-result" class="hidden">
+          <div class="grid grid-cols-1 gap-2" id="parse-fields"></div>
+          <div id="parse-params" class="hidden mt-4">
+            <p class="text-xs mb-2" style="color:var(--color-text-muted)">Query Parameters</p>
+            <div class="rounded-lg overflow-hidden border" style="border-color:rgba(0,212,255,0.2)">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr style="background:rgba(0,212,255,0.08)">
+                    <th class="px-4 py-2 text-left text-xs" style="color:#00d4ff">Key</th>
+                    <th class="px-4 py-2 text-left text-xs" style="color:#00d4ff">Value</th>
+                    <th class="px-4 py-2 w-10"></th>
+                  </tr>
+                </thead>
+                <tbody id="params-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Encode/Decode -->
+      <div id="tab-encode" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Encode -->
+          <div>
+            <p class="text-xs mb-2" style="color:#00d4ff">编码 (encodeURIComponent)</p>
+            <textarea id="encode-input" rows="5" placeholder="输入原始字符串..."
+              class="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none"
+              style="background:var(--color-void-card);border:1px solid rgba(0,212,255,0.3);color:var(--color-text-primary);caret-color:#00d4ff"
+              oninput="doEncode()"></textarea>
+            <div class="mt-2 flex items-center gap-2">
+              <p class="text-xs flex-1" style="color:var(--color-text-muted)">结果</p>
+              <button class="copy-btn text-xs" onclick="copyText('encode-output')">复制</button>
+            </div>
+            <div id="encode-output" class="mt-1 px-4 py-3 rounded-lg text-sm break-all select-all cursor-pointer"
+              style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);color:#00d4ff;min-height:44px"
+              onclick="copyText('encode-output')"></div>
+          </div>
+          <!-- Decode -->
+          <div>
+            <p class="text-xs mb-2" style="color:#00d4ff">解码 (decodeURIComponent)</p>
+            <textarea id="decode-input" rows="5" placeholder="输入编码后的字符串..."
+              class="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none"
+              style="background:var(--color-void-card);border:1px solid rgba(0,212,255,0.3);color:var(--color-text-primary);caret-color:#00d4ff"
+              oninput="doDecode()"></textarea>
+            <div class="mt-2 flex items-center gap-2">
+              <p class="text-xs flex-1" style="color:var(--color-text-muted)">结果</p>
+              <button class="copy-btn text-xs" onclick="copyText('decode-output')">复制</button>
+            </div>
+            <div id="decode-output" class="mt-1 px-4 py-3 rounded-lg text-sm break-all select-all cursor-pointer"
+              style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);color:#00d4ff;min-height:44px"
+              onclick="copyText('decode-output')"></div>
+            <div id="decode-error" class="hidden mt-1 text-xs" style="color:#ff6b6b"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Build -->
+      <div id="tab-build" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs mb-1" style="color:var(--color-text-muted)">Base URL</label>
+              <input id="build-base" type="text" placeholder="https://api.example.com"
+                class="w-full px-3 py-2 rounded text-sm outline-none"
+                style="background:var(--color-void-card);border:1px solid rgba(0,212,255,0.3);color:var(--color-text-primary)"
+                oninput="buildURL()" />
+            </div>
+            <div>
+              <label class="block text-xs mb-1" style="color:var(--color-text-muted)">Path</label>
+              <input id="build-path" type="text" placeholder="/v1/users/123"
+                class="w-full px-3 py-2 rounded text-sm outline-none"
+                style="background:var(--color-void-card);border:1px solid rgba(0,212,255,0.3);color:var(--color-text-primary)"
+                oninput="buildURL()" />
+            </div>
+            <div>
+              <label class="block text-xs mb-1" style="color:var(--color-text-muted)">Hash</label>
+              <input id="build-hash" type="text" placeholder="section"
+                class="w-full px-3 py-2 rounded text-sm outline-none"
+                style="background:var(--color-void-card);border:1px solid rgba(0,212,255,0.3);color:var(--color-text-primary)"
+                oninput="buildURL()" />
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-xs" style="color:var(--color-text-muted)">Query Params</label>
+                <button onclick="addParam()" class="copy-btn text-xs">+ 添加</button>
+              </div>
+              <div id="build-params" class="space-y-2"></div>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs mb-2" style="color:var(--color-text-muted)">生成的 URL</p>
+            <div id="build-output" class="px-4 py-3 rounded-lg text-sm break-all"
+              style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);color:#00d4ff;min-height:60px;word-break:break-all"></div>
+            <button class="copy-btn text-xs mt-2" onclick="copyEl('build-output')">复制</button>
+            <div id="build-error" class="hidden mt-2 text-xs" style="color:#ff6b6b"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .tab-btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,212,255,0.2);
+      color: var(--color-text-muted);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { border-color: rgba(0,212,255,0.5); color: #00d4ff; }
+    .active-tab { border-color: #00d4ff !important; color: #00d4ff !important; background: rgba(0,212,255,0.08) !important; }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--color-void-card);
+      border: 1px solid rgba(0,212,255,0.12);
+    }
+    .field-label { font-size: 10px; color: #00d4ff; min-width: 90px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .field-value { font-size: 12px; color: var(--color-text-primary); flex: 1; word-break: break-all; }
+    .field-empty { color: var(--color-text-muted); font-style: italic; }
+
+    .copy-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,212,255,0.3);
+      color: #00d4ff;
+      background: rgba(0,212,255,0.06);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: rgba(0,212,255,0.15); }
+
+    .param-row input {
+      background: var(--color-void-card);
+      border: 1px solid rgba(0,212,255,0.2);
+      color: var(--color-text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      outline: none;
+      width: 100%;
+    }
+  </style>
+
+  <script is:inline>
+    function switchTab(name) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'))
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active-tab'))
+      document.getElementById('tab-' + name).classList.remove('hidden')
+      document.querySelector(`[data-tab="${name}"]`).classList.add('active-tab')
+    }
+
+    function parseURL() {
+      const raw = document.getElementById('parse-input').value.trim()
+      const errEl = document.getElementById('parse-error')
+      const resEl = document.getElementById('parse-result')
+      const fieldsEl = document.getElementById('parse-fields')
+      const paramsEl = document.getElementById('parse-params')
+      const tableEl = document.getElementById('params-table')
+
+      if (!raw) { errEl.classList.add('hidden'); resEl.classList.add('hidden'); return }
+
+      let u
+      try { u = new URL(raw) } catch(e) {
+        errEl.textContent = '无效 URL：' + e.message
+        errEl.classList.remove('hidden')
+        resEl.classList.add('hidden')
+        return
+      }
+      errEl.classList.add('hidden')
+      resEl.classList.remove('hidden')
+
+      const fields = [
+        { label: 'Protocol', value: u.protocol },
+        { label: 'Host', value: u.host },
+        { label: 'Hostname', value: u.hostname },
+        { label: 'Port', value: u.port || '(default)' },
+        { label: 'Pathname', value: u.pathname },
+        { label: 'Search', value: u.search || '(none)' },
+        { label: 'Hash', value: u.hash || '(none)' },
+        { label: 'Origin', value: u.origin },
+      ]
+
+      fieldsEl.innerHTML = fields.map(f => `
+        <div class="field-row" title="点击复制" style="cursor:pointer" onclick="copyVal('${escapeHtml(f.value)}', this)">
+          <span class="field-label">${f.label}</span>
+          <span class="field-value${f.value.startsWith('(') ? ' field-empty' : ''}">${escapeHtml(f.value)}</span>
+          <span style="font-size:10px;color:rgba(0,212,255,0.4)">⎘</span>
+        </div>
+      `).join('')
+
+      const params = [...u.searchParams.entries()]
+      if (params.length) {
+        paramsEl.classList.remove('hidden')
+        tableEl.innerHTML = params.map(([k, v]) => `
+          <tr style="border-top:1px solid rgba(0,212,255,0.08)" onclick="copyVal('${escapeHtml(v)}', this)" style="cursor:pointer">
+            <td class="px-4 py-2 text-sm" style="color:#00d4ff">${escapeHtml(k)}</td>
+            <td class="px-4 py-2 text-sm" style="color:var(--color-text-primary)">${escapeHtml(v)}</td>
+            <td class="px-4 py-2 text-xs" style="color:rgba(0,212,255,0.4);cursor:pointer" onclick="copyVal('${escapeHtml(v)}')">⎘</td>
+          </tr>
+        `).join('')
+      } else {
+        paramsEl.classList.add('hidden')
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+    }
+
+    function copyVal(val, el) {
+      navigator.clipboard.writeText(val).then(() => {
+        if (el) { const orig = el.style.background; el.style.background = 'rgba(0,212,255,0.15)'; setTimeout(() => el.style.background = orig, 400) }
+      })
+    }
+
+    function copyText(id) {
+      const el = document.getElementById(id)
+      navigator.clipboard.writeText(el.textContent).then(() => {
+        const orig = el.style.background
+        el.style.background = 'rgba(0,212,255,0.2)'
+        setTimeout(() => el.style.background = orig, 400)
+      })
+    }
+
+    function copyEl(id) {
+      copyText(id)
+    }
+
+    function doEncode() {
+      const v = document.getElementById('encode-input').value
+      document.getElementById('encode-output').textContent = v ? encodeURIComponent(v) : ''
+    }
+
+    function doDecode() {
+      const v = document.getElementById('decode-input').value
+      const errEl = document.getElementById('decode-error')
+      const outEl = document.getElementById('decode-output')
+      if (!v) { outEl.textContent = ''; errEl.classList.add('hidden'); return }
+      try {
+        outEl.textContent = decodeURIComponent(v)
+        errEl.classList.add('hidden')
+      } catch(e) {
+        outEl.textContent = ''
+        errEl.textContent = '解码失败：' + e.message
+        errEl.classList.remove('hidden')
+      }
+    }
+
+    // Build URL
+    let paramCount = 0
+    function addParam() {
+      const id = ++paramCount
+      const div = document.createElement('div')
+      div.className = 'param-row flex gap-2 items-center'
+      div.id = 'param-' + id
+      div.innerHTML = `
+        <input type="text" placeholder="key" oninput="buildURL()" style="flex:1" />
+        <input type="text" placeholder="value" oninput="buildURL()" style="flex:2" />
+        <button onclick="removeParam(${id})" style="font-size:16px;color:rgba(255,100,100,0.6);background:none;border:none;cursor:pointer;padding:0 4px">×</button>
+      `
+      document.getElementById('build-params').appendChild(div)
+    }
+
+    function removeParam(id) {
+      document.getElementById('param-' + id)?.remove()
+      buildURL()
+    }
+
+    function buildURL() {
+      const base = document.getElementById('build-base').value.trim()
+      const path = document.getElementById('build-path').value.trim()
+      const hash = document.getElementById('build-hash').value.trim()
+      const outEl = document.getElementById('build-output')
+      const errEl = document.getElementById('build-error')
+
+      if (!base) { outEl.textContent = ''; errEl.classList.add('hidden'); return }
+
+      try {
+        const u = new URL(base)
+        if (path) u.pathname = path
+        if (hash) u.hash = hash
+        document.querySelectorAll('.param-row').forEach(row => {
+          const inputs = row.querySelectorAll('input')
+          const k = inputs[0]?.value.trim()
+          const v = inputs[1]?.value.trim()
+          if (k) u.searchParams.set(k, v || '')
+        })
+        outEl.textContent = u.toString()
+        errEl.classList.add('hidden')
+      } catch(e) {
+        outEl.textContent = ''
+        errEl.textContent = '错误：' + e.message
+        errEl.classList.remove('hidden')
+      }
+    }
+
+    // init one param row
+    addParam()
+  </script>
+</BaseLayout>

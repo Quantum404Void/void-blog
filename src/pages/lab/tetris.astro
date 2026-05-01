@@ -1,0 +1,402 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Tetris | void.dev">
+  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:opacity-80 transition-all">~/void-blog</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <a href="/void-blog/lab/" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-all">lab</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <span class="font-mono text-xs text-[rgba(180,0,255,0.9)]">tetris</span>
+      </div>
+    </nav>
+
+    <div class="pt-20 w-full max-w-2xl">
+      <div class="text-center mb-6">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: tetris.exe</p>
+        <h1 class="font-mono text-2xl font-bold mb-1" style="color:#b400ff;text-shadow:0 0 20px rgba(180,0,255,0.5)">TETRIS</h1>
+        <p class="font-mono text-xs text-[var(--color-text-muted)]">← → 移动 &nbsp;·&nbsp; ↑/Z 旋转 &nbsp;·&nbsp; ↓ 加速 &nbsp;·&nbsp; Space 硬降 &nbsp;·&nbsp; P 暂停</p>
+      </div>
+
+      <div class="flex gap-4 justify-center items-start">
+        <!-- Main game canvas -->
+        <div class="relative border border-[var(--color-void-border)] rounded-xl overflow-hidden" style="background:#06060e;box-shadow:0 0 40px rgba(180,0,255,0.08),inset 0 0 60px rgba(0,0,0,0.5)">
+          <canvas id="tetris-canvas" width="300" height="600" style="display:block"></canvas>
+          <div id="game-overlay" class="absolute inset-0 flex flex-col items-center justify-center font-mono" style="background:rgba(6,6,14,0.92)">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem">🧩</div>
+            <div class="text-xl font-bold mb-2" style="color:#b400ff;text-shadow:0 0 15px #b400ff">TETRIS</div>
+            <div class="text-xs mb-6" style="color:#8888aa">按 Space 或 Enter 开始</div>
+            <button id="start-btn" class="font-mono text-sm px-6 py-2 rounded-lg border transition-all"
+              style="border-color:rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08)"
+              onmouseover="this.style.background='rgba(180,0,255,0.15)'"
+              onmouseout="this.style.background='rgba(180,0,255,0.08)'">START GAME</button>
+          </div>
+        </div>
+
+        <!-- Side panel -->
+        <div class="flex flex-col gap-4 min-w-[120px]">
+          <div class="border border-[var(--color-void-border)] rounded-xl p-4" style="background:rgba(10,10,15,0.8)">
+            <p class="font-mono text-[9px] text-[var(--color-text-muted)] tracking-widest mb-2">NEXT</p>
+            <canvas id="next-canvas" width="100" height="100" style="display:block"></canvas>
+          </div>
+          <div class="border border-[var(--color-void-border)] rounded-xl p-4" style="background:rgba(10,10,15,0.8)">
+            <p class="font-mono text-[9px] text-[var(--color-text-muted)] tracking-widest mb-1">SCORE</p>
+            <p id="score" class="font-mono text-lg font-bold" style="color:#b400ff;text-shadow:0 0 10px rgba(180,0,255,0.5)">0</p>
+          </div>
+          <div class="border border-[var(--color-void-border)] rounded-xl p-4" style="background:rgba(10,10,15,0.8)">
+            <p class="font-mono text-[9px] text-[var(--color-text-muted)] tracking-widest mb-1">LEVEL</p>
+            <p id="level" class="font-mono text-lg font-bold" style="color:#00d4ff;text-shadow:0 0 10px rgba(0,212,255,0.5)">1</p>
+          </div>
+          <div class="border border-[var(--color-void-border)] rounded-xl p-4" style="background:rgba(10,10,15,0.8)">
+            <p class="font-mono text-[9px] text-[var(--color-text-muted)] tracking-widest mb-1">LINES</p>
+            <p id="lines" class="font-mono text-lg font-bold" style="color:#39ff14;text-shadow:0 0 10px rgba(57,255,20,0.5)">0</p>
+          </div>
+          <div class="border border-[var(--color-void-border)] rounded-xl p-4" style="background:rgba(10,10,15,0.8)">
+            <p class="font-mono text-[9px] text-[var(--color-text-muted)] tracking-widest mb-1">BEST</p>
+            <p id="best" class="font-mono text-lg font-bold" style="color:#ffa500;text-shadow:0 0 10px rgba(255,165,0,0.5)">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', function() {
+  const canvas = document.getElementById('tetris-canvas')
+  const ctx = canvas.getContext('2d')
+  const nextCanvas = document.getElementById('next-canvas')
+  const nextCtx = nextCanvas.getContext('2d')
+  const overlay = document.getElementById('game-overlay')
+  const startBtn = document.getElementById('start-btn')
+
+  const COLS = 10
+  const ROWS = 20
+  const CELL = 30
+  const COLORS = {
+    I: '#00d4ff',
+    O: '#ffa500',
+    T: '#b400ff',
+    S: '#39ff14',
+    Z: '#ff4444',
+    J: '#4444ff',
+    L: '#ff8800',
+  }
+  const PIECES = {
+    I: { shape: [[1,1,1,1]], color: COLORS.I },
+    O: { shape: [[1,1],[1,1]], color: COLORS.O },
+    T: { shape: [[0,1,0],[1,1,1]], color: COLORS.T },
+    S: { shape: [[0,1,1],[1,1,0]], color: COLORS.S },
+    Z: { shape: [[1,1,0],[0,1,1]], color: COLORS.Z },
+    J: { shape: [[1,0,0],[1,1,1]], color: COLORS.J },
+    L: { shape: [[0,0,1],[1,1,1]], color: COLORS.L },
+  }
+  const PIECE_KEYS = Object.keys(PIECES)
+  const SCORE_TABLE = [0, 100, 300, 500, 800]
+
+  let board, current, next, pos, score, lines, level, gameOver, paused, dropTimer, dropInterval, animFrame, started
+
+  function createBoard() {
+    return Array.from({length: ROWS}, () => Array(COLS).fill(null))
+  }
+
+  function randomPiece() {
+    const key = PIECE_KEYS[Math.floor(Math.random() * PIECE_KEYS.length)]
+    const p = PIECES[key]
+    return { shape: p.shape.map(r => [...r]), color: p.color }
+  }
+
+  function rotate(matrix) {
+    return matrix[0].map((_, i) => matrix.map(row => row[i]).reverse())
+  }
+
+  function isValid(shape, px, py) {
+    return shape.every((row, dy) =>
+      row.every((cell, dx) => {
+        if (!cell) return true
+        const nx = px + dx, ny = py + dy
+        return nx >= 0 && nx < COLS && ny < ROWS && !board[ny][nx]
+      })
+    )
+  }
+
+  function lockPiece() {
+    current.shape.forEach((row, dy) =>
+      row.forEach((cell, dx) => {
+        if (cell) board[pos.y + dy][pos.x + dx] = current.color
+      })
+    )
+    clearLines()
+    spawnPiece()
+  }
+
+  function clearLines() {
+    let cleared = 0
+    for (let r = ROWS - 1; r >= 0; r--) {
+      if (board[r].every(c => c !== null)) {
+        board.splice(r, 1)
+        board.unshift(Array(COLS).fill(null))
+        cleared++
+        r++
+      }
+    }
+    if (cleared > 0) {
+      lines += cleared
+      score += SCORE_TABLE[cleared] * level
+      level = Math.floor(lines / 10) + 1
+      dropInterval = Math.max(100, 500 - (level - 1) * 40)
+      updateUI()
+    }
+  }
+
+  function spawnPiece() {
+    current = next
+    next = randomPiece()
+    pos = { x: Math.floor((COLS - current.shape[0].length) / 2), y: 0 }
+    if (!isValid(current.shape, pos.x, pos.y)) {
+      endGame()
+    }
+    drawNext()
+  }
+
+  function ghostPos() {
+    let gy = pos.y
+    while (isValid(current.shape, pos.x, gy + 1)) gy++
+    return gy
+  }
+
+  function hardDrop() {
+    const gy = ghostPos()
+    score += (gy - pos.y) * 1
+    pos.y = gy
+    lockPiece()
+    updateUI()
+  }
+
+  function drop() {
+    if (isValid(current.shape, pos.x, pos.y + 1)) {
+      pos.y++
+    } else {
+      lockPiece()
+    }
+  }
+
+  function updateUI() {
+    document.getElementById('score').textContent = score
+    document.getElementById('level').textContent = level
+    document.getElementById('lines').textContent = lines
+    const best = parseInt(localStorage.getItem('tetris-best') || '0')
+    if (score > best) {
+      localStorage.setItem('tetris-best', score)
+      document.getElementById('best').textContent = score
+    }
+  }
+
+  function drawCell(c, x, y, alpha) {
+    if (!c) return
+    c.globalAlpha = alpha !== undefined ? alpha : 1
+    c.fillStyle = alpha !== undefined ? 'rgba(255,255,255,0.1)' : '#06060e'
+    c.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2)
+    if (alpha !== undefined) {
+      c.strokeStyle = alpha !== undefined ? (alpha < 0.5 ? 'rgba(255,255,255,0.3)' : '#06060e') : '#06060e'
+      c.lineWidth = 1
+      c.strokeRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2)
+    } else {
+      const color = alpha !== undefined ? 'rgba(255,255,255,0.1)' : '#06060e'
+      c.fillStyle = color
+      c.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2)
+    }
+    c.globalAlpha = 1
+  }
+
+  function drawBoard() {
+    ctx.fillStyle = '#06060e'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)'
+    ctx.lineWidth = 0.5
+    for (let r = 0; r < ROWS; r++) {
+      ctx.beginPath(); ctx.moveTo(0, r * CELL); ctx.lineTo(COLS * CELL, r * CELL); ctx.stroke()
+    }
+    for (let c = 0; c < COLS; c++) {
+      ctx.beginPath(); ctx.moveTo(c * CELL, 0); ctx.lineTo(c * CELL, ROWS * CELL); ctx.stroke()
+    }
+
+    // Board cells
+    board.forEach((row, r) => row.forEach((color, c) => {
+      if (color) {
+        ctx.fillStyle = color
+        ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2)
+        ctx.fillStyle = 'rgba(255,255,255,0.12)'
+        ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, 4)
+        ctx.shadowColor = color
+        ctx.shadowBlur = 6
+        ctx.fillStyle = color
+        ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2)
+        ctx.shadowBlur = 0
+      }
+    }))
+
+    // Ghost
+    if (current && !gameOver) {
+      const gy = ghostPos()
+      current.shape.forEach((row, dy) => row.forEach((cell, dx) => {
+        if (cell) {
+          ctx.globalAlpha = 0.25
+          ctx.fillStyle = current.color
+          ctx.fillRect((pos.x + dx) * CELL + 1, (gy + dy) * CELL + 1, CELL - 2, CELL - 2)
+          ctx.strokeStyle = current.color
+          ctx.lineWidth = 1
+          ctx.strokeRect((pos.x + dx) * CELL + 1, (gy + dy) * CELL + 1, CELL - 2, CELL - 2)
+          ctx.globalAlpha = 1
+        }
+      }))
+    }
+
+    // Current piece
+    if (current && !gameOver) {
+      current.shape.forEach((row, dy) => row.forEach((cell, dx) => {
+        if (cell) {
+          ctx.shadowColor = current.color
+          ctx.shadowBlur = 12
+          ctx.fillStyle = current.color
+          ctx.fillRect((pos.x + dx) * CELL + 1, (pos.y + dy) * CELL + 1, CELL - 2, CELL - 2)
+          ctx.fillStyle = 'rgba(255,255,255,0.2)'
+          ctx.fillRect((pos.x + dx) * CELL + 1, (pos.y + dy) * CELL + 1, CELL - 2, 4)
+          ctx.shadowBlur = 0
+        }
+      }))
+    }
+  }
+
+  function drawNext() {
+    nextCtx.fillStyle = '#06060e'
+    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height)
+    if (!next) return
+    const s = next.shape
+    const offX = Math.floor((4 - s[0].length) / 2)
+    const offY = Math.floor((4 - s.length) / 2)
+    const cell = 24
+    s.forEach((row, dy) => row.forEach((c, dx) => {
+      if (c) {
+        nextCtx.shadowColor = next.color
+        nextCtx.shadowBlur = 10
+        nextCtx.fillStyle = next.color
+        nextCtx.fillRect((offX + dx) * cell + 2, (offY + dy) * cell + 2, cell - 2, cell - 2)
+        nextCtx.shadowBlur = 0
+      }
+    }))
+  }
+
+  function gameLoop(now) {
+    if (!started || gameOver) return
+    animFrame = requestAnimationFrame(gameLoop)
+    if (!paused) {
+      if (now - dropTimer >= dropInterval) {
+        drop()
+        dropTimer = now
+      }
+      drawBoard()
+    }
+  }
+
+  function startGame() {
+    board = createBoard()
+    score = 0
+    lines = 0
+    level = 1
+    dropInterval = 500
+    gameOver = false
+    paused = false
+    started = true
+    dropTimer = performance.now()
+
+    const best = parseInt(localStorage.getItem('tetris-best') || '0')
+    document.getElementById('best').textContent = best
+
+    next = randomPiece()
+    spawnPiece()
+    updateUI()
+    overlay.style.display = 'none'
+    cancelAnimationFrame(animFrame)
+    animFrame = requestAnimationFrame(gameLoop)
+  }
+
+  function endGame() {
+    gameOver = true
+    started = false
+    const best = parseInt(localStorage.getItem('tetris-best') || '0')
+    if (score > best) localStorage.setItem('tetris-best', score)
+    overlay.style.display = 'flex'
+    overlay.innerHTML = `
+      <div style="font-size:2.5rem;margin-bottom:0.75rem">💀</div>
+      <div class="text-xl font-bold mb-1" style="color:#ff4444;text-shadow:0 0 15px #ff4444;font-family:monospace">GAME OVER</div>
+      <div class="text-sm mb-1" style="color:#8888aa;font-family:monospace">Score: <span style="color:#b400ff">${score}</span></div>
+      <div class="text-xs mb-6" style="color:#8888aa;font-family:monospace">Best: ${Math.max(score, best)}</div>
+      <button id="start-btn" class="font-mono text-sm px-6 py-2 rounded-lg border transition-all"
+        style="border-color:rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08);font-family:monospace"
+        onmouseover="this.style.background='rgba(180,0,255,0.15)'"
+        onmouseout="this.style.background='rgba(180,0,255,0.08)'">RETRY</button>
+    `
+    document.getElementById('start-btn').addEventListener('click', startGame)
+  }
+
+  startBtn.addEventListener('click', startGame)
+
+  document.addEventListener('keydown', function(e) {
+    if (!started || gameOver) {
+      if (e.code === 'Space' || e.code === 'Enter') startGame()
+      return
+    }
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      paused = !paused
+      if (!paused) {
+        dropTimer = performance.now()
+        animFrame = requestAnimationFrame(gameLoop)
+      }
+      return
+    }
+    if (paused) return
+    switch (e.code) {
+      case 'ArrowLeft':
+        if (isValid(current.shape, pos.x - 1, pos.y)) pos.x--
+        break
+      case 'ArrowRight':
+        if (isValid(current.shape, pos.x + 1, pos.y)) pos.x++
+        break
+      case 'ArrowDown':
+        if (isValid(current.shape, pos.x, pos.y + 1)) { pos.y++; score += 1; updateUI() }
+        break
+      case 'ArrowUp':
+      case 'KeyZ': {
+        const r = rotate(current.shape)
+        if (isValid(r, pos.x, pos.y)) current.shape = r
+        else if (isValid(r, pos.x - 1, pos.y)) { current.shape = r; pos.x-- }
+        else if (isValid(r, pos.x + 1, pos.y)) { current.shape = r; pos.x++ }
+        break
+      }
+      case 'KeyX': {
+        const rr = rotate(rotate(rotate(current.shape)))
+        if (isValid(rr, pos.x, pos.y)) current.shape = rr
+        break
+      }
+      case 'Space':
+        e.preventDefault()
+        hardDrop()
+        break
+    }
+    drawBoard()
+  })
+
+  // Initial render
+  ctx.fillStyle = '#06060e'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  nextCtx.fillStyle = '#06060e'
+  nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height)
+  document.getElementById('best').textContent = localStorage.getItem('tetris-best') || '0'
+})
+</script>

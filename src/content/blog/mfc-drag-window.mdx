@@ -6,6 +6,51 @@ tags: ["mfc", "cpp", "windows"]
 draft: false
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const dragRadarData = {
+  labels: ['实现复杂度', '控件兼容性', '自定义自由度', '代码可读性', '稳定性'],
+  datasets: [
+    {
+      label: 'OnNcHitTest',
+      data: [5, 2, 1, 5, 4],
+      backgroundColor: 'rgba(0,212,255,0.2)',
+      borderColor: 'rgba(0,212,255,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(0,212,255,0.9)',
+    },
+    {
+      label: 'PostMessage法',
+      data: [4, 5, 3, 4, 5],
+      backgroundColor: 'rgba(57,255,20,0.2)',
+      borderColor: 'rgba(57,255,20,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(57,255,20,0.9)',
+    },
+    {
+      label: '手动MouseMove',
+      data: [1, 5, 5, 2, 4],
+      backgroundColor: 'rgba(255,0,170,0.2)',
+      borderColor: 'rgba(255,0,170,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(255,0,170,0.9)',
+    },
+  ],
+}
+
+export const dragRadarOptions = {
+  scales: {
+    r: {
+      min: 0,
+      max: 5,
+      ticks: { display: false, stepSize: 1 },
+      grid: { color: 'rgba(136,136,170,0.25)' },
+      angleLines: { color: 'rgba(136,136,170,0.25)' },
+      pointLabels: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 11 } },
+    },
+  },
+}
+
 ## 背景
 
 MFC 自定义皮肤或无边框窗口设计中，通常会隐藏系统标题栏（`WS_CAPTION` 样式去掉）。但没了标题栏，用户就无法拖动窗口移动位置。需要手动处理鼠标消息，模拟标题栏拖动行为。
@@ -104,6 +149,10 @@ void CMyDlg::OnLButtonUp(UINT nFlags, CPoint point) {
 | OnNcHitTest | 最少 | 可能干扰 | 最小 | 全屏或无控件窗口 |
 | OnLButtonDown + PostMessage | 少 | 不影响 | 小 | **通用场景（首选）** |
 | OnMouseMove 手动 | 多 | 完全控制 | 最大 | 需要自定义拖动行为 |
+
+<Chart client:only="vue" type="radar" data={dragRadarData} options={dragRadarOptions} height={260} />
+
+> 分数 1-5，越高越好。实现复杂度取反，即代码越少得分越高。
 
 ## 注意事项
 

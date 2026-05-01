@@ -6,6 +6,43 @@ tags: ["AI", "agent", "RAG", "memory"]
 draft: false
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const embeddingRadarData = {
+  labels: ['延迟', '成本效益', '隐私', '质量', '维护简便'],
+  datasets: [
+    {
+      label: '本地',
+      data: [5, 5, 5, 3, 2],
+      backgroundColor: 'rgba(0,212,255,0.2)',
+      borderColor: 'rgba(0,212,255,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(0,212,255,0.9)',
+    },
+    {
+      label: '云端',
+      data: [2, 2, 1, 5, 5],
+      backgroundColor: 'rgba(255,0,170,0.2)',
+      borderColor: 'rgba(255,0,170,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(255,0,170,0.9)',
+    },
+  ],
+}
+
+export const embeddingRadarOptions = {
+  scales: {
+    r: {
+      min: 0,
+      max: 5,
+      ticks: { display: false, stepSize: 1 },
+      grid: { color: 'rgba(136,136,170,0.25)' },
+      angleLines: { color: 'rgba(136,136,170,0.25)' },
+      pointLabels: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 11 } },
+    },
+  },
+}
+
 你有没有遇到过这种情况：和 AI 聊了很长的上下文之后，它突然"忘记"了前面说过的事情——不是因为它不聪明，而是因为它的记忆系统到达了物理上限。
 
 记忆是 Agent 区别于普通 LLM 调用的核心能力之一。但"记忆"在工程上远比听起来复杂。
@@ -223,6 +260,8 @@ similarity(A, B) = (A · B) / (|A| × |B|)
 | 隐私 | 完全本地，数据不出境 | 数据上传第三方 |
 | 质量 | 中文：BGE-M3 ≈ OpenAI ada-002 | OpenAI text-embedding-3-large 最强 |
 | 维护 | 需要自己管理模型更新 | 零维护 |
+
+<Chart client:only="vue" type="radar" data={embeddingRadarData} options={embeddingRadarOptions} height={260} />
 
 **推荐组合**：
 

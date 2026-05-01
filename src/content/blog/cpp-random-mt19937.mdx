@@ -6,6 +6,43 @@ tags: ["cpp", "c++11", "random"]
 draft: false
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const randRadarData = {
+  labels: ['分布质量', '可读性', '线程安全', '种子质量', '分布灵活性'],
+  datasets: [
+    {
+      label: 'rand()',
+      data: [2, 2, 1, 1, 1],
+      backgroundColor: 'rgba(255,0,170,0.2)',
+      borderColor: 'rgba(255,0,170,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(255,0,170,0.9)',
+    },
+    {
+      label: 'mt19937',
+      data: [5, 5, 4, 5, 5],
+      backgroundColor: 'rgba(0,212,255,0.2)',
+      borderColor: 'rgba(0,212,255,0.9)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgba(0,212,255,0.9)',
+    },
+  ],
+}
+
+export const randRadarOptions = {
+  scales: {
+    r: {
+      min: 0,
+      max: 5,
+      ticks: { display: false, stepSize: 1 },
+      grid: { color: 'rgba(136,136,170,0.25)' },
+      angleLines: { color: 'rgba(136,136,170,0.25)' },
+      pointLabels: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 11 } },
+    },
+  },
+}
+
 C++ 里生成随机数，很多人第一反应是 `rand()`。但在实际项目中，`rand()` 几乎是一个"应该被遗忘"的函数。C++11 引入的 `<random>` 库提供了一套工业级的随机数解决方案，本文带你彻底搞清楚怎么用。
 
 ---
@@ -289,5 +326,7 @@ int main() {
 | 线程安全 | 否 | 手动管理（thread_local） |
 | 种子质量 | 差（time） | 好（random_device） |
 | 可读性 | 低 | 高 |
+
+<Chart client:only="vue" type="radar" data={randRadarData} options={randRadarOptions} height={260} />
 
 从 C++11 开始，`<random>` 已经完全可以替代 `rand()`。下次写随机数相关代码时，记得用 `mt19937` + 对应分布，彻底告别那个"能用但很糟"的老朋友。

@@ -17,6 +17,7 @@
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/tailwind": "^6.0.2",
     "@astrojs/vue": "^6.0.1",
+    "@vite-pwa/astro": "^1.2.0",
     "astro": "^6.2.0",
     "chart.js": "^4.5.1",
     "mermaid": "^11.14.0",
@@ -29,6 +30,7 @@
     "vue-chartjs": "^5.3.3"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.4"
+    "@tailwindcss/vite": "^4.2.4",
+    "sharp": "^0.34.5"
   }
 }

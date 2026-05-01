@@ -6,6 +6,51 @@ tags: ["Electron", "npm", "前端工具链", "国内镜像"]
 draft: false
 ---
 
+import Chart from '../../components/Chart.vue'
+
+export const electronSolutionData = {
+  labels: ['npmmirror镜像', '手动Mirror', '本地缓存', '离线包'],
+  datasets: [
+    {
+      label: '成功率',
+      data: [5, 4, 3, 5],
+      backgroundColor: 'rgba(0,212,255,0.2)',
+      borderColor: 'rgba(0,212,255,0.9)',
+      borderWidth: 2,
+    },
+    {
+      label: '复杂度(越高越简单)',
+      data: [5, 4, 4, 2],
+      backgroundColor: 'rgba(57,255,20,0.2)',
+      borderColor: 'rgba(57,255,20,0.9)',
+      borderWidth: 2,
+    },
+    {
+      label: '适用范围',
+      data: [5, 4, 3, 3],
+      backgroundColor: 'rgba(255,0,170,0.2)',
+      borderColor: 'rgba(255,0,170,0.9)',
+      borderWidth: 2,
+    },
+  ],
+}
+
+export const electronSolutionOptions = {
+  indexAxis: 'y',
+  scales: {
+    x: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { color: 'rgba(30,30,48,0.8)' },
+      border: { display: false },
+    },
+    y: {
+      ticks: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 10 } },
+      grid: { display: false },
+      border: { display: false },
+    },
+  },
+}
+
 ## 为什么 npm install electron 总是失败
 
 执行 `npm install --save-dev electron` 经常卡住，最终报错：
@@ -127,6 +172,8 @@ ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm install --save-dev electron
 | `checksum mismatch` | 缓存文件损坏 | 清除 `~/.electron` 或 `~/.cache/electron` 重新下载 |
 | `Unsupported platform` | 平台/架构不支持 | 检查 Node 和系统架构是否匹配 |
 | Permission denied | 全局安装权限不足 | 用 `sudo` 或修复 npm 全局目录权限 |
+
+<Chart client:only="vue" type="bar" data={electronSolutionData} options={electronSolutionOptions} height={240} />
 
 ## 验证安装成功
 

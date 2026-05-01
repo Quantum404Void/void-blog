@@ -1,0 +1,319 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Wordle | void.dev">
+  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
+        <a href="/void-blog/" class="font-mono text-sm text-[var(--color-neon-green)] hover:opacity-80 transition-all">~/void-blog</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <a href="/void-blog/lab/" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-all">lab</a>
+        <span class="text-[var(--color-text-muted)]">/</span>
+        <span class="font-mono text-xs" style="color:#39ff14">wordle</span>
+      </div>
+    </nav>
+
+    <div class="pt-20 w-full max-w-sm">
+      <div class="text-center mb-6">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: wordle.exe</p>
+        <h1 class="font-mono text-2xl font-bold mb-1" style="color:#39ff14;text-shadow:0 0 20px rgba(57,255,20,0.5)">WORDLE</h1>
+        <p class="font-mono text-xs text-[var(--color-text-muted)]">6次机会猜出5字母单词 · 代码词库版</p>
+      </div>
+
+      <!-- Message area -->
+      <div id="message" class="font-mono text-xs text-center mb-3 h-5" style="color:#ffa500"></div>
+
+      <!-- Grid -->
+      <div id="grid" class="grid gap-1.5 mb-4" style="grid-template-columns:repeat(5,1fr)">
+      </div>
+
+      <!-- Keyboard -->
+      <div id="keyboard" class="flex flex-col gap-1.5">
+      </div>
+
+      <div class="mt-4 text-center">
+        <button id="new-game-btn" class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
+          style="border-color:rgba(57,255,20,0.3);color:#39ff14;background:rgba(57,255,20,0.05)"
+          onmouseover="this.style.background='rgba(57,255,20,0.12)'"
+          onmouseout="this.style.background='rgba(57,255,20,0.05)'">NEW GAME</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.tile {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: rgba(10,10,15,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffffff;
+  transition: background 0.3s, border-color 0.3s;
+  border-radius: 6px;
+  text-shadow: none;
+  user-select: none;
+}
+.tile.filled {
+  border-color: rgba(255,255,255,0.3);
+}
+.tile.correct {
+  background: rgba(57,255,20,0.25);
+  border-color: #39ff14;
+  color: #39ff14;
+  text-shadow: 0 0 10px rgba(57,255,20,0.7);
+}
+.tile.present {
+  background: rgba(255,165,0,0.25);
+  border-color: #ffa500;
+  color: #ffa500;
+  text-shadow: 0 0 10px rgba(255,165,0,0.7);
+}
+.tile.absent {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.3);
+}
+.tile.flip {
+  animation: flipTile 0.5s ease forwards;
+}
+@keyframes flipTile {
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+.tile.shake {
+  animation: shakeTile 0.4s ease;
+}
+@keyframes shakeTile {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+.key-btn {
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 10px 4px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  min-width: 28px;
+  transition: all 0.2s;
+  user-select: none;
+}
+.key-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+.key-btn.correct {
+  background: rgba(57,255,20,0.25);
+  border-color: #39ff14;
+  color: #39ff14;
+}
+.key-btn.present {
+  background: rgba(255,165,0,0.25);
+  border-color: #ffa500;
+  color: #ffa500;
+}
+.key-btn.absent {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.2);
+}
+</style>
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', function() {
+  const WORDS = [
+    'ARRAY','STACK','QUEUE','CLASS','ASYNC','AWAIT','YIELD','CATCH','THROW','CONST',
+    'BREAK','DEBUG','ERROR','EVENT','FETCH','FRAME','GUARD','HOOKS','INDEX','INPUT',
+    'JUDGE','LOGIC','MATCH','MUTEX','NODES','OAUTH','PARSE','PROXY','QUERY','REACT',
+    'ROUTE','SCOPE','STATE','TABLE','TOKEN','TYPES','UNION','VALID','WATCH','XPATH',
+    'BUILD','CACHE','CLONE','DRAFT','EQUAL','FIXED','GRANT','HOIST','INNER','JOINT',
+    'LAYER','MERGE','NEVER','OUTER','PATCH','QUICK','REGEX','SLICE','STORE','TRACE',
+    'USING','VISIT','WRITE','BLOCK','CHECK','DEFER','EMPTY','FLAGS','GRAPH','LIMIT',
+    'ORDER','PRINT','QUOTE','READS','SETUP','TIMER','VALUE','ABORT','ADAPT','AGENT',
+    'ALERT','ALIGN','BREAK','CLOSE','COUNT','CYCLE','DELTA','DEPTH','DRIVE','ENTRY',
+    'EXIST','EXTRA','FIELD','FINAL','FLUSH','FOCUS','FORCE','MATCH','MODAL','RAISE',
+  ]
+
+  const ROWS = 6
+  const COLS = 5
+  let answer = ''
+  let currentRow = 0
+  let currentCol = 0
+  let guesses = []
+  let gameOver = false
+  let tiles = []
+  let keyMap = {}
+
+  const gridEl = document.getElementById('grid')
+  const keyboardEl = document.getElementById('keyboard')
+  const msgEl = document.getElementById('message')
+  const newGameBtn = document.getElementById('new-game-btn')
+
+  function buildGrid() {
+    gridEl.innerHTML = ''
+    tiles = []
+    for (let r = 0; r < ROWS; r++) {
+      const row = []
+      for (let c = 0; c < COLS; c++) {
+        const el = document.createElement('div')
+        el.className = 'tile'
+        gridEl.appendChild(el)
+        row.push(el)
+      }
+      tiles.push(row)
+    }
+  }
+
+  const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', '↵ZXCVBNM⌫']
+
+  function buildKeyboard() {
+    keyboardEl.innerHTML = ''
+    keyMap = {}
+    KEYBOARD_ROWS.forEach(rowStr => {
+      const row = document.createElement('div')
+      row.style.cssText = 'display:flex;gap:4px;justify-content:center'
+      rowStr.split('').forEach(k => {
+        const btn = document.createElement('button')
+        btn.className = 'key-btn'
+        btn.textContent = k
+        if (k === '↵') btn.style.minWidth = '44px'
+        if (k === '⌫') btn.style.minWidth = '44px'
+        btn.addEventListener('click', () => {
+          if (k === '↵') submitGuess()
+          else if (k === '⌫') deleteLetter()
+          else typeLetter(k)
+        })
+        row.appendChild(btn)
+        if (k !== '↵' && k !== '⌫') keyMap[k] = btn
+      })
+      keyboardEl.appendChild(row)
+    })
+  }
+
+  function typeLetter(letter) {
+    if (gameOver || currentCol >= COLS) return
+    tiles[currentRow][currentCol].textContent = letter
+    tiles[currentRow][currentCol].classList.add('filled')
+    guesses[currentRow] = (guesses[currentRow] || '') + letter
+    currentCol++
+  }
+
+  function deleteLetter() {
+    if (gameOver || currentCol <= 0) return
+    currentCol--
+    tiles[currentRow][currentCol].textContent = ''
+    tiles[currentRow][currentCol].classList.remove('filled')
+    guesses[currentRow] = (guesses[currentRow] || '').slice(0, -1)
+  }
+
+  function showMessage(msg, color) {
+    msgEl.style.color = color || '#ffa500'
+    msgEl.textContent = msg
+    if (msg) setTimeout(() => { if (msgEl.textContent === msg) msgEl.textContent = '' }, 2000)
+  }
+
+  function revealRow(row, result, callback) {
+    result.forEach((state, c) => {
+      setTimeout(() => {
+        tiles[row][c].classList.add('flip')
+        setTimeout(() => {
+          tiles[row][c].classList.add(state)
+          const letter = tiles[row][c].textContent
+          if (letter && keyMap[letter]) {
+            const cur = keyMap[letter].classList
+            const priority = { correct: 3, present: 2, absent: 1 }
+            const existing = cur.contains('correct') ? 3 : cur.contains('present') ? 2 : cur.contains('absent') ? 1 : 0
+            if ((priority[state] || 0) > existing) {
+              cur.remove('correct', 'present', 'absent')
+              cur.add(state)
+            }
+          }
+        }, 250)
+        if (c === COLS - 1 && callback) setTimeout(callback, 400)
+      }, c * 120)
+    })
+  }
+
+  function evaluateGuess(guess) {
+    const result = Array(COLS).fill('absent')
+    const ansArr = answer.split('')
+    const guessArr = guess.split('')
+    const used = Array(COLS).fill(false)
+
+    // First pass: correct
+    guessArr.forEach((l, i) => {
+      if (l === ansArr[i]) { result[i] = 'correct'; used[i] = true }
+    })
+    // Second pass: present
+    guessArr.forEach((l, i) => {
+      if (result[i] === 'correct') return
+      const j = ansArr.findIndex((a, ai) => a === l && !used[ai])
+      if (j !== -1) { result[i] = 'present'; used[j] = true }
+    })
+    return result
+  }
+
+  function submitGuess() {
+    if (gameOver) return
+    const guess = guesses[currentRow] || ''
+    if (guess.length < COLS) {
+      showMessage('单词未完整！', '#ff4444')
+      tiles[currentRow].forEach(t => { t.classList.add('shake'); setTimeout(() => t.classList.remove('shake'), 400) })
+      return
+    }
+
+    const result = evaluateGuess(guess)
+    const row = currentRow
+    currentRow++
+    currentCol = 0
+
+    revealRow(row, result, () => {
+      if (guess === answer) {
+        gameOver = true
+        const msgs = ['🔥 完美！','🎉 太棒了！','✨ 不错！','👍 答对了！','😅 险过！','😮 刚好！']
+        showMessage(msgs[row] || '✅ 答对了！', '#39ff14')
+        return
+      }
+      if (currentRow >= ROWS) {
+        gameOver = true
+        showMessage(`答案是: ${answer}`, '#ff4444')
+      }
+    })
+  }
+
+  function newGame() {
+    answer = WORDS[Math.floor(Math.random() * WORDS.length)]
+    currentRow = 0
+    currentCol = 0
+    guesses = []
+    gameOver = false
+    buildGrid()
+    buildKeyboard()
+    msgEl.textContent = ''
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { submitGuess(); return }
+    if (e.key === 'Backspace') { deleteLetter(); return }
+    const letter = e.key.toUpperCase()
+    if (/^[A-Z]$/.test(letter)) typeLetter(letter)
+  })
+
+  newGameBtn.addEventListener('click', newGame)
+
+  newGame()
+})
+</script>

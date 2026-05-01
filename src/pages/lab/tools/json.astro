@@ -1,0 +1,206 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+---
+<BaseLayout title="JSON 工具 | void.dev">
+  <div class="min-h-screen" style="background:var(--color-void);font-family:var(--font-mono)">
+    <nav class="px-6 py-4 border-b" style="border-color:var(--color-void-border);color:var(--color-text-secondary)">
+      <span style="color:var(--color-neon-cyan)">❯</span>
+      <a href="/void-blog/lab/" style="color:var(--color-text-secondary);text-decoration:none" onmouseover="this.style.color='var(--color-neon-cyan)'" onmouseout="this.style.color='var(--color-text-secondary)'">~/lab</a>
+      <span class="mx-2">/</span>
+      <span style="color:var(--color-neon-cyan)">json</span>
+    </nav>
+
+    <div class="p-6 max-w-7xl mx-auto">
+      <h1 class="text-2xl font-bold mb-2" style="color:var(--color-neon-cyan);text-shadow:0 0 20px rgba(0,212,255,0.6)">
+        { } JSON 工具
+      </h1>
+      <p class="mb-6 text-sm" style="color:var(--color-text-muted)">格式化 · 压缩 · 校验 · 路径查询</p>
+
+      <!-- Toolbar -->
+      <div class="flex flex-wrap gap-2 mb-4 items-center">
+        <button id="btn-format" class="tool-btn" style="border-color:rgba(0,212,255,0.5);color:var(--color-neon-cyan)">
+          ▸ 格式化
+        </button>
+        <button id="btn-minify" class="tool-btn" style="border-color:rgba(0,212,255,0.3);color:var(--color-text-secondary)">
+          ▸ 压缩
+        </button>
+        <button id="btn-validate" class="tool-btn" style="border-color:rgba(0,212,255,0.3);color:var(--color-text-secondary)">
+          ▸ 校验
+        </button>
+        <div class="ml-auto flex gap-2 items-center">
+          <span class="text-xs mr-1" style="color:var(--color-text-muted)">path:</span>
+          <input id="path-input" type="text" placeholder=".key.sub[0]"
+            style="background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);border-radius:8px;padding:6px 12px;font-size:12px;width:160px;outline:none"
+            onfocus="this.style.borderColor='rgba(0,212,255,0.5)'" onblur="this.style.borderColor='var(--color-void-border)'" />
+          <button id="btn-query" class="tool-btn" style="border-color:rgba(0,212,255,0.3);color:var(--color-text-secondary)">
+            查询
+          </button>
+        </div>
+      </div>
+
+      <!-- Editor area -->
+      <div class="grid gap-4" style="grid-template-columns:1fr 1fr">
+        <div style="position:relative">
+          <label class="block text-xs mb-2" style="color:var(--color-text-muted)">INPUT</label>
+          <textarea id="input" placeholder='{"key": "value"}' spellcheck="false"
+            style="width:100%;height:420px;resize:vertical;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:12px;padding:16px;outline:none;tab-size:2"
+            onfocus="this.style.borderColor='rgba(0,212,255,0.4)'" onblur="this.style.borderColor='var(--color-void-border)'"></textarea>
+        </div>
+        <div style="position:relative">
+          <label class="block text-xs mb-2" style="color:var(--color-text-muted)">OUTPUT</label>
+          <button id="btn-copy" onclick="copyOutput()"
+            style="position:absolute;top:0;right:0;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--color-neon-cyan);font-family:var(--font-mono);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer">
+            复制
+          </button>
+          <textarea id="output" readonly spellcheck="false"
+            style="width:100%;height:420px;resize:vertical;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-family:var(--font-mono);font-size:13px;border-radius:12px;padding:16px;outline:none"
+            placeholder="输出结果将显示在这里..."></textarea>
+        </div>
+      </div>
+
+      <!-- Status bar -->
+      <div id="status-bar" class="mt-3 text-xs px-3 py-2 rounded-lg" style="background:var(--color-void-card);border:1px solid var(--color-void-border);color:var(--color-text-muted)">
+        就绪
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tool-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tool-btn:hover {
+    background: rgba(0,212,255,0.08);
+    border-color: rgba(0,212,255,0.6) !important;
+    color: var(--color-neon-cyan) !important;
+  }
+</style>
+
+<script>
+  function setStatus(msg: string, isError = false) {
+    const el = document.getElementById('status-bar')!
+    el.textContent = msg
+    el.style.color = isError ? '#ff4466' : 'var(--color-text-secondary)'
+    el.style.borderColor = isError ? 'rgba(255,68,102,0.3)' : 'var(--color-void-border)'
+  }
+
+  function getInput() {
+    return (document.getElementById('input') as HTMLTextAreaElement).value.trim()
+  }
+
+  function setOutput(val: string) {
+    (document.getElementById('output') as HTMLTextAreaElement).value = val
+  }
+
+  document.getElementById('btn-format')!.onclick = () => {
+    try {
+      const parsed = JSON.parse(getInput())
+      setOutput(JSON.stringify(parsed, null, 4))
+      setStatus(`✓ 格式化完成`)
+    } catch (e: any) {
+      const msg = e.message || ''
+      const posMatch = msg.match(/position (\d+)/)
+      let detail = msg
+      if (posMatch) {
+        const pos = parseInt(posMatch[1])
+        const input = getInput()
+        const before = input.substring(0, pos)
+        const line = (before.match(/\n/g) || []).length + 1
+        const col = pos - before.lastIndexOf('\n')
+        detail = `${msg} (line ${line}, col ${col})`
+      }
+      setOutput(`// ✗ 解析错误\n// ${detail}`)
+      setStatus(`✗ ${detail}`, true)
+    }
+  }
+
+  document.getElementById('btn-minify')!.onclick = () => {
+    try {
+      const parsed = JSON.parse(getInput())
+      setOutput(JSON.stringify(parsed))
+      setStatus(`✓ 压缩完成，${JSON.stringify(parsed).length} 字符`)
+    } catch (e: any) {
+      setOutput(`// ✗ 解析错误\n// ${e.message}`)
+      setStatus(`✗ ${e.message}`, true)
+    }
+  }
+
+  document.getElementById('btn-validate')!.onclick = () => {
+    try {
+      const parsed = JSON.parse(getInput())
+      const keys = countKeys(parsed)
+      setStatus(`✓ 合法 JSON — ${keys} 个字段`)
+    } catch (e: any) {
+      const msg = e.message || ''
+      const posMatch = msg.match(/position (\d+)/)
+      let detail = msg
+      if (posMatch) {
+        const pos = parseInt(posMatch[1])
+        const input = getInput()
+        const before = input.substring(0, pos)
+        const line = (before.match(/\n/g) || []).length + 1
+        const col = pos - before.lastIndexOf('\n')
+        detail = `${msg} → line ${line}, col ${col}`
+      }
+      setStatus(`✗ ${detail}`, true)
+    }
+  }
+
+  function countKeys(obj: any): number {
+    if (typeof obj !== 'object' || obj === null) return 0
+    let count = 0
+    for (const k in obj) {
+      count++
+      count += countKeys((obj as any)[k])
+    }
+    return count
+  }
+
+  document.getElementById('btn-query')!.onclick = () => {
+    const path = (document.getElementById('path-input') as HTMLInputElement).value.trim()
+    if (!path) { setStatus('请输入 JSON path，如 .key.sub[0]', true); return }
+    try {
+      let data = JSON.parse(getInput())
+      // parse path like .key.sub[0].name
+      const parts = path.replace(/\[(\d+)\]/g, '.$1').replace(/^\./, '').split('.')
+      for (const p of parts) {
+        if (data === null || data === undefined) break
+        data = (data as any)[p]
+      }
+      setOutput(JSON.stringify(data, null, 2) ?? 'undefined')
+      setStatus(`✓ 查询结果：${path}`)
+    } catch (e: any) {
+      setOutput(`// ✗ 查询错误\n// ${e.message}`)
+      setStatus(`✗ ${e.message}`, true)
+    }
+  }
+
+  function copyOutput() {
+    const val = (document.getElementById('output') as HTMLTextAreaElement).value
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = document.getElementById('btn-copy')!
+      btn.textContent = '已复制 ✓'
+      setTimeout(() => { btn.textContent = '复制' }, 1500)
+    })
+  }
+
+  // Auto-format on paste if valid JSON
+  document.getElementById('input')!.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const ta = e.target as HTMLTextAreaElement
+      const start = ta.selectionStart
+      const end = ta.selectionEnd
+      ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end)
+      ta.selectionStart = ta.selectionEnd = start + 2
+    }
+  })
+</script>
