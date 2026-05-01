@@ -36,6 +36,8 @@ jobs:
 
       - name: Build
         run: bun run astro build
+        env:
+          PUBLIC_COMPILER_WORKER_URL: https://wandbox-proxy.moke521-wang.workers.dev
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

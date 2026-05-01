@@ -2,8 +2,15 @@ name = "wandbox-proxy"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# KV namespace for rate limiting (可选，不配置则跳过速率限制)
-# 部署后在 CF dashboard 创建 KV namespace 并绑定，命名为 RATE_KV
+# 部署后自动分配: https://wandbox-proxy.<your-account>.workers.dev
+# 可在 CF dashboard 绑定自定义域名
+
+# KV namespace for rate limiting (可选)
+# 1. wrangler kv:namespace create RATE_KV
+# 2. 把输出的 id 填到下面
 # [[kv_namespaces]]
 # binding = "RATE_KV"
 # id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+# 不需要额外环境变量，CORS 来源在代码里配置

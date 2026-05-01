@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+const workerUrl = import.meta.env.PUBLIC_COMPILER_WORKER_URL || ''
 ---
 
 <BaseLayout title="在线编译器 | void.dev">
@@ -11,7 +12,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
         <span class="text-xs text-[var(--color-neon-cyan)]">compiler</span>
         <div class="ml-auto flex items-center gap-3 text-[10px] text-[var(--color-text-muted)]">
           <span id="run-status"></span>
-          <span id="engine-label" class="px-2 py-0.5 rounded border" style="border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5)">Worker</span>
+          <span class="px-2 py-0.5 rounded border" style="border-color:rgba(0,212,255,0.2);color:rgba(0,212,255,0.5)">Wandbox</span>
         </div>
       </div>
     </nav>
@@ -29,7 +30,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
         </div>
         <div class="p-3 border-t border-[var(--color-void-border)]">
           <label class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">Stdin</label>
-          <textarea id="stdin-input" rows="3" placeholder="stdin (Python)..."
+          <textarea id="stdin-input" rows="3" placeholder="standard input..."
             style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--color-void-border);color:var(--color-text-primary);font-size:11px;border-radius:6px;padding:6px;outline:none;resize:none"></textarea>
         </div>
       </div>
@@ -42,7 +43,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
             <div class="w-3 h-3 rounded-full" style="background:#ffbd2e"></div>
             <div class="w-3 h-3 rounded-full" style="background:#27c93f"></div>
           </div>
-          <span id="editor-filename" class="text-[11px] text-[var(--color-text-muted)]">main.js</span>
+          <span id="editor-filename" class="text-[11px] text-[var(--color-text-muted)]">main.cpp</span>
           <div class="ml-auto flex items-center gap-2">
             <button id="run-btn"
               class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold"
@@ -63,10 +64,11 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
             style="background:#06060e;color:#e8e8f0;caret-color:#00d4ff;tab-size:2"></textarea>
         </div>
 
-        <div style="height:200px;background:#030308;border-top:1px solid var(--color-void-border);display:flex;flex-direction:column">
+        <div style="height:220px;background:#030308;border-top:1px solid var(--color-void-border);display:flex;flex-direction:column">
           <div class="flex items-center gap-3 px-4 py-1.5 border-b border-[var(--color-void-border)]">
             <span style="font-size:10px;color:var(--color-text-muted)">OUTPUT</span>
             <span id="exec-time" style="font-size:10px;color:rgba(136,136,170,0.5)"></span>
+            <span id="compiler-ver" style="font-size:10px;color:rgba(136,136,170,0.3);margin-left:auto"></span>
           </div>
           <pre id="output" class="flex-1 overflow-auto p-3 text-[12px] leading-relaxed" style="margin:0;color:#e8e8f0;white-space:pre-wrap;word-break:break-all"></pre>
         </div>
@@ -74,32 +76,110 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
     </div>
   </div>
 
+  <script define:vars={{ workerUrl }}>
+    window.__WORKER_URL__ = workerUrl
+  </script>
   <script is:inline>
 document.addEventListener('DOMContentLoaded', function () {
 
 // ── Languages ─────────────────────────────────────────────────────────────────
 const LANGS = [
-  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨', ext:'js',  engine:'worker',
-    template:`// JavaScript — Worker 沙箱，支持 ES2024 + async/await
-console.log("Hello, JavaScript!")
+  { id:'cpp', label:'C++', color:'#00599c', icon:'⚙️', ext:'cpp', compiler:'gcc-head',
+    template:`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
 
+int main() {
+    cout << "Hello, C++!" << endl;
+
+    vector<int> v = {5, 2, 8, 1, 9, 3};
+    sort(v.begin(), v.end());
+    for (int x : v) cout << x << " ";
+    cout << endl;
+
+    // Lambda
+    auto square = [](int x) { return x * x; };
+    for (int x : v) cout << square(x) << " ";
+    cout << endl;
+
+    return 0;
+}` },
+
+  { id:'c', label:'C', color:'#a8b9cc', icon:'🔵', ext:'c', compiler:'gcc-head-c',
+    template:`#include <stdio.h>
+#include <stdlib.h>
+
+void bubble_sort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++)
+        for (int j = 0; j < n-i-1; j++)
+            if (arr[j] > arr[j+1]) {
+                int t = arr[j]; arr[j] = arr[j+1]; arr[j+1] = t;
+            }
+}
+
+int main() {
+    printf("Hello, C!\n");
+    int arr[] = {64, 34, 25, 12, 22, 11, 90};
+    int n = sizeof(arr)/sizeof(arr[0]);
+    bubble_sort(arr, n);
+    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
+    printf("\n");
+    return 0;
+}` },
+
+  { id:'python', label:'Python', color:'#3776ab', icon:'🐍', ext:'py', compiler:'cpython-head',
+    template:`import sys
+from collections import Counter
+
+print("Hello, Python!", sys.version.split()[0])
+
+# 标准库
+data = "hello world hello python world hello"
+print(Counter(data.split()).most_common(3))
+
+# 推导式
+nums = [5, 2, 8, 1, 9, 3]
+print(sorted(nums))
+print([x**2 for x in sorted(nums)])
+
+# 数据类
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float
+    y: float
+    def dist(self): return (self.x**2 + self.y**2)**0.5
+
+print(Point(3, 4).dist())` },
+
+  { id:'javascript', label:'JavaScript', color:'#f7df1e', icon:'🟨', ext:'js', compiler:'nodejs-head',
+    template:`console.log("Hello, JavaScript!", process.version)
+
+// ES2024 features
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x)
 const double = x => x * 2
 const addOne = x => x + 1
 const square = x => x * x
-console.log("pipe(double,addOne,square)(3) =", pipe(double, addOne, square)(3))
+console.log("pipe:", pipe(double, addOne, square)(3))
 
-async function main() {
+// Async/await
+async function fetchData() {
   const nums = [5, 2, 8, 1, 9, 3]
   nums.sort((a, b) => a - b)
-  console.log("sorted:", nums)
   const squares = await Promise.all(nums.map(async x => x * x))
+  console.log("sorted:", nums)
   console.log("squares:", squares)
 }
-main()` },
+fetchData()
 
-  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷', ext:'ts',  engine:'babel',
-    template:`// TypeScript — Babel 转译后 Worker 运行
+// Destructuring
+const {name, age, ...rest} = {name: "Alice", age: 30, role: "admin"}
+console.log(name, age, rest)` },
+
+  { id:'typescript', label:'TypeScript', color:'#3178c6', icon:'🔷', ext:'ts', compiler:'typescript-head',
+    template:`// TypeScript — 真实 tsc 编译
 interface Point { x: number; y: number }
 
 function distance(a: Point, b: Point): number {
@@ -113,37 +193,107 @@ function divide(a: number, b: number): Result<number> {
   return { ok: true, value: a / b }
 }
 console.log(divide(10, 2))
-console.log(divide(5, 0))` },
+console.log(divide(5, 0))
 
-  { id:'python', label:'Python', color:'#3776ab', icon:'🐍', ext:'py',   engine:'skulpt',
-    template:`# Python — Skulpt (Python 3 子集)
-print("Hello, Python!")
+// Mapped types
+type Optional<T> = { [K in keyof T]?: T[K] }
+interface User { name: string; age: number }
+const u: Optional<User> = { name: "Alice" }
+console.log(u)` },
 
-def quicksort(arr):
-    if len(arr) <= 1: return arr
-    p = arr[len(arr) // 2]
-    return quicksort([x for x in arr if x < p]) + \
-           [x for x in arr if x == p] + \
-           quicksort([x for x in arr if x > p])
+  { id:'go', label:'Go', color:'#00add8', icon:'🐹', ext:'go', compiler:'go-head',
+    template:`package main
 
-print(quicksort([3, 6, 8, 10, 1, 2, 1]))
+import (
+    "fmt"
+    "sort"
+)
 
-class Dog:
-    def __init__(self, name): self.name = name
-    def speak(self): return f"{self.name} says Woof!"
+func fibonacci(n int) []int {
+    if n <= 0 { return nil }
+    fibs := make([]int, n)
+    fibs[0] = 0
+    if n > 1 { fibs[1] = 1 }
+    for i := 2; i < n; i++ {
+        fibs[i] = fibs[i-1] + fibs[i-2]
+    }
+    return fibs
+}
 
-print(Dog("Rex").speak())` },
+func main() {
+    fmt.Println("Hello, Go!")
+    fmt.Println(fibonacci(10))
 
-  { id:'ruby', label:'Ruby', color:'#cc342d', icon:'💎', ext:'rb',   engine:'opal',
-    template:`# Ruby — Opal.js (Ruby→JS)
-puts "Hello, Ruby!"
+    nums := []int{5, 2, 8, 1, 9, 3}
+    sort.Ints(nums)
+    fmt.Println(nums)
+}` },
 
-[1, 2, 3, 4, 5].each { |x| puts x * x }
+  { id:'rust', label:'Rust', color:'#dea584', icon:'🦀', ext:'rs', compiler:'rust-head',
+    template:`fn fibonacci(n: u32) -> u64 {
+    match n {
+        0 => 0,
+        1 => 1,
+        _ => fibonacci(n - 1) + fibonacci(n - 2),
+    }
+}
 
+fn main() {
+    println!("Hello, Rust!");
+
+    let mut v: Vec<i32> = vec![5, 2, 8, 1, 9, 3];
+    v.sort();
+    println!("{:?}", v);
+
+    let squares: Vec<i32> = v.iter().map(|x| x * x).collect();
+    println!("{:?}", squares);
+
+    for i in 0..8 {
+        println!("fib({}) = {}", i, fibonacci(i));
+    }
+}` },
+
+  { id:'java', label:'Java', color:'#f89820', icon:'☕', ext:'java', compiler:'openjdk-head',
+    template:`import java.util.*;
+import java.util.stream.*;
+
+public class Main {
+    static int fibonacci(int n) {
+        if (n <= 1) return n;
+        return fibonacci(n - 1) + fibonacci(n - 2);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Hello, Java!");
+
+        List<Integer> nums = Arrays.asList(5, 2, 8, 1, 9, 3);
+        List<Integer> sorted = nums.stream().sorted().collect(Collectors.toList());
+        System.out.println(sorted);
+
+        List<Integer> squares = sorted.stream()
+            .map(x -> x * x)
+            .collect(Collectors.toList());
+        System.out.println(squares);
+
+        for (int i = 0; i < 8; i++)
+            System.out.printf("fib(%d) = %d%n", i, fibonacci(i));
+    }
+}` },
+
+  { id:'ruby', label:'Ruby', color:'#cc342d', icon:'💎', ext:'rb', compiler:'ruby-head',
+    template:`puts "Hello, Ruby! #{RUBY_VERSION}"
+
+# 枚举
+nums = (1..10).to_a
+puts nums.select(&:odd?).map { |x| x ** 2 }.inspect
+
+# Hash
+scores = {alice: 95, bob: 82, carol: 91}
+puts scores.sort_by { |_, v| -v }.first(2).inspect
+
+# 类
 class Animal
-  def initialize(name)
-    @name = name
-  end
+  def initialize(name) = @name = name
   def speak = "#{@name} makes a sound"
 end
 
@@ -153,9 +303,8 @@ end
 
 [Dog.new("Rex"), Animal.new("Cat")].each { |a| puts a.speak }` },
 
-  { id:'lua', label:'Lua', color:'#000080', icon:'🌙', ext:'lua',  engine:'fengari',
-    template:`-- Lua 5.3 — Fengari (纯 JS 实现)
-print("Hello, Lua!")
+  { id:'lua', label:'Lua', color:'#00599c', icon:'🌙', ext:'lua', compiler:'lua-head',
+    template:`print("Hello, Lua! " .. _VERSION)
 
 local nums = {5, 2, 8, 1, 9, 3}
 table.sort(nums)
@@ -167,7 +316,6 @@ local function counter(start)
   local n = start
   return function() n = n + 1; return n end
 end
-
 local c = counter(0)
 print(c(), c(), c())
 
@@ -179,9 +327,8 @@ function Vec:len() return math.sqrt(self.x^2 + self.y^2) end
 local v = Vec.new(3, 4)
 print("len =", v:len())` },
 
-  { id:'sql', label:'SQL', color:'#e38c00', icon:'🗄️', ext:'sql',  engine:'sqljs',
-    template:`-- SQL — SQLite (sql.js WASM，纯浏览器运行)
-CREATE TABLE users (
+  { id:'sql', label:'SQLite', color:'#e38c00', icon:'🗄️', ext:'sql', compiler:'sqlite-head',
+    template:`CREATE TABLE users (
   id   INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   age  INTEGER,
@@ -195,59 +342,66 @@ INSERT INTO users (name, age, dept) VALUES
   ('Dave',  28, 'Marketing'),
   ('Eve',   32, 'Engineering');
 
--- 全表
 SELECT * FROM users ORDER BY age;
 
--- 条件查询
-SELECT name, age FROM users WHERE dept = 'Engineering' ORDER BY age;
-
--- 聚合
 SELECT dept, COUNT(*) AS cnt, AVG(age) AS avg_age
 FROM users GROUP BY dept;` },
 ]
 
 // ── Examples ──────────────────────────────────────────────────────────────────
 const EXAMPLES = {
-  javascript: [
-    { name:'斐波那契',  code:`function fib(n, m={}) {\n  if (n<=1) return n\n  return m[n] ?? (m[n] = fib(n-1,m) + fib(n-2,m))\n}\nfor(let i=0;i<12;i++) console.log(\`fib(\${i})=\${fib(i)}\`)` },
-    { name:'Promise链', code:`const delay=(ms,v)=>new Promise(r=>setTimeout(()=>r(v),ms))\nPromise.resolve(1)\n  .then(v=>{console.log("step1:",v);return delay(0,v+1)})\n  .then(v=>{console.log("step2:",v);return v*10})\n  .then(v=>console.log("done:",v))` },
-    { name:'正则',      code:`const text="2024-01-15 and 2025-12-31"\nconst re=/\\d{4}-\\d{2}-\\d{2}/g\nconsole.log([...text.matchAll(re)].map(m=>m[0]))` },
-    { name:'解构',      code:`const {name,age,...rest}={name:"Alice",age:30,role:"admin",city:"BJ"}\nconsole.log(name,age,rest)\nconst [h,...t]=[1,2,3,4,5]\nconsole.log(h,t)` },
+  cpp: [
+    { name:'模板',    code:`#include <iostream>\n#include <vector>\nusing namespace std;\ntemplate<typename T>\nT maxVal(const vector<T>& v){\n    T m=v[0];\n    for(const auto& x:v) if(x>m) m=x;\n    return m;\n}\nint main(){\n    vector<int> v={3,1,4,1,5,9,2,6};\n    cout<<"max="<<maxVal(v)<<endl;\n}` },
+    { name:'智能指针', code:`#include <iostream>\n#include <memory>\nusing namespace std;\nstruct Node{int val;shared_ptr<Node> next;Node(int v):val(v){}};\nint main(){\n    auto h=make_shared<Node>(1);\n    h->next=make_shared<Node>(2);\n    h->next->next=make_shared<Node>(3);\n    for(auto p=h;p;p=p->next) cout<<p->val<<" ";\n    cout<<endl;\n}` },
+    { name:'Lambda',  code:`#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\nint main(){\n    vector<int> v={5,2,8,1,9,3};\n    sort(v.begin(),v.end(),[](int a,int b){return a>b;});\n    for(int x:v) cout<<x<<" ";\n    cout<<endl;\n}` },
   ],
-  typescript: [
-    { name:'泛型',      code:`function identity<T>(x:T):T{return x}\nconsole.log(identity<string>("hello"))\nconsole.log(identity<number>(42))\n\ntype Pair<A,B>={first:A;second:B}\nconst p:Pair<string,number>={first:"age",second:30}\nconsole.log(p)` },
-    { name:'判别联合',  code:`type Shape=|{kind:"circle";r:number}|{kind:"rect";w:number;h:number}\nfunction area(s:Shape):number{\n  switch(s.kind){\n    case"circle":return Math.PI*s.r**2\n    case"rect":return s.w*s.h\n  }\n}\nconsole.log(area({kind:"circle",r:5}).toFixed(2))\nconsole.log(area({kind:"rect",w:4,h:6}))` },
-    { name:'工具类型',  code:`type Optional<T>={[K in keyof T]?:T[K]}\ninterface User{name:string;age:number;email:string}\nconst u:Optional<User>={name:"Alice"}\nconsole.log(u)\n\ntype Readonly2<T>={readonly[K in keyof T]:T[K]}\nconst ro:Readonly2<User>={name:"Bob",age:25,email:"b@b.com"}\nconsole.log(ro)` },
+  c: [
+    { name:'指针',    code:`#include <stdio.h>\nvoid swap(int* a,int* b){int t=*a;*a=*b;*b=t;}\nint main(){\n    int x=10,y=20;\n    swap(&x,&y);\n    printf("x=%d y=%d\n",x,y);\n    return 0;\n}` },
+    { name:'结构体',  code:`#include <stdio.h>\n#include <string.h>\ntypedef struct{char name[32];int age;}Person;\nint main(){\n    Person p;\n    strcpy(p.name,"Alice");\n    p.age=30;\n    printf("%s is %d years old\n",p.name,p.age);\n    return 0;\n}` },
   ],
   python: [
-    { name:'装饰器',    code:`import time\ndef timer(fn):\n    def w(*a,**k):\n        t=time.time()\n        r=fn(*a,**k)\n        print(f"{fn.__name__} {time.time()-t:.4f}s")\n        return r\n    return w\n@timer\ndef s(n): return sum(range(n))\nprint(s(100000))` },
-    { name:'生成器',    code:`def fib():\n    a,b=0,1\n    while True:\n        yield a\n        a,b=b,a+b\ng=fib()\nfor _ in range(12): print(next(g),end=" ")\nprint()` },
-    { name:'列表推导',  code:`m=[[i*j for j in range(1,6)] for i in range(1,6)]\nfor r in m: print(" ".join(f"{v:3}" for v in r))\nflat=[x for r in m for x in r if x%2==0]\nprint("偶数:",flat[:8])` },
+    { name:'装饰器',  code:`import time\ndef timer(fn):\n    def w(*a,**k):\n        t=time.time()\n        r=fn(*a,**k)\n        print(f"{fn.__name__} took {time.time()-t:.4f}s")\n        return r\n    return w\n@timer\ndef s(n): return sum(range(n))\nprint(s(1000000))` },
+    { name:'生成器',  code:`def fib():\n    a,b=0,1\n    while True:\n        yield a\n        a,b=b,a+b\ng=fib()\nprint([next(g) for _ in range(12)])` },
+    { name:'推导式',  code:`m=[[i*j for j in range(1,6)] for i in range(1,6)]\nfor r in m: print(" ".join(f"{v:3}" for v in r))\nflat=[x for r in m for x in r if x%2==0]\nprint("even:",flat[:8])` },
+  ],
+  javascript: [
+    { name:'斐波那契', code:`const fib=(n,m={})=>n<=1?n:m[n]??(m[n]=fib(n-1,m)+fib(n-2,m))\nfor(let i=0;i<12;i++) console.log(\`fib(\${i})=\${fib(i)}\`)` },
+    { name:'Promise', code:`const delay=(ms,v)=>new Promise(r=>setTimeout(()=>r(v),ms))\nPromise.resolve(1)\n  .then(v=>{console.log("step1:",v);return delay(0,v+1)})\n  .then(v=>{console.log("step2:",v);return v*10})\n  .then(v=>console.log("done:",v))` },
+    { name:'解构',    code:`const {name,age,...rest}={name:"Alice",age:30,role:"admin",city:"BJ"}\nconsole.log(name,age,rest)\nconst [h,...t]=[1,2,3,4,5]\nconsole.log(h,t)` },
+  ],
+  typescript: [
+    { name:'泛型',     code:`function identity<T>(x:T):T{return x}\nconsole.log(identity<string>("hello"))\nconsole.log(identity<number>(42))\n\ntype Pair<A,B>={first:A;second:B}\nconst p:Pair<string,number>={first:"age",second:30}\nconsole.log(p)` },
+    { name:'判别联合', code:`type Shape=|{kind:"circle";r:number}|{kind:"rect";w:number;h:number}\nfunction area(s:Shape):number{\n  switch(s.kind){\n    case"circle":return Math.PI*s.r**2\n    case"rect":return s.w*s.h\n  }\n}\nconsole.log(area({kind:"circle",r:5}).toFixed(2))\nconsole.log(area({kind:"rect",w:4,h:6}))` },
+  ],
+  go: [
+    { name:'并发',    code:`package main\nimport ("fmt";"sync")\nfunc worker(id int,wg *sync.WaitGroup){\n    defer wg.Done()\n    fmt.Printf("worker %d done\\n",id)\n}\nfunc main(){\n    var wg sync.WaitGroup\n    for i:=1;i<=5;i++{wg.Add(1);go worker(i,&wg)}\n    wg.Wait()\n}` },
+    { name:'channel', code:`package main\nimport "fmt"\nfunc sum(s []int,c chan int){t:=0;for _,v:=range s{t+=v};c<-t}\nfunc main(){\n    s:=[]int{7,2,8,-9,4,0}\n    c:=make(chan int)\n    go sum(s[:3],c);go sum(s[3:],c)\n    x,y:=<-c,<-c\n    fmt.Println(x,y,x+y)\n}` },
+  ],
+  rust: [
+    { name:'所有权',  code:`fn main(){\n    let s1=String::from("hello");\n    let s2=s1.clone();\n    println!("{} {}",s1,s2);\n    let v=vec![1,2,3];\n    for i in &v{print!("{} ",i);}\n    println!();\n}` },
+    { name:'枚举',    code:`#[derive(Debug)]\nenum Shape{Circle(f64),Rect(f64,f64)}\nimpl Shape{\n    fn area(&self)->f64{\n        match self{\n            Shape::Circle(r)=>std::f64::consts::PI*r*r,\n            Shape::Rect(w,h)=>w*h,\n        }\n    }\n}\nfn main(){\n    let shapes=vec![Shape::Circle(3.0),Shape::Rect(4.0,5.0)];\n    for s in &shapes{println!("{:?} area={:.2}",s,s.area());}\n}` },
+  ],
+  java: [
+    { name:'Stream',  code:`import java.util.*;\npublic class Main{\n    public static void main(String[] args){\n        Map<String,Integer> m=new HashMap<>();\n        m.put("Alice",90);m.put("Bob",85);m.put("Carol",92);\n        m.entrySet().stream()\n            .sorted(Map.Entry.<String,Integer>comparingByValue().reversed())\n            .forEach(e->System.out.println(e.getKey()+": "+e.getValue()));\n    }\n}` },
+    { name:'接口',    code:`import java.util.*;\npublic class Main{\n    interface Shape{double area();}\n    record Circle(double r)implements Shape{public double area(){return Math.PI*r*r;}}\n    record Rect(double w,double h)implements Shape{public double area(){return w*h;}}\n    public static void main(String[] args){\n        List.of(new Circle(3),new Rect(4,5))\n            .forEach(s->System.out.printf("%.2f%n",s.area()));\n    }\n}` },
   ],
   ruby: [
-    { name:'枚举方法',  code:`nums=(1..10).to_a\nputs nums.select{|x|x.odd?}.map{|x|x**2}.inspect\nputs nums.reduce(0){|s,x|s+x}` },
-    { name:'Hash',      code:`scores={alice:95,bob:82,carol:91,dave:78}\nputs scores.sort_by{|_,v|-v}.first(3).inspect\nputs scores.select{|_,v|v>=90}.inspect` },
-    { name:'模块Mixin', code:`module Greetable\n  def greet = "Hi, I am #{name}"\nend\nclass Person\n  include Greetable\n  attr_reader :name\n  def initialize(name) = @name=name\nend\nputs Person.new("Alice").greet` },
+    { name:'枚举',    code:`(1..10).each_slice(3){|g| p g}\nputs (1..10).select(&:even?).map{|x|x**2}.inspect` },
+    { name:'Mixin',   code:`module Greetable\n  def greet = "Hi, I am #{name}"\nend\nclass Person\n  include Greetable\n  attr_reader :name\n  def initialize(name) = @name=name\nend\nputs Person.new("Alice").greet` },
   ],
   lua: [
-    { name:'递归',      code:`local function fact(n)\n  if n<=1 then return 1 end\n  return n*fact(n-1)\nend\nfor i=1,10 do print(i.."! = "..fact(i)) end` },
-    { name:'字符串',    code:`local s="Hello, Lua!"\nprint(string.upper(s))\nprint(string.sub(s,1,5))\nprint(string.format("len=%d",#s))\nlocal t={}\nfor w in string.gmatch("one two three","(%a+)") do t[#t+1]=w end\nprint(table.concat(t,", "))` },
+    { name:'递归',    code:`local function fact(n)\n  if n<=1 then return 1 end\n  return n*fact(n-1)\nend\nfor i=1,10 do print(i.."! = "..fact(i)) end` },
+    { name:'字符串',  code:`local s="Hello, Lua!"\nprint(string.upper(s))\nprint(string.sub(s,1,5))\nfor w in string.gmatch("one two three","(%a+)") do print(w) end` },
   ],
   sql: [
-    { name:'JOIN',      code:`CREATE TABLE dept(id INT,name TEXT);\nCREATE TABLE emp(id INT,name TEXT,dept_id INT,salary INT);\nINSERT INTO dept VALUES(1,'Engineering'),(2,'Marketing');\nINSERT INTO emp VALUES(1,'Alice',1,9000),(2,'Bob',2,7000),(3,'Carol',1,8500),(4,'Dave',2,6500);\nSELECT e.name,d.name AS dept,e.salary FROM emp e JOIN dept d ON e.dept_id=d.id ORDER BY e.salary DESC;` },
-    { name:'GROUP BY',  code:`CREATE TABLE sales(product TEXT,amount INT,month INT);\nINSERT INTO sales VALUES('A',100,1),('B',200,1),('A',150,2),('B',180,2),('A',120,3);\nSELECT product,SUM(amount) AS total,ROUND(AVG(amount),1) AS avg FROM sales GROUP BY product ORDER BY total DESC;` },
-    { name:'子查询',    code:`CREATE TABLE emp(name TEXT,salary INT,dept TEXT);\nINSERT INTO emp VALUES('Alice',9000,'Eng'),('Bob',7000,'Mkt'),('Carol',8500,'Eng'),('Dave',6500,'Mkt');\nSELECT name,salary FROM emp WHERE salary>(SELECT AVG(salary) FROM emp);\nSELECT dept,MAX(salary) AS max_sal FROM emp GROUP BY dept;` },
+    { name:'JOIN',    code:`CREATE TABLE dept(id INT,name TEXT);\nCREATE TABLE emp(id INT,name TEXT,dept_id INT,salary INT);\nINSERT INTO dept VALUES(1,'Eng'),(2,'Mkt');\nINSERT INTO emp VALUES(1,'Alice',1,9000),(2,'Bob',2,7000),(3,'Carol',1,8500);\nSELECT e.name,d.name AS dept,e.salary FROM emp e JOIN dept d ON e.dept_id=d.id ORDER BY salary DESC;` },
+    { name:'GROUP BY',code:`CREATE TABLE sales(product TEXT,amount INT);\nINSERT INTO sales VALUES('A',100),('B',200),('A',150),('B',180),('A',120);\nSELECT product,SUM(amount) AS total,ROUND(AVG(amount),1) AS avg FROM sales GROUP BY product ORDER BY total DESC;` },
   ],
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let currentLang   = LANGS[0]
-let running       = false
-let skulptLoaded  = false
-let babelLoaded   = false
-let opalLoaded    = false
-let fengariLoaded = false
-let sqljsReady    = false
+let currentLang = LANGS[0]
+let running     = false
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
 const editor      = document.getElementById('editor')
@@ -256,8 +410,8 @@ const lineNums    = document.getElementById('line-numbers')
 const runBtn      = document.getElementById('run-btn')
 const runStatus   = document.getElementById('run-status')
 const execTime    = document.getElementById('exec-time')
+const compilerVer = document.getElementById('compiler-ver')
 const langLabel   = document.getElementById('editor-filename')
-const engineLabel = document.getElementById('engine-label')
 const stdinInput  = document.getElementById('stdin-input')
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -281,273 +435,93 @@ function selectLang(lang) {
   currentLang = lang
   document.querySelectorAll('#lang-list button').forEach(btn => {
     const active = btn.dataset.langId === lang.id
-    btn.style.background  = active ? lang.color+'18' : 'transparent'
-    btn.style.borderColor = active ? lang.color+'55' : 'transparent'
-    btn.style.color       = active ? lang.color : lang.color+'80'
+    btn.style.background  = active ? lang.color + '18' : 'transparent'
+    btn.style.borderColor = active ? lang.color + '40' : 'transparent'
+    btn.style.color       = active ? lang.color : lang.color + '60'
   })
   langLabel.textContent = `main.${lang.ext}`
-  const engineNames = { worker:'Worker', babel:'Babel→Worker', skulpt:'Skulpt', opal:'Opal.js', fengari:'Fengari', sqljs:'sql.js' }
-  engineLabel.textContent = engineNames[lang.engine] || lang.engine
-  stdinInput.style.opacity = lang.engine === 'skulpt' ? '1' : '0.3'
-
+  compilerVer.textContent = lang.compiler
   if (!editor.value || editor.value === prev.template) {
     editor.value = lang.template
     updateLineNumbers()
   }
   renderExamples(lang)
-
-  if (lang.engine === 'skulpt'  && !skulptLoaded)  loadSkulpt()
-  if (lang.engine === 'babel'   && !babelLoaded)   loadBabel()
-  if (lang.engine === 'opal'    && !opalLoaded)    loadOpal()
-  if (lang.engine === 'fengari' && !fengariLoaded) loadFengari()
 }
 
 function renderExamples(lang) {
   const list = document.getElementById('example-list')
   list.innerHTML = ''
-  ;(EXAMPLES[lang.id] || []).forEach(ex => {
+  const exs = EXAMPLES[lang.id] || []
+  exs.forEach(ex => {
     const btn = document.createElement('button')
-    btn.className = 'text-left text-[10px] px-2 py-1.5 rounded border transition-all w-full'
-    btn.style.cssText = `border-color:${lang.color}25;color:${lang.color}80;background:transparent;cursor:pointer`
+    btn.className = 'text-left text-[10px] px-2 py-1 rounded transition-colors w-full'
+    btn.style.cssText = 'color:rgba(136,136,170,0.6);background:transparent;cursor:pointer;border:1px solid transparent'
     btn.textContent = ex.name
-    btn.onmouseover = () => { btn.style.borderColor = lang.color+'55'; btn.style.color = lang.color }
-    btn.onmouseout  = () => { btn.style.borderColor = lang.color+'25'; btn.style.color = lang.color+'80' }
-    btn.onclick = () => { editor.value = ex.code; updateLineNumbers() }
+    btn.onmouseenter = () => btn.style.color = 'rgba(0,212,255,0.8)'
+    btn.onmouseleave = () => btn.style.color = 'rgba(136,136,170,0.6)'
+    btn.onclick = () => {
+      editor.value = ex.code
+      updateLineNumbers()
+    }
     list.appendChild(btn)
   })
 }
 
-// ── Loaders ───────────────────────────────────────────────────────────────────
-function loadScript(src, id) {
-  return new Promise((resolve, reject) => {
-    if (document.getElementById(id)) { resolve(); return }
-    const s = document.createElement('script')
-    s.id = id; s.src = src
-    s.onload = resolve; s.onerror = () => reject(new Error('Failed: ' + src))
-    document.head.appendChild(s)
-  })
-}
+// ── Wandbox API ───────────────────────────────────────────────────────────────
+async function runWandbox(code, compiler, stdin) {
+  // 优先走 CF Worker 代理（解决 CORS），没有则直接请求 Wandbox
+  const base = (window.__WORKER_URL__ || '').replace(/\/+$/, '')
+  const url  = base ? base + '/api/compile.json' : 'https://wandbox.org/api/compile.json'
 
-function loadSkulpt() {
-  loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js', 'skulpt-core')
-    .then(() => loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js', 'skulpt-stdlib'))
-    .then(() => { skulptLoaded = true })
-    .catch(console.warn)
-}
-function loadBabel() {
-  loadScript('https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js', 'babel-js')
-    .then(() => { babelLoaded = true })
-    .catch(console.warn)
-}
-function loadOpal() {
-  // Opal runtime only — use built-in compile from compiler bundle
-  loadScript('https://cdn.jsdelivr.net/npm/opal-runtime@1.8.2/dist/opal.min.js', 'opal-runtime')
-    .then(() => loadScript('https://cdn.jsdelivr.net/npm/opal-compiler@1.8.2/dist/compiler.min.js', 'opal-compiler'))
-    .then(() => { opalLoaded = true })
-    .catch(console.warn)
-}
-function loadFengari() {
-  loadScript('https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js', 'fengari-js')
-    .then(() => { fengariLoaded = true })
-    .catch(console.warn)
-}
-function loadSqljs() {
-  loadScript('https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.js', 'sqljs-js')
-    .then(() => {
-      window.initSqlJs({ locateFile: f => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${f}` })
-        .then(SQL => { window._SQL = SQL; sqljsReady = true })
-        .catch(console.warn)
+  let resp
+  try {
+    resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        compiler,
+        code,
+        stdin: stdin || '',
+        'compiler-option-raw': '',
+        options: '',
+      }),
+      signal: AbortSignal.timeout(30000),
     })
-    .catch(console.warn)
-}
+  } catch (e) {
+    const msg = e.name === 'AbortError' ? '编译超时（30s）' : '网络错误: ' + e.message
+    return { lines: [`<span style="color:#ff6b6b">${escHtml(msg)}</span>`], exit: 1 }
+  }
 
-// ── Engine: JS Worker sandbox ─────────────────────────────────────────────────
-function runInWorker(code) {
-  return new Promise(resolve => {
-    const lines = []
-    const src = `
-self.console={
-  log:  (...a)=>self.postMessage({t:'log',  s:a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join(' ')}),
-  warn: (...a)=>self.postMessage({t:'warn', s:a.map(x=>String(x)).join(' ')}),
-  error:(...a)=>self.postMessage({t:'err',  s:a.map(x=>String(x)).join(' ')}),
-  info: (...a)=>self.postMessage({t:'log',  s:a.map(x=>String(x)).join(' ')}),
-}
-self.onmessage=function(e){
-  try{
-    const fn=new Function(e.data)
-    const r=fn()
-    if(r&&typeof r.then==='function'){
-      r.then(()=>self.postMessage({t:'done',exit:0}))
-       .catch(er=>{self.postMessage({t:'err',s:String(er)});self.postMessage({t:'done',exit:1})})
-    }else{self.postMessage({t:'done',exit:0})}
-  }catch(er){self.postMessage({t:'err',s:String(er)});self.postMessage({t:'done',exit:1})}
-}`
-    const url = URL.createObjectURL(new Blob([src], { type:'application/javascript' }))
-    const w = new Worker(url)
-    const timer = setTimeout(() => {
-      w.terminate(); URL.revokeObjectURL(url)
-      resolve({ lines:[...lines,'<span style="color:#ffa500">[超时: 5s]</span>'], exit:1 })
-    }, 5000)
-    w.onmessage = ({data}) => {
-      if (data.t==='done') {
-        clearTimeout(timer); w.terminate(); URL.revokeObjectURL(url)
-        resolve({ lines, exit:data.exit })
-      } else {
-        const c = data.t==='err'?'#ff6b6b':data.t==='warn'?'#ffa500':null
-        lines.push(c ? `<span style="color:${c}">${escHtml(data.s)}</span>` : escHtml(data.s))
-      }
-    }
-    w.onerror = err => {
-      clearTimeout(timer); w.terminate(); URL.revokeObjectURL(url)
-      resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(err.message)}</span>`], exit:1 })
-    }
-    w.postMessage(code)
-  })
-}
+  if (!resp.ok) {
+    return { lines: [`<span style="color:#ff6b6b">服务错误 HTTP ${resp.status}</span>`], exit: 1 }
+  }
 
-// ── Engine: Babel ─────────────────────────────────────────────────────────────
-function runBabel(ts) {
-  return new Promise(resolve => {
-    if (!babelLoaded || !window.Babel) {
-      resolve({ lines:['<span style="color:#ffa500">Babel 加载中，请稍候…</span>'], exit:1 }); return
-    }
-    let js
-    try {
-      js = window.Babel.transform(ts, { presets:[['typescript',{}]], filename:'main.ts' }).code
-    } catch(e) {
-      resolve({ lines:[`<span style="color:#ff6b6b">TS 错误: ${escHtml(e.message)}</span>`], exit:1 }); return
-    }
-    runInWorker(js).then(resolve)
-  })
-}
+  const data = await resp.json()
+  const lines = []
 
-// ── Engine: Skulpt ────────────────────────────────────────────────────────────
-function runSkulpt(py) {
-  return new Promise(resolve => {
-    if (!skulptLoaded || !window.Sk) {
-      resolve({ lines:['<span style="color:#ffa500">Skulpt 加载中，请稍候…</span>'], exit:1 }); return
-    }
-    const lines = []
-    window.Sk.configure({
-      output: t => lines.push(escHtml(t)),
-      read: x => {
-        if (window.Sk.builtinFiles?.files[x]==null) throw new Error('File not found: '+x)
-        return window.Sk.builtinFiles.files[x]
-      },
-      inputfun: () => Promise.resolve(stdinInput.value||''),
-      __future__: window.Sk.python3,
-    })
-    window.Sk.misceval.asyncToPromise(
-      () => window.Sk.importMainWithBody('<stdin>', false, py, true)
-    ).then(() => resolve({ lines, exit:0 }))
-     .catch(e => resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(e.toString())}</span>`], exit:1 }))
-  })
-}
+  if (data.compiler_message && data.compiler_message.trim()) {
+    // compiler_message 包含警告/错误，黄色显示
+    lines.push('<span style="color:rgba(255,200,0,0.85)">' + escHtml(data.compiler_message.trimEnd()) + '</span>')
+  }
+  if (data.program_output && data.program_output.trim()) {
+    lines.push(escHtml(data.program_output))
+  }
+  if (data.program_error && data.program_error.trim()) {
+    lines.push('<span style="color:#ff6b6b">' + escHtml(data.program_error.trimEnd()) + '</span>')
+  }
+  if (!lines.length) {
+    lines.push('<span style="color:rgba(136,136,170,0.4)">(no output)</span>')
+  }
 
-// ── Engine: Opal (Ruby) ───────────────────────────────────────────────────────
-function runOpal(rb) {
-  return new Promise(resolve => {
-    if (!opalLoaded || !window.Opal) {
-      resolve({ lines:['<span style="color:#ffa500">Opal.js 加载中，请稍候…</span>'], exit:1 }); return
-    }
-    const lines = []
-    try {
-      // 重定向 stdout
-      const stdout = window.Opal.gvars.$stdout || window.Opal.gvars['$stdout']
-      window.Opal.gvars['$stdout'] = {
-        $write: t => { lines.push(escHtml(String(t))); return String(t).length },
-        $flush: () => window.Opal.nil,
-      }
-      const js = window.Opal.compile(rb, { requirable:false })
-      // eslint-disable-next-line no-new-func
-      new Function('Opal', js)(window.Opal)
-      resolve({ lines, exit:0 })
-    } catch(e) {
-      resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(e.message||String(e))}</span>`], exit:1 })
-    }
-  })
-}
-
-// ── Engine: Fengari (Lua) ─────────────────────────────────────────────────────
-function runFengari(lua) {
-  return new Promise(resolve => {
-    if (!fengariLoaded || !window.fengari) {
-      resolve({ lines:['<span style="color:#ffa500">Fengari 加载中，请稍候…</span>'], exit:1 }); return
-    }
-    const lines = []
-    try {
-      const { lua:L, lauxlib, lualib } = window.fengari
-      const state = lauxlib.luaL_newstate()
-      lualib.luaL_openlibs(state)
-      // override print
-      L.lua_pushcfunction(state, S => {
-        const n = L.lua_gettop(S); const parts = []
-        for (let i=1;i<=n;i++) {
-          L.lua_getglobal(S, L.to_luastring('tostring'))
-          L.lua_pushvalue(S, i); L.lua_call(S, 1, 1)
-          parts.push(L.lua_tojsstring(S, -1)); L.lua_pop(S, 1)
-        }
-        lines.push(escHtml(parts.join('\t'))); return 0
-      })
-      L.lua_setglobal(state, L.to_luastring('print'))
-      const enc = new TextEncoder()
-      const status = lauxlib.luaL_dostring(state, enc.encode(lua))
-      if (status !== 0) {
-        const err = L.lua_tojsstring(state, -1)
-        resolve({ lines:[...lines,`<span style="color:#ff6b6b">${escHtml(err)}</span>`], exit:1 })
-      } else {
-        resolve({ lines, exit:0 })
-      }
-    } catch(e) {
-      resolve({ lines:[`<span style="color:#ff6b6b">${escHtml(e.message)}</span>`], exit:1 })
-    }
-  })
-}
-
-// ── Engine: sql.js (SQLite) ───────────────────────────────────────────────────
-function runSqljs(sql) {
-  return new Promise(resolve => {
-    function exec() {
-      if (!window._SQL) {
-        resolve({ lines:['<span style="color:#ffa500">sql.js 加载中…</span>'], exit:1 }); return
-      }
-      try {
-        const db = new window._SQL.Database()
-        const stmts = sql.split(';').map(s=>s.trim()).filter(Boolean)
-        const lines = []
-        for (const stmt of stmts) {
-          const res = db.exec(stmt+';')
-          if (res.length) {
-            for (const r of res) {
-              lines.push('<span style="color:rgba(0,212,255,0.8)">'+escHtml(r.columns.join(' │ '))+'</span>')
-              lines.push('<span style="color:rgba(255,255,255,0.15)">'+('─'.repeat(40))+'</span>')
-              for (const row of r.values)
-                lines.push(escHtml(row.map(v=>v===null?'NULL':String(v)).join(' │ ')))
-              lines.push('')
-            }
-          }
-        }
-        db.close()
-        resolve({ lines:lines.length?lines:['<span style="color:rgba(136,136,170,0.4)">(no rows)</span>'], exit:0 })
-      } catch(e) {
-        resolve({ lines:[`<span style="color:#ff6b6b">${escHtml(e.message)}</span>`], exit:1 })
-      }
-    }
-    if (sqljsReady) { exec(); return }
-    let waited = 0
-    const poll = setInterval(() => {
-      waited += 200
-      if (sqljsReady) { clearInterval(poll); exec() }
-      else if (waited > 15000) { clearInterval(poll); resolve({ lines:['<span style="color:#ff6b6b">sql.js 加载超时</span>'], exit:1 }) }
-    }, 200)
-  })
+  const exit = (data.status === '0' || data.status === 0) ? 0 : 1
+  return { lines, exit }
 }
 
 // ── Run ───────────────────────────────────────────────────────────────────────
 async function runCode() {
   if (running) return
   running = true
-  output.innerHTML = '<span style="color:rgba(136,136,170,0.3)">Running…</span>'
+  output.innerHTML = '<span style="color:rgba(136,136,170,0.3)">Compiling…</span>'
   execTime.textContent = ''
   runStatus.textContent = '⟳'
   runStatus.style.color = '#ffa500'
@@ -555,27 +529,19 @@ async function runCode() {
 
   const t0 = Date.now()
   try {
-    const e = currentLang.engine
-    let result
-    if      (e==='worker')  result = await runInWorker(editor.value)
-    else if (e==='babel')   result = await runBabel(editor.value)
-    else if (e==='skulpt')  result = await runSkulpt(editor.value)
-    else if (e==='opal')    result = await runOpal(editor.value)
-    else if (e==='fengari') result = await runFengari(editor.value)
-    else if (e==='sqljs')   result = await runSqljs(editor.value)
-
+    const result = await runWandbox(editor.value, currentLang.compiler, stdinInput.value)
     const ms = Date.now() - t0
-    output.innerHTML = result.lines.length
-      ? result.lines.join('')
-      : '<span style="color:rgba(136,136,170,0.4)">(no output)</span>'
+    output.innerHTML = result.lines.join('\n')
     execTime.textContent = `exit ${result.exit} · ${ms}ms`
-    runStatus.textContent = result.exit===0 ? '✓ OK' : '✕ Error'
-    runStatus.style.color = result.exit===0 ? '#39ff14' : '#ff4466'
-  } catch(e) {
+    runStatus.textContent = result.exit === 0 ? '✓ OK' : '✕ Error'
+    runStatus.style.color = result.exit === 0 ? '#39ff14' : '#ff4466'
+  } catch (e) {
     output.innerHTML = `<span style="color:#ff6b6b">${escHtml(e.message)}</span>`
-    runStatus.textContent = '✕'; runStatus.style.color = '#ff4466'
+    runStatus.textContent = '✕'
+    runStatus.style.color = '#ff4466'
   }
-  running = false; runBtn.disabled = false
+  running = false
+  runBtn.disabled = false
 }
 
 function escHtml(s) {
@@ -584,38 +550,35 @@ function escHtml(s) {
 
 // ── Editor ────────────────────────────────────────────────────────────────────
 function updateLineNumbers() {
-  const n = (editor.value.match(/\n/g)||[]).length + 1
-  lineNums.innerHTML = Array.from({length:n},(_,i)=>i+1).join('\n')
+  const n = (editor.value.match(/\n/g) || []).length + 1
+  lineNums.innerHTML = Array.from({ length: n }, (_, i) => i + 1).join('\n')
 }
 editor.addEventListener('input', updateLineNumbers)
 editor.addEventListener('scroll', () => { lineNums.scrollTop = editor.scrollTop })
 editor.addEventListener('keydown', e => {
-  if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); runCode(); return }
-  if (e.key==='Tab') {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); return }
+  if (e.key === 'Tab') {
     e.preventDefault()
-    const s=editor.selectionStart, en=editor.selectionEnd
-    editor.value=editor.value.slice(0,s)+'  '+editor.value.slice(en)
-    editor.selectionStart=editor.selectionEnd=s+2
+    const s = editor.selectionStart, en = editor.selectionEnd
+    editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(en)
+    editor.selectionStart = editor.selectionEnd = s + 2
     updateLineNumbers()
   }
 })
 
 runBtn.onclick = runCode
 document.getElementById('clear-btn').onclick = () => {
-  output.innerHTML=''; execTime.textContent=''; runStatus.textContent=''
+  output.innerHTML = ''; execTime.textContent = ''; runStatus.textContent = ''
 }
 document.getElementById('copy-btn').onclick = () => {
   navigator.clipboard.writeText(editor.value).then(() => {
-    const b=document.getElementById('copy-btn')
-    b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy',1500)
+    const b = document.getElementById('copy-btn')
+    b.textContent = 'Copied!'; setTimeout(() => b.textContent = 'Copy', 1500)
   })
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderLangList()
-loadBabel()
-loadSkulpt()
-loadSqljs()   // sql.js 有 WASM 需要时间初始化，提前加载
 
 })
   </script>
