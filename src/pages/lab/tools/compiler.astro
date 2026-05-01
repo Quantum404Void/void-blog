@@ -109,9 +109,19 @@ const LANGS = [
   {id:'javascript', label:'JavaScript', color:'#f7df1e', compiler:'nodejs-20.17.0', ext:'js', icon:'🟨',
    template:`// Node.js 20\nconsole.log("Hello, JavaScript!")\n\n// async/await\nasync function fetchData() {\n  const data = [1, 2, 3, 4, 5]\n  const result = await Promise.all(data.map(async x => x * x))\n  console.log("Squares:", result)\n}\n\nfetchData()`},
 
-  {id:'typescript', label:'TypeScript', color:'#3178c6', compiler:'nodejs-20.17.0',  ext:'ts', icon:'🔷',
-   // Wandbox doesn't have native TS, compile via tsx
-   template:`// TypeScript\nconst greet = (name: string): string => {\n  return \`Hello, \${name}!\`\n}\n\nconsole.log(greet("TypeScript"))\n\ninterface Point { x: number; y: number }\nconst dist = (a: Point, b: Point): number =>\n  Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)\n\nconsole.log("Distance:", dist({x:0,y:0}, {x:3,y:4}))`},
+  {id:'typescript', label:'TypeScript', color:'#3178c6', compiler:'typescript-5.6.2', ext:'ts', icon:'🔷',
+   template:`// TypeScript 5.6
+const greet = (name: string): string => {
+  return \`Hello, \${name}!\`
+}
+
+console.log(greet("TypeScript"))
+
+interface Point { x: number; y: number }
+const dist = (a: Point, b: Point): number =>
+  Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
+
+console.log("Distance:", dist({x:0,y:0}, {x:3,y:4}))`},
 
   {id:'go',      label:'Go',         color:'#00add8', compiler:'go-1.23.2',      ext:'go',   icon:'🔵',
    template:`package main\n\nimport (\n\t"fmt"\n\t"sort"\n)\n\nfunc main() {\n\tfmt.Println("Hello, Go!")\n\tnums := []int{5, 2, 8, 1, 9, 3}\n\tsort.Ints(nums)\n\tfmt.Println("Sorted:", nums)\n}`},
@@ -119,14 +129,47 @@ const LANGS = [
   {id:'rust',    label:'Rust',       color:'#ce422b', compiler:'rust-1.82.0',    ext:'rs',   icon:'🦀',
    template:`fn main() {\n    println!("Hello, Rust!");\n    let mut v = vec![5, 2, 8, 1, 9, 3];\n    v.sort();\n    println!("Sorted: {:?}", v);\n    \n    // 闭包\n    let squares: Vec<i32> = (1..=5).map(|x| x * x).collect();\n    println!("Squares: {:?}", squares);\n}`},
 
-  {id:'kotlin',  label:'Kotlin',     color:'#7f52ff', compiler:'kotlin-2.0.21',  ext:'kt',   icon:'🟣',
-   template:`fun main() {\n    println("Hello, Kotlin!")\n    val nums = listOf(5, 2, 8, 1, 9, 3).sorted()\n    println("Sorted: \$nums")\n    val squares = (1..5).map { it * it }\n    println("Squares: \$squares")\n}`},
+  {id:'swift',   label:'Swift',      color:'#f05138', compiler:'swift-6.0.1',    ext:'swift', icon:'🍎',
+   template:`// Swift 6
+print("Hello, Swift!")
 
-  {id:'ruby',    label:'Ruby',       color:'#cc342d', compiler:'ruby-3.3.0',     ext:'rb',   icon:'💎',
-   template:`puts "Hello, Ruby!"\nnums = [5, 2, 8, 1, 9, 3].sort\nputs "Sorted: #{nums}"\nsquares = (1..5).map { |x| x**2 }\nputs "Squares: #{squares}"`},
+let nums = [5, 2, 8, 1, 9, 3].sorted()
+print("Sorted: \(nums)")
 
-  {id:'php',     label:'PHP',        color:'#4f5b93', compiler:'php-7.4.28',     ext:'php',  icon:'🐘',
-   template:`<?php\necho "Hello, PHP!\\n";\n$nums = [5, 2, 8, 1, 9, 3];\nsort($nums);\necho "Sorted: " . implode(", ", $nums) . "\\n";\n$squares = array_map(fn($x) => $x * $x, range(1, 5));\necho "Squares: " . implode(", ", $squares) . "\\n";`},
+let squares = (1...5).map { $0 * $0 }
+print("Squares: \(squares)")
+
+// 闭包
+func compose<T>(_ f: @escaping (T) -> T, _ g: @escaping (T) -> T) -> (T) -> T {
+    return { f(g($0)) }
+}
+let addOne = { (x: Int) in x + 1 }
+let double = { (x: Int) in x * 2 }
+let addOneThenDouble = compose(double, addOne)
+print("compose(double, addOne)(3) =", addOneThenDouble(3))`},
+
+  {id:'ruby',    label:'Ruby',       color:'#cc342d', compiler:'ruby-3.3.11',   ext:'rb',   icon:'💎',
+   template:`puts "Hello, Ruby!"
+nums = [5, 2, 8, 1, 9, 3].sort
+puts "Sorted: #{nums}"
+squares = (1..5).map { |x| x**2 }
+puts "Squares: #{squares}"`},
+
+  {id:'php',     label:'PHP',        color:'#4f5b93', compiler:'php-8.3.12',     ext:'php',  icon:'🐘',
+   template:`<?php
+echo "Hello, PHP 8.3!\n";
+$nums = [5, 2, 8, 1, 9, 3];
+sort($nums);
+echo "Sorted: " . implode(", ", $nums) . "\n";
+$squares = array_map(fn($x) => $x * $x, range(1, 5));
+echo "Squares: " . implode(", ", $squares) . "\n";
+
+// PHP 8 named arguments
+function makeTag(string $tag, string $content, string $class = ''): string {
+    $cls = $class ? " class=\"$class\"" : '';
+    return "<$tag$cls>$content</$tag>";
+}
+echo makeTag(content: 'Hello', tag: 'p') . "\n";`},
 
   {id:'bash',    label:'Bash',       color:'#89e051', compiler:'bash',           ext:'sh',   icon:'💻',
    template:`#!/bin/bash\necho "Hello, Bash!"\n\n# 数组操作\narr=(5 2 8 1 9 3)\necho "Original: \${arr[@]}"\n\n# 冒泡排序\nn=\${#arr[@]}\nfor ((i=0; i<n; i++)); do\n  for ((j=0; j<n-i-1; j++)); do\n    if [ "\${arr[j]}" -gt "\${arr[$((j+1))]}" ]; then\n      tmp="\${arr[j]}"; arr[j]="\${arr[$((j+1))]}"; arr[$((j+1))]="\$tmp"\n    fi\n  done\ndone\necho "Sorted: \${arr[@]}"`},
@@ -239,7 +282,29 @@ const LANG_EXAMPLES = {
   ],
 }
 // Fill in minimal examples for others
-;['c','java','kotlin','ruby','php','bash','typescript'].forEach(id => {
+LANG_EXAMPLES['swift'] = [
+  {name:'Hello World', code:`print("Hello, Swift!")`},
+  {name:'枚举与模式匹配', code:`enum Shape {
+    case circle(radius: Double)
+    case rectangle(width: Double, height: Double)
+    case triangle(base: Double, height: Double)
+
+    var area: Double {
+        switch self {
+        case .circle(let r): return Double.pi * r * r
+        case .rectangle(let w, let h): return w * h
+        case .triangle(let b, let h): return 0.5 * b * h
+        }
+    }
+}
+
+let shapes: [Shape] = [.circle(radius: 5), .rectangle(width: 4, height: 6), .triangle(base: 3, height: 8)]
+for shape in shapes {
+    print("Area: \(String(format: "%.2f", shape.area))")
+}`},
+]
+
+;['c','java','ruby','php','bash','typescript'].forEach(id => {
   if (!LANG_EXAMPLES[id]) {
     const lang = LANGS.find(l => l.id === id)
     LANG_EXAMPLES[id] = [{name:'默认示例', code: lang?.template || ''}]
@@ -298,26 +363,8 @@ async function runCode() {
   let compiler = lang.compiler
   let finalCode = code
 
-  // Special: TypeScript → run as JS (strip types naively for demo)
-  if (lang.id === 'typescript') {
-    compiler = 'nodejs-20.17.0'
-    // Simple type stripping for demo purposes
-    finalCode = code
-      .replace(/:\s*\w+(\[\])?(\s*\|[^=;\n]+)?/g, '')
-      .replace(/<[^>]+>/g, '')
-      .replace(/interface\s+\w+\s*\{[^}]*\}/g, '')
-  }
-
-  // Kotlin: use correct compiler name
-  if (lang.id === 'kotlin') {
-    // Try to find correct kotlin compiler
-    try {
-      const r = await fetch('https://wandbox.org/api/list.json')
-      const list = await r.json()
-      const kotlinComp = list.find(c => c.language === 'Kotlin')
-      if (kotlinComp) compiler = kotlinComp.name
-    } catch(e) {}
-  }
+  // TypeScript: use Wandbox native TypeScript compiler (no stripping needed)
+  // compiler is already set to 'typescript-5.6.2' from LANGS config
 
   try {
     const payload = { compiler, code: finalCode, stdin }
