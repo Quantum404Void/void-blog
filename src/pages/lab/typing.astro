@@ -117,23 +117,24 @@ const snippets = [
 
     function renderDisplay(typed) {
       const chars = target.split('')
+      const cursor = typed.length
       let html = ''
       chars.forEach((ch, i) => {
         const t = typed[i]
         const display_ch = ch === '\n' ? '↵\n' : ch === ' ' ? '·' : ch
+        const isCursor = i === cursor
+        const cursorStyle = isCursor ? 'outline:2px solid rgba(0,212,255,0.9);outline-offset:-1px;border-radius:2px;' : ''
         if (t === undefined) {
-          html += `<span style="color:rgba(232,232,240,0.4)">${escHtml(display_ch)}</span>`
+          html += `<span style="color:rgba(232,232,240,0.4);${cursorStyle}">${escHtml(display_ch)}</span>`
         } else if (t === ch) {
-          html += `<span style="color:#39ff14">${escHtml(display_ch)}</span>`
+          html += `<span style="color:#39ff14;${cursorStyle}">${escHtml(display_ch)}</span>`
         } else {
-          html += `<span style="color:#ff00aa;text-decoration:underline;background:rgba(255,0,170,0.1)">${escHtml(display_ch)}</span>`
+          html += `<span style="color:#ff00aa;text-decoration:underline;background:rgba(255,0,170,0.1);${cursorStyle}">${escHtml(display_ch)}</span>`
         }
       })
-      // cursor
-      if (typed.length < chars.length) {
-        const pos = typed.length
-        html = html.substring(0, html.lastIndexOf('</span>', html.indexOf(`>${escHtml(target[pos] === '\n' ? '↵\n' : target[pos] === ' ' ? '·' : target[pos])}</span>`) + 1) + 1) 
-        // simpler: inject cursor marker
+      // cursor at end of text
+      if (cursor === chars.length) {
+        html += '<span style="display:inline-block;width:0.5ch;background:rgba(0,212,255,0.7);border-radius:1px;animation:blink 1s step-end infinite">&nbsp;</span>'
       }
       display.innerHTML = html
     }
@@ -229,4 +230,11 @@ const snippets = [
 
     reset()
   </script>
+
+  <style>
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
 </BaseLayout>
