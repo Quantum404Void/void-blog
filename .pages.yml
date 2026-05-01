@@ -1,0 +1,41 @@
+media:
+  input: public/uploads
+  output: /uploads
+
+content:
+  - name: blog
+    label: 文章
+    path: src/content/blog
+    filename: "{fields.title}"
+    exclude: ["about"]
+    fields:
+      - name: title
+        label: 标题
+        type: string
+        required: true
+      - name: description
+        label: 描述
+        type: string
+      - name: pubDate
+        label: 发布日期
+        type: date
+        required: true
+        default: today
+        options:
+          format: "YYYY-MM-DD"
+      - name: updatedDate
+        label: 更新日期
+        type: date
+        options:
+          format: "YYYY-MM-DD"
+      - name: tags
+        label: 标签
+        type: string
+        list: true
+      - name: draft
+        label: 草稿
+        type: boolean
+        default: false
+      - name: body
+        label: 内容
+        type: rich-text
