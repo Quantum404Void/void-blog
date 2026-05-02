@@ -31,42 +31,6 @@ jobs:
         env:
           PUBLIC_COMPILER_WORKER_URL: https://wandbox-proxy.moke521-wang.workers.dev
 
-      - name: Prepare dist for CF Pages SSR
-        run: |
-          node -e "
-            const fs = require('fs');
-            const path = require('path');
-
-            // 1. Fix server/wrangler.json — keep only Pages-compatible fields
-            const cfgPath = 'dist/server/wrangler.json';
-            const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-            const clean = {
-              name: cfg.name,
-              compatibility_date: cfg.compatibility_date,
-              compatibility_flags: cfg.compatibility_flags,
-              main: cfg.main,
-              d1_databases: cfg.d1_databases,
-              vars: cfg.vars || {},
-            };
-            fs.writeFileSync(cfgPath, JSON.stringify(clean, null, 2));
-            console.log('Cleaned wrangler.json:', JSON.stringify(clean, null, 2));
-
-            // 2. Copy static assets from dist/client into dist/server
-            //    so that wrangler pages deploy dist/server has all files
-            const clientDir = 'dist/client';
-            const serverDir = 'dist/server';
-            function copyDir(src, dest) {
-              if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-              for (const item of fs.readdirSync(src)) {
-                const s = path.join(src, item), d = path.join(dest, item);
-                if (fs.statSync(s).isDirectory()) copyDir(s, d);
-                else fs.copyFileSync(s, d);
-              }
-            }
-            copyDir(clientDir, serverDir);
-            console.log('Copied client assets into server dir');
-          "
-
       - name: Bind D1 to Pages project
         run: |
           curl -s -X PATCH \
@@ -81,4 +45,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: pages deploy dist/server --project-name=void-blog
+          command: pages deploy dist --project-name=void-blog

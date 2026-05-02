@@ -23,14 +23,6 @@ export default defineConfig({
     plugins: [tailwindcss()],
     build: {
       chunkSizeWarningLimit: 3000,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('mermaid')) return 'mermaid-vendor'
-            if (id.includes('chart.js') || id.includes('vue-chartjs')) return 'chart-vendor'
-          },
-        },
-      },
     },
   },
   markdown: {
