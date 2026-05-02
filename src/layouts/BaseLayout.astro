@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import { version } from '../../package.json'
 
 interface Props {
   title: string
@@ -147,32 +148,74 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
       })
     </script>
 
-    <!-- PWA Install Button (top-right) -->
-    <button id="pwa-install-btn" style="display:none; position:fixed; top:1rem; right:1rem; z-index:1000; align-items:center; gap:0.4rem; padding:0.45rem 0.85rem; background:rgba(10,10,15,0.92); border:1px solid rgba(0,212,255,0.35); border-radius:8px; box-shadow:0 0 14px rgba(0,212,255,0.12); font-family:'JetBrains Mono',monospace; font-size:12px; color:#00d4ff; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap; transition:background 0.2s, box-shadow 0.2s;">📱 安装</button>
+    <!-- PWA Buttons (top-right: install + update) -->
+    <div id="pwa-actions" style="position:fixed; top:0.85rem; right:1rem; z-index:9999; display:flex; gap:0.5rem; align-items:center;">
+      <button id="pwa-update-btn" style="display:none; align-items:center; gap:0.35rem; padding:0.4rem 0.8rem; background:rgba(10,10,15,0.93); border:1px solid rgba(0,255,136,0.4); border-radius:7px; box-shadow:0 0 12px rgba(0,255,136,0.12); font-family:'JetBrains Mono',monospace; font-size:11px; color:#00ff88; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap;">🔄 新版本</button>
+      <button id="pwa-install-btn" style="display:none; align-items:center; gap:0.35rem; padding:0.4rem 0.8rem; background:rgba(10,10,15,0.93); border:1px solid rgba(0,212,255,0.35); border-radius:7px; box-shadow:0 0 12px rgba(0,212,255,0.1); font-family:'JetBrains Mono',monospace; font-size:11px; color:#00d4ff; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap;">📱 安装</button>
+    </div>
+    <!-- Version badge (bottom-right) -->
+    <div style="position:fixed; bottom:0.6rem; right:0.8rem; z-index:9990; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(100,100,140,0.55); pointer-events:none; user-select:none;">v{version}</div>
     <script>
       {
         let deferredPrompt: any
-        const btn = document.getElementById('pwa-install-btn') as HTMLButtonElement | null
+        const installBtn = document.getElementById('pwa-install-btn') as HTMLButtonElement | null
+        const updateBtn  = document.getElementById('pwa-update-btn')  as HTMLButtonElement | null
 
-        // 已安装则不显示
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-          if (btn) btn.style.display = 'none'
+        // --- Install prompt ---
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+          window.addEventListener('beforeinstallprompt', (e: any) => {
+            e.preventDefault()
+            deferredPrompt = e
+            if (installBtn) installBtn.style.display = 'flex'
+          })
+          window.addEventListener('appinstalled', () => {
+            if (installBtn) installBtn.style.display = 'none'
+            deferredPrompt = null
+          })
         }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault()
-          deferredPrompt = e
-          if (btn) btn.style.display = 'flex'
-        })
-
-        btn?.addEventListener('click', async () => {
+        installBtn?.addEventListener('click', async () => {
           if (!deferredPrompt) return
           deferredPrompt.prompt()
           const { outcome } = await deferredPrompt.userChoice
           deferredPrompt = null
-          if (btn) btn.style.display = 'none'
+          if (installBtn) installBtn.style.display = 'none'
+        })
+
+        // --- Update prompt (SW waiting) ---
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then((reg) => {
+            // 已有 waiting worker
+            if (reg.waiting) {
+              if (updateBtn) updateBtn.style.display = 'flex'
+            }
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing
+              newWorker?.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  if (updateBtn) updateBtn.style.display = 'flex'
+                }
+              })
+            })
+          })
+        }
+        updateBtn?.addEventListener('click', () => {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.waiting?.postMessage({ type: 'SKIP_WAITING' })
+          })
+          if (updateBtn) updateBtn.style.display = 'none'
+          window.location.reload()
         })
       }
+    </script>
+
+    <!-- Console banner -->
+    <script define:vars={{ version }}>
+      console.log(
+        '%c void.dev %c v' + version + ' %c',
+        'background:#0a0a0f;color:#00d4ff;padding:2px 6px;border-radius:3px 0 0 3px;font-family:monospace;font-size:11px;',
+        'background:#0d2030;color:#00ff88;padding:2px 6px;border-radius:0 3px 3px 0;font-family:monospace;font-size:11px;',
+        ''
+      )
     </script>
 
     <slot />

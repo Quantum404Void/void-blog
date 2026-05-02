@@ -14,7 +14,7 @@ export default defineConfig({
     mdx(),
     sitemap(),
     AstroPWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       manifest: {
         name: 'void.dev',
         short_name: 'void.dev',
@@ -48,6 +48,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: '/404.html',
         navigateFallbackDenylist: [/^\/\_/, /\/[^/?]+\.[^/]+$/],
+        skipWaiting: false,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
