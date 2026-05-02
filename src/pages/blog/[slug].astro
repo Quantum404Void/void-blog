@@ -1,59 +1,46 @@
 ---
-import { getCollection, render } from 'astro:content'
-import type { GetStaticPaths } from 'astro'
 import PostLayout from '../../layouts/PostLayout.astro'
+import { getPost, getAllPosts } from '../../lib/db'
+import { renderMarkdown } from '../../lib/markdown'
 
-export const getStaticPaths = (async () => {
-  const posts = await getCollection('blog', ({ data }) => !data.draft)
-  return posts.map(post => {
-    const slug = post.id.replace(/\.mdx?$/, '')
-    return { params: { slug }, props: { post } }
-  })
-}) satisfies GetStaticPaths
+const { slug } = Astro.params
+const db = Astro.locals.runtime.env.void_blog_posts
 
-const { post } = Astro.props
-const { Content, headings } = await render(post)
+const post = await getPost(db, slug!)
+if (!post) return Astro.redirect('/404')
 
-const wordCount = post.body?.length ?? 0
-const readingTime = Math.max(1, Math.round(wordCount / 600))
-
-// 只保留 h2/h3
+const { html, headings } = await renderMarkdown(post.content)
 const tocHeadings = headings.filter(h => h.depth <= 3)
 
-// 相关文章：按 tags 排序，取前 3 篇
-const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
-  .filter(p => !p.id.startsWith('about') && p.id !== post.id)
+const wordCount = post.content.length
+const readingTime = Math.max(1, Math.round(wordCount / 600))
 
-const postTags = new Set(post.data.tags ?? [])
+// 相关文章
+const allPosts = (await getAllPosts(db)).filter(p => p.slug !== slug && p.slug !== 'about')
+const postTags = new Set(post.tags)
 const related = allPosts
-  .map(p => ({
-    post: p,
-    score: (p.data.tags ?? []).filter(t => postTags.has(t)).length,
-  }))
+  .map(p => ({ post: p, score: p.tags.filter(t => postTags.has(t)).length }))
   .filter(x => x.score > 0)
-  .sort((a, b) => b.score - a.score || b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf())
+  .sort((a, b) => b.score - a.score)
   .slice(0, 3)
   .map(x => x.post)
 
 // 前后篇导航
-const sortedAll = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-const curIdx = sortedAll.findIndex(p => p.id === post.id)
-const prevPost = curIdx < sortedAll.length - 1 ? sortedAll[curIdx + 1] : null
-const nextPost = curIdx > 0 ? sortedAll[curIdx - 1] : null
+const curIdx = allPosts.findIndex(p => p.slug === slug)
+const prevPost = curIdx < allPosts.length - 1 ? allPosts[curIdx + 1] : null
+const nextPost = curIdx > 0 ? allPosts[curIdx - 1] : null
 ---
 
 <PostLayout
-  title={post.data.title}
-  description={post.data.description}
-  pubDate={post.data.pubDate}
-  updatedDate={post.data.updatedDate}
-  tags={post.data.tags}
-  image={post.data.image}
+  title={post.title}
+  description={post.description}
+  pubDate={new Date(post.pub_date)}
+  tags={post.tags}
   readingTime={readingTime}
   headings={tocHeadings}
-  related={related.map(p => ({ slug: p.id.replace(/\.mdx?$/, ''), title: p.data.title, tags: p.data.tags ?? [] }))}
-  prevPost={prevPost ? { slug: prevPost.id.replace(/\.mdx?$/, ''), title: prevPost.data.title } : null}
-  nextPost={nextPost ? { slug: nextPost.id.replace(/\.mdx?$/, ''), title: nextPost.data.title } : null}
+  related={related.map(p => ({ slug: p.slug, title: p.title, tags: p.tags }))}
+  prevPost={prevPost ? { slug: prevPost.slug, title: prevPost.title } : null}
+  nextPost={nextPost ? { slug: nextPost.slug, title: nextPost.title } : null}
 >
-  <Content />
+  <div class="prose-content" set:html={html} />
 </PostLayout>

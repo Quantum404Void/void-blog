@@ -1,16 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Chart from '../components/Chart.vue'
-import { getCollection } from 'astro:content'
+import { getAllPosts } from '../lib/db'
 
-const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
-  .filter(p => !p.id.startsWith('about'))
-  .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
+const db = Astro.locals.runtime.env.void_blog_posts
+const allPosts = (await getAllPosts(db)).filter(p => p.slug !== 'about')
 
 // 按年月统计
 const byMonth: Record<string, number> = {}
 for (const p of allPosts) {
-  const key = p.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }).replace('/', '-')
+  const key = p.pub_date.slice(0, 7).replace('-', '-')
   byMonth[key] = (byMonth[key] || 0) + 1
 }
 
@@ -21,7 +20,7 @@ const monthCounts = monthLabels.map(k => byMonth[k])
 // 按年统计
 const byYear: Record<string, number> = {}
 for (const p of allPosts) {
-  const y = String(p.data.pubDate.getFullYear())
+  const y = p.pub_date.slice(0, 4)
   byYear[y] = (byYear[y] || 0) + 1
 }
 const yearLabels = Object.keys(byYear).sort()
@@ -30,7 +29,7 @@ const yearCounts = yearLabels.map(k => byYear[k])
 // Tag 分布
 const tagCounts: Record<string, number> = {}
 for (const p of allPosts) {
-  for (const t of (p.data.tags ?? [])) {
+  for (const t of (p.tags ?? [])) {
     tagCounts[t] = (tagCounts[t] || 0) + 1
   }
 }
@@ -38,8 +37,8 @@ const top12Tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0,
 
 // 最近 7 天文章数
 const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-const recentCount = allPosts.filter(p => p.data.pubDate.valueOf() > sevenDaysAgo.valueOf()).length
-const totalWords = allPosts.reduce((s, p) => s + (p.body?.length ?? 0), 0)
+const recentCount = allPosts.filter(p => new Date(p.pub_date).valueOf() > sevenDaysAgo.valueOf()).length
+const totalWords = 0  // D1: word count not tracked separately
 const totalReadingMin = Math.round(totalWords / 600)
 
 // 图表数据
@@ -191,20 +190,19 @@ const tagChartOptions = {
         </h2>
         <div class="space-y-0.5 max-h-80 overflow-y-auto pr-2 timeline-scroll">
           {allPosts.slice().reverse().map(p => {
-            const slug = p.id.replace(/\.mdx?$/, '')
             return (
               <a
-                href={`/blog/${slug}/`}
+                href={`/blog/${p.slug}/`}
                 class="group flex items-center gap-4 py-2 px-2 rounded-lg hover:bg-[var(--color-void-muted)] transition-colors"
               >
                 <time class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-24">
-                  {p.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                  {new Date(p.pub_date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
                 </time>
                 <span class="font-mono text-xs text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors line-clamp-1 flex-1">
-                  {p.data.title}
+                  {p.title}
                 </span>
                 <div class="hidden sm:flex flex-wrap gap-1 shrink-0">
-                  {(p.data.tags ?? []).slice(0, 2).map(t => (
+                  {(p.tags ?? []).slice(0, 2).map(t => (
                     <span class="font-mono text-[9px] text-[var(--color-text-muted)] bg-[var(--color-void-muted)] px-1.5 py-0.5 rounded-full">#{t}</span>
                   ))}
                 </div>

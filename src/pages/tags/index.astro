@@ -1,13 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getCollection } from 'astro:content'
+import { getAllTags } from '../../lib/db'
 
-const posts = await getCollection('blog', ({ data }) => !data.draft)
-const tagCounts = posts.flatMap(p => p.data.tags).reduce((acc, tag) => {
-  acc[tag] = (acc[tag] || 0) + 1
-  return acc
-}, {} as Record<string, number>)
-
+const db = Astro.locals.runtime.env.void_blog_posts
+const tagCounts = await getAllTags(db)
 const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
 ---
 

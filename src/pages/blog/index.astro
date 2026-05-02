@@ -1,16 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getCollection } from 'astro:content'
+import { getAllPosts } from '../../lib/db'
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
-  .filter(p => !p.id.startsWith('about'))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+const db = Astro.locals.runtime.env.void_blog_posts
+const posts = (await getAllPosts(db)).filter(p => p.slug !== 'about')
 
-const formatDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
 
 const byYear = posts.reduce((acc, post) => {
-  const year = post.data.pubDate.getFullYear().toString()
+  const year = post.pub_date.slice(0, 4)
   if (!acc[year]) acc[year] = []
   acc[year].push(post)
   return acc
@@ -61,45 +60,37 @@ const getTagColor = (tag: string) => {
 
           <div class="space-y-1 pl-1">
             {byYear[year].map(post => {
-              const slug = post.id.replace(/\.mdx?$/, '')
-              const primaryColor = getTagColor(post.data.tags[0] ?? 'x')
+              const primaryColor = getTagColor(post.tags[0] ?? 'x')
               return (
                 <a
-                  href={`/blog/${slug}/`}
+                  href={`/blog/${post.slug}/`}
                   class="group relative flex items-center gap-4 px-3 py-2.5 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-150 overflow-hidden"
                 >
-                  <!-- Left color bar animation -->
                   <span class="absolute left-0 top-0 bottom-0 w-0 group-hover:w-[3px] rounded-l-lg transition-all duration-200"
                         style={`background: var(--color-${primaryColor})`}></span>
-
-                  <!-- Color dot -->
                   <span class={`shrink-0 w-1.5 h-1.5 rounded-full opacity-50 group-hover:opacity-100 transition-opacity`}
                         style={`background: var(--color-${primaryColor})`}></span>
-
-                  <time datetime={post.data.pubDate.toISOString()}
+                  <time datetime={post.pub_date}
                         class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-16 tabular-nums text-right">
-                    {post.data.pubDate.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+                    {new Date(post.pub_date).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
                   </time>
-
                   <div class="flex-1 min-w-0">
                     <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors block truncate leading-snug">
-                      {post.data.title}
+                      {post.title}
                     </span>
-                    {post.data.description && (
+                    {post.description && (
                       <span class="font-mono text-[10px] text-[var(--color-text-secondary)] block truncate mt-0.5 leading-snug opacity-70 group-hover:opacity-100 transition-opacity">
-                        {post.data.description}
+                        {post.description}
                       </span>
                     )}
                   </div>
-
                   <div class="flex gap-1.5 shrink-0">
-                    {post.data.tags.slice(0, 2).map(tag => (
+                    {post.tags.slice(0, 2).map(tag => (
                       <span class="font-mono text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
                         #{tag}
                       </span>
                     ))}
                   </div>
-
                   <span class="font-mono text-xs text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)] transition-colors shrink-0 ml-auto">→</span>
                 </a>
               )

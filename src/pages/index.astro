@@ -1,28 +1,21 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getCollection } from 'astro:content'
+import { getAllPosts, getAllTags } from '../lib/db'
 
-const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
-  .filter(p => !p.id.startsWith('about'))
+const db = Astro.locals.runtime.env.void_blog_posts
+const allPosts = (await getAllPosts(db)).filter(p => p.slug !== 'about')
+const posts = allPosts.slice(0, 6)
 
-const posts = allPosts
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 6)
-
-const allTags = [...new Set(allPosts.flatMap(p => p.data.tags))]
-
-// Tag weights for cloud
-const tagCounts = allPosts.flatMap(p => p.data.tags).reduce((acc, tag) => {
-  acc[tag] = (acc[tag] || 0) + 1
-  return acc
-}, {} as Record<string, number>)
-const maxCount = Math.max(...Object.values(tagCounts))
+const tagCounts = await getAllTags(db)
+const maxCount = Math.max(...Object.values(tagCounts), 1)
 const tagCloud = Object.entries(tagCounts)
   .sort((a, b) => b[1] - a[1])
   .slice(0, 18)
 
-const formatDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+const allTags = Object.keys(tagCounts)
+
+const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
 
 // Tag colors cycle
 const tagColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
@@ -139,11 +132,10 @@ const getTagColor = (tag: string) => {
 
         <div class="space-y-2">
           {posts.map((post, i) => {
-            const slug = post.id.replace(/\.mdx?$/, '')
-            const color = getTagColor(post.data.tags[0] ?? '')
+            const color = getTagColor(post.tags[0] ?? '')
             return (
               <a
-                href={`/blog/${slug}/`}
+                href={`/blog/${post.slug}/`}
                 class="group block p-4 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
                 style={`animation-delay: ${i * 0.05}s`}
               >
@@ -154,20 +146,20 @@ const getTagColor = (tag: string) => {
                   <div class="flex-1 min-w-0">
                     <div class="flex items-start justify-between gap-4">
                       <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
-                        {post.data.title}
+                        {post.title}
                       </h3>
-                      <time datetime={post.data.pubDate.toISOString()}
+                      <time datetime={post.pub_date}
                             class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">
-                        {formatDate(post.data.pubDate)}
+                        {formatDate(post.pub_date)}
                       </time>
                     </div>
-                    {post.data.description && (
+                    {post.description && (
                       <p class="text-xs mt-1 line-clamp-1 leading-relaxed" style="color:#9999bb">
-                        {post.data.description}
+                        {post.description}
                       </p>
                     )}
                     <div class="flex flex-wrap gap-1.5 mt-2">
-                      {post.data.tags.slice(0, 3).map(tag => (
+                      {post.tags.slice(0, 3).map(tag => (
                         <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
                           #{tag}
                         </span>
