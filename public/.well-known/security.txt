@@ -1,0 +1,4 @@
+Contact: mailto:moke521_wang@163.com
+Expires: 2027-05-02T00:00:00.000Z
+Preferred-Languages: zh, en
+Canonical: https://void.redx.space/.well-known/security.txt
