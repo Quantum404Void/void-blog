@@ -2,10 +2,6 @@
   "name": "void-blog",
   "compatibility_date": "2025-01-01",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "dist/server/entry.mjs",
-  "assets": {
-    "directory": "./dist/client"
-  },
   "d1_databases": [
     {
       "binding": "void_blog_posts",

@@ -31,9 +31,30 @@ jobs:
         env:
           PUBLIC_COMPILER_WORKER_URL: https://wandbox-proxy.moke521-wang.workers.dev
 
+      - name: Write deploy wrangler config
+        run: |
+          cat > wrangler.deploy.json << 'EOF'
+          {
+            "name": "void-blog",
+            "compatibility_date": "2025-01-01",
+            "compatibility_flags": ["nodejs_compat"],
+            "main": "dist/server/entry.mjs",
+            "assets": {
+              "directory": "./dist/client"
+            },
+            "d1_databases": [
+              {
+                "binding": "void_blog_posts",
+                "database_name": "void-blog-posts",
+                "database_id": "c97bc822-cd27-46eb-8cdb-1f0b49447f04"
+              }
+            ]
+          }
+          EOF
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: deploy --config wrangler.json
+          command: deploy --config wrangler.deploy.json
