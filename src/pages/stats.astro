@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import Chart from '../components/Chart.vue'
 import { getAllPosts } from '../lib/db'
 
-const db = Astro.locals.runtime.env.void_blog_posts
+const db = Astro.locals.cloudflare.env.void_blog_posts
 const allPosts = (await getAllPosts(db)).filter(p => p.slug !== 'about')
 
 // 按年月统计

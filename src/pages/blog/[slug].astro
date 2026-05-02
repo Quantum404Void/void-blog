@@ -4,7 +4,7 @@ import { getPost, getAllPosts } from '../../lib/db'
 import { renderMarkdown } from '../../lib/markdown'
 
 const { slug } = Astro.params
-const db = Astro.locals.runtime.env.void_blog_posts
+const db = Astro.locals.cloudflare.env.void_blog_posts
 
 const post = await getPost(db, slug!)
 if (!post) return Astro.redirect('/404')

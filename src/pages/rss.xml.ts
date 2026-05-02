@@ -3,7 +3,7 @@ import type { APIContext } from 'astro'
 import { getAllPosts } from '../lib/db'
 
 export async function GET(context: APIContext) {
-  const db = (context.locals as any).runtime.env.void_blog_posts
+  const db = (context.locals as any).cloudflare.env.void_blog_posts
   const posts = (await getAllPosts(db)).filter(p => p.slug !== 'about')
 
   return rss({
