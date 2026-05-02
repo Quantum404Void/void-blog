@@ -31,15 +31,23 @@ jobs:
         env:
           PUBLIC_COMPILER_WORKER_URL: https://wandbox-proxy.moke521-wang.workers.dev
 
-      - name: Fix wrangler.json (remove reserved ASSETS binding)
+      - name: Fix wrangler.json (remove Pages-incompatible fields)
         run: |
           node -e "
             const fs = require('fs');
             const p = 'dist/server/wrangler.json';
             const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+            // CF Pages 不支持这些字段
             delete cfg.assets;
             delete cfg.images;
             delete cfg.kv_namespaces;
+            delete cfg.main;
+            delete cfg.rules;
+            delete cfg.pages_build_output_dir;
+            delete cfg.triggers;
+            delete cfg.no_bundle;
+            delete cfg.previews;
+            delete cfg.dev;
             fs.writeFileSync(p, JSON.stringify(cfg, null, 2));
             console.log('Fixed wrangler.json');
           "
