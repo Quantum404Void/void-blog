@@ -4,3 +4,8 @@ node_modules/
 .DS_Store
 .wrangler
 .env.production
+
+# Articles are managed in void-blog-content repo, injected at build time
+src/content/blog/*.mdx
+src/content/blog/*.md
+

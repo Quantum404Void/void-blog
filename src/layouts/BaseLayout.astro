@@ -147,41 +147,30 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
       })
     </script>
 
-    <!-- PWA Install Banner -->
-    <div id="pwa-install-banner" style="display:none; position:fixed; bottom:5rem; left:50%; transform:translateX(-50%); z-index:1000; align-items:center; gap:0.75rem; padding:0.75rem 1.25rem; background:rgba(10,10,15,0.95); border:1px solid rgba(0,212,255,0.3); border-radius:12px; box-shadow:0 0 20px rgba(0,212,255,0.15); font-family:'JetBrains Mono',monospace; font-size:13px; color:#e0e0ff; backdrop-filter:blur(12px); white-space:nowrap;">
-      <button id="pwa-install-btn" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.4); border-radius:8px; color:#00d4ff; padding:0.4rem 0.9rem; cursor:pointer; font-family:inherit; font-size:13px; transition:background 0.2s;">📱 安装到主屏幕</button>
-      <button id="pwa-dismiss-btn" style="background:transparent; border:none; color:rgba(136,136,170,0.7); cursor:pointer; font-size:16px; padding:0 0.25rem; line-height:1;">✕</button>
-    </div>
+    <!-- PWA Install Button (top-right) -->
+    <button id="pwa-install-btn" style="display:none; position:fixed; top:1rem; right:1rem; z-index:1000; align-items:center; gap:0.4rem; padding:0.45rem 0.85rem; background:rgba(10,10,15,0.92); border:1px solid rgba(0,212,255,0.35); border-radius:8px; box-shadow:0 0 14px rgba(0,212,255,0.12); font-family:'JetBrains Mono',monospace; font-size:12px; color:#00d4ff; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap; transition:background 0.2s, box-shadow 0.2s;">📱 安装</button>
     <script>
       {
         let deferredPrompt: any
-        const banner = document.getElementById('pwa-install-banner')
+        const btn = document.getElementById('pwa-install-btn') as HTMLButtonElement | null
 
-        // 已安装或已关闭则不显示
-        if (
-          window.matchMedia('(display-mode: standalone)').matches ||
-          localStorage.getItem('pwa-dismissed')
-        ) {
-          if (banner) banner.style.display = 'none'
+        // 已安装则不显示
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          if (btn) btn.style.display = 'none'
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
           e.preventDefault()
           deferredPrompt = e
-          if (banner && !localStorage.getItem('pwa-dismissed')) banner.style.display = 'flex'
+          if (btn) btn.style.display = 'flex'
         })
 
-        document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
+        btn?.addEventListener('click', async () => {
           if (!deferredPrompt) return
           deferredPrompt.prompt()
           const { outcome } = await deferredPrompt.userChoice
           deferredPrompt = null
-          if (banner) banner.style.display = 'none'
-        })
-
-        document.getElementById('pwa-dismiss-btn')?.addEventListener('click', () => {
-          if (banner) banner.style.display = 'none'
-          localStorage.setItem('pwa-dismissed', '1')
+          if (btn) btn.style.display = 'none'
         })
       }
     </script>
