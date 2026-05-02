@@ -52,6 +52,15 @@ jobs:
             console.log('Fixed wrangler.json');
           "
 
+      - name: Bind D1 to Pages project
+        run: |
+          curl -s -X PATCH \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/pages/projects/void-blog" \
+            -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"deployment_configs":{"production":{"d1_databases":{"void_blog_posts":{"id":"c97bc822-cd27-46eb-8cdb-1f0b49447f04"}}},"preview":{"d1_databases":{"void_blog_posts":{"id":"c97bc822-cd27-46eb-8cdb-1f0b49447f04"}}}}}' \
+            | python3 -c "import json,sys; d=json.load(sys.stdin); print('D1 bind:', 'ok' if d['success'] else d['errors'])"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
