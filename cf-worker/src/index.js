@@ -12,6 +12,7 @@
  */
 
 const ALLOWED_ORIGINS = [
+  'https://void.redx.space',
   'https://quantum505void.github.io',
   'http://localhost:4321',
   'http://localhost:3000',

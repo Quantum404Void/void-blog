@@ -296,6 +296,51 @@
 }
 .prose tr:hover td { background: rgba(0, 212, 255, 0.03); transition: background 0.15s; }
 
+/* Prose code blocks — rehype-highlight (hljs) rendered from D1 markdown */
+.prose pre {
+  background: #0d0d1a;
+  border: 1px solid var(--color-void-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  position: relative;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  border-radius: 0;
+}
+.prose :not(pre) > code {
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 0.3rem;
+  padding: 0.15em 0.45em;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--color-neon-cyan);
+}
+
+/* highlight.js (hljs) token colors — tokyo-night style */
+.hljs { color: #a9b1d6; }
+.hljs-comment, .hljs-quote { color: #565f89; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in { color: #bb9af7; }
+.hljs-literal, .hljs-number { color: #ff9e64; }
+.hljs-string, .hljs-attr { color: #9ece6a; }
+.hljs-title, .hljs-section, .hljs-name { color: #7aa2f7; }
+.hljs-type, .hljs-class .hljs-title { color: #2ac3de; }
+.hljs-variable, .hljs-template-variable { color: #e0af68; }
+.hljs-operator, .hljs-punctuation { color: #89ddff; }
+.hljs-attribute, .hljs-bullet, .hljs-code, .hljs-addition { color: #9ece6a; }
+.hljs-deletion { color: #f7768e; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: bold; }
+
 /* Timeline scrollbar (stats page) */
 .timeline-scroll::-webkit-scrollbar { width: 3px; }
 .timeline-scroll::-webkit-scrollbar-track { background: transparent; }
