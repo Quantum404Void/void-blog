@@ -6,7 +6,6 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import AstroPWA from '@vite-pwa/astro';
 import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
@@ -19,65 +18,6 @@ export default defineConfig({
     vue(),
     mdx(),
     sitemap(),
-    AstroPWA({
-      registerType: 'prompt',
-      manifest: {
-        name: 'void.dev',
-        short_name: 'void.dev',
-        description: '王宇的技术博客 — 代码、工具、折腾与思考',
-        theme_color: '#0a0a0f',
-        background_color: '#0a0a0f',
-        display: 'standalone',
-        start_url: '/',
-        scope: '/',
-        icons: [
-          {
-            src: '/icons/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/icons/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: '/icons/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{css,js,html,svg,png,ico,txt}'],
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        navigateFallback: '/404.html',
-        navigateFallbackDenylist: [/^\/\_/, /\/[^/?]+\.[^/]+$/],
-        skipWaiting: false,
-        clientsClaim: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
-      },
-    }),
   ],
   vite: {
     plugins: [tailwindcss()],

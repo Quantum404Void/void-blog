@@ -148,22 +148,40 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
       })
     </script>
 
-    <!-- PWA Buttons (top-right: install + update) -->
+    <!-- PWA Buttons (top-right) -->
     <div id="pwa-actions" style="position:fixed; top:0.85rem; right:1rem; z-index:9999; display:flex; gap:0.5rem; align-items:center;">
-      <button id="pwa-update-btn" style="display:none; align-items:center; gap:0.35rem; padding:0.4rem 0.8rem; background:rgba(10,10,15,0.93); border:1px solid rgba(0,255,136,0.4); border-radius:7px; box-shadow:0 0 12px rgba(0,255,136,0.12); font-family:'JetBrains Mono',monospace; font-size:11px; color:#00ff88; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap;">🔄 新版本</button>
+      <button id="pwa-update-btn" style="display:none; align-items:center; gap:0.35rem; padding:0.4rem 0.8rem; background:rgba(10,10,15,0.93); border:1px solid rgba(0,255,136,0.4); border-radius:7px; box-shadow:0 0 12px rgba(0,255,136,0.12); font-family:'JetBrains Mono',monospace; font-size:11px; color:#00ff88; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap;">🔄 有更新</button>
       <button id="pwa-install-btn" style="display:none; align-items:center; gap:0.35rem; padding:0.4rem 0.8rem; background:rgba(10,10,15,0.93); border:1px solid rgba(0,212,255,0.35); border-radius:7px; box-shadow:0 0 12px rgba(0,212,255,0.1); font-family:'JetBrains Mono',monospace; font-size:11px; color:#00d4ff; cursor:pointer; backdrop-filter:blur(10px); white-space:nowrap;">📱 安装</button>
     </div>
     <!-- Version badge (bottom-right) -->
     <div style="position:fixed; bottom:0.6rem; right:0.8rem; z-index:9990; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(100,100,140,0.55); pointer-events:none; user-select:none;">v{version}</div>
-    <script>
+    <script define:vars={{ version }}>
       {
-        let deferredPrompt: any
-        const installBtn = document.getElementById('pwa-install-btn') as HTMLButtonElement | null
-        const updateBtn  = document.getElementById('pwa-update-btn')  as HTMLButtonElement | null
+        const SW_CACHE = 'void-blog-v' + version
+        let deferredPrompt = null
+        const installBtn = document.getElementById('pwa-install-btn')
+        const updateBtn  = document.getElementById('pwa-update-btn')
 
-        // --- Install prompt ---
+        // --- 注册自定义 SW ---
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            // SW 更新检测：新版本的 cache name 变了，activate 后旧 cache 被清
+            // 页面加载时检查是否已有更新的 SW controlling（cache 版本不匹配）
+            caches.keys().then((keys) => {
+              const hasOldCache = keys.some((k) => k.startsWith('void-blog-') && k !== SW_CACHE)
+              if (hasOldCache && updateBtn) updateBtn.style.display = 'flex'
+            })
+
+            // SW controllerchange = 新 SW 已接管，刷新页面
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              window.location.reload()
+            })
+          })
+        }
+
+        // --- 安装按钮 (beforeinstallprompt) ---
         if (!window.matchMedia('(display-mode: standalone)').matches) {
-          window.addEventListener('beforeinstallprompt', (e: any) => {
+          window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault()
             deferredPrompt = e
             if (installBtn) installBtn.style.display = 'flex'
@@ -176,32 +194,13 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`
         installBtn?.addEventListener('click', async () => {
           if (!deferredPrompt) return
           deferredPrompt.prompt()
-          const { outcome } = await deferredPrompt.userChoice
+          await deferredPrompt.userChoice
           deferredPrompt = null
           if (installBtn) installBtn.style.display = 'none'
         })
 
-        // --- Update prompt (SW waiting) ---
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.ready.then((reg) => {
-            // 已有 waiting worker
-            if (reg.waiting) {
-              if (updateBtn) updateBtn.style.display = 'flex'
-            }
-            reg.addEventListener('updatefound', () => {
-              const newWorker = reg.installing
-              newWorker?.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  if (updateBtn) updateBtn.style.display = 'flex'
-                }
-              })
-            })
-          })
-        }
+        // --- 更新按钮：点击刷新（SW skipWaiting 已在 install 阶段完成）---
         updateBtn?.addEventListener('click', () => {
-          navigator.serviceWorker.ready.then((reg) => {
-            reg.waiting?.postMessage({ type: 'SKIP_WAITING' })
-          })
           if (updateBtn) updateBtn.style.display = 'none'
           window.location.reload()
         })

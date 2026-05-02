@@ -31,6 +31,19 @@ jobs:
         env:
           PUBLIC_COMPILER_WORKER_URL: https://wandbox-proxy.moke521-wang.workers.dev
 
+      - name: Fix wrangler.json (remove reserved ASSETS binding)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = 'dist/server/wrangler.json';
+            const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+            delete cfg.assets;
+            delete cfg.images;
+            delete cfg.kv_namespaces;
+            fs.writeFileSync(p, JSON.stringify(cfg, null, 2));
+            console.log('Fixed wrangler.json');
+          "
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
