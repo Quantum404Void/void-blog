@@ -3,8 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import { searchPosts } from '../lib/db'
 
 const q = Astro.url.searchParams.get('q') ?? ''
-const db = Astro.locals.cloudflare.env.void_blog_posts
-const results = q ? await searchPosts(db, q) : []
+const results = q ? await searchPosts(q) : []
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })

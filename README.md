@@ -6,30 +6,57 @@
 
 ## 技术栈
 
-- **框架**：Astro 6 (static output)
+- **框架**：Astro 6 (SSR)
 - **样式**：Tailwind v4 CSS-first
-- **内容**：MDX（文章存储在 [void-blog-content](https://github.com/Quantum505Void/void-blog-content) 仓库）
-- **部署**：Cloudflare Pages，GitHub Actions 自动触发
-- **PWA**：`@vite-pwa/astro`，支持安装到主屏幕
+- **内容**：Cloudflare D1（SQLite）— 文章存数据库，无 git 内容仓库
+- **部署**：Cloudflare Workers + Static Assets
+- **CI/CD**：GitHub Actions 自动部署
+- **PWA**：自定义 Service Worker，install即接管，版本变化自动提示
 
-## 工作流
+## 架构
 
 ```
-void-blog-content (文章)
-        │  push → dispatch trigger
-        ▼
-void-blog (框架) → GitHub Actions → Cloudflare Pages → void.redx.space
+GitHub push main
+    │
+    ▼
+GitHub Actions
+    ├── bun build → dist/server/entry.mjs + dist/client/
+    └── wrangler deploy → Cloudflare Worker (void-blog)
+                              │
+                    ┌─────────┴──────────┐
+                    │ Static Assets      │ D1 Database
+                    │ dist/client/       │ void-blog-posts
+                    └────────────────────┘
+                              │
+                    void.redx.space
+```
+
+## 数据库
+
+文章存储在 Cloudflare D1（`void-blog-posts`），无独立内容仓库。
+
+新增文章方式：
+
+```bash
+# 写入 migrations/0002_seed.sql 然后执行
+bunx wrangler d1 execute void-blog-posts --remote --file=migrations/0002_seed.sql
+```
+
+或用迁移脚本（从 mdx 批量导入）：
+
+```bash
+# 把 mdx 文件放到 ../void-blog-content/posts/（临时）
+node migrations/migrate-posts.mjs
 ```
 
 ## 本地开发
 
 ```sh
 bun install
-bun run dev       # 开发服务器 localhost:4321
+bun run dev       # 开发服务器 localhost:4321（需要 wrangler platformProxy）
 bun run build     # 构建输出到 dist/
-bun run preview   # 预览构建结果
 ```
 
-## 写文章
+## 版本
 
-文章统一在 [void-blog-content](https://github.com/Quantum505Void/void-blog-content) 仓库管理，push 后自动触发本仓库重新构建部署。
+当前版本：**v1.0.0**（显示在右下角）

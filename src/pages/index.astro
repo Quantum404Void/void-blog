@@ -2,11 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getAllPosts, getAllTags } from '../lib/db'
 
-const db = Astro.locals.cloudflare.env.void_blog_posts
-const allPosts = (await getAllPosts(db)).filter(p => p.slug !== 'about')
+const allPosts = (await getAllPosts()).filter(p => p.slug !== 'about')
 const posts = allPosts.slice(0, 6)
 
-const tagCounts = await getAllTags(db)
+const tagCounts = await getAllTags()
 const maxCount = Math.max(...Object.values(tagCounts), 1)
 const tagCloud = Object.entries(tagCounts)
   .sort((a, b) => b[1] - a[1])

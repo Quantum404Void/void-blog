@@ -4,9 +4,8 @@ import { getPost, getAllPosts } from '../../lib/db'
 import { renderMarkdown } from '../../lib/markdown'
 
 const { slug } = Astro.params
-const db = Astro.locals.cloudflare.env.void_blog_posts
 
-const post = await getPost(db, slug!)
+const post = await getPost(slug!)
 if (!post) return Astro.redirect('/404')
 
 const { html, headings } = await renderMarkdown(post.content)
@@ -16,7 +15,7 @@ const wordCount = post.content.length
 const readingTime = Math.max(1, Math.round(wordCount / 600))
 
 // 相关文章
-const allPosts = (await getAllPosts(db)).filter(p => p.slug !== slug && p.slug !== 'about')
+const allPosts = (await getAllPosts()).filter(p => p.slug !== slug && p.slug !== 'about')
 const postTags = new Set(post.tags)
 const related = allPosts
   .map(p => ({ post: p, score: p.tags.filter(t => postTags.has(t)).length }))

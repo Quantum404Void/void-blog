@@ -2,8 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getAllTags } from '../../lib/db'
 
-const db = Astro.locals.cloudflare.env.void_blog_posts
-const tagCounts = await getAllTags(db)
+const tagCounts = await getAllTags()
 const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
 ---
 
