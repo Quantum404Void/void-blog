@@ -1,14 +1,6 @@
 <template>
   <div style="margin:0;padding:0;overflow:hidden;background:#000;height:100vh;width:100vw;position:relative">
-    <div style="position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;padding:0 1.5rem;height:3rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,255,65,0.15);font-family:'JetBrains Mono',monospace;font-size:12px;gap:1rem">
-      <NuxtLink to="/lab" style="color:rgba(0,255,65,0.8);text-decoration:none">~/lab</NuxtLink>
-      <span style="color:rgba(255,255,255,0.2)">/</span>
-      <span style="color:rgba(0,212,255,0.8)">matrix</span>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:1rem">
-        <span id="fps-badge" style="color:rgba(0,255,65,0.5);font-size:10px">-- fps</span>
-        <span ref="themeNameEl" style="color:rgba(0,255,65,0.7);font-size:10px">GREEN</span>
-      </div>
-    </div>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'matrix-rain' }]" />
     <canvas ref="canvasEl" style="display:block;width:100vw;height:100vh;cursor:crosshair"></canvas>
     <div style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:0.75rem;padding:0.5rem 1rem;background:rgba(0,0,0,0.75);border:1px solid rgba(0,255,65,0.2);border-radius:10px;backdrop-filter:blur(10px);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap">
       <button @click="nextTheme" style="padding:4px 10px;border:1px solid rgba(0,255,65,0.3);border-radius:6px;background:transparent;color:rgba(0,255,65,0.8);cursor:pointer">🎨</button>

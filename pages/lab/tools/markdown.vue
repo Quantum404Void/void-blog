@@ -1,12 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4 font-mono text-xs">
-        <NuxtLink to="/lab" class="text-[var(--color-neon-green)]">~/lab</NuxtLink><span>/</span>
-        <NuxtLink to="/lab" class="text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">tools</NuxtLink><span>/</span>
-        <span style="color:#b400ff">markdown</span>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'markdown' }]" />
 
     <div class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6">
       <div class="flex items-center justify-between mb-4">

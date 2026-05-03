@@ -1,15 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink to="/lab" class="font-mono text-sm text-[var(--color-neon-green)]">~/lab</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs text-[var(--color-neon-cyan)]">wordle</span>
-        <div class="ml-auto">
-          <button @click="newGame" class="font-mono text-xs px-3 py-1.5 rounded-lg border border-[rgba(0,212,255,0.3)] text-[rgba(0,212,255,0.7)] hover:bg-[rgba(0,212,255,0.1)] transition-all">新游戏</button>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'wordle' }]" />
     <div class="flex-1 flex flex-col items-center py-8 px-4">
       <div v-if="message" class="font-mono text-sm px-4 py-2 rounded-lg mb-4" :style="msgStyle">{{ message }}</div>
       <!-- Grid -->

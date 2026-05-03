@@ -1,16 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink to="/lab" class="font-mono text-sm text-[var(--color-neon-green)]">~/lab</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs text-[var(--color-neon-cyan)]">Conway's Life</span>
-        <div class="ml-auto flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
-          <span>Gen: <span class="text-[var(--color-neon-cyan)] font-bold">{{ gen }}</span></span>
-          <span>Live: <span class="text-[var(--color-neon-green)] font-bold">{{ liveCount }}</span></span>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'conways-life' }]" />
     <div class="flex-1 flex flex-col items-center p-4">
       <div class="flex flex-wrap gap-2 mb-4 font-mono text-xs">
         <button v-for="p in patterns" :key="p" @click="placePattern(p)" class="px-3 py-1.5 rounded-lg border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all">{{ p }}</button>

@@ -1,16 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
-    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink href="/lab" class="font-mono text-sm text-[var(--color-neon-green)] hover:opacity-80 transition-opacity">~/lab</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs text-[var(--color-neon-cyan)]">breakout</span>
-        <div class="ml-auto flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
-          <span>SCORE: <span id="score-el" style="color:#00d4ff;font-weight:700">0</span></span>
-          <span>LIVES: <span id="lives-el" style="color:#ff00aa;font-weight:700">3</span></span>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'breakout' }]" />
 
     <div class="pt-20 w-full max-w-5xl">
       <div class="text-center mb-4">

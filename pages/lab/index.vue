@@ -1,15 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
-        <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] text-sm tracking-widest">void.dev</NuxtLink>
-        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
-          <NuxtLink href="/blog" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
-          <NuxtLink href="/stats" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</NuxtLink>
-          <span style="color:rgba(180,0,255,0.9)">~/lab</span>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab' }]" />
 
     <div class="max-w-5xl mx-auto px-6 py-14">
       <div class="mb-12">

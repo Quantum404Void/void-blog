@@ -1,14 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
-    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink to="/" class="font-mono text-sm text-[var(--color-neon-green)]">{{ siteName }}</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <NuxtLink to="/lab" class="font-mono text-xs text-[var(--color-neon-cyan)]">lab</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs" style="color:rgba(180,0,255,0.9)">tetris</span>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tetris' }]" />
     <div class="pt-20 w-full max-w-2xl">
       <div class="text-center mb-6">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: tetris.exe</p>

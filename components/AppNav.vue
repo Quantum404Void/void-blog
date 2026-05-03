@@ -50,11 +50,12 @@ const props = withDefaults(defineProps<{
 }>(), { crumbs: () => [] })
 
 const navLinks = [
-  { href: '/blog',       label: '~/blog',   activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
-  { href: '/tags',       label: '~/tags',   activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
-  { href: '/search',     label: '~/search', activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
-  { href: '/stats',      label: '~/stats',  activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
-  { href: '/lab',        label: '~/lab',    activeClass: 'text-[var(--color-neon-purple)]', style: 'color:rgba(180,0,255,0.75)' },
+  { href: '/blog',   label: '~/blog',   activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
+  { href: '/tags',   label: '~/tags',   activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
+  { href: '/search', label: '~/search', activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
+  { href: '/about',  label: '~/about',  activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
+  { href: '/stats',  label: '~/stats',  activeClass: 'text-[var(--color-neon-cyan)]',   style: '' },
+  { href: '/lab',    label: '~/lab',    activeClass: 'text-[var(--color-neon-purple)]', style: 'color:rgba(180,0,255,0.75)' },
 ]
 
 function isActive(href: string) {

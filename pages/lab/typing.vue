@@ -1,17 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-4xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink to="/lab" class="font-mono text-sm text-[var(--color-neon-green)]">~/lab</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs text-[var(--color-neon-pink)]">typing</span>
-        <div class="ml-auto flex items-center gap-6 font-mono text-xs">
-          <span class="text-[var(--color-text-muted)]">WPM: <span class="text-[var(--color-neon-cyan)] font-bold">{{ wpm }}</span></span>
-          <span class="text-[var(--color-text-muted)]">ACC: <span class="text-[var(--color-neon-green)] font-bold">{{ acc }}</span></span>
-          <span class="text-[var(--color-text-muted)]">TIME: <span class="text-[var(--color-neon-purple)] font-bold">{{ timeLeft }}</span>s</span>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'code-typing' }]" />
     <div class="max-w-4xl mx-auto px-6 py-12 flex-1 flex flex-col">
       <div class="mb-8 text-center">
         <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-pink)] mb-2" style="text-shadow:0 0 20px rgba(255,0,170,0.5)">Code Typing</h1>

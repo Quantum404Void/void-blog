@@ -1,17 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
-    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">{{ siteName }}</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <NuxtLink href="/lab" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">lab</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs text-[var(--color-neon-purple)]">snake</span>
-        <div class="ml-auto flex items-center gap-3">
-          <button id="wall-mode-btn" class="font-mono text-[10px] px-2 py-1 rounded border transition-all" style="border-color:rgba(0,212,255,0.3);color:rgba(0,212,255,0.7)">穿墙 ON</button>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'snake' }]" />
 
     <div class="pt-20 w-full max-w-lg">
       <div class="text-center mb-6">

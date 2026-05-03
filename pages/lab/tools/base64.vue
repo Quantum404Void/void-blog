@@ -1,12 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4 font-mono text-xs">
-        <NuxtLink to="/lab" class="text-[var(--color-neon-green)]">~/lab</NuxtLink><span>/</span>
-        <NuxtLink to="/lab" class="text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">tools</NuxtLink><span>/</span>
-        <span class="text-[var(--color-neon-purple)]">base64</span>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'base64' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">Base64 工具</h1>
       <div class="grid gap-4">

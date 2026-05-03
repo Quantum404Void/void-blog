@@ -1,11 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
-      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4 font-mono text-xs">
-        <NuxtLink to="/lab" class="text-[var(--color-neon-green)]">~/lab</NuxtLink><span>/</span>
-        <NuxtLink to="/lab" class="text-[var(--color-neon-cyan)] hover:opacity-80 transition-opacity">tools</NuxtLink><span>/</span><span class="text-[var(--color-neon-purple)]">url</span>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'url' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-purple)] mb-6">URL 工具</h1>
       <textarea v-model="input" placeholder="输入 URL 或文本..." class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:100px"></textarea>
