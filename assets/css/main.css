@@ -486,3 +486,24 @@ body::after {
   background: rgba(19, 19, 31, 0.6);
   backdrop-filter: blur(8px);
 }
+
+/* ── 代码块行号（CSS counter，零 JS） ── */
+.prose pre code {
+  counter-reset: line;
+}
+.prose pre code .hljs-ln-line,
+.prose pre code > span[class] {
+  counter-increment: line;
+}
+/* 对 hljs 渲染的每行加行号 */
+.prose pre {
+  padding-left: 3.5rem;
+}
+.prose pre code {
+  position: relative;
+  display: block;
+}
+/* 行号列 — 用 generated content on each line */
+.prose pre .hljs-ln-numbers {
+  display: none; /* hljs 自带的禁掉 */
+}

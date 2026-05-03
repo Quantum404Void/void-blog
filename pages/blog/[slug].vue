@@ -400,6 +400,30 @@ onMounted(() => {
       } catch {}
     })
     pre.appendChild(btn)
+
+    // 行号
+    const lines = (code?.textContent || '').split('\n')
+    if (lines.length > 3) {  // 超过 3 行才加行号
+      const nums = document.createElement('div')
+      nums.style.cssText = [
+        'position:absolute', 'left:0', 'top:0', 'bottom:0',
+        'width:2.5rem', 'padding:2.75rem 0 1.5rem',
+        'display:flex', 'flex-direction:column',
+        'align-items:flex-end', 'padding-right:0.75rem',
+        'font-size:11px', 'line-height:1.625',
+        'color:rgba(100,100,150,0.4)', 'user-select:none',
+        'pointer-events:none', 'border-right:1px solid rgba(100,100,150,0.1)',
+      ].join(';')
+      // 去掉最后的空行
+      const lineCount = lines[lines.length - 1] === '' ? lines.length - 1 : lines.length
+      for (let i = 1; i <= lineCount; i++) {
+        const span = document.createElement('span')
+        span.textContent = String(i)
+        nums.appendChild(span)
+      }
+      pre.style.paddingLeft = '3rem'
+      pre.appendChild(nums)
+    }
   })
 })
 
