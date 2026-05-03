@@ -13,6 +13,20 @@ export default defineNuxtConfig({
   // runtimeConfig: no CF API credentials needed — D1 binding handles auth natively
   runtimeConfig: {},
 
+  app: {
+    head: {
+      link: [
+        { rel: 'manifest', href: '/manifest.json' },
+      ],
+      script: [
+        {
+          innerHTML: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js') }`,
+          type: 'text/javascript',
+        },
+      ],
+    },
+  },
+
   routeRules: {
     '/': { prerender: false },   // dynamic — reads from D1
     '/blog/**': { isr: 3600 },

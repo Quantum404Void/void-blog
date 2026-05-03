@@ -195,7 +195,8 @@ const heroLine0 = ref<HTMLElement | null>(null)
 const heroLine1 = ref<HTMLElement | null>(null)
 const heroLine2 = ref<HTMLElement | null>(null)
 
-const { data: allPosts } = await useFetch('/api/posts', { default: () => [] as any[] })
+const { data: allPostsRaw } = await useFetch('/api/posts', { default: () => [] as any[] })
+const allPosts = computed(() => (allPostsRaw.value || []).filter((p: any) => p.slug !== 'about'))
 const { data: tagCounts } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 
 const recentPosts = computed(() => (allPosts.value || []).filter((p: any) => p.slug !== 'about').slice(0, 6))
