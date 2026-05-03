@@ -317,3 +317,145 @@ pre code.hljs{display:block;overflow-x:auto;padding:0}code.hljs{padding:3px 5px}
 
 .callout-info    { background: rgba(0,212,255,0.06); border-color: var(--color-neon-cyan); }
 .callout-info .callout-title { color: var(--color-neon-cyan); }
+
+/* ── 扫描线 scanline 效果（赛博朋克标志性） ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── 代码块终端风格头部 ── */
+.prose pre {
+  position: relative;
+}
+.prose pre::before {
+  content: '';
+  display: block;
+  width: 54px;
+  height: 12px;
+  background-image:
+    radial-gradient(circle, #ff5f57 4px, transparent 4px),
+    radial-gradient(circle, #ffbd2e 4px, transparent 4px),
+    radial-gradient(circle, #28c840 4px, transparent 4px);
+  background-size: 18px 12px;
+  background-position: 0 0, 18px 0, 36px 0;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  opacity: 0.7;
+}
+
+/* ── prose 标题颜色分级 ── */
+.prose h1 { color: var(--color-text-primary); }
+.prose h2 {
+  color: var(--color-neon-cyan);
+  border-bottom: 1px solid rgba(0,212,255,0.2);
+  padding-bottom: 0.4rem;
+}
+.prose h3 { color: var(--color-neon-green); }
+.prose h4 { color: var(--color-neon-purple); }
+
+/* ── prose blockquote 赛博风 ── */
+.prose blockquote {
+  border-left: 3px solid var(--color-neon-purple);
+  background: rgba(180,76,255,0.05);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  font-style: normal;
+  color: var(--color-text-secondary);
+}
+.prose blockquote p { margin: 0 !important; }
+.prose blockquote::before {
+  content: '//';
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-neon-purple);
+  opacity: 0.6;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* ── prose 表格 ── */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  margin: 1.5rem 0;
+}
+.prose thead tr {
+  background: rgba(0,212,255,0.08);
+  border-bottom: 1px solid rgba(0,212,255,0.3);
+}
+.prose thead th {
+  padding: 0.6rem 1rem;
+  color: var(--color-neon-cyan);
+  font-weight: 600;
+  text-align: left;
+}
+.prose tbody tr {
+  border-bottom: 1px solid var(--color-void-border);
+  transition: background 0.15s;
+}
+.prose tbody tr:hover { background: rgba(255,255,255,0.03); }
+.prose tbody td {
+  padding: 0.6rem 1rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── prose ul/ol 自定义 bullet ── */
+.prose ul { list-style: none; padding-left: 1.25rem; }
+.prose ul li::before {
+  content: '▸';
+  color: var(--color-neon-green);
+  font-size: 0.75rem;
+  margin-left: -1.25rem;
+  margin-right: 0.5rem;
+}
+.prose ol { padding-left: 1.5rem; }
+.prose ol li::marker { color: var(--color-neon-cyan); font-family: var(--font-mono); }
+
+/* ── prose a 链接样式 ── */
+.prose a {
+  color: var(--color-neon-cyan);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,212,255,0.3);
+  transition: border-color 0.15s, color 0.15s;
+}
+.prose a:hover {
+  color: var(--color-neon-green);
+  border-bottom-color: var(--color-neon-green);
+}
+
+/* ── 文章卡片 hover 发光 ── */
+@keyframes border-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.post-card-glow:hover {
+  box-shadow: 0 0 0 1px rgba(0,212,255,0.3), 0 4px 24px rgba(0,212,255,0.08);
+}
+
+/* ── 终端光标闪烁 ── */
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: 0 } }
+
+/* ── 标题 glow 动效 ── */
+.glow-green  { text-shadow: 0 0 8px rgba(0,255,136,0.6); }
+.glow-cyan   { text-shadow: 0 0 8px rgba(0,212,255,0.6); }
+.glow-purple { text-shadow: 0 0 8px rgba(180,76,255,0.6); }

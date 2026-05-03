@@ -61,7 +61,7 @@
             v-for="post in byYear[year]"
             :key="post.slug"
             :href="`/blog/${post.slug}`"
-            class="group relative flex items-center gap-4 px-3 py-2.5 rounded-lg border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-150 overflow-hidden"
+            class="post-card-glow group relative flex items-center gap-4 px-3 py-2.5 rounded-lg border border-transparent hover:border-[rgba(0,212,255,0.2)] hover:bg-[var(--color-void-card)] transition-all duration-150 overflow-hidden"
           >
             <span class="absolute left-0 top-0 bottom-0 w-0 group-hover:w-[3px] rounded-l-lg transition-all duration-200"
                   :style="`background: var(--color-${getTagColor(post.tags[0] ?? 'x')})`"></span>

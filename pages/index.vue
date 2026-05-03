@@ -36,7 +36,11 @@
         <div class="flex items-start gap-4 mb-8">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0" style="animation: pulse 1.5s ease-in-out infinite;"></div>
           <div>
-            <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-3">process started</p>
+            <p class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)]" style="animation:pulse 1.5s ease-in-out infinite"></span>
+              <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
+              <span style="color:var(--color-text-muted)">./init</span>
+            </p>
             <h1 class="text-5xl sm:text-7xl font-bold font-mono leading-none mb-6">
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
@@ -96,7 +100,7 @@
             v-for="(post, i) in recentPosts"
             :key="post.slug"
             :href="`/blog/${post.slug}`"
-            class="group block p-4 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
+            class="post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
             :style="`animation-delay: ${i * 0.05}s`"
           >
             <div class="flex items-start gap-4">

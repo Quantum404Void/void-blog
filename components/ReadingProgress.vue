@@ -1,8 +1,8 @@
 <template>
   <div
     :style="{ width: progress + '%' }"
-    class="fixed top-0 left-0 h-[2px] z-[100] transition-all duration-100"
-    style="background: linear-gradient(to right, #00ff88, #00d4ff);"
+    class="fixed top-0 left-0 h-[2px] z-[100] transition-none"
+    style="background: linear-gradient(to right, #00ff88, #00d4ff, #b44cff, #ff2d78); box-shadow: 0 0 8px rgba(0,212,255,0.6);"
   />
 </template>
 

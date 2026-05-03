@@ -1,6 +1,6 @@
 <template>
   <nav v-if="headings.length > 0" class="toc">
-    <p class="toc-title">目录</p>
+    <p class="toc-title"><span style="color:var(--color-neon-green)">▶</span> 目录</p>
     <ul>
       <li
         v-for="h in headings"
@@ -59,30 +59,44 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   overflow-y: auto;
   font-size: 0.75rem;
   font-family: var(--font-mono);
+  padding: 1rem;
+  border: 1px solid var(--color-void-border);
+  border-radius: 0.75rem;
+  background: rgba(19,19,31,0.6);
+  backdrop-filter: blur(8px);
 }
 .toc-title {
   font-size: 0.625rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   color: var(--color-text-muted);
   margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 .toc ul { list-style: none; padding: 0; margin: 0; }
-.toc-item { margin: 0.25rem 0; }
+.toc-item { margin: 0.15rem 0; }
 .toc-item a {
   color: var(--color-text-muted);
   text-decoration: none;
-  line-height: 1.5;
+  line-height: 1.6;
   display: block;
-  transition: color 0.15s;
+  transition: color 0.15s, padding-left 0.15s;
   border-left: 2px solid transparent;
-  padding-left: 0.5rem;
+  padding-left: 0.6rem;
+  font-size: 0.7rem;
 }
 .toc-item.active a {
   color: var(--color-neon-cyan);
   border-left-color: var(--color-neon-cyan);
+  text-shadow: 0 0 6px rgba(0,212,255,0.4);
+  padding-left: 0.9rem;
 }
-.toc-item a:hover { color: var(--color-text-secondary); }
+.toc-item a:hover {
+  color: var(--color-text-secondary);
+  padding-left: 0.9rem;
+}
 .toc-h3 { padding-left: 0.75rem; }
 .toc-h4 { padding-left: 1.5rem; }
 </style>
