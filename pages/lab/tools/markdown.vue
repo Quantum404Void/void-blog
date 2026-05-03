@@ -40,16 +40,10 @@
 </template>
 
 <script setup lang="ts">
-import MarkdownIt from 'markdown-it'
-import hljs from 'highlight.js'
-// @ts-expect-error — no type declarations for this package
-import markdownItHljs from 'markdown-it-highlightjs'
-
 const { siteName } = useSiteConfig()
 useHead({ title: `Markdown 预览 | ` })
 
-const md = new MarkdownIt({ html: true, linkify: true, typographer: true, breaks: true })
-  .use(markdownItHljs, { hljs, auto: true, code: true })
+const { md } = useMarkdown({ containers: true, lineNumbers: false })
 
 const source = ref(`# Hello, Markdown!
 

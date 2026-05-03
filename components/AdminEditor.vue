@@ -123,11 +123,6 @@
 </template>
 
 <script setup lang="ts">
-import MarkdownIt from 'markdown-it'
-import hljs from 'highlight.js'
-// @ts-expect-error — no type declarations for this package
-import markdownItHljs from 'markdown-it-highlightjs'
-
 const props = defineProps<{ isNew: boolean; initialSlug?: string }>()
 const router = useRouter()
 
@@ -166,7 +161,7 @@ const isDirty = computed(() => JSON.stringify({ ...form, tags: parsedTags.value 
 onMounted(() => { savedSnapshot.value = JSON.stringify({ ...form, tags: parsedTags.value }) })
 
 // Markdown 预览
-const md = new MarkdownIt({ html: true, linkify: true, typographer: true }).use(markdownItHljs, { hljs, auto: true, code: true })
+const { md } = useMarkdown({ containers: false, lineNumbers: false })
 const previewMode = ref(false)
 const renderedPreview = computed(() => form.content ? md.render(form.content) : '')
 

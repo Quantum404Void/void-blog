@@ -163,18 +163,8 @@
 </template>
 
 <script setup lang="ts">
-import MarkdownIt from 'markdown-it'
-import hljs from 'highlight.js'
-// @ts-expect-error — no type declarations for this package
-import markdownItHljs from 'markdown-it-highlightjs'
-// @ts-expect-error — no type declarations for this package
-import markdownItContainer from 'markdown-it-container'
-
 const route = useRoute()
 const slug = route.params.slug as string
-
-// about 已有专属页面，直接跳转
-if (slug === 'about') { await navigateTo('/about', { redirectCode: 301 }) }
 
 const { data: post, error } = await useFetch(`/api/posts/${slug}`)
 
@@ -215,63 +205,9 @@ useHead({
   }]
 })
 
-// heading slug helper
-function toSlug(text: string) {
-  return text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '')
-}
 
-// Render markdown — heading_open 插入 id，保证 TOC 锚点渲染即存在
-const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
-  .use(markdownItHljs, { hljs, auto: true, code: true })
 
-// Callout 容器：:::tip / :::warning / :::danger / :::info
-const calloutTypes = [
-  { name: 'tip',     icon: '💡', label: '提示' },
-  { name: 'warning', icon: '⚠️', label: '注意' },
-  { name: 'danger',  icon: '🚨', label: '危险' },
-  { name: 'info',    icon: 'ℹ️', label: '说明' },
-]
-for (const { name, icon, label } of calloutTypes) {
-  md.use(markdownItContainer, name, {
-    render(tokens: any[], idx: number) {
-      if (tokens[idx].nesting === 1) {
-        const title = tokens[idx].info.trim().slice(name.length).trim() || label
-        return `<div class="callout callout-${name}"><p class="callout-title">${icon} ${title}</p>\n`
-      }
-      return '</div>\n'
-    }
-  })
-}
-
-const defaultHeadingOpen = md.renderer.rules.heading_open ||
-  ((tokens: any[], idx: number, options: any, env: any, self: any) => self.renderToken(tokens, idx, options))
-
-md.renderer.rules.heading_open = (tokens: any[], idx: number, options: any, env: any, self: any) => {
-  const inline = tokens[idx + 1]
-  const text = inline?.children?.map((t: any) => t.content).join('') ?? ''
-  const id = toSlug(text)
-  tokens[idx].attrSet('id', id)
-  return defaultHeadingOpen(tokens, idx, options, env, self)
-}
-
-// 代码块自定义渲染：给每行加 <span class="code-line">，用 CSS counter 对齐行号
-const defaultFence = md.renderer.rules.fence
-md.renderer.rules.fence = (tokens: any[], idx: number, options: any, env: any, self: any) => {
-  const raw: string = defaultFence ? defaultFence(tokens, idx, options, env, self) : self.renderToken(tokens, idx, options)
-  // 将 </code> 前的内容按行拆分，每行加 span
-  return raw.replace(
-    /(<code[^>]*>)([\s\S]*?)(<\/code>)/,
-    (_m: string, open: string, body: string, close: string) => {
-      const lines = body.split('\n')
-      // 最后空行不加包装
-      const last = lines[lines.length - 1] === '' ? lines.slice(0, -1) : lines
-      if (last.length < 4) return open + body + close  // 少于 4 行不加行号
-      const wrapped = last.map((l: string) => `<span class="code-line">${l}</span>`).join('\n')
-      return open + wrapped + '\n' + close
-    }
-  )
-}
-
+const { md } = useMarkdown()
 const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
 
 // Extract headings from RENDERED HTML — 避免代码块里的 # 注释被误识别
