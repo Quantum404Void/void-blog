@@ -39,7 +39,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'Breakout | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Breakout | ${siteName}` })
 
 onMounted(() => {
   const canvas = document.getElementById('breakout-canvas') as HTMLCanvasElement

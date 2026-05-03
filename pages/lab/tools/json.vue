@@ -23,7 +23,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: 'JSON 工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `JSON 工具 | ` })
 const input=ref(''),msg=ref(''),msgOk=ref(true)
 function parse(){try{return{ok:true,val:JSON.parse(input.value)}}catch(e:any){return{ok:false,err:e.message}}}
 function format(indent: number){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(r.val,null,indent);msg.value='✓ 格式化完成';msgOk.value=true}

@@ -57,7 +57,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'UUID 生成器 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `UUID 生成器 | ` })
 
 const uuids = ref<string[]>([])
 const copiedAll = ref(false)

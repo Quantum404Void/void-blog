@@ -18,7 +18,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: '进制转换 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `进制转换 | ` })
 const bases=[{n:2,label:'二进制',color:'#39ff14'},{n:8,label:'八进制',color:'#00d4ff'},{n:10,label:'十进制',color:'#b400ff'},{n:16,label:'十六进制',color:'#ff00aa'}]
 const values=reactive<Record<number,string>>({2:'',8:'',10:'',16:''})
 function fromBase(n: number, val: string){

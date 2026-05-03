@@ -29,7 +29,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: 'Diff 工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Diff 工具 | ` })
 const a=ref(''),b=ref('')
 interface Line { type:'add'|'del'|'same'; text:string }
 const lines=ref<Line[]>([])

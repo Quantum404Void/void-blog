@@ -36,7 +36,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: '时间戳工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `时间戳工具 | ` })
 const tsInput=ref(''),dateInput=ref(''),tsResult=ref(''),dateResult=ref('')
 const nowTs=ref(''),nowStr=ref('')
 function update(){const d=new Date();nowTs.value=String(Math.floor(d.getTime()/1000));nowStr.value=d.toLocaleString('zh-CN')}

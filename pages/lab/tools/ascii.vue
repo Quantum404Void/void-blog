@@ -27,7 +27,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: 'ASCII 工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `ASCII 工具 | ` })
 const input=ref(''),output=ref('')
 function charToCode(){output.value=[...input.value].map(c=>`${c}=${c.charCodeAt(0)} (0x${c.charCodeAt(0).toString(16)})`).join('  ')}
 function codeToChar(){const codes=input.value.trim().split(/\s+/);output.value=codes.map(s=>{const n=parseInt(s);return isNaN(n)?'?':String.fromCharCode(n)}).join('')}

@@ -79,7 +79,8 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: 'Lab | void.dev' })
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Lab | ${siteName}` })
 
 const games = [
   { href: '/lab/snake', icon: '🐍', label: 'Snake', desc: '霓虹贪吃蛇', tag: 'CLASSIC', color: '#39ff14' },

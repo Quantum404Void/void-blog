@@ -49,7 +49,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'Code Typing | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Code Typing | ${siteName}` })
 const snippets = [
   `function debounce(fn, delay) {\n  let timer\n  return (...args) => {\n    clearTimeout(timer)\n    timer = setTimeout(() => fn(...args), delay)\n  }\n}`,
   `const quickSort = (arr) => {\n  if (arr.length <= 1) return arr\n  const pivot = arr[arr.length >> 1]\n  const left = arr.filter(x => x < pivot)\n  const right = arr.filter(x => x > pivot)\n  return [...quickSort(left), pivot, ...quickSort(right)]\n}`,

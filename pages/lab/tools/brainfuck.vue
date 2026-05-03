@@ -23,7 +23,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: 'Brainfuck | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Brainfuck | ` })
 const code=ref(''),input=ref(''),output=ref<string|null>(null),error=ref('')
 function run(){
   output.value=null;error.value=''

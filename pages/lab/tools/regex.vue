@@ -30,7 +30,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: '正则工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `正则工具 | ` })
 const pattern=ref(''),flags=ref('g'),testStr=ref(''),errMsg=ref(''),matches=ref<string[][]>([]),highlighted=ref('')
 watchEffect(()=>{
   errMsg.value='';matches.value=[];highlighted.value=''

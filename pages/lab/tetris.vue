@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
     <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
       <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink to="/" class="font-mono text-sm text-[var(--color-neon-green)]">~/void-blog</NuxtLink>
+        <NuxtLink to="/" class="font-mono text-sm text-[var(--color-neon-green)]">{{ siteName }}</NuxtLink>
         <span class="text-[var(--color-text-muted)]">/</span>
         <NuxtLink to="/lab" class="font-mono text-xs text-[var(--color-neon-cyan)]">lab</NuxtLink>
         <span class="text-[var(--color-text-muted)]">/</span>
@@ -41,7 +41,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'Tetris | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Tetris | ${siteName}` })
 const mainCanvas = ref<HTMLCanvasElement>()
 const nextCanvas = ref<HTMLCanvasElement>()
 const overlay = ref<HTMLElement>()

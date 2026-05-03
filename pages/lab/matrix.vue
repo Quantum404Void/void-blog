@@ -28,7 +28,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'Matrix Rain | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Matrix Rain | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const themeNameEl = ref<HTMLElement>()
 const paused = ref(false)

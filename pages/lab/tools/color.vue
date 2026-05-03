@@ -26,7 +26,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: '颜色工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `颜色工具 | ` })
 const hex=ref('#39ff14')
 const formats=computed(()=>{
   const r=parseInt(hex.value.slice(1,3)||'00',16),g=parseInt(hex.value.slice(3,5)||'00',16),b=parseInt(hex.value.slice(5,7)||'00',16)

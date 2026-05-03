@@ -51,7 +51,8 @@ import hljs from 'highlight.js'
 // @ts-ignore
 import markdownItHljs from 'markdown-it-highlightjs'
 
-useHead({ title: 'Markdown 预览 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Markdown 预览 | ` })
 
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true, breaks: true })
   .use(markdownItHljs, { hljs, auto: true, code: true })

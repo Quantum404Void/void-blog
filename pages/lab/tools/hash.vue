@@ -26,7 +26,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: 'Hash 工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Hash 工具 | ` })
 const input = ref(''), result = ref(''), active = ref(''), copied = ref(false)
 const algos = ['SHA-256','SHA-512','SHA-1','MD5-like']
 

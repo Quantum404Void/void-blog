@@ -29,7 +29,8 @@
   </div>
 </template>
 <script setup lang="ts">
-useHead({ title: 'Cron 工具 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Cron 工具 | ` })
 const expr=ref('* * * * *')
 const examples=[
   {e:'* * * * *',d:'每分钟'},{e:'0 * * * *',d:'每小时整点'},{e:'0 0 * * *',d:'每天 00:00'},

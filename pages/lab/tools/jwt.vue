@@ -79,7 +79,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'JWT 解析器 | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `JWT 解析器 | ` })
 
 const input = ref('')
 const error = ref('')

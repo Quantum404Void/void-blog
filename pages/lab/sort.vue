@@ -57,7 +57,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: 'Sort Visualizer | void.dev' })
+const { siteName } = useSiteConfig()
+useHead({ title: `Sort Visualizer | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const currentAlgo = ref('bubble'), currentColor = ref('#00d4ff')
 const hasData = ref(false), running = ref(false), paused = ref(false)
