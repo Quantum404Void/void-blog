@@ -1,11 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)]">{{ siteName }}</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/search</span>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'search' }]" />
 
     <main class="max-w-3xl mx-auto px-6 py-16">
       <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-8 flex items-center gap-3">

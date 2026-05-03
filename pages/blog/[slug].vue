@@ -3,16 +3,7 @@
     <ReadingProgress />
     
     <!-- Nav -->
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-6">
-        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">void.dev</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-xs">{{ post.title }}</span>
-        <div class="ml-auto flex items-center gap-4 text-xs text-[var(--color-text-muted)] font-mono">
-          <span v-if="readingTime">约 {{ readingTime }} 分钟</span>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'blog', href: '/blog' }, { label: post?.title ?? slug }]" />
 
     <!-- Layout: article + TOC -->
     <div class="max-w-6xl mx-auto px-6 py-16 flex gap-12">

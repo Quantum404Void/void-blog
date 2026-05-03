@@ -1,16 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-3">
-        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">void.dev</NuxtLink>
-        <span class="text-[var(--color-text-muted)] font-mono text-xs">/</span>
-        <span class="font-mono text-sm text-[var(--color-text-muted)]">blog</span>
-        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">
-          <span class="text-[var(--color-text-secondary)]">{{ filtered.length }}</span>
-          <span v-if="activeTag"> / {{ posts.length }}</span> 篇
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'blog', href: '/blog' }]" />
 
     <main class="max-w-3xl mx-auto px-6 py-16">
       <div class="mb-10">

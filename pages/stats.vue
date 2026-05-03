@@ -1,17 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
-        <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">{{ siteName }}</NuxtLink>
-        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
-          <NuxtLink href="/blog" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
-          <NuxtLink href="/tags" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</NuxtLink>
-          <NuxtLink href="/search" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</NuxtLink>
-          <span class="text-[var(--color-neon-cyan)]">~/stats</span>
-          <NuxtLink href="/lab" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.8)">~/lab</NuxtLink>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'stats' }]" />
 
     <div class="max-w-5xl mx-auto px-6 py-16">
       <div class="mb-12">

@@ -1,16 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-4xl mx-auto px-6 h-14 flex items-center gap-4">
-        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)]">{{ siteName }}</NuxtLink>
-        <span class="text-[var(--color-text-muted)]">/</span>
-        <span class="font-mono text-sm text-[var(--color-text-muted)]">tags</span>
-        <div class="ml-auto font-mono text-xs text-[var(--color-text-muted)]">
-          <span class="text-[var(--color-text-secondary)]">{{ tags.length }}</span> 个标签 ·
-          <NuxtLink href="/stats" class="hover:text-[var(--color-neon-cyan)] transition-colors ml-1">查看统计 →</NuxtLink>
-        </div>
-      </div>
-    </nav>
+    <AppNav :crumbs="[{ label: 'tags', href: '/tags' }]" />
 
     <main class="max-w-4xl mx-auto px-6 py-12">
       <div class="mb-10">
