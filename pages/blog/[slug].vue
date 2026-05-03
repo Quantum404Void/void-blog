@@ -123,7 +123,7 @@
             <div class="flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
               <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">王</div>
               <div>
-                <div class="text-[var(--color-text-primary)] font-bold" style="font-size:11px">王宇</div>
+                <div class="text-[var(--color-text-primary)] font-bold" style="font-size:11px">{{ authorName }}</div>
                 <div style="font-size:10px;color:rgba(136,136,170,0.8)">C++ / AI Agent / 桌面应用</div>
               </div>
             </div>
@@ -177,16 +177,16 @@ if (error.value || !post.value) {
   throw createError({ statusCode: 404, statusMessage: 'Post not found' })
 }
 
-const baseUrl = 'https://void.redx.space'
+const { siteUrl, siteName, authorName } = useSiteConfig()
 useSeoMeta({
-  title: `${post.value.title} | void.dev`,
+  title: `${post.value.title} | ${siteName}`,
   description: post.value.description,
-  ogTitle: `${post.value.title} | void.dev`,
+  ogTitle: `${post.value.title} | ${siteName}`,
   ogDescription: post.value.description,
   ogType: 'article',
-  ogUrl: `${baseUrl}/blog/${slug}`,
+  ogUrl: `${siteUrl}/blog/${slug}`,
   twitterCard: 'summary_large_image',
-  twitterTitle: `${post.value.title} | void.dev`,
+  twitterTitle: `${post.value.title} | ${siteName}`,
   twitterDescription: post.value.description,
 })
 
@@ -201,10 +201,10 @@ useHead({
       description: post.value.description,
       datePublished: post.value.pub_date,
       dateModified: post.value.pub_date,
-      author: { '@type': 'Person', name: '王宇', url: baseUrl },
-      publisher: { '@type': 'Person', name: '王宇', url: baseUrl },
-      url: `${baseUrl}/blog/${slug}`,
-      mainEntityOfPage: { '@type': 'WebPage', '@id': `${baseUrl}/blog/${slug}` },
+      author: { '@type': 'Person', name: authorName, url: siteUrl },
+      publisher: { '@type': 'Person', name: authorName, url: siteUrl },
+      url: `${siteUrl}/blog/${slug}`,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/blog/${slug}` },
       keywords: post.value.tags?.join(', '),
     })
   }]
@@ -392,7 +392,7 @@ onMounted(() => {
   })
 })
 
-const shareUrl = computed(() => `https://void.redx.space/blog/${slug}`)
+const shareUrl = computed(() => `${siteUrl}/blog/${slug}`)
 const copied = ref(false)
 async function copyLink() {
   try {

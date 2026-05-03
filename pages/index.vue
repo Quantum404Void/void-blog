@@ -137,7 +137,7 @@
       <aside class="space-y-8">
         <div class="space-y-px">
           <div class="font-mono text-xs text-[var(--color-text-muted)] py-1">
-            <span style="color:var(--color-neon-green)">王宇</span>
+            <span style="color:var(--color-neon-green)">{{ authorName }}</span>
             <span class="ml-2 text-[10px]">C++ / 桌面 / AI Agent</span>
           </div>
           <div class="pt-3 mt-2 border-t border-[var(--color-void-border)] flex flex-wrap gap-x-4 gap-y-1.5">
@@ -181,7 +181,7 @@
             <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
             <span class="text-[var(--color-neon-green)]">Vue 3</span>
           </span>
-          <span>© {{ startYear }}–{{ currentYear }} 王宇</span>
+          <span>© {{ startYear }}–{{ currentYear }} {{ authorName }}</span>
         </div>
       </div>
     </footer>
@@ -189,15 +189,16 @@
 </template>
 
 <script setup lang="ts">
+const { siteUrl, siteName, siteDescription, authorName } = useSiteConfig()
 useSeoMeta({
-  title: 'void.dev',
-  description: '王宇的技术博客 — 代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题',
-  ogTitle: 'void.dev — 王宇的技术博客',
+  title: siteName,
+  description: `${authorName}的技术博客 — 代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题`,
+  ogTitle: `${siteName} — ${authorName}的技术博客`,
   ogDescription: '代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题',
   ogType: 'website',
-  ogUrl: 'https://void.redx.space',
+  ogUrl: siteUrl,
   twitterCard: 'summary',
-  twitterTitle: 'void.dev — 王宇的技术博客',
+  twitterTitle: `${siteName} — ${authorName}的技术博客`,
   twitterDescription: '代码、工具、折腾与思考',
 })
 useHead({
@@ -206,13 +207,13 @@ useHead({
     children: JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      name: 'void.dev',
-      url: 'https://void.redx.space',
-      description: '王宇的技术博客',
-      author: { '@type': 'Person', name: '王宇' },
+      name: siteName,
+      url: siteUrl,
+      description: siteDescription,
+      author: { '@type': 'Person', name: authorName },
       potentialAction: {
         '@type': 'SearchAction',
-        target: 'https://void.redx.space/search?q={search_term_string}',
+        target: `${siteUrl}/search?q={search_term_string}`,
         'query-input': 'required name=search_term_string',
       },
     })

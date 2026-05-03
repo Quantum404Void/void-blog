@@ -42,15 +42,16 @@
 </template>
 
 <script setup lang="ts">
+const { siteUrl, siteName } = useSiteConfig()
 const route = useRoute()
 const tag = route.params.tag as string
 
 useSeoMeta({
-  title: `#${tag} | void.dev`,
-  description: `void.dev 上关于 #${tag} 的所有技术文章`,
-  ogTitle: `#${tag} | void.dev`,
-  ogDescription: `void.dev 上关于 #${tag} 的所有技术文章`,
-  ogUrl: `https://void.redx.space/tags/${tag}`,
+  title: `#${tag} | ${siteName}`,
+  description: `${siteName} 上关于 #${tag} 的所有技术文章`,
+  ogTitle: `#${tag} | ${siteName}`,
+  ogDescription: `${siteName} 上关于 #${tag} 的所有技术文章`,
+  ogUrl: `${siteUrl}/tags/${tag}`,
 })
 
 const { data: postsData } = await useFetch(`/api/posts/tag/${tag}`, { default: () => [] as any[] })

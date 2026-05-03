@@ -91,12 +91,13 @@
 </template>
 
 <script setup lang="ts">
+const { siteUrl, siteName } = useSiteConfig()
 useSeoMeta({
-  title: '统计看板 | void.dev',
-  description: 'void.dev 博客内容统计：文章数、标签分布、每年产出可视化',
-  ogTitle: '统计看板 | void.dev',
-  ogDescription: 'void.dev 博客内容统计：文章数、标签分布、每年产出可视化',
-  ogUrl: 'https://void.redx.space/stats',
+  title: `统计看板 | ${siteName}`,
+  description: `${siteName} 博客内容统计：文章数、标签分布、每年产出可视化`,
+  ogTitle: `统计看板 | ${siteName}`,
+  ogDescription: `${siteName} 博客内容统计：文章数、标签分布、每年产出可视化`,
+  ogUrl: `${siteUrl}/stats`,
 })
 
 const { data: statsData } = await useFetch('/api/stats')

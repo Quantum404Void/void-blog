@@ -3,7 +3,8 @@ export default defineEventHandler(async (event) => {
     slug: string; pub_date: string; updated_at: string
   }>(event, "SELECT slug,pub_date,updated_at FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC")
 
-  const base = 'https://void.redx.space'
+  const config = useRuntimeConfig()
+  const base = config.public.siteUrl as string
 
   const staticUrls = [
     { loc: base, priority: '1.0', changefreq: 'daily' },
