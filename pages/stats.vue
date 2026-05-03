@@ -56,6 +56,31 @@
         </div>
       </div>
 
+      <!-- 月度贡献热力图 (GitHub contributions 风格) -->
+      <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <span class="text-[var(--color-neon-green)]">&#9654;</span> 写作热力图
+          <span class="ml-auto text-[9px] normal-case tracking-normal">{{ heatmapRange }}</span>
+        </h2>
+        <div class="overflow-x-auto pb-2">
+          <div class="flex gap-[3px]" style="min-width: max-content">
+            <div v-for="(week, wi) in heatmapWeeks" :key="wi" class="flex flex-col gap-[3px]">
+              <div v-for="(day, di) in week" :key="di"
+                class="w-[11px] h-[11px] rounded-sm transition-all"
+                :style="{ background: heatColor(day.count), opacity: day.future ? 0.15 : 1 }"
+                :title="day.date ? `${day.date}: ${day.count} 篇` : ''"
+              />
+            </div>
+          </div>
+          <!-- 炎度图例 -->
+          <div class="flex items-center gap-1.5 mt-3 font-mono text-[9px] text-[var(--color-text-muted)]">
+            <span>Less</span>
+            <div v-for="n in 5" :key="n" class="w-[11px] h-[11px] rounded-sm" :style="{ background: heatColor((n-1) * 2) }"></div>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Timeline -->
       <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
@@ -105,6 +130,59 @@ const { data: postsData } = await useFetch('/api/posts', { default: () => [] as 
 
 const allPosts = computed(() => (postsData.value || []).filter((p: any) => p.slug !== 'about'))
 const timelinePosts = computed(() => [...allPosts.value].reverse())
+
+// 月度热力图
+const heatmapData = computed(() => {
+  const map: Record<string, number> = {}
+  for (const p of allPosts.value) {
+    map[p.pub_date] = (map[p.pub_date] || 0) + 1
+  }
+  return map
+})
+
+const heatmapWeeks = computed(() => {
+  const today = new Date()
+  const end = new Date(today)
+  // 对齐到本周周六
+  end.setDate(end.getDate() + (6 - end.getDay()))
+  // 往前 52 周
+  const start = new Date(end)
+  start.setDate(start.getDate() - 52 * 7 + 1)
+
+  const weeks: { date: string; count: number; future: boolean }[][] = []
+  let cur = new Date(start)
+  // 对齐到周日
+  cur.setDate(cur.getDate() - cur.getDay())
+
+  while (cur <= end) {
+    const week: { date: string; count: number; future: boolean }[] = []
+    for (let d = 0; d < 7; d++) {
+      const dateStr = cur.toISOString().slice(0, 10)
+      week.push({
+        date: dateStr,
+        count: heatmapData.value[dateStr] || 0,
+        future: cur > today,
+      })
+      cur.setDate(cur.getDate() + 1)
+    }
+    weeks.push(week)
+  }
+  return weeks
+})
+
+const heatmapRange = computed(() => {
+  const w = heatmapWeeks.value
+  if (!w.length) return ''
+  return `${w[0][0].date} ~ ${w[w.length-1][6].date}`
+})
+
+function heatColor(count: number): string {
+  if (count === 0) return 'rgba(100,100,150,0.12)'
+  if (count === 1) return 'rgba(0,212,255,0.25)'
+  if (count === 2) return 'rgba(0,212,255,0.5)'
+  if (count <= 4) return 'rgba(0,255,136,0.6)'
+  return 'rgba(0,255,136,0.9)'
+}
 
 const overviewCards = computed(() => {
   const s = statsData.value as any
