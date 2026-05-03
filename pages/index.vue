@@ -1,0 +1,236 @@
+<template>
+  <div class="min-h-screen bg-[var(--color-void)]">
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
+        <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
+          void.dev
+        </NuxtLink>
+        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
+          <NuxtLink href="/blog" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
+          <NuxtLink href="/tags" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</NuxtLink>
+          <NuxtLink href="/search" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</NuxtLink>
+          <NuxtLink href="/blog/about" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/about</NuxtLink>
+          <NuxtLink href="/stats" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</NuxtLink>
+          <NuxtLink href="/lab" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.9)">~/lab</NuxtLink>
+          <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener"
+             class="hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative py-24 border-b border-[var(--color-void-border)] overflow-hidden">
+      <div class="absolute inset-0 opacity-[0.06]"
+           style="background-image: linear-gradient(var(--color-neon-green) 1px, transparent 1px), linear-gradient(90deg, var(--color-neon-green) 1px, transparent 1px); background-size: 40px 40px;"></div>
+      <div class="absolute top-0 right-0 rounded-full" style="width:600px;height:600px;background:radial-gradient(circle, rgba(180,76,255,0.12), transparent 70%);transform:translate(30%,-30%);pointer-events:none"></div>
+      <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
+      <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
+
+      <div class="relative max-w-5xl mx-auto px-6">
+        <div class="flex items-start gap-4 mb-8">
+          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0" style="animation: pulse 1.5s ease-in-out infinite;"></div>
+          <div>
+            <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-3">process started</p>
+            <h1 class="text-5xl sm:text-7xl font-bold font-mono leading-none mb-6">
+              <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
+            </h1>
+            <div class="font-mono text-sm space-y-2.5 max-w-xl">
+              <p class="animate-fade-up" style="animation-delay:0.1s;color:#c8c8e0">
+                <span style="color:#b400ff">interest</span>
+                <span style="color:#6666aa"> = </span>
+                <span ref="heroLine0" style="color:#00d4ff"></span>
+              </p>
+              <p class="animate-fade-up" style="animation-delay:0.2s;color:#c8c8e0">
+                <span style="color:#b400ff">stack</span>
+                <span style="color:#6666aa"> = </span>
+                <span ref="heroLine1" style="color:#39ff14"></span>
+              </p>
+              <p class="animate-fade-up" style="animation-delay:0.3s;color:#c8c8e0">
+                <span style="color:#b400ff">status</span>
+                <span style="color:#6666aa"> = </span>
+                <span ref="heroLine2" style="color:#39ff14"></span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="flex gap-8 font-mono text-xs text-[var(--color-text-muted)] animate-fade-up" style="animation-delay:0.4s">
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-neon-green)]">▸</span>
+            <span style="color:#e8e8f0;font-weight:bold">{{ allPosts.length }}</span>
+            <span>篇文章</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-neon-cyan)]">▸</span>
+            <span style="color:#e8e8f0;font-weight:bold">{{ allTags.length }}</span>
+            <span>个标签</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[var(--color-neon-purple)]">▸</span>
+            <span style="color:#e8e8f0;font-weight:bold">2021</span>
+            <span>年至今</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content grid -->
+    <div class="max-w-5xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12">
+      <!-- Posts list -->
+      <section>
+        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+          <span class="text-[var(--color-neon-green)]">▶</span>
+          最新文章
+          <span class="flex-1 h-px bg-gradient-to-r from-[var(--color-void-border)] to-transparent"></span>
+        </h2>
+
+        <div class="space-y-2">
+          <NuxtLink
+            v-for="(post, i) in recentPosts"
+            :key="post.slug"
+            :href="`/blog/${post.slug}`"
+            class="group block p-4 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
+            :style="`animation-delay: ${i * 0.05}s`"
+          >
+            <div class="flex items-start gap-4">
+              <div class="shrink-0 w-0.5 rounded-full mt-1 opacity-50 group-hover:opacity-100 transition-opacity"
+                   :style="`background: var(--color-${getTagColor(post.tags[0] ?? '')}); min-height: 2.5rem;`"></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                  <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
+                    {{ post.title }}
+                  </h3>
+                  <time :datetime="post.pub_date" class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">
+                    {{ formatDate(post.pub_date) }}
+                  </time>
+                </div>
+                <p v-if="post.description" class="text-xs mt-1 line-clamp-1 leading-relaxed" style="color:#9999bb">
+                  {{ post.description }}
+                </p>
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  <span v-for="tag in post.tags.slice(0, 3)" :key="tag"
+                        class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
+                    #{{ tag }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+
+        <div class="mt-6">
+          <NuxtLink href="/blog"
+             class="inline-flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.3)] px-4 py-2 rounded-lg">
+            查看全部 {{ allPosts.length }} 篇文章 →
+          </NuxtLink>
+        </div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="space-y-8">
+        <div class="space-y-px">
+          <div class="font-mono text-xs text-[var(--color-text-muted)] py-1">
+            <span style="color:var(--color-neon-green)">王宇</span>
+            <span class="ml-2 text-[10px]">C++ / 桌面 / AI Agent</span>
+          </div>
+          <div class="pt-3 mt-2 border-t border-[var(--color-void-border)] flex flex-wrap gap-x-4 gap-y-1.5">
+            <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener"
+               class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">GitHub ↗</a>
+            <NuxtLink href="/rss.xml" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">RSS ↗</NuxtLink>
+            <NuxtLink href="/search" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Search ↗</NuxtLink>
+            <NuxtLink href="/stats" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Stats ↗</NuxtLink>
+            <NuxtLink href="/lab" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Lab ↗</NuxtLink>
+          </div>
+        </div>
+
+        <!-- Hot tags -->
+        <div>
+          <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-3">
+            <span class="text-[var(--color-neon-purple)]">▶</span> 热门标签
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            <NuxtLink
+              v-for="[tag] in topTags"
+              :key="tag"
+              :href="`/tags/${tag}`"
+              class="font-mono text-[10px] px-2 py-0.5 rounded border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all"
+            >
+              #{{ tag }}
+            </NuxtLink>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-[var(--color-void-border)] py-10">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="font-mono text-[10px] text-[var(--color-text-muted)] text-center mb-4 opacity-30 select-none leading-relaxed">
+          ░▒▓ void.dev ▓▒░
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-4 font-mono text-xs text-[var(--color-text-muted)]">
+          <span>
+            构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 3</span> ·
+            <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
+            <span class="text-[var(--color-neon-green)]">Vue 3</span>
+          </span>
+          <span>© 2021–2026 王宇</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+</template>
+
+<script setup lang="ts">
+useSeoMeta({ title: 'void.dev', description: '王宇的技术博客 — 代码、工具、折腾与思考' })
+
+const heroLine0 = ref<HTMLElement | null>(null)
+const heroLine1 = ref<HTMLElement | null>(null)
+const heroLine2 = ref<HTMLElement | null>(null)
+
+const { data: allPosts } = await useFetch('/api/posts', { default: () => [] as any[] })
+const { data: tagCounts } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
+
+const recentPosts = computed(() => (allPosts.value || []).filter((p: any) => p.slug !== 'about').slice(0, 6))
+const allTags = computed(() => Object.keys(tagCounts.value || {}))
+const topTags = computed(() =>
+  Object.entries(tagCounts.value || {}).sort((a, b) => b[1] - a[1]).slice(0, 10)
+)
+
+const tagColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
+function getTagColor(tag: string) {
+  const idx = Math.abs(tag.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length
+  return tagColors[idx]
+}
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+}
+
+onMounted(() => {
+  const lines = [
+    { el: heroLine0, text: 'interest = ["系统", "工具链", "桌面", "AI Agent"]', delay: 200 },
+    { el: heroLine1, text: 'stack    = ["C++", "TypeScript", "Vue", "Nuxt"]', delay: 600 },
+    { el: heroLine2, text: 'status   = 在线 ●', delay: 1000 },
+  ]
+  lines.forEach(({ el, text, delay }) => {
+    const node = el.value
+    if (!node) return
+    node.textContent = ''
+    let i = 0
+    setTimeout(() => {
+      const timer = setInterval(() => {
+        node.textContent += text[i++]
+        if (i >= text.length) clearInterval(timer)
+      }, 18)
+    }, delay)
+  })
+})
+</script>

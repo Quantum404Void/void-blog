@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Workers
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -8,16 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+      - uses: actions/checkout@v4
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -28,36 +20,10 @@ jobs:
 
       - name: Build
         run: bun run build
-        env:
-          PUBLIC_COMPILER_WORKER_URL: https://wandbox-proxy.moke521-wang.workers.dev
 
-      - name: Write deploy wrangler config
-        run: |
-          cat > wrangler.deploy.json << 'EOF'
-          {
-            "name": "void-blog",
-            "compatibility_date": "2025-01-01",
-            "compatibility_flags": ["nodejs_compat"],
-            "main": "dist/server/entry.mjs",
-            "assets": {
-              "directory": "./dist/client"
-            },
-            "routes": [
-              { "pattern": "void.redx.space/*", "zone_name": "redx.space" }
-            ],
-            "d1_databases": [
-              {
-                "binding": "void_blog_posts",
-                "database_name": "void-blog-posts",
-                "database_id": "c97bc822-cd27-46eb-8cdb-1f0b49447f04"
-              }
-            ]
-          }
-          EOF
-
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: deploy --config wrangler.deploy.json
+          command: pages deploy dist --project-name=void-blog
