@@ -19,7 +19,7 @@ export default defineNuxtConfig({
     public: {
       siteUrl: 'https://void.redx.space',
       siteName: 'void.dev',
-      siteDescription: '王宇的技术博客 — 代码、工具、折腾与思考',
+      siteDescription: '王宇的技术博客 — C++ / Python / AI Agent / 桌面应用',
       authorName: '王宇',
       authorEmail: 'moke521_wang@163.com',
       authorGithub: 'https://github.com/Quantum505Void',
@@ -51,7 +51,7 @@ export default defineNuxtConfig({
     manifest: {
       name: 'void.dev',
       short_name: 'void.dev',
-      description: '王宇的技术博客 — 代码、工具、折腾与思考',
+      description: '王宇的技术博客 — C++ / Python / AI Agent / 桌面应用',
       theme_color: '#00ff88',
       background_color: '#0a0a0f',
       display: 'standalone',

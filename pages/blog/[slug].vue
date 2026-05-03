@@ -115,7 +115,7 @@
               <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">{{ authorInitial }}</div>
               <div>
                 <div class="text-[var(--color-text-primary)] font-bold" style="font-size:11px">{{ authorName }}</div>
-                <div style="font-size:10px;color:rgba(136,136,170,0.8)">C++ / AI Agent / 桌面应用</div>
+                <div style="font-size:10px;color:rgba(136,136,170,0.8)">C++ / Python / AI Agent / 桌面应用</div>
               </div>
             </div>
             <div class="flex gap-3 font-mono text-[10px] text-[var(--color-text-muted)] items-center">

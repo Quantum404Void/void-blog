@@ -120,7 +120,7 @@
         <div class="space-y-px">
           <div class="font-mono text-xs text-[var(--color-text-muted)] py-1">
             <span style="color:var(--color-neon-green)">{{ authorName }}</span>
-            <span class="ml-2 text-[10px]">C++ / 桌面 / AI Agent</span>
+            <span class="ml-2 text-[10px]">C++ / Python / AI Agent / 桌面</span>
           </div>
           <div class="pt-3 mt-2 border-t border-[var(--color-void-border)] flex flex-wrap gap-x-4 gap-y-1.5">
             <a :href="authorGithub" target="_blank" rel="noopener"
@@ -174,14 +174,14 @@
 const { siteUrl, siteName, siteDescription, authorName, authorGithub } = useSiteConfig()
 useSeoMeta({
   title: siteName,
-  description: `${authorName}的技术博客 — 代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题`,
+  description: `${authorName}的技术博客 — C++ / Python / AI Agent / 桌面应用。涵盖 C++、Python、Vue3、AI Agent、Electron 等主题`,
   ogTitle: `${siteName} — ${authorName}的技术博客`,
-  ogDescription: '代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题',
+  ogDescription: '代码、工具、折腾与思考。涵盖 C++、Python、Vue3、AI Agent、Electron 等主题',
   ogType: 'website',
   ogUrl: siteUrl,
   twitterCard: 'summary',
   twitterTitle: `${siteName} — ${authorName}的技术博客`,
-  twitterDescription: '代码、工具、折腾与思考',
+  twitterDescription: 'C++ / Python / AI Agent / 桌面应用',
 })
 useHead({
   script: [{
@@ -230,7 +230,7 @@ function formatDate(d: string) {
 
 onMounted(() => {
   const lines = [
-    { el: heroLine0, text: 'interest = ["系统", "工具链", "桌面", "AI Agent"]', delay: 200 },
+    { el: heroLine0, text: 'interest = ["C++", "Python", "AI Agent", "桌面应用"]', delay: 200 },
     { el: heroLine1, text: 'stack    = ["C++", "TypeScript", "Vue", "Nuxt"]', delay: 600 },
     { el: heroLine2, text: 'status   = 在线 ●', delay: 1000 },
   ]
