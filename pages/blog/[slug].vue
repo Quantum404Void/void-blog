@@ -156,16 +156,37 @@ if (error.value || !post.value) {
   throw createError({ statusCode: 404, statusMessage: 'Post not found' })
 }
 
+const baseUrl = 'https://void.redx.space'
 useSeoMeta({
   title: `${post.value.title} | void.dev`,
   description: post.value.description,
   ogTitle: `${post.value.title} | void.dev`,
   ogDescription: post.value.description,
   ogType: 'article',
-  ogUrl: `https://void.redx.space/blog/${slug}`,
-  twitterCard: 'summary',
+  ogUrl: `${baseUrl}/blog/${slug}`,
+  twitterCard: 'summary_large_image',
   twitterTitle: `${post.value.title} | void.dev`,
   twitterDescription: post.value.description,
+})
+
+// JSON-LD 结构化数据
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    children: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.value.title,
+      description: post.value.description,
+      datePublished: post.value.pub_date,
+      dateModified: post.value.pub_date,
+      author: { '@type': 'Person', name: '王宇', url: baseUrl },
+      publisher: { '@type': 'Person', name: '王宇', url: baseUrl },
+      url: `${baseUrl}/blog/${slug}`,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `${baseUrl}/blog/${slug}` },
+      keywords: post.value.tags?.join(', '),
+    })
+  }]
 })
 
 // Render markdown

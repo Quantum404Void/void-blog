@@ -45,7 +45,13 @@
 const route = useRoute()
 const tag = route.params.tag as string
 
-useSeoMeta({ title: `#${tag} | void.dev` })
+useSeoMeta({
+  title: `#${tag} | void.dev`,
+  description: `void.dev 上关于 #${tag} 的所有技术文章`,
+  ogTitle: `#${tag} | void.dev`,
+  ogDescription: `void.dev 上关于 #${tag} 的所有技术文章`,
+  ogUrl: `https://void.redx.space/tags/${tag}`,
+})
 
 const { data: postsData } = await useFetch(`/api/posts/tag/${tag}`, { default: () => [] as any[] })
 const posts = computed(() => postsData.value || [])

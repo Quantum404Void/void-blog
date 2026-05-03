@@ -26,7 +26,13 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: 'Tags | void.dev' })
+useSeoMeta({
+  title: 'Tags | void.dev',
+  description: '按标签浏览技术文章，涵盖 C++、Vue3、TypeScript、AI、Linux、算法等主题',
+  ogTitle: 'Tags | void.dev',
+  ogDescription: '按标签浏览技术文章，涵盖 C++、Vue3、TypeScript、AI、Linux、算法等主题',
+  ogUrl: 'https://void.redx.space/tags',
+})
 const { data: tagCountsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 const tags = computed(() => Object.entries(tagCountsData.value || {}).sort((a, b) => b[1] - a[1]))
 </script>

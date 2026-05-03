@@ -78,7 +78,13 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: '搜索 | void.dev' })
+useSeoMeta({
+  title: '搜索 | void.dev',
+  description: '搜索 void.dev 所有技术文章，支持标题、正文内容全文检索',
+  ogTitle: '搜索 | void.dev',
+  ogDescription: '搜索 void.dev 所有技术文章，支持标题、正文内容全文检索',
+  ogUrl: 'https://void.redx.space/search',
+})
 
 const route = useRoute()
 const router = useRouter()

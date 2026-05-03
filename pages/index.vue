@@ -189,7 +189,35 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: 'void.dev', description: '王宇的技术博客 — 代码、工具、折腾与思考' })
+useSeoMeta({
+  title: 'void.dev',
+  description: '王宇的技术博客 — 代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题',
+  ogTitle: 'void.dev — 王宇的技术博客',
+  ogDescription: '代码、工具、折腾与思考。涵盖 C++、Vue3、Electron、AI Agent、Linux 等主题',
+  ogType: 'website',
+  ogUrl: 'https://void.redx.space',
+  twitterCard: 'summary',
+  twitterTitle: 'void.dev — 王宇的技术博客',
+  twitterDescription: '代码、工具、折腾与思考',
+})
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    children: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'void.dev',
+      url: 'https://void.redx.space',
+      description: '王宇的技术博客',
+      author: { '@type': 'Person', name: '王宇' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://void.redx.space/search?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    })
+  }]
+})
 
 const heroLine0 = ref<HTMLElement | null>(null)
 const heroLine1 = ref<HTMLElement | null>(null)
