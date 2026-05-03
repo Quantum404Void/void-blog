@@ -43,7 +43,7 @@
             </div>
             <div class="flex gap-3">
               <span class="text-[var(--color-neon-cyan)] w-16 shrink-0">role</span>
-              <span class="text-[var(--color-text-primary)]">C++ / AI Agent / 桌面应用工程师</span>
+              <span class="text-[var(--color-text-primary)]">C++ / Python / AI Agent / 桌面应用工程师</span>
             </div>
             <div class="flex gap-3">
               <span class="text-[var(--color-neon-cyan)] w-16 shrink-0">since</span>
@@ -161,14 +161,15 @@
 const { siteUrl, siteName, authorName, authorEmail, authorGithub, authorMotto } = useSiteConfig()
 useSeoMeta({
   title: `About | ${siteName}`,
-  description: `${authorName} — 好奇心驱动的工程师，专注 C++ / AI Agent / 桌面应用。${authorMotto}`,
+  description: `${authorName} — 好奇心驱动的工程师，专注 C++ / Python / AI Agent / 桌面应用。${authorMotto}`,
   ogTitle: `About | ${siteName}`,
-  ogDescription: `${authorName} — 好奇心驱动的工程师，专注 C++ / AI Agent / 桌面应用。`,
+  ogDescription: `${authorName} — 好奇心驱动的工程师，专注 C++ / Python / AI Agent / 桌面应用。`,
   ogUrl: `${siteUrl}/about`,
 })
 
 const topics = [
   { icon: '⚙️', tag: 'cpp',      title: '系统与底层',  desc: 'C++、驱动、通信协议、性能调优' },
+  { icon: '🐍', tag: 'python',   title: 'Python',       desc: '数据处理、自动化脚本、asyncio、类型注解' },
   { icon: '🖥️', tag: 'electron', title: '桌面应用',    desc: 'Windows/Linux 跨平台、Electron、Qt' },
   { icon: '⚡',  tag: 'vue',      title: '前端工程',    desc: 'Vue3、Vite+、现代工具链、TypeScript' },
   { icon: '🤖', tag: 'agent',    title: 'AI Agent',    desc: 'LLM 工具链、自动化工作流、记忆系统' },
@@ -178,11 +179,11 @@ const topics = [
 
 const stack = [
   { name: 'C++17',       color: '#00d4ff' },
+  { name: 'Python 3',    color: '#ffd43b' },
   { name: 'Qt',          color: '#41cd52' },
   { name: 'Vue 3',       color: '#42b883' },
   { name: 'TypeScript',  color: '#3178c6' },
   { name: 'Electron',    color: '#9feaf9' },
-  { name: 'Python',      color: '#ffd43b' },
   { name: 'Linux',       color: '#f4a837' },
   { name: 'Nuxt 3',      color: '#00dc82' },
   { name: 'Cloudflare',  color: '#f6821f' },

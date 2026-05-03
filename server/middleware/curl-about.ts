@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
    ╚═══╝   ╚═════╝ ╚═╝╚═════╝    ╚═════╝ ╚══════╝  ╚═══╝
 \x1b[0m
 \x1b[36m  ${config.public.authorName} @ ${config.public.siteName}\x1b[0m
-\x1b[90m  C++ / AI Agent / 桌面应用 / 折腾不止\x1b[0m
+\x1b[90m  C++ / Python / AI Agent / 桌面应用\x1b[0m
 
 \x1b[33m  blog    \x1b[0m${config.public.siteUrl}/blog
 \x1b[33m  github  \x1b[0m${config.public.authorGithub}
