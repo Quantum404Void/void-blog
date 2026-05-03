@@ -105,7 +105,7 @@ const overviewCards = computed(() => {
     { label: '总文章数', value: allPosts.value.length, color: 'neon-cyan' },
     { label: '标签数量', value: s?.totalTags ?? 0, color: 'neon-green' },
     { label: '写作年份', value: Object.keys(s?.byYear ?? {}).length, color: 'neon-purple' },
-    { label: '创作开始', value: '2021', color: 'neon-pink' },
+    { label: '创作开始', value: allPosts.value.length ? allPosts.value[allPosts.value.length - 1].pub_date.slice(0, 4) : '-', color: 'neon-pink' },
   ]
 })
 

@@ -74,7 +74,7 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="text-[var(--color-neon-purple)]">▸</span>
-            <span style="color:#e8e8f0;font-weight:bold">2021</span>
+            <span style="color:#e8e8f0;font-weight:bold">{{ startYear }}</span>
             <span>年至今</span>
           </div>
         </div>
@@ -181,7 +181,7 @@
             <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
             <span class="text-[var(--color-neon-green)]">Vue 3</span>
           </span>
-          <span>© 2021–2026 王宇</span>
+          <span>© {{ startYear }}–{{ currentYear }} 王宇</span>
         </div>
       </div>
     </footer>
@@ -199,7 +199,9 @@ const { data: allPostsRaw } = await useFetch('/api/posts', { default: () => [] a
 const allPosts = computed(() => (allPostsRaw.value || []).filter((p: any) => p.slug !== 'about'))
 const { data: tagCounts } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 
-const recentPosts = computed(() => (allPosts.value || []).filter((p: any) => p.slug !== 'about').slice(0, 6))
+const recentPosts = computed(() => allPosts.value.slice(0, 6))
+const startYear = computed(() => allPosts.value.length ? allPosts.value[allPosts.value.length - 1].pub_date.slice(0, 4) : '2021')
+const currentYear = new Date().getFullYear()
 const allTags = computed(() => Object.keys(tagCounts.value || {}))
 const topTags = computed(() =>
   Object.entries(tagCounts.value || {}).sort((a, b) => b[1] - a[1]).slice(0, 10)
