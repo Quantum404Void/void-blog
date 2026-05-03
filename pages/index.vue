@@ -9,7 +9,10 @@
         <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)] overflow-x-auto">
           <NuxtLink href="/blog" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
           <NuxtLink href="/tags" class="hidden sm:block hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</NuxtLink>
-          <NuxtLink href="/search" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</NuxtLink>
+          <NuxtLink href="/search" class="hover:text-[var(--color-neon-cyan)] transition-colors flex items-center gap-1">
+            ~/search
+            <span class="font-mono text-[9px] px-1 py-0.5 rounded border border-[var(--color-void-border)] text-[var(--color-text-muted)] opacity-60" title="快捷键">/</span>
+          </NuxtLink>
           <NuxtLink href="/blog/about" class="hidden sm:block hover:text-[var(--color-neon-cyan)] transition-colors">~/about</NuxtLink>
           <NuxtLink href="/stats" class="hidden sm:block hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</NuxtLink>
           <NuxtLink href="/lab" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.9)">~/lab</NuxtLink>

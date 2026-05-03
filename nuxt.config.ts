@@ -4,7 +4,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
 
-  modules: ['@vite-pwa/nuxt'],
+  modules: ['@vite-pwa/nuxt', '@nuxtjs/color-mode'],
+
+  colorMode: {
+    classSuffix: '',          // <html class="dark"> 而非 dark-mode
+    preference: 'dark',       // 默认暗色（技术宅风格）
+    fallback: 'dark',
+    storageKey: 'void-color-mode',
+  },
 
   css: ['~/assets/css/main.css'],
 

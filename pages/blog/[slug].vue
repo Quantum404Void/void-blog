@@ -146,6 +146,17 @@
           <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2">
             <span>←</span> 返回首页
           </NuxtLink>
+
+          <!-- 评论 -->
+          <div class="pt-8 border-t border-[var(--color-void-border)]">
+            <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+              <span class="text-[var(--color-neon-cyan)]">&#9654;</span> 评论
+              <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.2)] to-transparent"></span>
+            </p>
+            <ClientOnly>
+              <GiscusComments :slug="slug" />
+            </ClientOnly>
+          </div>
         </footer>
       </main>
 
