@@ -62,11 +62,12 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: false },
-    '/blog/**': { isr: 3600 },
-    '/tags/**': { isr: 3600 },
-    '/search': { isr: 300 },
-    '/stats': { isr: 600 },
+    '/blog/**': { isr: false },
+    '/tags/**': { isr: 300 },
+    '/search': { isr: false },
+    '/stats': { isr: 300 },
     '/rss.xml': { isr: 3600 },
+    '/sitemap.xml': { isr: 3600 },
   },
 
   nitro: {
