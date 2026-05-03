@@ -14,6 +14,17 @@ export default defineNuxtConfig({
 
   runtimeConfig: {},
 
+  app: {
+    head: {
+      link: [
+        { rel: 'sitemap', type: 'application/xml', href: 'https://void.redx.space/sitemap.xml' },
+      ],
+      meta: [
+        { name: 'robots', content: 'index, follow' },
+      ],
+    },
+  },
+
   pwa: {
     registerType: 'prompt',   // waiting SW → 用户手动触发更新，避免强刷丢资源
 
