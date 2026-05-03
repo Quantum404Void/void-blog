@@ -19,8 +19,8 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">10</span> 游戏</span>
-          <span><span style="color:rgba(0,212,255,0.9)">13</span> 工具</span>
+          <span><span style="color:rgba(180,0,255,0.9)">11</span> 游戏</span>
+          <span><span style="color:rgba(0,212,255,0.9)">16</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
       </div>
@@ -92,6 +92,7 @@ const games = [
   { href: '/lab/wordle', icon: '📝', label: 'Wordle', desc: '5字母猜词游戏，代码词库版', tag: 'WORD', color: '#39ff14' },
   { href: '/lab/flappy', icon: '🐦', label: 'Flappy Bird', desc: '赛博朋克风霓虹管道', tag: 'CASUAL', color: '#ffa500' },
   { href: '/lab/life', icon: '🔬', label: "Conway's Life", desc: '细胞自动机，点击绘制 · 预设图案', tag: 'SIM', color: '#00ff88' },
+  { href: '/lab/breakout', icon: '🧱', label: 'Breakout', desc: '霓虹打砖块，鼠标/键盘控制', tag: 'CLASSIC', color: '#00d4ff' },
 ]
 
 const tools = [
@@ -108,5 +109,8 @@ const tools = [
   { href: '/lab/tools/cron', icon: '⏰', label: 'Cron 解析', desc: 'Cron 表达式可视化解析', tag: 'UTIL', color: '#b400ff' },
   { href: '/lab/tools/brainfuck', icon: '🧠', label: 'Brainfuck', desc: 'Brainfuck 解释器', tag: 'ESOTERIC', color: '#00ff88' },
   { href: '/lab/tools/netinfo', icon: '🌐', label: '网络信息', desc: '查看 IP / User-Agent 等网络信息', tag: 'NET', color: '#00d4ff' },
+  { href: '/lab/tools/jwt', icon: '🔑', label: 'JWT 解析', desc: '解析 JWT 的 Header / Payload', tag: 'CRYPTO', color: '#f47067' },
+  { href: '/lab/tools/uuid', icon: '🆔', label: 'UUID 生成', desc: '批量生成 v4 UUID，一键复制', tag: 'UTIL', color: '#00ff88' },
+  { href: '/lab/tools/markdown', icon: 'MD', label: 'Markdown 预览', desc: '实时 Markdown 渲染预览', tag: 'FORMAT', color: '#b400ff' },
 ]
 </script>

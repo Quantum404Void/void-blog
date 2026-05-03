@@ -4,20 +4,8 @@
     <NuxtPage />
   </NuxtLayout>
 
-  <!-- PWA 安装按钮 -->
+  <!-- SW 更新提示 -->
   <ClientOnly>
-    <Transition name="pwa-fade">
-      <button
-        v-if="$pwa?.showInstallPrompt && !$pwa?.isPWAInstalled"
-        class="pwa-btn install"
-        @click="$pwa?.install()"
-        title="安装到桌面"
-      >
-        📱 安装
-      </button>
-    </Transition>
-
-    <!-- SW 更新提示 -->
     <Transition name="pwa-fade">
       <button
         v-if="$pwa?.needRefresh"
