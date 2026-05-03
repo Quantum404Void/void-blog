@@ -63,14 +63,16 @@
             <span class="text-[var(--color-text-muted)] normal-case tracking-normal ml-1">没有固定方向，碰到值得记的就写</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div v-for="topic in topics" :key="topic.tag"
-              class="flex items-start gap-3 p-3 rounded-lg border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.3)] hover:bg-[rgba(0,212,255,0.03)] transition-all">
+            <NuxtLink
+              v-for="topic in topics" :key="topic.tag"
+              :href="`/tags/${topic.tag}`"
+              class="flex items-start gap-3 p-3 rounded-lg border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.3)] hover:bg-[rgba(0,212,255,0.03)] transition-all group">
               <span class="text-base shrink-0">{{ topic.icon }}</span>
-              <div>
-                <div class="text-[var(--color-text-primary)] text-xs font-semibold">{{ topic.title }}</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-[var(--color-text-primary)] text-xs font-semibold group-hover:text-[var(--color-neon-cyan)] transition-colors">{{ topic.title }}</div>
                 <div class="text-[var(--color-text-muted)] text-[10px] mt-0.5 leading-relaxed">{{ topic.desc }}</div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
 
@@ -80,11 +82,15 @@
             <span class="text-[var(--color-neon-purple)]">▸</span> cat ./package.json | jq '.stack[]'
           </div>
           <div class="flex flex-wrap gap-2">
-            <span v-for="tech in stack" :key="tech.name"
-              class="font-mono text-xs px-3 py-1.5 rounded-lg border transition-all hover:scale-105 cursor-default"
+            <component
+              :is="tech.tag ? 'NuxtLink' : 'span'"
+              v-for="tech in stack" :key="tech.name"
+              :to="tech.tag ? `/tags/${tech.tag}` : undefined"
+              class="font-mono text-xs px-3 py-1.5 rounded-lg border transition-all hover:scale-105"
+              :class="tech.tag ? 'cursor-pointer hover:brightness-125' : 'cursor-default'"
               :style="`color:${tech.color};border-color:${tech.color}33;background:${tech.color}0a`">
               {{ tech.name }}
-            </span>
+            </component>
           </div>
         </div>
 
@@ -178,15 +184,15 @@ const topics = [
 ]
 
 const stack = [
-  { name: 'C++17',       color: '#00d4ff' },
-  { name: 'Python 3',    color: '#ffd43b' },
-  { name: 'Qt',          color: '#41cd52' },
-  { name: 'Vue 3',       color: '#42b883' },
-  { name: 'TypeScript',  color: '#3178c6' },
-  { name: 'Electron',    color: '#9feaf9' },
-  { name: 'Linux',       color: '#f4a837' },
-  { name: 'Nuxt 3',      color: '#00dc82' },
-  { name: 'Cloudflare',  color: '#f6821f' },
-  { name: 'OpenClaw',    color: '#b44cff' },
+  { name: 'C++17',      color: '#00d4ff', tag: 'cpp' },
+  { name: 'Python 3',   color: '#ffd43b', tag: 'python' },
+  { name: 'Qt',         color: '#41cd52', tag: '' },
+  { name: 'Vue 3',      color: '#42b883', tag: 'vue' },
+  { name: 'TypeScript', color: '#3178c6', tag: 'typescript' },
+  { name: 'Electron',   color: '#9feaf9', tag: 'electron' },
+  { name: 'Linux',      color: '#f4a837', tag: 'linux' },
+  { name: 'Nuxt 3',     color: '#00dc82', tag: '' },
+  { name: 'Cloudflare', color: '#f6821f', tag: '' },
+  { name: 'OpenClaw',   color: '#b44cff', tag: '' },
 ]
 </script>
