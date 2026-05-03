@@ -1,1 +1,2 @@
-/blog/about /about 301
+# Cloudflare Pages redirects
+# /blog/about 由 Nuxt 层处理 301 → /about

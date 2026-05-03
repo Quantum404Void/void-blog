@@ -173,6 +173,9 @@ import markdownItContainer from 'markdown-it-container'
 const route = useRoute()
 const slug = route.params.slug as string
 
+// about 已有专属页面，直接跳转
+if (slug === 'about') { await navigateTo('/about', { redirectCode: 301 }) }
+
 const { data: post, error } = await useFetch(`/api/posts/${slug}`)
 
 if (error.value || !post.value) {
