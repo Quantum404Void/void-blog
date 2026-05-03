@@ -487,14 +487,7 @@ body::after {
   backdrop-filter: blur(8px);
 }
 
-/* ── 代码块行号（CSS counter，零 JS） ── */
-.prose pre code {
-  counter-reset: line;
-}
-.prose pre code .hljs-ln-line,
-.prose pre code > span[class] {
-  counter-increment: line;
-}
+
 /* 对 hljs 渲染的每行加行号 */
 .prose pre {
   padding-left: 3.5rem;
@@ -506,4 +499,32 @@ body::after {
 /* 行号列 — 用 generated content on each line */
 .prose pre .hljs-ln-numbers {
   display: none; /* hljs 自带的禁掉 */
+}
+
+/* ── 代码块行号 (CSS counter，与 markdown-it fence renderer 配合) ── */
+.prose pre code {
+  counter-reset: code-line;
+}
+.prose pre .code-line {
+  counter-increment: code-line;
+  display: block;
+  position: relative;
+  padding-left: 3rem;
+}
+.prose pre .code-line::before {
+  content: counter(code-line);
+  position: absolute;
+  left: 0;
+  width: 2.25rem;
+  text-align: right;
+  color: rgba(100, 100, 150, 0.35);
+  font-size: 11px;
+  line-height: inherit;
+  user-select: none;
+  border-right: 1px solid rgba(100, 100, 150, 0.1);
+  padding-right: 0.5rem;
+}
+/* 有行号时 pre 不需要额外 padding-left */
+.prose pre:has(.code-line) {
+  padding-left: 1.5rem;
 }
