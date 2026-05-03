@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
       <div class="max-w-3xl mx-auto px-6 h-14 flex items-center gap-3">
         <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">void.dev</NuxtLink>
         <span class="text-[var(--color-text-muted)] font-mono text-xs">/</span>

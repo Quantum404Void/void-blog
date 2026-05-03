@@ -476,3 +476,79 @@ body::after {
 .glow-green  { text-shadow: 0 0 8px rgba(0,255,136,0.6); }
 .glow-cyan   { text-shadow: 0 0 8px rgba(0,212,255,0.6); }
 .glow-purple { text-shadow: 0 0 8px rgba(180,76,255,0.6); }
+
+/* ── 亮/暗模式适配工具 class ── */
+/* nav 毛玻璃背景 — 跟随主题 */
+.nav-glass {
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(16px);
+}
+.light .nav-glass {
+  background: rgba(240, 240, 245, 0.9);
+}
+
+/* TOC 背景 */
+.toc-glass {
+  background: rgba(19, 19, 31, 0.6);
+  backdrop-filter: blur(8px);
+}
+.light .toc-glass {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* card 背景 */
+.light .bg-\[var\(--color-void-card\)\] {
+  background-color: var(--color-void-card) !important;
+}
+
+/* glow 在亮色下降强 */
+.light .glow-green  { text-shadow: 0 0 4px rgba(0, 170, 85, 0.4); }
+.light .glow-cyan   { text-shadow: 0 0 4px rgba(0, 153, 204, 0.4); }
+.light .glow-purple { text-shadow: 0 0 4px rgba(136, 51, 204, 0.4); }
+
+/* scanline 亮色下关掉 */
+.light body::after { display: none; }
+
+/* 亮色下行线背景变淡 */
+.light body {
+  background-image: repeating-linear-gradient(
+    var(--color-void) 0 3px,
+    rgba(0,0,0,0.02) 3px 4px
+  );
+}
+
+/* hljs 亮色主题替换 */
+.light pre { background: #f6f8fa !important; border-color: #d0d7de !important; }
+.light .hljs { color: #24292e; background: transparent; }
+.light .hljs-keyword, .light .hljs-type { color: #d73a49; }
+.light .hljs-string, .light .hljs-meta .hljs-string { color: #032f62; }
+.light .hljs-comment { color: #6a737d; }
+.light .hljs-number, .light .hljs-literal { color: #005cc5; }
+.light .hljs-title, .light .hljs-title\.function_ { color: #6f42c1; }
+.light .hljs-built_in { color: #e36209; }
+.light .hljs-addition { background-color: #e6ffec; color: #22863a; }
+.light .hljs-deletion { background-color: #ffeef0; color: #b31d28; }
+
+/* prose 亮色 */
+.light .prose h2 { border-bottom-color: rgba(0,153,204,0.25); }
+.light .prose blockquote { background: rgba(136,51,204,0.04); }
+.light .prose a { color: var(--color-neon-cyan); border-bottom-color: rgba(0,153,204,0.3); }
+.light .prose a:hover { color: var(--color-neon-green); }
+
+/* Hero 光晕亮色下降强 */
+.light .hero-glow { opacity: 0.03 !important; }
+
+/* GlobalActions 按钮亮色 */
+.light .fixed.bottom-6 button {
+  background: rgba(255,255,255,0.9);
+  border-color: var(--color-void-border);
+}
+
+/* 亮色下代码块 ::before 红绿黄点调整 */
+.light .prose pre::before { opacity: 0.5; }
+
+/* 亮色下 callout */
+.light .callout-tip    { background: rgba(0,170,85,0.06); }
+.light .callout-warning { background: rgba(255,200,0,0.06); }
+.light .callout-danger  { background: rgba(204,17,85,0.06); }
+.light .callout-info    { background: rgba(0,153,204,0.06); }

@@ -3,7 +3,7 @@
     <ReadingProgress />
     
     <!-- Nav -->
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.8)] backdrop-blur-xl">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
       <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-6">
         <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">void.dev</NuxtLink>
         <span class="text-[var(--color-text-muted)]">/</span>

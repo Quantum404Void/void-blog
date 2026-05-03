@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <!-- Nav -->
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.85)] backdrop-blur-xl">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
       <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-8">
         <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
           void.dev

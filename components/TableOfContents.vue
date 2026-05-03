@@ -1,5 +1,5 @@
 <template>
-  <nav v-if="headings.length > 0" class="toc">
+  <nav v-if="headings.length > 0" class="toc toc-glass">
     <p class="toc-title"><span style="color:var(--color-neon-green)">▶</span> 目录</p>
     <ul>
       <li
@@ -63,6 +63,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   border: 1px solid var(--color-void-border);
   border-radius: 0.75rem;
   background: rgba(19,19,31,0.6);
+  /* 亮色模式在 .light .toc-glass 中覆盖 */
   backdrop-filter: blur(8px);
 }
 .toc-title {

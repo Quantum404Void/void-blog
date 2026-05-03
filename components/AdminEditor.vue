@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <!-- Nav -->
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.9)] backdrop-blur-xl">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
       <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-4">
         <NuxtLink href="/admin" class="font-mono text-sm text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">← 文章列表</NuxtLink>
         <span class="text-[var(--color-text-muted)]">/</span>
