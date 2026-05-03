@@ -251,15 +251,16 @@ md.renderer.rules.heading_open = (tokens: any[], idx: number, options: any, env:
 
 const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
 
-// Extract headings from rendered content
+// Extract headings from RENDERED HTML — 避免代码块里的 # 注释被误识别
+// 只取 h2（跳过文章 h1 大标题和过细的 h3），保证 TOC 简洁且锚点真实存在
 interface Heading { depth: number; slug: string; text: string }
 const tocHeadings = computed<Heading[]>(() => {
-  if (!post.value) return []
-  const matches = [...post.value.content.matchAll(/^(#{1,3})\s+(.+)$/gm)]
+  if (!renderedContent.value) return []
+  const matches = [...renderedContent.value.matchAll(/<h2[^>]*id="([^"]+)"[^>]*>(.*?)<\/h2>/gs)]
   return matches.map(m => ({
-    depth: m[1].length,
-    slug: toSlug(m[2]),
-    text: m[2],
+    depth: 2,
+    slug: m[1],
+    text: m[2].replace(/<[^>]+>/g, '').trim(),
   }))
 })
 
