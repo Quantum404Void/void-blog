@@ -182,14 +182,15 @@ if (!isNew) {
 
 // 标题自动生成 slug（仅新建）
 watch(() => form.title, (val) => {
-  if (!isNew) return
-  form.slug = val.toLowerCase()
-    .replace(/[\u4e00-\u9fa5]+/g, s => {
-      // 中文按字符转拼音首字母（简单降级：直接用位置hash）
-      return s.split('').map(() => '').join('')
-    })
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    .slice(0, 60) || ''
+  if (!isNew || form.slug) return
+  // 中文转 pinyin 降级方案：用 pub_date + 标题长度 hash 做后缀
+  const ascii = val.toLowerCase()
+    .replace(/[\u4e00-\u9fa5]/g, '') // 移除中文
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)
+  const hash = val.length.toString(36)
+  form.slug = (ascii || 'post') + (ascii ? '' : `-${hash}`)
 })
 
 // Markdown 预览

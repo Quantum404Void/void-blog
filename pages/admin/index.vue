@@ -66,10 +66,11 @@
                 </div>
               </td>
               <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded-full text-[10px]"
+                <span class="px-2 py-0.5 rounded-full text-[10px] whitespace-nowrap cursor-pointer select-none transition-all hover:opacity-80"
                   :class="post.draft
                     ? 'bg-[rgba(255,200,0,0.1)] text-[#ffc800] border border-[rgba(255,200,0,0.3)]'
-                    : 'bg-[rgba(0,255,136,0.08)] text-[var(--color-neon-green)] border border-[rgba(0,255,136,0.3)]'">
+                    : 'bg-[rgba(0,255,136,0.08)] text-[var(--color-neon-green)] border border-[rgba(0,255,136,0.3)]'"
+                  @click.stop="toggleDraft(post)">
                   {{ post.draft ? '草稿' : '已发布' }}
                 </span>
               </td>
@@ -117,6 +118,13 @@ const filtered = computed(() => {
 async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
   navigateTo('/admin/login')
+}
+
+async function toggleDraft(post: any) {
+  await $fetch(`/api/admin/posts/${post.slug}`, {
+    method: 'PUT', body: { draft: !post.draft }
+  })
+  post.draft = !post.draft
 }
 
 async function deletePost(slug: string) {
