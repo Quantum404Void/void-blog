@@ -125,7 +125,7 @@
 <script setup lang="ts">
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-// @ts-ignore
+// @ts-expect-error — no type declarations for this package
 import markdownItHljs from 'markdown-it-highlightjs'
 
 const props = defineProps<{ isNew: boolean; initialSlug?: string }>()

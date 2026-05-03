@@ -165,9 +165,9 @@
 <script setup lang="ts">
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-// @ts-ignore
+// @ts-expect-error — no type declarations for this package
 import markdownItHljs from 'markdown-it-highlightjs'
-// @ts-ignore
+// @ts-expect-error — no type declarations for this package
 import markdownItContainer from 'markdown-it-container'
 
 const route = useRoute()
