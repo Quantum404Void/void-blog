@@ -8,13 +8,13 @@
       </div>
     </nav>
 
-    <div class="flex-1 flex flex-col max-w-3xl w-full mx-auto px-6 py-6">
+    <div class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6">
       <div class="flex items-center justify-between mb-4">
         <h1 class="font-mono text-xl font-bold" style="color:#b400ff">MD Markdown 预览</h1>
         <button @click="clear" class="font-mono text-[10px] px-3 py-1.5 rounded-lg border transition-all" style="border-color:rgba(255,0,170,0.3);color:rgba(255,0,170,0.7)">清空</button>
       </div>
 
-      <div class="grid grid-cols-2 gap-4 flex-1" style="min-height:60vh">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1" style="min-height:60vh">
         <!-- 左侧输入 -->
         <div class="flex flex-col gap-2">
           <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest flex items-center gap-2">
@@ -47,10 +47,14 @@
 
 <script setup lang="ts">
 import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+// @ts-ignore
+import markdownItHljs from 'markdown-it-highlightjs'
 
 useHead({ title: 'Markdown 预览 | void.dev' })
 
-const md = new MarkdownIt({ html: false, linkify: true, typographer: true, breaks: true })
+const md = new MarkdownIt({ html: true, linkify: true, typographer: true, breaks: true })
+  .use(markdownItHljs, { hljs, auto: true, code: true })
 
 const source = ref(`# Hello, Markdown!
 
@@ -139,5 +143,5 @@ function clear() {
 .prose-void table { border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 0.8em 0; }
 .prose-void th { color: #00d4ff; border: 1px solid rgba(0,212,255,0.2); padding: 0.4em 0.8em; background: rgba(0,212,255,0.06); font-family: var(--font-mono, monospace); }
 .prose-void td { color: var(--color-text-primary); border: 1px solid var(--color-void-border); padding: 0.4em 0.8em; }
-.prose-void img { max-width: 100%; border-radius: 8px; }
+.prose-void img { max-width: 100%; height: auto; border-radius: 8px; display: block; }
 </style>

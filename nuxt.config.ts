@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     registerType: 'prompt',   // waiting SW → 用户手动触发更新，避免强刷丢资源
 
     client: {
-      installPrompt: true,    // 拦截 beforeinstallprompt，通过 $pwa.showInstallPrompt 控制
+      installPrompt: false,    // 让浏览器自己显示安装提示
       periodicSyncForUpdates: 3600,  // 每小时检查更新
     },
 

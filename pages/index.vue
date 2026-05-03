@@ -6,12 +6,12 @@
         <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">
           void.dev
         </NuxtLink>
-        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)]">
+        <div class="ml-auto flex items-center gap-5 text-xs font-mono text-[var(--color-text-muted)] overflow-x-auto">
           <NuxtLink href="/blog" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
-          <NuxtLink href="/tags" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</NuxtLink>
+          <NuxtLink href="/tags" class="hidden sm:block hover:text-[var(--color-neon-cyan)] transition-colors">~/tags</NuxtLink>
           <NuxtLink href="/search" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/search</NuxtLink>
-          <NuxtLink href="/blog/about" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/about</NuxtLink>
-          <NuxtLink href="/stats" class="hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</NuxtLink>
+          <NuxtLink href="/blog/about" class="hidden sm:block hover:text-[var(--color-neon-cyan)] transition-colors">~/about</NuxtLink>
+          <NuxtLink href="/stats" class="hidden sm:block hover:text-[var(--color-neon-cyan)] transition-colors">~/stats</NuxtLink>
           <NuxtLink href="/lab" class="hover:text-[var(--color-neon-cyan)] transition-colors" style="color:rgba(180,0,255,0.9)">~/lab</NuxtLink>
           <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener"
              class="hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-1">

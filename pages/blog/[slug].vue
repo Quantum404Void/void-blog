@@ -5,7 +5,7 @@
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] bg-[rgba(10,10,15,0.8)] backdrop-blur-xl">
       <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-6">
-        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">~/void-blog</NuxtLink>
+        <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)] hover:glow-green transition-all">void.dev</NuxtLink>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-xs">{{ post.title }}</span>
         <div class="ml-auto flex items-center gap-4 text-xs text-[var(--color-text-muted)] font-mono">
@@ -99,7 +99,7 @@
             </div>
           </div>
 
-          <!-- Author strip -->
+          <!-- Author strip + Share -->
           <div class="flex items-center justify-between flex-wrap gap-4 py-4 border-t border-[var(--color-void-border)]">
             <div class="flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
               <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">王</div>
@@ -108,9 +108,19 @@
                 <div style="font-size:10px;color:rgba(136,136,170,0.8)">C++ / AI Agent / 桌面应用</div>
               </div>
             </div>
-            <div class="flex gap-3 font-mono text-[10px] text-[var(--color-text-muted)]">
+            <div class="flex gap-3 font-mono text-[10px] text-[var(--color-text-muted)] items-center">
               <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener" class="hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
               <NuxtLink href="/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS</NuxtLink>
+              <button
+                @click="copyLink"
+                class="flex items-center gap-1 px-2.5 py-1 rounded border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:text-[var(--color-neon-cyan)] transition-all"
+                :class="copied ? 'text-[var(--color-neon-green)] border-[rgba(0,255,136,0.35)]' : ''"
+              >
+                <svg v-if="!copied" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                {{ copied ? '✓ 已复制' : '复制链接' }}
+              </button>
             </div>
           </div>
 
@@ -149,6 +159,13 @@ if (error.value || !post.value) {
 useSeoMeta({
   title: `${post.value.title} | void.dev`,
   description: post.value.description,
+  ogTitle: `${post.value.title} | void.dev`,
+  ogDescription: post.value.description,
+  ogType: 'article',
+  ogUrl: `https://void.redx.space/blog/${slug}`,
+  twitterCard: 'summary',
+  twitterTitle: `${post.value.title} | void.dev`,
+  twitterDescription: post.value.description,
 })
 
 // Render markdown
@@ -168,7 +185,13 @@ const tocHeadings = computed<Heading[]>(() => {
   }))
 })
 
-const readingTime = computed(() => post.value ? Math.max(1, Math.round(post.value.content.length / 600)) : 0)
+const readingTime = computed(() => {
+  if (!post.value) return 0
+  const content = post.value.content
+  const cjkChars = (content.match(/[\u4e00-\u9fa5]/g) || []).length
+  const otherChars = content.length - cjkChars
+  return Math.max(1, Math.round(cjkChars / 500 + otherChars / 1000))
+})
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -192,4 +215,86 @@ const related = computed(() =>
 const curIdx = computed(() => allPosts.value.findIndex((p: any) => p.slug === slug))
 const prevPost = computed(() => curIdx.value < allPosts.value.length - 1 ? allPosts.value[curIdx.value + 1] : null)
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
+
+onMounted(() => {
+  // 1. 给 heading 注入 id，修复 TOC 跳转
+  const article = document.querySelector('.prose')
+  if (article) {
+    article.querySelectorAll('h1, h2, h3, h4').forEach(el => {
+      const text = el.textContent || ''
+      const id = text.toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+        .replace(/^-|-$/g, '')
+      el.id = id
+    })
+  }
+
+  // 2. 代码块：语言标签 + 复制按钮
+  document.querySelectorAll('.prose pre').forEach(pre => {
+    const code = pre.querySelector('code')
+    const lang = [...(code?.classList || [])].find(c => c.startsWith('language-'))?.replace('language-', '') || ''
+
+    // 语言标签
+    const label = document.createElement('span')
+    label.textContent = lang || 'code'
+    label.style.cssText = [
+      'position:absolute', 'top:0.75rem', 'left:1rem',
+      'font-family:var(--font-mono)', 'font-size:10px',
+      'color:rgba(136,136,170,0.55)', 'text-transform:uppercase', 'letter-spacing:0.08em',
+      'user-select:none', 'pointer-events:none',
+    ].join(';')
+    pre.appendChild(label)
+
+    // 复制按钮
+    const btn = document.createElement('button')
+    btn.textContent = '复制'
+    btn.style.cssText = [
+      'position:absolute', 'top:0.625rem', 'right:0.75rem',
+      'font-family:var(--font-mono)', 'font-size:10px',
+      'padding:3px 10px', 'border-radius:4px',
+      'background:rgba(0,212,255,0.06)', 'border:1px solid rgba(0,212,255,0.18)',
+      'color:rgba(0,212,255,0.65)', 'cursor:pointer',
+      'transition:all 0.15s', 'z-index:10',
+    ].join(';')
+    btn.addEventListener('mouseenter', () => {
+      btn.style.background = 'rgba(0,212,255,0.12)'
+      btn.style.borderColor = 'rgba(0,212,255,0.35)'
+      btn.style.color = 'rgba(0,212,255,0.9)'
+    })
+    btn.addEventListener('mouseleave', () => {
+      if (btn.textContent === '复制') {
+        btn.style.background = 'rgba(0,212,255,0.06)'
+        btn.style.borderColor = 'rgba(0,212,255,0.18)'
+        btn.style.color = 'rgba(0,212,255,0.65)'
+      }
+    })
+    btn.addEventListener('click', async () => {
+      const text = code?.textContent || ''
+      try {
+        await navigator.clipboard.writeText(text)
+        btn.textContent = '✓ 已复制'
+        btn.style.color = 'rgba(0,255,136,0.9)'
+        btn.style.borderColor = 'rgba(0,255,136,0.4)'
+        btn.style.background = 'rgba(0,255,136,0.08)'
+        setTimeout(() => {
+          btn.textContent = '复制'
+          btn.style.color = 'rgba(0,212,255,0.65)'
+          btn.style.borderColor = 'rgba(0,212,255,0.18)'
+          btn.style.background = 'rgba(0,212,255,0.06)'
+        }, 2000)
+      } catch {}
+    })
+    pre.appendChild(btn)
+  })
+})
+
+const shareUrl = computed(() => `https://void.redx.space/blog/${slug}`)
+const copied = ref(false)
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {}
+}
 </script>

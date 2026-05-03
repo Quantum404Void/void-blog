@@ -13,14 +13,20 @@
       </h1>
 
       <form @submit.prevent="doSearch" class="mb-10">
-        <div class="flex gap-3">
+        <div class="relative flex gap-3">
           <input
             v-model="q"
             type="text"
-            placeholder="搜索文章..."
+            placeholder="搜索文章、标签..."
             autofocus
-            class="flex-1 bg-[#0f0f1a] border border-[var(--color-void-border)] rounded-lg px-4 py-2.5 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
+            class="flex-1 bg-[#0f0f1a] border border-[var(--color-void-border)] rounded-lg px-4 py-2.5 pr-10 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
           />
+          <!-- loading spinner -->
+          <div v-if="pending" class="absolute right-[80px] top-1/2 -translate-y-1/2">
+            <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
           <button
             type="submit"
             class="px-5 py-2.5 bg-[rgba(0,212,255,0.1)] border border-[rgba(0,212,255,0.35)] rounded-lg font-mono text-sm text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.2)] transition-colors"
@@ -29,8 +35,23 @@
       </form>
 
       <p v-if="q && !pending" class="font-mono text-xs text-[var(--color-text-muted)] mb-6">
-        "{{ q }}" — {{ results.length }} 篇结果
+        "{{ q }}" — <span class="text-[var(--color-text-secondary)]">{{ results.length }}</span> 篇结果
       </p>
+
+      <!-- Empty state: hot tags -->
+      <div v-if="!q" class="py-6">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-4">
+          <span class="text-[var(--color-neon-purple)]">▶</span> 热门标签
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="tag in hotTags"
+            :key="tag"
+            @click="q = tag; doSearch()"
+            class="font-mono text-xs px-3 py-1 rounded-full border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all"
+          >#{{ tag }}</button>
+        </div>
+      </div>
 
       <div class="space-y-2">
         <NuxtLink
@@ -65,12 +86,24 @@ const q = ref((route.query.q as string) || '')
 const results = ref<any[]>([])
 const pending = ref(false)
 
+const { data: tagsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
+const hotTags = computed(() =>
+  Object.entries(tagsData.value || {}).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([t]) => t)
+)
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+watch(q, (val) => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  if (!val.trim()) { results.value = []; return }
+  debounceTimer = setTimeout(() => doSearch(), 300)
+})
+
 async function doSearch() {
   if (!q.value.trim()) { results.value = []; return }
   pending.value = true
   await router.replace({ query: { q: q.value } })
   try {
-    results.value = await $fetch(`/api/search?q=${encodeURIComponent(q.value)}`)
+    results.value = (await $fetch(`/api/search?q=${encodeURIComponent(q.value)}`) as any[]).filter((r: any) => r.slug !== 'about')
   } finally {
     pending.value = false
   }
