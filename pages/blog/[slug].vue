@@ -50,6 +50,25 @@
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 border-t border-[var(--color-void-border)] space-y-10">
+          <!-- Views + Likes -->
+          <div class="flex items-center justify-center gap-8">
+            <div class="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
+              <span class="text-base">👁</span>
+              <span>{{ postViews }} 次阅读</span>
+            </div>
+            <button
+              @click="handleLike"
+              :disabled="liked"
+              class="flex items-center gap-2 font-mono text-xs px-4 py-2 rounded-full border transition-all"
+              :class="liked
+                ? 'border-[rgba(255,45,120,0.6)] text-[var(--color-neon-pink)] bg-[rgba(255,45,120,0.08)] cursor-default'
+                : 'border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-[rgba(255,45,120,0.5)] hover:text-[var(--color-neon-pink)] hover:bg-[rgba(255,45,120,0.05)]'"
+            >
+              <span class="text-base transition-transform" :class="liked ? 'scale-125' : ''">{{ liked ? '❤️' : '🤍' }}</span>
+              <span>{{ postLikes }}</span>
+            </button>
+          </div>
+
           <!-- Prev/Next -->
           <div class="grid grid-cols-2 gap-4 font-mono text-xs">
             <NuxtLink
@@ -146,6 +165,8 @@ import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 // @ts-ignore
 import markdownItHljs from 'markdown-it-highlightjs'
+// @ts-ignore
+import markdownItContainer from 'markdown-it-container'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -197,6 +218,25 @@ function toSlug(text: string) {
 // Render markdown — heading_open 插入 id，保证 TOC 锚点渲染即存在
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
   .use(markdownItHljs, { hljs, auto: true, code: true })
+
+// Callout 容器：:::tip / :::warning / :::danger / :::info
+const calloutTypes = [
+  { name: 'tip',     icon: '💡', label: '提示' },
+  { name: 'warning', icon: '⚠️', label: '注意' },
+  { name: 'danger',  icon: '🚨', label: '危险' },
+  { name: 'info',    icon: 'ℹ️', label: '说明' },
+]
+for (const { name, icon, label } of calloutTypes) {
+  md.use(markdownItContainer, name, {
+    render(tokens: any[], idx: number) {
+      if (tokens[idx].nesting === 1) {
+        const title = tokens[idx].info.trim().slice(name.length).trim() || label
+        return `<div class="callout callout-${name}"><p class="callout-title">${icon} ${title}</p>\n`
+      }
+      return '</div>\n'
+    }
+  })
+}
 
 const defaultHeadingOpen = md.renderer.rules.heading_open ||
   ((tokens: any[], idx: number, options: any, env: any, self: any) => self.renderToken(tokens, idx, options))
@@ -254,7 +294,44 @@ const curIdx = computed(() => allPosts.value.findIndex((p: any) => p.slug === sl
 const prevPost = computed(() => curIdx.value < allPosts.value.length - 1 ? allPosts.value[curIdx.value + 1] : null)
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
 
+// 浏览量 + 点赞
+const postViews = ref(0)
+const postLikes = ref(0)
+const liked = ref(false)
+
+async function loadStats() {
+  try {
+    const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`)
+    postViews.value = data.views
+    postLikes.value = data.likes
+  } catch {}
+}
+
+async function recordView() {
+  try {
+    const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`, {
+      method: 'POST', body: { action: 'view' }
+    })
+    postViews.value = data.views
+    postLikes.value = data.likes
+  } catch {}
+}
+
+async function handleLike() {
+  if (liked.value) return
+  liked.value = true
+  try {
+    const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`, {
+      method: 'POST', body: { action: 'like' }
+    })
+    postLikes.value = data.likes
+  } catch { liked.value = false }
+}
+
 onMounted(() => {
+  loadStats()
+  // 延迟 1s 再记录阅读，避免预览模式刻处
+  setTimeout(recordView, 1000)
   // 代码块：语言标签 + 复制按钮（heading id 已在 markdown-it renderer 注入，无需重复）
   document.querySelectorAll('.prose pre').forEach(pre => {
     const code = pre.querySelector('code')
