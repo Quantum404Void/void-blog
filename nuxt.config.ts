@@ -14,8 +14,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // 服务端私有（不暴露给客户端）
-    adminPassword: process.env.NUXT_ADMIN_PASSWORD || 'change-me',
-    jwtSecret: process.env.NUXT_JWT_SECRET || 'change-me-secret',
+    adminPassword: '',  // 生产由 CF Pages 环境变量 NUXT_ADMIN_PASSWORD 注入
+    jwtSecret: '',      // 生产由 CF Pages 环境变量 NUXT_JWT_SECRET 注入
     public: {
       siteUrl: 'https://void.redx.space',
       siteName: 'void.dev',

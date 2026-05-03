@@ -59,7 +59,7 @@ const hasErrors = computed(()=>{
 const stats = computed(()=>[
   {label:'WPM',value:wpm.value,color:'#00d4ff'},
   {label:'ACC',value:acc.value,color:'#39ff14'},
-  {label:'ERRORS',value:errorsCount.value==='--'?'--':String(errorsCount.value),color:'#ff00aa'},
+  {label:'ERRORS',value:typeof errorsCount.value==='number'?String(errorsCount.value):'--',color:'#ff00aa'},
   {label:'TIME',value:timeLeft.value+'s',color:'#b400ff'},
 ])
 

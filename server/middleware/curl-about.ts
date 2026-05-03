@@ -1,9 +1,9 @@
-// server/routes/about.ts
-// curl https://void.redx.space/about → ASCII art for terminal users
+// server/middleware/curl-about.ts
+// curl https://void.redx.space/about → ASCII art，其他 user-agent 走正常页面
 export default defineEventHandler(async (event) => {
+  if (getRequestURL(event).pathname !== '/about') return
   const ua = getHeader(event, 'user-agent') || ''
-  const isCurl = ua.toLowerCase().startsWith('curl')
-  if (!isCurl) return // 非 curl 走正常页面路由
+  if (!ua.toLowerCase().startsWith('curl')) return
 
   const config = useRuntimeConfig()
   const text = `

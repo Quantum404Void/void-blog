@@ -62,8 +62,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   padding: 1rem;
   border: 1px solid var(--color-void-border);
   border-radius: 0.75rem;
-  background: rgba(19,19,31,0.6);
-  /* 亮色模式在 .light .toc-glass 中覆盖 */
+  background: rgba(19,19,31,0.6);  /* toc-glass class 已在主 nav-glass 中定义 */
   backdrop-filter: blur(8px);
 }
 .toc-title {

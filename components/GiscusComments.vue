@@ -5,12 +5,15 @@
 <script setup lang="ts">
 const props = defineProps<{ slug: string }>()
 const container = ref<HTMLDivElement>()
+const { authorGithub, siteName } = useSiteConfig()
+// repo: Quantum505Void/void-blog (从 authorGithub 提取)
+const repo = authorGithub.replace('https://github.com/', '') + '/void-blog'
 
 onMounted(() => {
   if (!container.value) return
   const s = document.createElement('script')
   s.src = 'https://giscus.app/client.js'
-  s.setAttribute('data-repo', 'Quantum505Void/void-blog')
+  s.setAttribute('data-repo', repo)
   s.setAttribute('data-repo-id', 'R_kgDOSQz6vQ')
   s.setAttribute('data-category', 'General')
   s.setAttribute('data-category-id', 'DIC_kwDOSQz6vc4C8PXU')
