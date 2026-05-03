@@ -33,11 +33,11 @@ export default defineNuxtConfig({
   },
 
   pwa: {
-    registerType: 'prompt',   // waiting SW → 用户手动触发更新，避免强刷丢资源
+    registerType: 'autoUpdate',  // 新 SW 直接 skipWaiting + clients.claim，即时生效
 
     client: {
-      installPrompt: false,    // 让浏览器自己显示安装提示
-      periodicSyncForUpdates: 3600,  // 每小时检查更新
+      installPrompt: false,
+      periodicSyncForUpdates: 3600,
     },
 
     manifest: {
@@ -55,13 +55,20 @@ export default defineNuxtConfig({
     },
 
     workbox: {
-      navigateFallback: null,        // SSR 不用 fallback
+      navigateFallback: null,
       globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      // /api/* 完全跳过缓存（和 OpenClaw 一致）
+      navigateFallbackDenylist: [/^\/api\//],
       runtimeCaching: [
         {
           urlPattern: /^\/api\/.*/,
-          handler: 'NetworkFirst',   // API 永远走网络优先
-          options: { cacheName: 'api-cache', networkTimeoutSeconds: 5 },
+          handler: 'NetworkOnly',  // API 永远不缓存
+          options: {},
+        },
+        {
+          urlPattern: /^\/_nuxt\/.*/,
+          handler: 'CacheFirst',   // hash 资源，缓存优先
+          options: { cacheName: 'nuxt-assets', expiration: { maxAgeSeconds: 31536000 } },
         },
       ],
     },
