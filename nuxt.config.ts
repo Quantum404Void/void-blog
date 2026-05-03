@@ -21,8 +21,10 @@ export default defineNuxtConfig({
       siteName: 'void.dev',
       siteDescription: '王宇的技术博客 — 代码、工具、折腾与思考',
       authorName: '王宇',
+      authorEmail: 'moke521_wang@163.com',
       authorGithub: 'https://github.com/Quantum505Void',
       authorInitial: '王',
+      authorMotto: '不灸水，不追热点，不水文章',
     },
   },
 

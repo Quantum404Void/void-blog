@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
 
 \x1b[33m  blog    \x1b[0m${config.public.siteUrl}/blog
 \x1b[33m  github  \x1b[0m${config.public.authorGithub}
+\x1b[33m  email   \x1b[0m${config.public.authorEmail}
 \x1b[33m  rss     \x1b[0m${config.public.siteUrl}/rss.xml
 \x1b[33m  search  \x1b[0m${config.public.siteUrl}/search
 

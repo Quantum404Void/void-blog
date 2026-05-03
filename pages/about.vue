@@ -21,11 +21,12 @@
             <span class="text-[var(--color-neon-green)]">▸</span> whoami
           </div>
           <div class="space-y-2 text-[var(--color-text-secondary)]">
-            <div><span class="text-[var(--color-neon-cyan)]">name</span>    = <span class="text-[var(--color-text-primary)]">{{ authorName }}</span></div>
-            <div><span class="text-[var(--color-neon-cyan)]">role</span>    = <span class="text-[var(--color-text-primary)]">Software Engineer</span></div>
-            <div><span class="text-[var(--color-neon-cyan)]">focus</span>   = <span class="text-[var(--color-text-primary)]">C++ · AI Agent · 桌面应用</span></div>
-            <div><span class="text-[var(--color-neon-cyan)]">since</span>   = <span class="text-[var(--color-text-primary)]">2022</span></div>
-            <div><span class="text-[var(--color-neon-cyan)]">online</span>  = <span class="text-[var(--color-text-primary)]">{{ siteUrl }}</span></div>
+            <div><span class="text-[var(--color-neon-cyan)]" style="display:inline-block;width:7ch">name</span>   = <span class="text-[var(--color-text-primary)]">{{ authorName }}</span></div>
+            <div><span class="text-[var(--color-neon-cyan)]" style="display:inline-block;width:7ch">role</span>   = <span class="text-[var(--color-text-primary)]">Software Engineer</span></div>
+            <div><span class="text-[var(--color-neon-cyan)]" style="display:inline-block;width:7ch">focus</span>  = <span class="text-[var(--color-text-primary)]">C++ · AI Agent · 桌面应用</span></div>
+            <div><span class="text-[var(--color-neon-cyan)]" style="display:inline-block;width:7ch">since</span>  = <span class="text-[var(--color-text-primary)]">2022</span></div>
+            <div><span class="text-[var(--color-neon-cyan)]" style="display:inline-block;width:7ch">motto</span>  = <span class="text-[var(--color-text-muted)] italic">{{ authorMotto }}</span></div>
+            <div><span class="text-[var(--color-neon-cyan)]" style="display:inline-block;width:7ch">online</span> = <span class="text-[var(--color-text-primary)]">{{ siteUrl }}</span></div>
           </div>
         </div>
 
@@ -68,12 +69,17 @@
           <div class="space-y-2 text-[var(--color-text-secondary)]">
             <a :href="authorGithub" target="_blank" rel="noopener"
               class="flex items-center gap-3 hover:text-[var(--color-neon-green)] transition-colors group">
-              <span class="text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)]">GitHub</span>
+              <span class="font-mono text-xs w-16 text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-green)] shrink-0">github</span>
               <span class="text-[var(--color-text-muted)] font-mono text-xs">→</span>
               <span class="text-[var(--color-neon-green)] text-xs">{{ authorGithub.replace('https://','') }}</span>
             </a>
             <div class="flex items-center gap-3">
-              <span class="text-[var(--color-text-muted)]">RSS</span>
+              <span class="font-mono text-xs w-16 text-[var(--color-text-muted)] shrink-0">email</span>
+              <span class="text-[var(--color-text-muted)] font-mono text-xs">→</span>
+              <a :href="`mailto:${authorEmail}`" class="text-[var(--color-neon-cyan)] text-xs hover:underline">{{ authorEmail }}</a>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs w-16 text-[var(--color-text-muted)] shrink-0">rss</span>
               <span class="text-[var(--color-text-muted)] font-mono text-xs">→</span>
               <NuxtLink href="/rss.xml" class="text-[var(--color-neon-cyan)] text-xs hover:underline">{{ siteUrl }}/rss.xml</NuxtLink>
             </div>
@@ -99,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-const { siteUrl, siteName, authorName, authorGithub } = useSiteConfig()
+const { siteUrl, siteName, authorName, authorEmail, authorGithub, authorMotto } = useSiteConfig()
 useSeoMeta({
   title: `About | ${siteName}`,
   description: `${authorName} — C++ / AI Agent / 桌面应用工程师，${siteName} 博客作者`,
