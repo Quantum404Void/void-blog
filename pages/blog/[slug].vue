@@ -189,9 +189,26 @@ useHead({
   }]
 })
 
-// Render markdown
+// heading slug helper
+function toSlug(text: string) {
+  return text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '')
+}
+
+// Render markdown — heading_open 插入 id，保证 TOC 锚点渲染即存在
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
   .use(markdownItHljs, { hljs, auto: true, code: true })
+
+const defaultHeadingOpen = md.renderer.rules.heading_open ||
+  ((tokens: any[], idx: number, options: any, env: any, self: any) => self.renderToken(tokens, idx, options))
+
+md.renderer.rules.heading_open = (tokens: any[], idx: number, options: any, env: any, self: any) => {
+  const inline = tokens[idx + 1]
+  const text = inline?.children?.map((t: any) => t.content).join('') ?? ''
+  const id = toSlug(text)
+  tokens[idx].attrSet('id', id)
+  return defaultHeadingOpen(tokens, idx, options, env, self)
+}
+
 const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
 
 // Extract headings from rendered content
@@ -201,7 +218,7 @@ const tocHeadings = computed<Heading[]>(() => {
   const matches = [...post.value.content.matchAll(/^(#{1,3})\s+(.+)$/gm)]
   return matches.map(m => ({
     depth: m[1].length,
-    slug: m[2].toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, ''),
+    slug: toSlug(m[2]),
     text: m[2],
   }))
 })
@@ -238,19 +255,7 @@ const prevPost = computed(() => curIdx.value < allPosts.value.length - 1 ? allPo
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
 
 onMounted(() => {
-  // 1. 给 heading 注入 id，修复 TOC 跳转
-  const article = document.querySelector('.prose')
-  if (article) {
-    article.querySelectorAll('h1, h2, h3, h4').forEach(el => {
-      const text = el.textContent || ''
-      const id = text.toLowerCase()
-        .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-        .replace(/^-|-$/g, '')
-      el.id = id
-    })
-  }
-
-  // 2. 代码块：语言标签 + 复制按钮
+  // 代码块：语言标签 + 复制按钮（heading id 已在 markdown-it renderer 注入，无需重复）
   document.querySelectorAll('.prose pre').forEach(pre => {
     const code = pre.querySelector('code')
     const lang = [...(code?.classList || [])].find(c => c.startsWith('language-'))?.replace('language-', '') || ''
