@@ -62,10 +62,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: false },
-    '/blog/**': { isr: false },
-    '/tags/**': { isr: 300 },
-    '/search': { isr: false },
-    '/stats': { isr: 300 },
+    '/api/**': { headers: { 'Cache-Control': 'no-store' } },
     '/rss.xml': { isr: 3600 },
     '/sitemap.xml': { isr: 3600 },
   },
