@@ -133,6 +133,9 @@
 
 <script setup lang="ts">
 import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+// @ts-ignore
+import markdownItHljs from 'markdown-it-highlightjs'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -150,6 +153,7 @@ useSeoMeta({
 
 // Render markdown
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
+  .use(markdownItHljs, { hljs, auto: true, code: true })
 const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
 
 // Extract headings from rendered content

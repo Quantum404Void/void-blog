@@ -53,6 +53,9 @@ export default defineNuxtConfig({
     '/': { prerender: false },
     '/blog/**': { isr: 3600 },
     '/tags/**': { isr: 3600 },
+    '/search': { isr: 300 },
+    '/stats': { isr: 600 },
+    '/rss.xml': { isr: 3600 },
   },
 
   nitro: {
