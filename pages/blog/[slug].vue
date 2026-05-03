@@ -121,14 +121,14 @@
           <!-- Author strip + Share -->
           <div class="flex items-center justify-between flex-wrap gap-4 py-4 border-t border-[var(--color-void-border)]">
             <div class="flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
-              <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">王</div>
+              <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">{{ authorInitial }}</div>
               <div>
                 <div class="text-[var(--color-text-primary)] font-bold" style="font-size:11px">{{ authorName }}</div>
                 <div style="font-size:10px;color:rgba(136,136,170,0.8)">C++ / AI Agent / 桌面应用</div>
               </div>
             </div>
             <div class="flex gap-3 font-mono text-[10px] text-[var(--color-text-muted)] items-center">
-              <a href="https://github.com/Quantum505Void" target="_blank" rel="noopener" class="hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
+              <a :href="authorGithub" target="_blank" rel="noopener" class="hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
               <NuxtLink href="/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS</NuxtLink>
               <button
                 @click="copyLink"
@@ -177,7 +177,7 @@ if (error.value || !post.value) {
   throw createError({ statusCode: 404, statusMessage: 'Post not found' })
 }
 
-const { siteUrl, siteName, authorName } = useSiteConfig()
+const { siteUrl, siteName, authorName, authorGithub, authorInitial } = useSiteConfig()
 useSeoMeta({
   title: `${post.value.title} | ${siteName}`,
   description: post.value.description,
@@ -342,7 +342,7 @@ onMounted(() => {
     const label = document.createElement('span')
     label.textContent = lang || 'code'
     label.style.cssText = [
-      'position:absolute', 'top:0.75rem', 'left:1rem',
+      'position:absolute', 'top:0.75rem', 'left:4.5rem',  // 跳过左边红绿黄点(54px+1rem)
       'font-family:var(--font-mono)', 'font-size:10px',
       'color:rgba(136,136,170,0.55)', 'text-transform:uppercase', 'letter-spacing:0.08em',
       'user-select:none', 'pointer-events:none',

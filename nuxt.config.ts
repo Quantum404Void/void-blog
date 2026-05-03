@@ -18,6 +18,8 @@ export default defineNuxtConfig({
       siteName: 'void.dev',
       siteDescription: '王宇的技术博客 — 代码、工具、折腾与思考',
       authorName: '王宇',
+      authorGithub: 'https://github.com/Quantum505Void',
+      authorInitial: '王',
     },
   },
 
