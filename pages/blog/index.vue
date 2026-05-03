@@ -116,7 +116,7 @@ useSeoMeta({
 })
 
 const { data: postsData } = await useFetch('/api/posts', { default: () => [] as any[] })
-const posts = computed(() => (postsData.value || []).filter((p: any) => p.slug !== 'about'))
+const posts = computed(() => postsData.value || [])
 
 const { data: tagsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 const topTags = computed(() =>

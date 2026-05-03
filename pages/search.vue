@@ -110,7 +110,7 @@ async function doSearch() {
   pending.value = true
   await router.replace({ query: { q: q.value } })
   try {
-    results.value = (await $fetch(`/api/search?q=${encodeURIComponent(q.value)}`) as any[]).filter((r: any) => r.slug !== 'about')
+    results.value = await $fetch(`/api/search?q=${encodeURIComponent(q.value)}`) as any[]
   } finally {
     pending.value = false
   }

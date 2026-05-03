@@ -24,7 +24,8 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'sitemap', type: 'application/xml', href: 'https://void.redx.space/sitemap.xml' },
+        // sitemap href: 生产地址，如需多域部署改这里
+        { rel: 'sitemap', type: 'application/xml', href: '/sitemap.xml' },
       ],
       meta: [
         { name: 'robots', content: 'index, follow' },
