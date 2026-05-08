@@ -111,17 +111,45 @@ function postorder(node: BSTNode | null, out: number[]) {
 }
 
 // ── Layout ──────────────────────────────────────────────────────────────────
-const H_GAP = 48
-const V_GAP = 70
+const V_GAP = 72
 const R = 22
+const H_GAP = 52  // min horizontal gap between nodes
 
-function layout(node: BSTNode | null, depth: number, left: number, right: number) {
+// Assign x by in-order index (Reingold-Tilford simplified)
+// Returns the width of the subtree in node-units
+function assignX(node: BSTNode | null, counter: { i: number }) {
   if (!node) return
-  node.x = (left + right) / 2
+  assignX(node.left, counter)
+  node.x = counter.i++
+  assignX(node.right, counter)
+}
+
+function assignY(node: BSTNode | null, depth: number) {
+  if (!node) return
   node.y = 60 + depth * V_GAP
-  const mid = (left + right) / 2
-  layout(node.left, depth + 1, left, mid - H_GAP / 4)
-  layout(node.right, depth + 1, mid + H_GAP / 4, right)
+  assignY(node.left, depth + 1)
+  assignY(node.right, depth + 1)
+}
+
+function layout(node: BSTNode | null, canvasWidth: number) {
+  if (!node) return
+  // 1. Assign x by in-order position
+  const counter = { i: 0 }
+  assignX(node, counter)
+  const totalNodes = counter.i
+  // 2. Scale x positions to canvas width
+  const padding = 40
+  const available = canvasWidth - padding * 2
+  const step = totalNodes <= 1 ? 0 : available / (totalNodes - 1)
+  function scaleX(n: BSTNode | null) {
+    if (!n) return
+    n.x = padding + n.x * step
+    scaleX(n.left)
+    scaleX(n.right)
+  }
+  scaleX(node)
+  // 3. Assign y by depth
+  assignY(node, 0)
 }
 
 // ── Canvas ───────────────────────────────────────────────────────────────────
@@ -129,9 +157,9 @@ const canvasEl = ref<HTMLCanvasElement | null>(null)
 let animFrame = 0
 let highlighted: Set<BSTNode> = new Set()
 let currentNode: BSTNode | null = null
-let insertPath: BSTNode[] = []
 let animStep = 0
 let animTimer: ReturnType<typeof setTimeout> | null = null
+let resizeObserver: ResizeObserver | null = null
 
 const inputVal = ref<string>('')
 const statusMsg = ref('Insert values or click Random to start.')
@@ -162,8 +190,22 @@ function draw() {
   const el = canvasEl.value
   if (!el) return
   const ctx = el.getContext('2d')!
-  const { w, h } = getCanvasSize()
-  el.width = w; el.height = h
+  const w = el.parentElement?.clientWidth || 800
+  
+  // Calculate needed height based on tree depth
+  let maxDepth = 0
+  function getDepth(n: BSTNode | null, d: number) {
+    if (!n) return
+    maxDepth = Math.max(maxDepth, d)
+    getDepth(n.left, d + 1)
+    getDepth(n.right, d + 1)
+  }
+  if (root) getDepth(root, 0)
+  const h = Math.max(320, 60 + (maxDepth + 1) * V_GAP + R + 20)
+  
+  el.width = w
+  el.height = h
+  el.style.height = h + 'px'
 
   ctx.clearRect(0, 0, w, h)
 
@@ -175,7 +217,7 @@ function draw() {
     return
   }
 
-  layout(root, 0, 0, w)
+  layout(root, w)
 
   // draw edges
   function drawEdges(n: BSTNode | null) {
@@ -330,11 +372,16 @@ function doTraversal(type: string) {
 }
 
 onMounted(() => {
-  draw()
+  nextTick(() => {
+    draw()
+    resizeObserver = new ResizeObserver(() => draw())
+    if (canvasEl.value?.parentElement) resizeObserver.observe(canvasEl.value.parentElement)
+  })
   window.addEventListener('resize', draw)
 })
 onUnmounted(() => {
   if (animTimer) clearTimeout(animTimer)
+  resizeObserver?.disconnect()
   window.removeEventListener('resize', draw)
   cancelAnimationFrame(animFrame)
 })
@@ -412,7 +459,7 @@ onUnmounted(() => {
 }
 .bst-canvas {
   width: 100%;
-  height: 480px;
+  min-height: 320px;
   border: 1px solid rgba(0,212,255,0.1);
   border-radius: 10px;
   background: #080810;

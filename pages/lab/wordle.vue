@@ -92,5 +92,12 @@ function getKeyStyle(k: string){
   return 'border-color:rgba(255,255,255,0.15);color:#c8c8e0;background:rgba(255,255,255,0.03)'
 }
 
-onMounted(()=>{newGame();window.addEventListener('keydown',(e)=>{if(gameOver.value) return;if(e.key==='Enter')submit();else if(e.key==='Backspace')del();else if(/^[A-Za-z]$/.test(e.key))type(e.key.toUpperCase())})})
+const _wordleKeydown = (e: KeyboardEvent) => {
+  if(gameOver.value) return
+  if(e.key==='Enter') submit()
+  else if(e.key==='Backspace') del()
+  else if(/^[A-Za-z]$/.test(e.key)) type(e.key.toUpperCase())
+}
+onMounted(()=>{ newGame(); window.addEventListener('keydown', _wordleKeydown) })
+onUnmounted(()=>{ window.removeEventListener('keydown', _wordleKeydown) })
 </script>

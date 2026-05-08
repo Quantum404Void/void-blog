@@ -97,8 +97,15 @@ onMounted(()=>{
   initBird()
   const cv=canvasEl.value!
   cv.addEventListener('click',jump)
-  window.addEventListener('keydown',(e)=>{if(e.code==='Space'){e.preventDefault();jump()}})
+  const _flappyKey=(e:KeyboardEvent)=>{if(e.code==='Space'){e.preventDefault();jump()}}
+  window.addEventListener('keydown',_flappyKey)
+  ;(cv as any)._flappyKey=_flappyKey
   rafId=requestAnimationFrame(frame)
 })
-onUnmounted(()=>cancelAnimationFrame(rafId))
+const _flappyCleanup=()=>{
+  cancelAnimationFrame(rafId)
+  const cv=canvasEl.value
+  if(cv&&(cv as any)._flappyKey) window.removeEventListener('keydown',(cv as any)._flappyKey)
+}
+onUnmounted(_flappyCleanup)
 </script>

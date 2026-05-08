@@ -261,7 +261,7 @@ onMounted(() => {
     mouseX = (e.clientX - rect.left) * (W / rect.width)
   })
 
-  document.addEventListener('keydown', e => {
+  const _bkKeydown = (e: KeyboardEvent) => {
     if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault()
     if (e.key === ' ' || e.key === 'Enter') {
       if (gameState === 'idle' || gameState === 'dead' || gameState === 'win') startGame()
@@ -271,15 +271,27 @@ onMounted(() => {
     if (e.key === 'r' || e.key === 'R') startGame()
     if (e.key === 'ArrowLeft') keys.left = true
     if (e.key === 'ArrowRight') keys.right = true
-  })
-  document.addEventListener('keyup', e => {
+  }
+  const _bkKeyup = (e: KeyboardEvent) => {
     if (e.key === 'ArrowLeft') keys.left = false
     if (e.key === 'ArrowRight') keys.right = false
-  })
+  }
+  document.addEventListener('keydown', _bkKeydown)
+  document.addEventListener('keyup', _bkKeyup)
+  ;(canvas as any)._bkKeydown = _bkKeydown
+  ;(canvas as any)._bkKeyup = _bkKeyup
   startBtn.addEventListener('click', () => {
     if (gameState === 'idle' || gameState === 'dead' || gameState === 'win') startGame()
   })
 
   draw()
+})
+onUnmounted(() => {
+  cancelAnimationFrame(animId)
+  const canvas = document.querySelector('canvas')
+  if (canvas) {
+    if ((canvas as any)._bkKeydown) document.removeEventListener('keydown', (canvas as any)._bkKeydown)
+    if ((canvas as any)._bkKeyup) document.removeEventListener('keyup', (canvas as any)._bkKeyup)
+  }
 })
 </script>
