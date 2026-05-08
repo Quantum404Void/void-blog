@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'regex' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'regex' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">正则工具</h1>
       <div class="flex gap-2 items-center">

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'url' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'url' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-purple)] mb-6">URL 工具</h1>
       <textarea v-model="input" placeholder="输入 URL 或文本..." class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:100px"></textarea>

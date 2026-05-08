@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'base64' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'base64' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">Base64 工具</h1>
       <div class="grid gap-4">

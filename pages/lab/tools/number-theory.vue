@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools' }, { label: 'number-theory' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'number-theory' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold mb-1" style="color:rgba(255,165,0,0.9)">Number Theory</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">数论工具箱 — 质因数分解、GCD/LCM、质数检测、欧拉函数、快速幂</p>

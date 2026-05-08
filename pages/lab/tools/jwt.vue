@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'jwt' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'jwt' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold mb-1" style="color:#f47067">🔑 JWT 解析器</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">解析 JWT 的 Header / Payload / Signature</p>

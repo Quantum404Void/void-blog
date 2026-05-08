@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'uuid' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'uuid' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-green)] mb-1">🆔 UUID 生成器</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">批量生成 v4 UUID，一键复制</p>

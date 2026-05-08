@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools' }, { label: 'bitwise' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'bitwise' }]" />
     <div class="max-w-4xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold mb-1" style="color:rgba(0,212,255,0.9)">Bitwise Calculator</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">32 位整数位运算可视化计算器</p>

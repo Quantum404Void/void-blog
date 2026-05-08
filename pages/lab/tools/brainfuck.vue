@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'brainfuck' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'brainfuck' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-green)] mb-6">Brainfuck 解释器</h1>
       <textarea v-model="code" placeholder="++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-neon-cyan)] outline-none" style="height:120px"></textarea>

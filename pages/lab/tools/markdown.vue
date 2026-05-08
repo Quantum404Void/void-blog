@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'markdown' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'markdown' }]" />
 
     <div class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6">
       <div class="flex items-center justify-between mb-4">
