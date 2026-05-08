@@ -1,6 +1,6 @@
 <template>
   <div class="cpu-page">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'cpu-sim' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'cpu-sim' }]" />
     <div class="cpu-container">
       <h1 class="title">8-bit CPU <span class="dim">Simulator</span></h1>
 

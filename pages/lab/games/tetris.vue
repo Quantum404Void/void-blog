@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tetris' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'tetris' }]" />
     <div class="pt-20 w-full max-w-2xl">
       <div class="text-center mb-6">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: tetris.exe</p>

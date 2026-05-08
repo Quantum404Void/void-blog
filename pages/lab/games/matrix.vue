@@ -1,6 +1,6 @@
 <template>
   <div style="margin:0;padding:0;overflow:hidden;background:#000;height:100vh;width:100vw;position:relative">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'matrix-rain' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'matrix-rain' }]" />
     <canvas ref="canvasEl" style="display:block;width:100vw;height:100vh;cursor:crosshair"></canvas>
     <div style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:0.75rem;padding:0.5rem 1rem;background:rgba(0,0,0,0.75);border:1px solid rgba(0,255,65,0.2);border-radius:10px;backdrop-filter:blur(10px);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap">
       <button @click="nextTheme" style="padding:4px 10px;border:1px solid rgba(0,255,65,0.3);border-radius:6px;background:transparent;color:rgba(0,255,65,0.8);cursor:pointer">🎨</button>

@@ -10,8 +10,8 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">18</span> 游戏</span>
-          <span><span style="color:rgba(0,212,255,0.9)">21</span> 工具</span>
+          <span><span style="color:rgba(180,0,255,0.9)">20</span> 游戏</span>
+          <span><span style="color:rgba(0,212,255,0.9)">23</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
       </div>
@@ -74,24 +74,26 @@ const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lab | ${siteName}` })
 
 const games = [
-  { href: '/lab/snake', icon: '🐍', label: 'Snake', desc: '霓虹贪吃蛇', tag: 'CLASSIC', color: '#39ff14' },
-  { href: '/lab/matrix', icon: '🌧️', label: 'Matrix Rain', desc: '数字雨可视化', tag: 'VISUAL', color: '#00d4ff' },
-  { href: '/lab/typing', icon: '⌨️', label: 'Code Typing', desc: '代码打字测速', tag: 'SKILL', color: '#ff00aa' },
-  { href: '/lab/sort', icon: '📊', label: 'Sort Visualizer', desc: '9 种排序动画', tag: 'ALGO', color: '#b400ff' },
-  { href: '/lab/2048', icon: '🔢', label: '2048', desc: '数字合并游戏，霓虹重制版', tag: 'CLASSIC', color: '#ffa500' },
-  { href: '/lab/minesweeper', icon: '💣', label: 'Minesweeper', desc: '扫雷，终端 ASCII 风格', tag: 'CLASSIC', color: '#ff00aa' },
-  { href: '/lab/tetris', icon: '🧩', label: 'Tetris', desc: '经典俄罗斯方块，霓虹重制', tag: 'CLASSIC', color: '#b400ff' },
-  { href: '/lab/wordle', icon: '📝', label: 'Wordle', desc: '5字母猜词游戏，代码词库版', tag: 'WORD', color: '#39ff14' },
-  { href: '/lab/flappy', icon: '🐦', label: 'Flappy Bird', desc: '赛博朋克风霓虹管道', tag: 'CASUAL', color: '#ffa500' },
-  { href: '/lab/life', icon: '🔬', label: "Conway's Life", desc: '细胞自动机，点击绘制 · 预设图案', tag: 'SIM', color: '#00ff88' },
-  { href: '/lab/breakout', icon: '🧱', label: 'Breakout', desc: '霓虹打砖块，鼠标/键盘控制', tag: 'CLASSIC', color: '#00d4ff' },
-  { href: '/lab/pathfinding', icon: '🗺️', label: 'Pathfinding', desc: 'A*/BFS/DFS/Dijkstra/Greedy 路径寻找可视化', tag: 'ALGO', color: '#00d4ff' },
-  { href: '/lab/doom-fire', icon: '🔥', label: 'Doom Fire', desc: '经典 DOOM 火焰算法，实时渲染', tag: 'VISUAL', color: '#ff4500' },
-  { href: '/lab/hex-editor', icon: '💾', label: 'Hex Editor', desc: '16进制编辑器，字节/ASCII 联动高亮', tag: 'SYS', color: '#00ff88' },
-  { href: '/lab/regex-golf', icon: '⛳', label: 'Regex Golf', desc: '10关卡正则高尔夫，越短越好', tag: 'CHALLENGE', color: '#ff00aa' },
-  { href: '/lab/binary-tree', icon: '🌲', label: 'Binary Tree', desc: 'BST 插入/查找/删除 + 三种遍历动画', tag: 'ALGO', color: '#00ff88' },
-  { href: '/lab/cpu-sim', icon: '💾', label: 'CPU Sim', desc: '8-bit CPU 模拟器，支持 MOV/ADD/JMP 等指令', tag: 'SIM', color: '#b400ff' },
-  { href: '/lab/lissajous', icon: '〰️', label: 'Lissajous', desc: '利萨如图形生成器，实时参数控制', tag: 'VISUAL', color: '#ff00aa' },
+  { href: '/lab/games/snake', icon: '🐍', label: 'Snake', desc: '霓虹贪吃蛇', tag: 'CLASSIC', color: '#39ff14' },
+  { href: '/lab/games/matrix', icon: '🌧️', label: 'Matrix Rain', desc: '数字雨可视化', tag: 'VISUAL', color: '#00d4ff' },
+  { href: '/lab/games/typing', icon: '⌨️', label: 'Code Typing', desc: '代码打字测速', tag: 'SKILL', color: '#ff00aa' },
+  { href: '/lab/games/sort', icon: '📊', label: 'Sort Visualizer', desc: '9 种排序动画', tag: 'ALGO', color: '#b400ff' },
+  { href: '/lab/games/2048', icon: '🔢', label: '2048', desc: '数字合并游戏，霓虹重制版', tag: 'CLASSIC', color: '#ffa500' },
+  { href: '/lab/games/minesweeper', icon: '💣', label: 'Minesweeper', desc: '扫雷，终端 ASCII 风格', tag: 'CLASSIC', color: '#ff00aa' },
+  { href: '/lab/games/tetris', icon: '🧩', label: 'Tetris', desc: '经典俄罗斯方块，霓虹重制', tag: 'CLASSIC', color: '#b400ff' },
+  { href: '/lab/games/wordle', icon: '📝', label: 'Wordle', desc: '5字母猜词游戏，代码词库版', tag: 'WORD', color: '#39ff14' },
+  { href: '/lab/games/flappy', icon: '🐦', label: 'Flappy Bird', desc: '赛博朋克风霓虹管道', tag: 'CASUAL', color: '#ffa500' },
+  { href: '/lab/games/life', icon: '🔬', label: "Conway's Life", desc: '细胞自动机，点击绘制 · 预设图案', tag: 'SIM', color: '#00ff88' },
+  { href: '/lab/games/breakout', icon: '🧱', label: 'Breakout', desc: '霓虹打砖块，鼠标/键盘控制', tag: 'CLASSIC', color: '#00d4ff' },
+  { href: '/lab/games/pathfinding', icon: '🗺️', label: 'Pathfinding', desc: 'A*/BFS/DFS/Dijkstra/Greedy 路径寻找可视化', tag: 'ALGO', color: '#00d4ff' },
+  { href: '/lab/games/audio-visualizer', icon: '🎵', label: 'Audio Visualizer', desc: '麦克风/音调实时频谱可视化', tag: 'VISUAL', color: '#ff2d78' },
+  { href: '/lab/games/doom-fire', icon: '🔥', label: 'Doom Fire', desc: '经典 DOOM 火焰算法，实时渲染', tag: 'VISUAL', color: '#ff4500' },
+  { href: '/lab/games/graph-theory', icon: '🕸️', label: 'Graph Theory', desc: '图论算法可视化 BFS/DFS/Dijkstra', tag: 'ALGO', color: '#00d4ff' },
+  { href: '/lab/games/hex-editor', icon: '💾', label: 'Hex Editor', desc: '16进制编辑器，字节/ASCII 联动高亮', tag: 'SYS', color: '#00ff88' },
+  { href: '/lab/games/regex-golf', icon: '⛳', label: 'Regex Golf', desc: '10关卡正则高尔夫，越短越好', tag: 'CHALLENGE', color: '#ff00aa' },
+  { href: '/lab/games/binary-tree', icon: '🌲', label: 'Binary Tree', desc: 'BST 插入/查找/删除 + 三种遍历动画', tag: 'ALGO', color: '#00ff88' },
+  { href: '/lab/games/cpu-sim', icon: '💾', label: 'CPU Sim', desc: '8-bit CPU 模拟器，支持 MOV/ADD/JMP 等指令', tag: 'SIM', color: '#b400ff' },
+  { href: '/lab/games/lissajous', icon: '〰️', label: 'Lissajous', desc: '利萨如图形生成器，实时参数控制', tag: 'VISUAL', color: '#ff00aa' },
 ]
 
 const tools = [
@@ -112,7 +114,9 @@ const tools = [
   { href: '/lab/tools/uuid', icon: '🆔', label: 'UUID 生成', desc: '批量生成 v4 UUID，一键复制', tag: 'UTIL', color: '#00ff88' },
   { href: '/lab/tools/markdown', icon: 'MD', label: 'Markdown 预览', desc: '实时 Markdown 渲染预览', tag: 'FORMAT', color: '#b400ff' },
   { href: '/lab/tools/qrcode', icon: '▦', label: 'QR 码生成器', desc: '纯前端手写 QR 算法，支持 ECC 四级', tag: 'ENCODE', color: '#00ff88' },
+  { href: '/lab/tools/color-palette', icon: '🎨', label: '调色板生成器', desc: '互补色/色阶/WCAG 对比度/CSS 导出', tag: 'COLOR', color: '#b400ff' },
   { href: '/lab/tools/pomodoro', icon: '🍅', label: '番茄钟', desc: '极客风 25/5/15 番茄工作法', tag: 'UTIL', color: '#ff4500' },
+  { href: '/lab/tools/text-tools', icon: '📝', label: '文本工具集', desc: '字数/大小写/去重/排序/转义/查替', tag: 'TEXT', color: '#ffa500' },
   { href: '/lab/tools/subnet', icon: '🌐', label: 'IP 子网计算', desc: 'CIDR 子网掩码 / 地址范围 / 二进制展示', tag: 'NET', color: '#b400ff' },
   { href: '/lab/tools/bitwise', icon: '🔢', label: '位运算计算器', desc: '32-bit AND/OR/XOR/移位可视化', tag: 'SYS', color: '#00d4ff' },
   { href: '/lab/tools/number-theory', icon: 'π', label: '数论工具箱', desc: '质因数分解 / GCD / Miller-Rabin / 快速幂', tag: 'MATH', color: '#00ff88' },

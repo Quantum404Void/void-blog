@@ -1,6 +1,6 @@
 <template>
   <div class="lissajous-page">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'lissajous' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'lissajous' }]" />
     <div class="lis-container">
       <h1 class="title">Lissajous <span class="dim">Figure Generator</span></h1>
 

@@ -69,42 +69,46 @@
       <section>
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
           <span class="text-[var(--color-neon-green)]">▶</span>
-          最新文章
+          最近更新
           <span class="flex-1 h-px bg-gradient-to-r from-[var(--color-void-border)] to-transparent"></span>
         </h2>
 
-        <div class="space-y-2">
-          <NuxtLink
-            v-for="(post, i) in recentPosts"
-            :key="post.slug"
-            :href="`/blog/${post.slug}`"
-            class="post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up"
-            :style="`animation-delay: ${i * 0.05}s`"
-          >
-            <div class="flex items-start gap-4">
-              <div class="shrink-0 w-0.5 rounded-full mt-1 opacity-50 group-hover:opacity-100 transition-opacity"
-                   :style="`background: var(--color-${getTagColor(post.tags[0] ?? '')}); min-height: 2.5rem;`"></div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-4">
-                  <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
-                    {{ post.title }}
-                  </h3>
-                  <time :datetime="post.pub_date" class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">
-                    {{ formatDate(post.pub_date) }}
-                  </time>
-                </div>
-                <p v-if="post.description" class="text-xs mt-1 line-clamp-1 leading-relaxed" style="color:#9999bb">
-                  {{ post.description }}
-                </p>
-                <div class="flex flex-wrap gap-1.5 mt-2">
-                  <span v-for="tag in post.tags.slice(0, 3)" :key="tag"
-                        class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
-                    #{{ tag }}
-                  </span>
-                </div>
+        <!-- Timeline -->
+        <div class="relative pl-5">
+          <!-- vertical line -->
+          <div class="absolute left-1.5 top-2 bottom-2 w-px" style="background:linear-gradient(to bottom,rgba(0,212,255,0.3),rgba(180,76,255,0.2),transparent)"></div>
+          <div class="space-y-0">
+            <NuxtLink
+              v-for="(post, i) in recentPosts"
+              :key="post.slug"
+              :href="`/blog/${post.slug}`"
+              class="post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up relative"
+              :style="`animation-delay: ${i * 0.05}s`"
+            >
+              <!-- timeline dot -->
+              <div
+                class="absolute -left-[1.15rem] top-5 w-2.5 h-2.5 rounded-full border-2 border-[var(--color-void)] shrink-0 z-10 transition-transform group-hover:scale-125"
+                :style="`background: var(--color-${getTagColor(post.tags[0] ?? '')}); box-shadow: 0 0 6px var(--color-${getTagColor(post.tags[0] ?? '')})`"
+              ></div>
+              <div class="flex items-start justify-between gap-4">
+                <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
+                  {{ post.title }}
+                </h3>
+                <time :datetime="post.pub_date" class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">
+                  {{ formatDate(post.pub_date) }}
+                </time>
               </div>
-            </div>
-          </NuxtLink>
+              <p v-if="post.description" class="text-xs mt-1 line-clamp-1 leading-relaxed" style="color:#9999bb">
+                {{ post.description }}
+              </p>
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                <span v-for="tag in post.tags.slice(0, 3)" :key="tag"
+                      class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
+                  #{{ tag }}
+                </span>
+              </div>
+            </NuxtLink>
+          </div>
         </div>
 
         <div class="mt-6">
@@ -212,7 +216,7 @@ const { data: allPostsRaw } = await useFetch('/api/posts', { default: () => [] a
 const allPosts = computed(() => allPostsRaw.value || [])
 const { data: tagCounts } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 
-const recentPosts = computed(() => allPosts.value.slice(0, 6))
+const recentPosts = computed(() => allPosts.value.slice(0, 5))
 const startYear = computed(() => allPosts.value.length ? allPosts.value[allPosts.value.length - 1].pub_date.slice(0, 4) : '2021')
 const currentYear = new Date().getFullYear()
 const allTags = computed(() => Object.keys(tagCounts.value || {}))

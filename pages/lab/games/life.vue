@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'conways-life' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'conways-life' }]" />
     <div class="flex-1 flex flex-col items-center p-4">
       <div class="flex flex-wrap gap-2 mb-4 font-mono text-xs">
         <button v-for="p in patterns" :key="p" @click="placePattern(p)" class="px-3 py-1.5 rounded-lg border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all">{{ p }}</button>

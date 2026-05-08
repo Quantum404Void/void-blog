@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'hex-editor' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'hex-editor' }]" />
     <div class="max-w-5xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold mb-1" style="color:rgba(57,255,20,0.9)">Hex Editor</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">十六进制编辑器 — 查看与编辑二进制数据</p>

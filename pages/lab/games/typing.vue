@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'code-typing' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'code-typing' }]" />
     <div class="max-w-4xl mx-auto px-6 py-12 flex-1 flex flex-col">
       <div class="mb-8 text-center">
         <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-pink)] mb-2" style="text-shadow:0 0 20px rgba(255,0,170,0.5)">Code Typing</h1>

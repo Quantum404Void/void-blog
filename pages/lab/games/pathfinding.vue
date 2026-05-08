@@ -1,6 +1,6 @@
 <template>
   <div class="pathfinding-page">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'Pathfinding' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'Pathfinding' }]" />
 
     <main class="content">
       <div class="header">

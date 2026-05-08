@@ -1,6 +1,6 @@
 <template>
   <div class="bst-page">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'binary-tree' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'binary-tree' }]" />
     <div class="bst-container">
       <h1 class="title">Binary Search Tree <span class="dim">Visualizer</span></h1>
 

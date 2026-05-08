@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'flappy-void' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'flappy-void' }]" />
     <div class="pt-20 flex flex-col items-center gap-4">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)]" style="text-shadow:0 0 20px rgba(0,212,255,0.5)">Flappy Void</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)]">Space / Click / Tap 跳跃</p>

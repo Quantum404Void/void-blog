@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'wordle' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'wordle' }]" />
     <div class="flex-1 flex flex-col items-center py-8 px-4">
       <div v-if="message" class="font-mono text-sm px-4 py-2 rounded-lg mb-4" :style="msgStyle">{{ message }}</div>
       <!-- Grid -->

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'regex-golf' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'regex-golf' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold mb-1" style="color:rgba(180,0,255,0.9)">Regex Golf</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">用最短的正则表达式通过关卡 — 越短越好</p>
