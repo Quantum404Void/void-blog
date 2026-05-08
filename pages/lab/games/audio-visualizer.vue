@@ -10,11 +10,24 @@
       <div class="flex flex-wrap gap-4 mb-6 items-center">
         <div class="flex gap-2">
           <button
-            v-for="src in ['mic','tone']" :key="src"
-            @click="setSource(src as 'mic'|'tone')"
+            v-for="src in ['mic','tone','file']" :key="src"
+            @click="setSource(src as 'mic'|'tone'|'file')"
             class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
             :style="source===src ? 'border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,0.1)' : 'border-color:rgba(255,255,255,0.15);color:#666'"
-          >{{ src==='mic'?'🎤 麦克风':'🎵 音调' }}</button>
+          >{{ src==='mic'?'🎤 麦克风':src==='tone'?'🎵 音调':'📁 文件' }}</button>
+        </div>
+
+        <!-- 文件状态 -->
+        <div v-if="source==='file'" class="flex items-center gap-3">
+          <span v-if="fileName" class="font-mono text-[11px] text-cyan-400 max-w-[160px] truncate" :title="fileName">{{ fileName }}</span>
+          <span v-else class="font-mono text-[11px] text-gray-500">未选择文件</span>
+          <button v-if="fileName" @click="setSource('file')" class="font-mono text-[10px] px-2 py-1 rounded border border-gray-700 text-gray-400 hover:border-cyan-800 transition-all">更换</button>
+          <div v-if="fileProgress > 0 && fileProgress < 100" class="flex items-center gap-2">
+            <div class="w-20 h-1 bg-gray-800 rounded-full overflow-hidden">
+              <div class="h-full bg-cyan-400 transition-all" :style="{width: fileProgress+'%'}"></div>
+            </div>
+            <span class="font-mono text-[10px] text-gray-500">{{ fileProgress }}%</span>
+          </div>
         </div>
 
         <template v-if="source==='tone'">
@@ -72,12 +85,17 @@ useSeoMeta({ title: `音频可视化 | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement | null>(null)
 const containerEl = ref<HTMLElement | null>(null)
 const active = ref(false)
-const source = ref<'mic'|'tone'>('tone')
+const source = ref<'mic'|'tone'|'file'>('tone')
 const mode = ref<'bars'|'wave'|'polar'>('bars')
 const toneFreq = ref(440)
 const toneVolume = ref(0.5)
 const bpm = ref<number|null>(null)
 const error = ref('')
+const fileName = ref('')
+const fileProgress = ref(0)
+let audioBuffer: AudioBuffer | null = null
+let bufferSource: AudioBufferSourceNode | null = null
+let fileInputEl: HTMLInputElement | null = null
 const hoverFreq = ref<number|null>(null)
 
 const PIXEL_RATIO = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1
@@ -185,6 +203,16 @@ async function startAudio() {
       gainNode.connect(analyser)
       analyser.connect(audioCtx.destination)
       oscillator.start()
+    } else if (source.value === 'file') {
+      if (!audioBuffer) { error.value = '请先上传音频文件'; audioCtx.close().catch(() => {}); return }
+      bufferSource = audioCtx.createBufferSource()
+      bufferSource.buffer = audioBuffer
+      bufferSource.loop = true
+      bufferSource.connect(gainNode)
+      gainNode.connect(analyser)
+      analyser.connect(audioCtx.destination)
+      bufferSource.start()
+      bufferSource.onended = () => { if (active.value) stopAll() }
     } else {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       micSource = audioCtx.createMediaStreamSource(micStream)
@@ -204,6 +232,9 @@ function stopAll() {
   oscillator?.stop()
   oscillator?.disconnect()
   oscillator = null
+  bufferSource?.stop()
+  bufferSource?.disconnect()
+  bufferSource = null
   micSource?.disconnect()
   micSource = null
   micStream?.getTracks().forEach(t => t.stop())
@@ -232,10 +263,40 @@ function updateGain() {
   if (gainNode) gainNode.gain.value = toneVolume.value
 }
 
-function setSource(s: 'mic'|'tone') {
+function setSource(s: 'mic'|'tone'|'file') {
   const wasActive = active.value
   if (wasActive) stopAll()
   source.value = s
+  if (s === 'file') {
+    // 触发文件选择，不自动 startAudio
+    if (!fileInputEl) {
+      fileInputEl = document.createElement('input')
+      fileInputEl.type = 'file'
+      fileInputEl.accept = 'audio/*'
+      fileInputEl.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0]
+        if (!file) return
+        fileName.value = file.name
+        fileProgress.value = 0
+        error.value = ''
+        try {
+          const ab = await file.arrayBuffer()
+          fileProgress.value = 50
+          const tmpCtx = new AudioContext()
+          audioBuffer = await tmpCtx.decodeAudioData(ab)
+          await tmpCtx.close()
+          fileProgress.value = 100
+        } catch (err: any) {
+          error.value = '解码失败：' + err.message
+          fileName.value = ''
+          fileProgress.value = 0
+        }
+      }
+    }
+    fileInputEl.value = ''
+    fileInputEl.click()
+    return
+  }
   if (wasActive) startAudio()
 }
 
@@ -428,5 +489,7 @@ onMounted(() => {
 onUnmounted(() => {
   stopAll()
   resizeObserver?.disconnect()
+  if (fileInputEl) { fileInputEl.onchange = null; fileInputEl = null }
+  audioBuffer = null
 })
 </script>
