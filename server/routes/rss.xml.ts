@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   const rows = await queryD1<{
-    slug: string; title: string; description: string; pub_date: string
-  }>(event, "SELECT slug,title,description,pub_date FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC LIMIT 20")
+    slug: string; title: string; description: string; content: string; pub_date: string
+  }>(event, "SELECT slug,title,description,content,pub_date FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC LIMIT 20")
 
   const config = useRuntimeConfig()
   const base = config.public.siteUrl as string
@@ -15,10 +15,11 @@ export default defineEventHandler(async (event) => {
       <guid>${base}/blog/${r.slug}</guid>
       <pubDate>${new Date(r.pub_date).toUTCString()}</pubDate>
       <description><![CDATA[${r.description}]]></description>
+      <content:encoded><![CDATA[${r.content}]]></content:encoded>
     </item>`).join('')
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${siteName}</title>
     <link>${base}</link>

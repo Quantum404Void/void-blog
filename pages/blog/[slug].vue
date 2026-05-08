@@ -33,6 +33,11 @@
             <time :datetime="post.pub_date">
               <span class="text-[var(--color-neon-green)]">$</span> {{ formatDate(post.pub_date) }}
             </time>
+            <span class="text-[var(--color-void-border)]">|</span>
+            <span class="flex items-center gap-1">
+              <span class="text-[var(--color-neon-purple)]">⏱</span>
+              约 {{ readingTime }} 分钟
+            </span>
           </div>
         </header>
 
@@ -180,9 +185,13 @@ useSeoMeta({
   ogDescription: post.value.description,
   ogType: 'article',
   ogUrl: `${siteUrl}/blog/${slug}`,
+  ogImage: `${siteUrl}/og-default.png`,
+  articlePublishedTime: post.value.pub_date,
+  articleTag: post.value.tags,
   twitterCard: 'summary_large_image',
   twitterTitle: `${post.value.title} | ${siteName}`,
   twitterDescription: post.value.description,
+  twitterImage: `${siteUrl}/og-default.png`,
 })
 
 // JSON-LD 结构化数据

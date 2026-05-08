@@ -22,7 +22,7 @@ export default defineNuxtConfig({
       siteDescription: '王宇的技术博客 — C++ / Python / AI Agent / 桌面应用',
       authorName: '王宇',
       authorEmail: 'moke521_wang@163.com',
-      authorGithub: 'https://github.com/Quantum505Void',
+      authorGithub: 'https://github.com/Quantum404Void',
       authorInitial: '王',
       authorMotto: '不灸水，不追热点，不水文章',
     },

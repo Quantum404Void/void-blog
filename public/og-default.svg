@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#0d0d1a"/>
+    </linearGradient>
+    <filter id="glow-green">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-cyan">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Grid lines -->
+  <g opacity="0.04" stroke="#00ff88" stroke-width="1">
+    <line x1="0" y1="60" x2="1200" y2="60"/>
+    <line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="240" x2="1200" y2="240"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="360" x2="1200" y2="360"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="480" x2="1200" y2="480"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="60" y1="0" x2="60" y2="630"/>
+    <line x1="120" y1="0" x2="120" y2="630"/>
+    <line x1="180" y1="0" x2="180" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/>
+    <line x1="420" y1="0" x2="420" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/>
+    <line x1="540" y1="0" x2="540" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="660" y1="0" x2="660" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/>
+    <line x1="780" y1="0" x2="780" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/>
+    <line x1="1020" y1="0" x2="1020" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/>
+    <line x1="1140" y1="0" x2="1140" y2="630"/>
+  </g>
+
+  <!-- Glow orbs -->
+  <circle cx="900" cy="120" r="280" fill="rgba(180,76,255,0.07)"/>
+  <circle cx="200" cy="500" r="200" fill="rgba(0,212,255,0.06)"/>
+
+  <!-- Border -->
+  <rect x="40" y="40" width="1120" height="550" rx="12" fill="none" stroke="rgba(0,255,136,0.15)" stroke-width="1"/>
+
+  <!-- Terminal prompt -->
+  <text x="80" y="130" font-family="monospace" font-size="18" fill="rgba(136,136,170,0.6)">root@void:~$</text>
+  <text x="230" y="130" font-family="monospace" font-size="18" fill="rgba(0,212,255,0.7)">cat ./post</text>
+
+  <!-- Title -->
+  <text x="80" y="260" font-family="monospace" font-size="64" font-weight="bold" fill="#e8e8f0">void</text>
+  <text x="222" y="260" font-family="monospace" font-size="64" font-weight="bold" fill="#b400ff">.</text>
+  <text x="246" y="260" font-family="monospace" font-size="64" font-weight="bold" fill="#00d4ff">dev</text>
+
+  <!-- Tagline -->
+  <text x="80" y="320" font-family="monospace" font-size="22" fill="rgba(200,200,224,0.6)">C++ / Python / AI Agent / 桌面应用</text>
+
+  <!-- Divider -->
+  <line x1="80" y1="350" x2="600" y2="350" stroke="rgba(0,255,136,0.2)" stroke-width="1"/>
+
+  <!-- Status dot -->
+  <circle cx="80" cy="400" r="6" fill="#00ff88" filter="url(#glow-green)"/>
+  <text x="100" y="406" font-family="monospace" font-size="18" fill="rgba(0,255,136,0.8)">ONLINE</text>
+
+  <!-- Author -->
+  <text x="80" y="540" font-family="monospace" font-size="16" fill="rgba(136,136,170,0.5)">by 王宇 · void.redx.space</text>
+</svg>

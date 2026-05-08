@@ -6,7 +6,7 @@
 const props = defineProps<{ slug: string }>()
 const container = ref<HTMLDivElement>()
 const { authorGithub, siteName } = useSiteConfig()
-// repo: Quantum505Void/void-blog (从 authorGithub 提取)
+// repo: Quantum404Void/void-blog (从 authorGithub 提取)
 const repo = authorGithub.replace('https://github.com/', '') + '/void-blog'
 
 onMounted(() => {

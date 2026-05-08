@@ -179,9 +179,11 @@ useSeoMeta({
   ogDescription: '代码、工具、折腾与思考。涵盖 C++、Python、Vue3、AI Agent、Electron 等主题',
   ogType: 'website',
   ogUrl: siteUrl,
-  twitterCard: 'summary',
+  ogImage: `${siteUrl}/og-default.png`,
+  twitterCard: 'summary_large_image',
   twitterTitle: `${siteName} — ${authorName}的技术博客`,
   twitterDescription: 'C++ / Python / AI Agent / 桌面应用',
+  twitterImage: `${siteUrl}/og-default.png`,
 })
 useHead({
   script: [{
