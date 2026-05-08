@@ -10,8 +10,8 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">16</span> 游戏</span>
-          <span><span style="color:rgba(0,212,255,0.9)">19</span> 工具</span>
+          <span><span style="color:rgba(180,0,255,0.9)">18</span> 游戏</span>
+          <span><span style="color:rgba(0,212,255,0.9)">21</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
       </div>
@@ -87,6 +87,8 @@ const games = [
   { href: '/lab/breakout', icon: '🧱', label: 'Breakout', desc: '霓虹打砖块，鼠标/键盘控制', tag: 'CLASSIC', color: '#00d4ff' },
   { href: '/lab/pathfinding', icon: '🗺️', label: 'Pathfinding', desc: 'A*/BFS/DFS/Dijkstra/Greedy 路径寻找可视化', tag: 'ALGO', color: '#00d4ff' },
   { href: '/lab/doom-fire', icon: '🔥', label: 'Doom Fire', desc: '经典 DOOM 火焰算法，实时渲染', tag: 'VISUAL', color: '#ff4500' },
+  { href: '/lab/hex-editor', icon: '💾', label: 'Hex Editor', desc: '16进制编辑器，字节/ASCII 联动高亮', tag: 'SYS', color: '#00ff88' },
+  { href: '/lab/regex-golf', icon: '⛳', label: 'Regex Golf', desc: '10关卡正则高尔夫，越短越好', tag: 'CHALLENGE', color: '#ff00aa' },
   { href: '/lab/binary-tree', icon: '🌲', label: 'Binary Tree', desc: 'BST 插入/查找/删除 + 三种遍历动画', tag: 'ALGO', color: '#00ff88' },
   { href: '/lab/cpu-sim', icon: '💾', label: 'CPU Sim', desc: '8-bit CPU 模拟器，支持 MOV/ADD/JMP 等指令', tag: 'SIM', color: '#b400ff' },
   { href: '/lab/lissajous', icon: '〰️', label: 'Lissajous', desc: '利萨如图形生成器，实时参数控制', tag: 'VISUAL', color: '#ff00aa' },
@@ -112,5 +114,7 @@ const tools = [
   { href: '/lab/tools/qrcode', icon: '▦', label: 'QR 码生成器', desc: '纯前端手写 QR 算法，支持 ECC 四级', tag: 'ENCODE', color: '#00ff88' },
   { href: '/lab/tools/pomodoro', icon: '🍅', label: '番茄钟', desc: '极客风 25/5/15 番茄工作法', tag: 'UTIL', color: '#ff4500' },
   { href: '/lab/tools/subnet', icon: '🌐', label: 'IP 子网计算', desc: 'CIDR 子网掩码 / 地址范围 / 二进制展示', tag: 'NET', color: '#b400ff' },
+  { href: '/lab/tools/bitwise', icon: '🔢', label: '位运算计算器', desc: '32-bit AND/OR/XOR/移位可视化', tag: 'SYS', color: '#00d4ff' },
+  { href: '/lab/tools/number-theory', icon: 'π', label: '数论工具箱', desc: '质因数分解 / GCD / Miller-Rabin / 快速幂', tag: 'MATH', color: '#00ff88' },
 ]
 </script>
