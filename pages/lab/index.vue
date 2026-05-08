@@ -10,8 +10,8 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">11</span> 游戏</span>
-          <span><span style="color:rgba(0,212,255,0.9)">16</span> 工具</span>
+          <span><span style="color:rgba(180,0,255,0.9)">13</span> 游戏</span>
+          <span><span style="color:rgba(0,212,255,0.9)">19</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
       </div>
@@ -85,6 +85,8 @@ const games = [
   { href: '/lab/flappy', icon: '🐦', label: 'Flappy Bird', desc: '赛博朋克风霓虹管道', tag: 'CASUAL', color: '#ffa500' },
   { href: '/lab/life', icon: '🔬', label: "Conway's Life", desc: '细胞自动机，点击绘制 · 预设图案', tag: 'SIM', color: '#00ff88' },
   { href: '/lab/breakout', icon: '🧱', label: 'Breakout', desc: '霓虹打砖块，鼠标/键盘控制', tag: 'CLASSIC', color: '#00d4ff' },
+  { href: '/lab/pathfinding', icon: '🗺️', label: 'Pathfinding', desc: 'A*/BFS/DFS/Dijkstra 路径寻找可视化', tag: 'ALGO', color: '#00d4ff' },
+  { href: '/lab/doom-fire', icon: '🔥', label: 'Doom Fire', desc: '经典 DOOM 火焰算法，实时渲染', tag: 'VISUAL', color: '#ff4500' },
 ]
 
 const tools = [
@@ -104,5 +106,8 @@ const tools = [
   { href: '/lab/tools/jwt', icon: '🔑', label: 'JWT 解析', desc: '解析 JWT 的 Header / Payload', tag: 'CRYPTO', color: '#f47067' },
   { href: '/lab/tools/uuid', icon: '🆔', label: 'UUID 生成', desc: '批量生成 v4 UUID，一键复制', tag: 'UTIL', color: '#00ff88' },
   { href: '/lab/tools/markdown', icon: 'MD', label: 'Markdown 预览', desc: '实时 Markdown 渲染预览', tag: 'FORMAT', color: '#b400ff' },
+  { href: '/lab/tools/qrcode', icon: '▦', label: 'QR 码生成器', desc: '纯前端手写 QR 算法，支持 ECC 四级', tag: 'ENCODE', color: '#00ff88' },
+  { href: '/lab/tools/pomodoro', icon: '🍅', label: '番茄钟', desc: '极客风 25/5/15 番茄工作法', tag: 'UTIL', color: '#ff4500' },
+  { href: '/lab/tools/subnet', icon: '🌐', label: 'IP 子网计算', desc: 'CIDR 子网掩码 / 地址范围 / 二进制展示', tag: 'NET', color: '#b400ff' },
 ]
 </script>
