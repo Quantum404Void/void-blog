@@ -63,6 +63,7 @@ const algos = [
   ['bubble','冒泡','O(n²)','#00d4ff'],['selection','选择','O(n²)','#39ff14'],
   ['insertion','插入','O(n²)','#ff00aa'],['quick','快排','O(n log n)','#b400ff'],
   ['merge','归并','O(n log n)','#00d4ff'],['heap','堆排','O(n log n)','#39ff14'],
+  ['counting','计数','O(n+k)','#ffa500'],['radix','基数','O(nk)','#ff4444'],['tim','TimSort','O(n log n)','#aaffaa'],
 ]
 
 const ALGO_INFO: Record<string,any> = {
@@ -72,6 +73,9 @@ const ALGO_INFO: Record<string,any> = {
   quick:{avg:'O(n log n)',worst:'O(n²)',space:'O(log n)',stable:'✗',color:'#b400ff'},
   merge:{avg:'O(n log n)',worst:'O(n log n)',space:'O(n)',stable:'✓',color:'#00d4ff'},
   heap:{avg:'O(n log n)',worst:'O(n log n)',space:'O(1)',stable:'✗',color:'#39ff14'},
+  counting:{avg:'O(n+k)',worst:'O(n+k)',space:'O(k)',stable:'✓',color:'#ffa500'},
+  radix:{avg:'O(nk)',worst:'O(nk)',space:'O(n+k)',stable:'✓',color:'#ff4444'},
+  tim:{avg:'O(n log n)',worst:'O(n log n)',space:'O(n)',stable:'✓',color:'#aaffaa'},
 }
 
 const complexity = computed(()=>{
@@ -139,6 +143,26 @@ async function runSort(){
       const heapify=async(n2:number,i:number)=>{let largest=i,l=2*i+1,r=2*i+2;cmpCount.value+=2;if(l<n2&&a[l]>a[largest])largest=l;if(r<n2&&a[r]>a[largest])largest=r;if(largest!==i){swap(i,largest);highlights={[i]:'#39ff14',[largest]:'#ff2d78'};draw();await sleep(delay.value);await heapify(n2,largest)}}
       for(let i=Math.floor(n/2)-1;i>=0&&!stopFlag;i--)await heapify(n,i)
       for(let i=n-1;i>0&&!stopFlag;i--){swap(0,i);await heapify(i,0)}
+    } else if(currentAlgo.value==='counting'){
+      const max=Math.max(...a), min=Math.min(...a), range=max-min+1
+      const count=new Array(range).fill(0)
+      for(let i=0;i<n&&!stopFlag;i++){count[a[i]-min]++;highlights={[i]:'#ffa500'};cmpCount.value++;draw();await sleep(delay.value)}
+      let k=0
+      for(let i=0;i<range&&!stopFlag;i++)while(count[i]-->0&&!stopFlag){a[k]=i+min;arr=[...a];highlights={[k]:'#39ff14'};swapCount.value++;draw();await sleep(delay.value);k++}
+    } else if(currentAlgo.value==='radix'){
+      const getDigit=(num:number,place:number)=>Math.floor(Math.abs(num)/Math.pow(10,place))%10
+      const digitCount=(num:number)=>num===0?1:Math.floor(Math.log10(Math.abs(num)))+1
+      const maxDigits=Math.max(...a.map(digitCount))
+      for(let d=0;d<maxDigits&&!stopFlag;d++){
+        const buckets:number[][]=Array.from({length:10},()=>[])
+        for(let i=0;i<n&&!stopFlag;i++){buckets[getDigit(a[i],d)].push(a[i]);highlights={[i]:'#ff4444'};cmpCount.value++;draw();await sleep(delay.value)}
+        let k=0;for(const b of buckets)for(const v of b){a[k]=v;arr=[...a];highlights={[k]:'#39ff14'};swapCount.value++;draw();await sleep(delay.value);k++}
+      }
+    } else if(currentAlgo.value==='tim'){
+      const RUN=32
+      const insertionRun=async(left:number,right:number)=>{for(let i=left+1;i<=right&&!stopFlag;i++){let j=i;while(j>left&&!stopFlag){highlights={[j]:'#ff2d78',[j-1]:'#ff2d78'};cmpCount.value++;if(a[j]<a[j-1]){swap(j,j-1);j--}else break;draw();await sleep(delay.value)}}}
+      for(let i=0;i<n&&!stopFlag;i+=RUN)await insertionRun(i,Math.min(i+RUN-1,n-1))
+      for(let s=RUN;s<n&&!stopFlag;s*=2)for(let lo=0;lo<n&&!stopFlag;lo+=2*s){const mid=Math.min(lo+s-1,n-1),hi=Math.min(lo+2*s-1,n-1);if(mid<hi){const tmp=a.slice(lo,hi+1);let i=0,j=mid-lo+1,k=lo;while(i<=mid-lo&&j<=hi-lo&&!stopFlag){cmpCount.value++;highlights={[lo+i]:'#aaffaa',[lo+j]:'#00d4ff'};if(tmp[i]<=tmp[j])a[k++]=tmp[i++];else a[k++]=tmp[j++];arr=[...a];draw();await sleep(delay.value)};while(i<=mid-lo&&!stopFlag){a[k++]=tmp[i++];arr=[...a];draw();await sleep(delay.value)};while(j<=hi-lo&&!stopFlag){a[k++]=tmp[j++];arr=[...a];draw();await sleep(delay.value)}}}
     }
   } catch(e){}
   highlights={}; draw()

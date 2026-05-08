@@ -45,6 +45,12 @@ const snippets = [
   `const quickSort = (arr) => {\n  if (arr.length <= 1) return arr\n  const pivot = arr[arr.length >> 1]\n  const left = arr.filter(x => x < pivot)\n  const right = arr.filter(x => x > pivot)\n  return [...quickSort(left), pivot, ...quickSort(right)]\n}`,
   `async function fetchWithRetry(url, retries = 3) {\n  for (let i = 0; i < retries; i++) {\n    try {\n      const res = await fetch(url)\n      if (res.ok) return await res.json()\n    } catch (e) {\n      if (i === retries - 1) throw e\n      await new Promise(r => setTimeout(r, 1000 * (i + 1)))\n    }\n  }\n}`,
   `const memo = (fn) => {\n  const cache = new Map()\n  return (...args) => {\n    const key = JSON.stringify(args)\n    if (cache.has(key)) return cache.get(key)\n    const result = fn(...args)\n    cache.set(key, result)\n    return result\n  }\n}`,
+  `function binarySearch(arr, target) {\n  let lo = 0, hi = arr.length - 1\n  while (lo <= hi) {\n    const mid = (lo + hi) >> 1\n    if (arr[mid] === target) return mid\n    arr[mid] < target ? lo = mid + 1 : hi = mid - 1\n  }\n  return -1\n}`,
+  `class EventEmitter {\n  #events = {}\n  on(e, fn) { (this.#events[e] ??= []).push(fn) }\n  off(e, fn) { this.#events[e] = (this.#events[e]||[]).filter(f=>f!==fn) }\n  emit(e, ...args) { (this.#events[e]||[]).forEach(fn=>fn(...args)) }\n}`,
+  `const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x)`,
+  `async function* paginate(url) {\n  let next = url\n  while (next) {\n    const res = await fetch(next).then(r => r.json())\n    yield res.data\n    next = res.nextPage\n  }\n}`,
+  `function LRUCache(cap) {\n  const map = new Map()\n  return {\n    get(k) { if(!map.has(k))return -1;const v=map.get(k);map.delete(k);map.set(k,v);return v },\n    put(k,v) { map.delete(k);map.set(k,v);if(map.size>cap)map.delete(map.keys().next().value) }\n  }\n}`,
+  `const trie = () => {\n  const root = {}\n  const insert = (w) => { let n=root; for(const c of w)(n[c]??={}),n=n[c]; n.$=1 }\n  const search = (w) => { let n=root; for(const c of w){if(!n[c])return false;n=n[c]}; return !!n.$ }\n  return { insert, search }\n}`,
 ]
 const inputEl = ref<HTMLTextAreaElement>()
 const typed = ref(''), snippetIdx = ref(0), started = ref(false), finished = ref(false)
@@ -100,8 +106,15 @@ function reset(){
 }
 function nextSnippet(){snippetIdx.value++;reset()}
 
+const _typingKey = (e: KeyboardEvent) => { if(e.key==='r'&&document.activeElement!==inputEl.value)reset() }
+
 onMounted(()=>{
-  window.addEventListener('keydown',(e)=>{if(e.key==='r'&&document.activeElement!==inputEl.value)reset()})
+  window.addEventListener('keydown', _typingKey)
   inputEl.value?.focus()
+})
+
+onUnmounted(()=>{
+  window.removeEventListener('keydown', _typingKey)
+  clearInterval(timerInterval)
 })
 </script>

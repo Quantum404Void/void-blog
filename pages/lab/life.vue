@@ -18,7 +18,8 @@
 </template>
 
 <script setup lang="ts">
-useHead({ title: "Conway's Life | void.dev" })
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Conway's Life | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const gen = ref(0), liveCount = ref(0), running = ref(false), speed = ref(60)
 const CELL=12, COLS=70, ROWS=50
@@ -81,12 +82,18 @@ function loop(ts: number){
   if(ts-lastTime>=speed.value){step();lastTime=ts}
 }
 
+let _mouseupHandler: () => void
+
 onMounted(()=>{
   const cv=canvasEl.value!; cv.width=COLS*CELL; cv.height=ROWS*CELL
   initGrid(); draw()
   cv.addEventListener('mousedown',(e)=>{drawing=true;const r=cv.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/CELL),y=Math.floor((e.clientY-r.top)/CELL);drawValue=grid[idx(x,y)]?0:1;grid[idx(x,y)]=drawValue;draw();countLive()})
   cv.addEventListener('mousemove',(e)=>{if(!drawing)return;const r=cv.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/CELL),y=Math.floor((e.clientY-r.top)/CELL);grid[idx(x,y)]=drawValue;draw();countLive()})
-  window.addEventListener('mouseup',()=>drawing=false)
+  _mouseupHandler=()=>drawing=false
+  window.addEventListener('mouseup',_mouseupHandler)
 })
-onUnmounted(()=>{cancelAnimationFrame(animId)})
+onUnmounted(()=>{
+  cancelAnimationFrame(animId)
+  window.removeEventListener('mouseup',_mouseupHandler)
+})
 </script>

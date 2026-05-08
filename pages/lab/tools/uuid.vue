@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `UUID 生成器 | ` })
+useSeoMeta({ title: `UUID 生成器 | ${siteName}` })
 
 const uuids = ref<string[]>([])
 const copiedAll = ref(false)

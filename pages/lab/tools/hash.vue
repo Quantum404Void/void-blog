@@ -3,8 +3,17 @@
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'hash' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-purple)] mb-6">Hash 工具</h1>
+      <div class="flex gap-2 mb-4">
+        <button @click="mode='text'" class="font-mono text-xs px-4 py-2 rounded-lg border transition-all" :style="mode==='text'?'border-color:rgba(180,0,255,0.5);color:#b400ff;background:rgba(180,0,255,0.1)':'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)'">文本</button>
+        <button @click="mode='file'" class="font-mono text-xs px-4 py-2 rounded-lg border transition-all" :style="mode==='file'?'border-color:rgba(180,0,255,0.5);color:#b400ff;background:rgba(180,0,255,0.1)':'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)'">文件</button>
+      </div>
       <div class="flex flex-col gap-4">
-        <textarea v-model="input" placeholder="输入文本..." class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:120px"></textarea>
+        <textarea v-if="mode==='text'" v-model="input" placeholder="输入文本..." class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:120px"></textarea>
+        <div v-else class="border border-dashed border-[var(--color-void-border)] rounded-xl p-8 bg-[var(--color-void-card)] text-center">
+          <input type="file" ref="fileInput" @change="onFile" class="hidden">
+          <div class="font-mono text-sm text-[var(--color-text-muted)] mb-3">{{ fileName || '选择或拖入文件' }}</div>
+          <button @click="fileInput?.click()" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(180,0,255,0.4)] text-[var(--color-neon-purple)] hover:bg-[rgba(180,0,255,0.1)] transition-all">选择文件</button>
+        </div>
         <div class="flex gap-2 flex-wrap">
           <button v-for="algo in algos" :key="algo" @click="compute(algo)" class="font-mono text-xs px-4 py-2 rounded-lg border transition-all" :style="active===algo?'border-color:rgba(180,0,255,0.5);color:#b400ff;background:rgba(180,0,255,0.1)':'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)'">{{ algo }}</button>
         </div>
@@ -19,24 +28,40 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `Hash 工具 | ` })
+useSeoMeta({ title: `Hash 工具 | ${siteName}` })
 const input = ref(''), result = ref(''), active = ref(''), copied = ref(false)
-const algos = ['SHA-256','SHA-512','SHA-1','MD5-like']
+const mode = ref<'text'|'file'>('text')
+const fileName = ref('')
+const fileBuffer = ref<ArrayBuffer|null>(null)
+const fileInput = ref<HTMLInputElement|null>(null)
+const algos = ['SHA-256','SHA-512','SHA-384','SHA-1']
 
 async function compute(algo: string){
-  active.value=algo; if(!input.value){result.value='';return}
-  if(algo==='MD5-like'){result.value=simpleMd5(input.value);return}
-  const name=algo==='SHA-256'?'SHA-256':algo==='SHA-512'?'SHA-512':'SHA-1'
-  const buf=new TextEncoder().encode(input.value)
-  const hashBuf=await crypto.subtle.digest(name,buf)
-  result.value=Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('')
+  active.value = algo
+  let buf: ArrayBuffer
+  if (mode.value === 'file') {
+    if (!fileBuffer.value) { result.value = ''; return }
+    buf = fileBuffer.value
+  } else {
+    if (!input.value) { result.value = ''; return }
+    buf = new TextEncoder().encode(input.value).buffer
+  }
+  const hashBuf = await crypto.subtle.digest(algo, buf)
+  result.value = Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('')
 }
 
-function simpleMd5(s: string){
-  let h=0; for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0}
-  return (h>>>0).toString(16).padStart(8,'0').repeat(4)
+function onFile(e: Event){
+  const f = (e.target as HTMLInputElement).files?.[0]
+  if (!f) return
+  fileName.value = f.name
+  const reader = new FileReader()
+  reader.onload = async () => {
+    fileBuffer.value = reader.result as ArrayBuffer
+    if (active.value) compute(active.value)
+  }
+  reader.readAsArrayBuffer(f)
 }
 
 async function copy(){navigator.clipboard.writeText(result.value);copied.value=true;setTimeout(()=>copied.value=false,2000)}
-watch(input,()=>{if(active.value)compute(active.value)})
+watch(input,()=>{if(active.value && mode.value==='text')compute(active.value)})
 </script>

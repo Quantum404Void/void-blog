@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `Markdown 预览 | ` })
+useSeoMeta({ title: `Markdown 预览 | ${siteName}` })
 
 const { md } = useMarkdown({ containers: true, lineNumbers: false })
 

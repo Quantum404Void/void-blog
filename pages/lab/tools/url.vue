@@ -22,7 +22,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `URL 工具 | ` })
+useSeoMeta({ title: `URL 工具 | ${siteName}` })
 const input=ref(''),output=ref(''),parsed=ref<Record<string,string>|null>(null)
 function encode(){try{output.value=encodeURIComponent(input.value);parsed.value=null}catch(e){output.value='编码失败'}}
 function decode(){try{output.value=decodeURIComponent(input.value);parsed.value=null}catch(e){output.value='解码失败'}}

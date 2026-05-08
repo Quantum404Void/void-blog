@@ -21,7 +21,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `网络信息 | ` })
+useSeoMeta({ title: `网络信息 | ${siteName}` })
 const items=ref([
   {label:'User Agent',value:'loading...',color:'#e8e8f0'},
   {label:'Language',value:'',color:'#00d4ff'},

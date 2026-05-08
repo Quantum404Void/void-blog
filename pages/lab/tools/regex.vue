@@ -26,7 +26,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `正则工具 | ` })
+useSeoMeta({ title: `正则工具 | ${siteName}` })
 const pattern=ref(''),flags=ref('g'),testStr=ref(''),errMsg=ref(''),matches=ref<string[][]>([]),highlighted=ref('')
 watchEffect(()=>{
   errMsg.value='';matches.value=[];highlighted.value=''

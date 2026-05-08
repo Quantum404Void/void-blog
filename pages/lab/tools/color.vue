@@ -22,7 +22,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `颜色工具 | ` })
+useSeoMeta({ title: `颜色工具 | ${siteName}` })
 const hex=ref('#39ff14')
 const formats=computed(()=>{
   const r=parseInt(hex.value.slice(1,3)||'00',16),g=parseInt(hex.value.slice(3,5)||'00',16),b=parseInt(hex.value.slice(5,7)||'00',16)

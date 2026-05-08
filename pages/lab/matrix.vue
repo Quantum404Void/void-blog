@@ -80,18 +80,28 @@ function frame(ts: number){
   }
 }
 
+let _resizeHandler: () => void, _keydownHandler: (e: KeyboardEvent) => void, _clickHandler: (e: MouseEvent) => void
+
 onMounted(()=>{
   const cv=canvasEl.value!
   cv.width=window.innerWidth; cv.height=window.innerHeight
   initCols()
-  cv.addEventListener('click',(e)=>ripples.push({x:e.clientX,y:e.clientY,r:0,life:1}))
-  window.addEventListener('resize',()=>{cv.width=window.innerWidth;cv.height=window.innerHeight;initCols()})
-  document.addEventListener('keydown',(e)=>{
+  _clickHandler=(e)=>ripples.push({x:e.clientX,y:e.clientY,r:0,life:1})
+  _resizeHandler=()=>{cv.width=window.innerWidth;cv.height=window.innerHeight;initCols()}
+  _keydownHandler=(e)=>{
     if(e.key===' '){e.preventDefault();togglePause()}
     if(e.key==='t'||e.key==='T') nextTheme()
     if(e.key==='f'||e.key==='F') toggleFullscreen()
-  })
+  }
+  cv.addEventListener('click', _clickHandler)
+  window.addEventListener('resize', _resizeHandler)
+  document.addEventListener('keydown', _keydownHandler)
   rafId=requestAnimationFrame(frame)
 })
-onUnmounted(()=>cancelAnimationFrame(rafId))
+onUnmounted(()=>{
+  cancelAnimationFrame(rafId)
+  window.removeEventListener('resize', _resizeHandler)
+  document.removeEventListener('keydown', _keydownHandler)
+  canvasEl.value?.removeEventListener('click', _clickHandler)
+})
 </script>

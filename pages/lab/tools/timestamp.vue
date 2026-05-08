@@ -31,7 +31,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `时间戳工具 | ` })
+useSeoMeta({ title: `时间戳工具 | ${siteName}` })
 const tsInput=ref(''),dateInput=ref(''),tsResult=ref(''),dateResult=ref('')
 const nowTs=ref(''),nowStr=ref('')
 function update(){const d=new Date();nowTs.value=String(Math.floor(d.getTime()/1000));nowStr.value=d.toLocaleString('zh-CN')}

@@ -11,6 +11,11 @@
           <button @click="sort" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(180,0,255,0.4)] text-[var(--color-neon-purple)] hover:bg-[rgba(180,0,255,0.1)] transition-all">排序 key</button>
           <button @click="clear" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,0,170,0.3)] text-[rgba(255,0,170,0.7)] hover:bg-[rgba(255,0,170,0.1)] transition-all">清空</button>
         </div>
+        <div class="flex gap-2">
+          <input v-model="pathQuery" placeholder="$.store.book[0].title" class="flex-1 font-mono text-sm rounded-xl border border-[var(--color-void-border)] px-4 py-2 bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none">
+          <button @click="runQuery" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,165,0,0.4)] text-[#ffa500] hover:bg-[rgba(255,165,0,0.1)] transition-all">JSONPath 查询</button>
+        </div>
+        <div v-if="pathResult" class="font-mono text-xs px-4 py-2 rounded-lg whitespace-pre-wrap" :style="pathOk?'background:rgba(57,255,20,0.1);color:#39ff14;border:1px solid rgba(57,255,20,0.2)':'background:rgba(255,0,170,0.1);color:#ff00aa;border:1px solid rgba(255,0,170,0.2)'">{{ pathResult }}</div>
         <div v-if="msg" class="font-mono text-xs px-4 py-2 rounded-lg" :style="msgOk?'background:rgba(57,255,20,0.1);color:#39ff14;border:1px solid rgba(57,255,20,0.2)':'background:rgba(255,0,170,0.1);color:#ff00aa;border:1px solid rgba(255,0,170,0.2)'">{{ msg }}</div>
       </div>
     </div>
@@ -18,12 +23,34 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `JSON 工具 | ` })
+useSeoMeta({ title: `JSON 工具 | ${siteName}` })
 const input=ref(''),msg=ref(''),msgOk=ref(true)
 function parse(){try{return{ok:true,val:JSON.parse(input.value)}}catch(e:any){return{ok:false,err:e.message}}}
 function format(indent: number){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(r.val,null,indent);msg.value='✓ 格式化完成';msgOk.value=true}
 function minify(){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(r.val);msg.value='✓ 压缩完成';msgOk.value=true}
 function sortKeys(obj: any): any{if(Array.isArray(obj))return obj.map(sortKeys);if(obj&&typeof obj==='object'){return Object.keys(obj).sort().reduce((a:any,k)=>{a[k]=sortKeys(obj[k]);return a},{})}return obj}
 function sort(){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(sortKeys(r.val),null,2);msg.value='✓ Key 已排序';msgOk.value=true}
-function clear(){input.value='';msg.value=''}
+function clear(){input.value='';msg.value='';pathResult.value=''}
+
+function queryPath(obj: any, path: string): any {
+  const keys = path.replace(/^\$\.?/, '').split(/[.\[\]]+/).filter(Boolean)
+  let cur = obj
+  for (const k of keys) {
+    if (cur == null) return undefined
+    cur = cur[isNaN(Number(k)) ? k : Number(k)]
+  }
+  return cur
+}
+
+const pathQuery = ref('')
+const pathResult = ref('')
+const pathOk = ref(true)
+
+function runQuery(){
+  const r = parse()
+  if (!r.ok) { pathResult.value = '❌ JSON 解析失败'; pathOk.value = false; return }
+  const res = queryPath(r.val, pathQuery.value)
+  if (res === undefined) { pathResult.value = '⚠ 路径不存在'; pathOk.value = false }
+  else { pathResult.value = JSON.stringify(res, null, 2); pathOk.value = true }
+}
 </script>

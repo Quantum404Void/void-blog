@@ -13,6 +13,10 @@
           </div>
         </div>
       </div>
+      <div v-if="nextRuns.length" class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)]">
+        <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-3">接下来 5 次执行时间</div>
+        <div v-for="(t,i) in nextRuns" :key="i" class="font-mono text-xs text-[var(--color-neon-cyan)] py-1">{{ t.toLocaleString('zh-CN') }}</div>
+      </div>
       <div class="space-y-2">
         <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest">常用示例</div>
         <div v-for="ex in examples" :key="ex.e" @click="expr=ex.e" class="flex gap-4 items-center cursor-pointer hover:bg-[var(--color-void-muted)] rounded-xl px-3 py-2 transition-all">
@@ -25,7 +29,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `Cron 工具 | ` })
+useSeoMeta({ title: `Cron 工具 | ${siteName}` })
 const expr=ref('* * * * *')
 const examples=[
   {e:'* * * * *',d:'每分钟'},{e:'0 * * * *',d:'每小时整点'},{e:'0 0 * * *',d:'每天 00:00'},
@@ -45,5 +49,27 @@ const desc=computed(()=>{
   if(day!=='*')parts.push(`${day}日`)
   const timeStr=hour==='*'&&min==='*'?'每分钟':hour==='*'?`每小时第 ${min} 分`:`${hour}:${min.padStart(2,'0')}`
   return parts.length?`${parts.join(' ')} ${timeStr} 执行`:timeStr+' 执行'
+})
+function matchField(field: string, val: number): boolean {
+  if (field === '*') return true
+  if (field.startsWith('*/')) return val % parseInt(field.slice(2)) === 0
+  if (field.includes('-')) { const [a,b]=field.split('-').map(Number); return val>=a&&val<=b }
+  if (field.includes(',')) return field.split(',').map(Number).includes(val)
+  return parseInt(field) === val
+}
+
+const nextRuns = computed(()=>{
+  const p=expr.value.trim().split(/\s+/)
+  if(p.length!==5) return []
+  const [minF,hourF,dayF,monF,dowF]=p
+  const results: Date[]=[]
+  const d=new Date(); d.setSeconds(0,0); d.setMinutes(d.getMinutes()+1)
+  let count=0
+  while(results.length<5&&count<525600){
+    if(matchField(minF,d.getMinutes())&&matchField(hourF,d.getHours())&&matchField(dayF,d.getDate())&&matchField(monF,d.getMonth()+1)&&matchField(dowF,d.getDay()))
+      results.push(new Date(d))
+    d.setMinutes(d.getMinutes()+1); count++
+  }
+  return results
 })
 </script>

@@ -74,7 +74,7 @@
 
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `JWT 解析器 | ` })
+useSeoMeta({ title: `JWT 解析器 | ${siteName}` })
 
 const input = ref('')
 const error = ref('')

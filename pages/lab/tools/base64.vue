@@ -25,7 +25,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `Base64 工具 | ` })
+useSeoMeta({ title: `Base64 工具 | ${siteName}` })
 const input=ref(''),output=ref<string|null>(null),error=ref(false),copied=ref(false)
 function encode(){try{output.value=btoa(unescape(encodeURIComponent(input.value)));error.value=false}catch(e){output.value='编码失败';error.value=true}}
 function decode(){try{output.value=decodeURIComponent(escape(atob(input.value)));error.value=false}catch(e){output.value='非有效 Base64';error.value=true}}

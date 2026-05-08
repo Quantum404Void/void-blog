@@ -19,7 +19,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `Brainfuck | ` })
+useSeoMeta({ title: `Brainfuck | ${siteName}` })
 const code=ref(''),input=ref(''),output=ref<string|null>(null),error=ref('')
 function run(){
   output.value=null;error.value=''

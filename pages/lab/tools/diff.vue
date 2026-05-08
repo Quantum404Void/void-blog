@@ -14,6 +14,7 @@
         </div>
       </div>
       <button @click="compute" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.1)] transition-all">比较</button>
+      <div v-if="perfWarn" class="font-mono text-xs px-4 py-2 rounded-lg" style="background:rgba(255,165,0,0.1);color:#ffa500;border:1px solid rgba(255,165,0,0.3)">{{ perfWarn }}</div>
       <div v-if="lines.length" class="border border-[var(--color-void-border)] rounded-xl overflow-hidden">
         <div v-for="(line,i) in lines" :key="i" class="font-mono text-xs px-4 py-1.5 flex gap-4" :style="lineStyle(line)">
           <span class="w-4 shrink-0">{{ line.type==='add'?'+':line.type==='del'?'-':' ' }}</span>
@@ -25,7 +26,7 @@
 </template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
-useHead({ title: `Diff 工具 | ` })
+useSeoMeta({ title: `Diff 工具 | ${siteName}` })
 const a=ref(''),b=ref('')
 interface Line { type:'add'|'del'|'same'; text:string }
 const lines=ref<Line[]>([])
@@ -34,20 +35,50 @@ function lineStyle(l: Line){
   if(l.type==='del') return 'background:rgba(255,45,120,0.08);color:#ff2d78'
   return 'color:rgba(232,232,240,0.5)'
 }
-function compute(){
-  const al=a.value.split('\n'),bl=b.value.split('\n')
-  const res:Line[]=[]
-  const m=al.length,n=bl.length
-  // LCS diff
-  const dp:number[][]=Array.from({length:m+1},()=>Array(n+1).fill(0))
-  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=al[i-1]===bl[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1])
-  let i=m,j=n
-  const ops:Line[]=[]
-  while(i>0||j>0){
-    if(i>0&&j>0&&al[i-1]===bl[j-1]){ops.unshift({type:'same',text:al[i-1]});i--;j--}
-    else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){ops.unshift({type:'add',text:bl[j-1]});j--}
-    else{ops.unshift({type:'del',text:al[i-1]});i--}
+const perfWarn = ref('')
+
+function myersDiff(aArr: string[], bArr: string[]) {
+  const m = aArr.length, n = bArr.length
+  const max = m + n
+  if (max === 0) return []
+  const v = new Int32Array(2 * max + 1).fill(0)
+  const trace: Int32Array[] = []
+  let found = false, finalD = 0
+  for (let d = 0; d <= max; d++) {
+    trace.push(v.slice())
+    for (let k = -d; k <= d; k += 2) {
+      let x = k === -d || (k !== d && v[k-1+max] < v[k+1+max]) ? v[k+1+max] : v[k-1+max] + 1
+      let y = x - k
+      while (x < m && y < n && aArr[x] === bArr[y]) { x++; y++ }
+      v[k+max] = x
+      if (x >= m && y >= n) { finalD = d; found = true; break }
+    }
+    if (found) break
   }
-  lines.value=ops
+  // backtrack
+  const ops: Line[] = []
+  let x = m, y = n
+  for (let d = finalD; d > 0; d--) {
+    const pv = trace[d-1]
+    const k = x - y
+    const prevK = k === -d || (k !== d && pv[k-1+max] < pv[k+1+max]) ? k+1 : k-1
+    const prevX = pv[prevK+max], prevY = prevX - prevK
+    while (x > prevX+1 && y > prevY+1) { ops.unshift({type:'same',text:aArr[x-1]}); x--; y-- }
+    if (prevX === x-1 && prevY === y) { ops.unshift({type:'del',text:aArr[x-1]}); x-- }
+    else if (prevY === y-1 && prevX === x) { ops.unshift({type:'add',text:bArr[y-1]}); y-- }
+    else { while (x > prevX && y > prevY) { ops.unshift({type:'same',text:aArr[x-1]}); x--; y-- } }
+  }
+  while (x > 0 && y > 0) { ops.unshift({type:'same',text:aArr[x-1]}); x--; y-- }
+  return ops
+}
+
+function compute(){
+  perfWarn.value = ''
+  let al=a.value.split('\n'), bl=b.value.split('\n')
+  if (al.length > 500 || bl.length > 500) {
+    perfWarn.value = `⚠ 文本过长（${al.length}行 vs ${bl.length}行），仅对比前 500 行`
+    al = al.slice(0, 500); bl = bl.slice(0, 500)
+  }
+  lines.value = myersDiff(al, bl)
 }
 </script>
