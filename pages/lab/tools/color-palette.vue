@@ -1,10 +1,41 @@
 <template>
   <div class="min-h-screen bg-[#0a0a0f]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'color-palette' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: '颜色工具' }]" />
 
     <div class="max-w-4xl mx-auto px-6 py-10">
-      <h1 class="font-mono text-2xl font-bold mb-2" style="color:#ff2d78;text-shadow:0 0 20px rgba(255,45,120,0.5)">调色板生成器</h1>
-      <p class="font-mono text-xs text-gray-500 mb-8">Color Palette Generator — 互补色、色阶、Tailwind、对比度检测</p>
+      <h1 class="font-mono text-2xl font-bold mb-2" style="color:#ff2d78;text-shadow:0 0 20px rgba(255,45,120,0.5)">颜色工具</h1>
+      <p class="font-mono text-xs text-gray-500 mb-4">Color Tools — 颜色转换 · 调色板 · 对比度检测</p>
+
+      <!-- Top-level tabs -->
+      <div class="flex gap-2 mb-8">
+        <button v-for="t in topTabs" :key="t.key" @click="topTab=t.key"
+          class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
+          :style="topTab===t.key ? 'border-color:#ff2d78;color:#ff2d78;background:rgba(255,45,120,0.1)' : 'border-color:rgba(255,255,255,0.15);color:#666'"
+        >{{ t.label }}</button>
+      </div>
+
+      <!-- Tab: 颜色转换 -->
+      <template v-if="topTab==='converter'">
+        <div class="flex gap-4 items-center mb-6">
+          <input type="color" v-model="cvtHex" class="w-16 h-16 rounded-xl border-0 cursor-pointer bg-transparent" style="padding:0">
+          <input v-model="cvtHex" @input="onCvtHexInput" placeholder="#000000"
+            class="font-mono text-lg rounded-xl border border-gray-700 px-4 py-2 bg-[#050508] text-white outline-none w-40">
+          <div class="w-16 h-16 rounded-xl border border-gray-700" :style="`background:${cvtHex}`"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-3">
+          <div v-for="fmt in cvtFormats" :key="fmt.label"
+            class="border border-gray-800 rounded-xl p-4 bg-[#050508] flex items-center justify-between">
+            <div>
+              <div class="font-mono text-[10px] text-gray-500 uppercase tracking-widest mb-1">{{ fmt.label }}</div>
+              <div class="font-mono text-sm" :style="`color:${fmt.color}`">{{ fmt.value }}</div>
+            </div>
+            <button @click="copyColor(fmt.value)" class="font-mono text-[10px] px-3 py-1 rounded border border-gray-700 text-gray-400 hover:text-cyan-400 transition-all">复制</button>
+          </div>
+        </div>
+      </template>
+
+      <!-- Tab: 调色板 -->
+      <template v-if="topTab==='palette'">
 
       <!-- Base color input -->
       <div class="flex items-center gap-4 mb-8">
@@ -85,6 +116,8 @@
         <pre class="font-mono text-[11px] bg-[#050508] border border-gray-800 rounded-xl p-4 overflow-x-auto text-gray-300 max-h-48">{{ exportCode }}</pre>
       </section>
 
+      </template>
+
       <div v-if="toast" class="fixed bottom-6 right-6 font-mono text-xs px-4 py-2 rounded-lg bg-[#1a1a2e] border border-cyan-800 text-cyan-400 shadow-xl">{{ toast }}</div>
     </div>
   </div>
@@ -94,13 +127,50 @@
 import { ref, computed } from 'vue'
 
 const { siteName } = useSiteConfig()
-useSeoMeta({ title: `调色板生成器 | ${siteName}` })
+useSeoMeta({ title: `颜色工具 | ${siteName}` })
 
 const base = ref('#b400ff')
 const harmonyMode = ref('complementary')
 const scaleMode = ref('Material')
 const exportFmt = ref('CSS变量')
 const toast = ref('')
+const topTab = ref<'converter'|'palette'>('converter')
+const cvtHex = ref('#39ff14')
+
+const topTabs = [
+  { key: 'converter', label: '🎨 颜色转换' },
+  { key: 'palette', label: '🖌️ 调色板' },
+]
+
+const cvtFormats = computed(() => {
+  const h = cvtHex.value
+  if (!/^#[0-9a-fA-F]{6}$/.test(h)) return []
+  const r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), b = parseInt(h.slice(5, 7), 16)
+  const rf = (r/255).toFixed(3), gf = (g/255).toFixed(3), bf = (b/255).toFixed(3)
+  const mn = Math.min(r,g,b)/255, mx = Math.max(r,g,b)/255, delta = mx - mn
+  let hue = 0
+  if (delta) {
+    if (mx === r/255) hue = ((g - b) / 255 / delta) % 6
+    else if (mx === g/255) hue = (b - r) / 255 / delta + 2
+    else hue = (r - g) / 255 / delta + 4
+    hue = Math.round(hue * 60)
+    if (hue < 0) hue += 360
+  }
+  const sat = mx ? Math.round(delta / mx * 100) : 0
+  const val = Math.round(mx * 100)
+  const lgt = Math.round((mx + mn) / 2 * 100)
+  const satL = (mx + mn) / 2 < 0.5 ? delta / (mx + mn) : (delta / (2 - mx - mn))
+  const satLp = Math.round((satL || 0) * 100)
+  return [
+    { label: 'HEX', value: h.toUpperCase(), color: '#39ff14' },
+    { label: 'RGB', value: `rgb(${r}, ${g}, ${b})`, color: '#00d4ff' },
+    { label: 'HSL', value: `hsl(${hue}, ${satLp}%, ${lgt}%)`, color: '#b400ff' },
+    { label: 'HSV', value: `hsv(${hue}°, ${sat}%, ${val}%)`, color: '#ff00aa' },
+    { label: 'Float', value: `(${rf}, ${gf}, ${bf})`, color: '#ffa500' },
+  ]
+})
+
+function onCvtHexInput() { /* hex bound to input */ }
 
 const harmonies = [
   { key: 'complementary', label: '互补色' },

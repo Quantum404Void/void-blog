@@ -14,26 +14,37 @@
           <span><span style="color:rgba(0,212,255,0.9)">23</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
+
+        <!-- 搜索过滤 -->
+        <div class="mt-6 relative max-w-sm">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-mono text-xs pointer-events-none">~/</span>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="search games & tools..."
+            class="w-full font-mono text-xs bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg pl-7 pr-4 py-2 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:border-[rgba(180,0,255,0.5)] focus:outline-none transition-colors"
+          />
+        </div>
       </div>
 
       <!-- GAMES -->
-      <section class="mb-12">
+      <section class="mb-12" v-if="filteredGames.length || !searchQuery">
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-5 flex items-center gap-3">
           <span style="color:rgba(180,0,255,0.8)">▶</span> 游戏
           <span class="flex-1 h-px bg-gradient-to-r from-[rgba(180,0,255,0.3)] to-transparent"></span>
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <a
-            v-for="game in games"
+            v-for="game in filteredGames"
             :key="game.href"
             :href="game.href"
             class="group block border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
-            @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = game.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + game.color + '18' }"
+            @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = game.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + game.color + '25' }"
             @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
           >
             <div class="flex items-start justify-between mb-3">
-              <span class="text-2xl">{{ game.icon }}</span>
-              <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border" :style="`border-color:${game.color}44;color:${game.color}cc`">{{ game.tag }}</span>
+              <span class="text-2xl transition-transform duration-200 group-hover:scale-110">{{ game.icon }}</span>
+              <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border tracking-wider" :style="`border-color:${game.color}44;color:${game.color}cc;background:${game.color}0d`">{{ game.tag }}</span>
             </div>
             <h3 class="font-mono text-sm font-bold text-[var(--color-text-primary)] mb-1 group-hover:transition-colors" style="transition:color 0.2s">{{ game.label }}</h3>
             <p class="font-mono text-[11px] text-[var(--color-text-muted)]">{{ game.desc }}</p>
@@ -42,27 +53,33 @@
       </section>
 
       <!-- TOOLS -->
-      <section>
+      <section v-if="filteredTools.length || !searchQuery">
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-5 flex items-center gap-3">
           <span class="text-[var(--color-neon-cyan)]">▶</span> 在线工具
           <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.3)] to-transparent"></span>
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <a
-            v-for="tool in tools"
+            v-for="tool in filteredTools"
             :key="tool.href"
             :href="tool.href"
             class="group block border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
-            @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = tool.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + tool.color + '18' }"
+            @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = tool.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
             @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
           >
             <div class="flex items-start justify-between mb-3">
-              <span class="text-xl font-mono font-bold" :style="`color:${tool.color}`">{{ tool.icon }}</span>
-              <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border" :style="`border-color:${tool.color}44;color:${tool.color}cc`">{{ tool.tag }}</span>
+              <span class="text-xl font-mono font-bold transition-transform duration-200 group-hover:scale-110 inline-block" :style="`color:${tool.color}`">{{ tool.icon }}</span>
+              <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border tracking-wider" :style="`border-color:${tool.color}44;color:${tool.color}cc;background:${tool.color}0d`">{{ tool.tag }}</span>
             </div>
             <h3 class="font-mono text-sm font-bold text-[var(--color-text-primary)] mb-1">{{ tool.label }}</h3>
             <p class="font-mono text-[11px] text-[var(--color-text-muted)]">{{ tool.desc }}</p>
           </a>
+        </div>
+
+        <!-- 无结果提示 -->
+        <div v-if="searchQuery && !filteredGames.length && !filteredTools.length" class="text-center py-16 font-mono text-[var(--color-text-muted)]">
+          <p class="text-sm mb-1">bash: {{ searchQuery }}: command not found</p>
+          <p class="text-xs opacity-50">try a different search term</p>
         </div>
       </section>
     </div>
@@ -72,6 +89,28 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lab | ${siteName}` })
+
+const searchQuery = ref('')
+
+const filteredGames = computed(() => {
+  if (!searchQuery.value) return games
+  const q = searchQuery.value.toLowerCase()
+  return games.filter(g =>
+    g.label.toLowerCase().includes(q) ||
+    g.desc.toLowerCase().includes(q) ||
+    g.tag.toLowerCase().includes(q)
+  )
+})
+
+const filteredTools = computed(() => {
+  if (!searchQuery.value) return tools
+  const q = searchQuery.value.toLowerCase()
+  return tools.filter(t =>
+    t.label.toLowerCase().includes(q) ||
+    t.desc.toLowerCase().includes(q) ||
+    t.tag.toLowerCase().includes(q)
+  )
+})
 
 const games = [
   { href: '/lab/games/snake', icon: '🐍', label: 'Snake', desc: '霓虹贪吃蛇', tag: 'CLASSIC', color: '#39ff14' },
@@ -101,7 +140,7 @@ const tools = [
   { href: '/lab/tools/regex', icon: '.*', label: '正则测试器', desc: '实时匹配 + 高亮 + 分组提取', tag: 'REGEX', color: '#39ff14' },
   { href: '/lab/tools/base64', icon: '64', label: 'Base64', desc: '编码 / 解码 / 文件转换', tag: 'ENCODE', color: '#ff00aa' },
   { href: '/lab/tools/timestamp', icon: '⏱', label: '时间戳转换', desc: 'Unix 时间戳 ↔ 日期时间', tag: 'TIME', color: '#ffa500' },
-  { href: '/lab/tools/color', icon: '🎨', label: '颜色工具', desc: 'HEX / RGB / HSL 互转 + 调色板', tag: 'COLOR', color: '#b400ff' },
+  { href: '/lab/tools/color-palette', icon: '🎨', label: '颜色工具', desc: 'HEX/RGB/HSL 互转 · 调色板 · WCAG 对比度', tag: 'COLOR', color: '#b400ff' },
   { href: '/lab/tools/hash', icon: '#', label: '哈希计算', desc: 'MD5 / SHA1 / SHA256 在线计算', tag: 'CRYPTO', color: '#00d4ff' },
   { href: '/lab/tools/url', icon: '🔗', label: 'URL 工具', desc: 'URL 解析/编解码/构建', tag: 'NET', color: '#00d4ff' },
   { href: '/lab/tools/diff', icon: '±', label: 'Diff 工具', desc: '文本/代码对比高亮差异', tag: 'DIFF', color: '#39ff14' },
@@ -114,7 +153,6 @@ const tools = [
   { href: '/lab/tools/uuid', icon: '🆔', label: 'UUID 生成', desc: '批量生成 v4 UUID，一键复制', tag: 'UTIL', color: '#00ff88' },
   { href: '/lab/tools/markdown', icon: 'MD', label: 'Markdown 预览', desc: '实时 Markdown 渲染预览', tag: 'FORMAT', color: '#b400ff' },
   { href: '/lab/tools/qrcode', icon: '▦', label: 'QR 码生成器', desc: '纯前端手写 QR 算法，支持 ECC 四级', tag: 'ENCODE', color: '#00ff88' },
-  { href: '/lab/tools/color-palette', icon: '🎨', label: '调色板生成器', desc: '互补色/色阶/WCAG 对比度/CSS 导出', tag: 'COLOR', color: '#b400ff' },
   { href: '/lab/tools/pomodoro', icon: '🍅', label: '番茄钟', desc: '极客风 25/5/15 番茄工作法', tag: 'UTIL', color: '#ff4500' },
   { href: '/lab/tools/text-tools', icon: '📝', label: '文本工具集', desc: '字数/大小写/去重/排序/转义/查替', tag: 'TEXT', color: '#ffa500' },
   { href: '/lab/tools/subnet', icon: '🌐', label: 'IP 子网计算', desc: 'CIDR 子网掩码 / 地址范围 / 二进制展示', tag: 'NET', color: '#b400ff' },

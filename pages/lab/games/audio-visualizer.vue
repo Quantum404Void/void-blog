@@ -48,8 +48,14 @@
       </div>
 
       <!-- Canvas -->
-      <div class="rounded-2xl overflow-hidden border border-gray-800" style="background:#050508">
-        <canvas ref="canvasEl" :width="canvasW" :height="canvasH" class="w-full block" />
+      <div ref="containerEl" class="rounded-2xl overflow-hidden border border-gray-800 relative" style="background:#050508">
+        <canvas ref="canvasEl" class="block"
+          @mousemove="onMouseMove"
+          @mouseleave="hoverFreq=null"
+        />
+        <div v-if="hoverFreq !== null" class="absolute top-2 right-3 font-mono text-[10px] text-cyan-400 bg-black/60 px-2 py-1 rounded pointer-events-none">
+          {{ hoverFreq }} Hz
+        </div>
       </div>
 
       <div v-if="error" class="mt-4 font-mono text-xs text-red-400 bg-red-900/20 rounded-lg p-3 border border-red-800">{{ error }}</div>
@@ -64,8 +70,7 @@ const { siteName } = useSiteConfig()
 useSeoMeta({ title: `音频可视化 | ${siteName}` })
 
 const canvasEl = ref<HTMLCanvasElement | null>(null)
-const canvasW = 800
-const canvasH = 400
+const containerEl = ref<HTMLElement | null>(null)
 const active = ref(false)
 const source = ref<'mic'|'tone'>('tone')
 const mode = ref<'bars'|'wave'|'polar'>('bars')
@@ -73,6 +78,10 @@ const toneFreq = ref(440)
 const toneVolume = ref(0.5)
 const bpm = ref<number|null>(null)
 const error = ref('')
+const hoverFreq = ref<number|null>(null)
+
+const PIXEL_RATIO = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1
+let cw = 800, ch = 360  // logical size
 
 const modes = [
   { key: 'bars', label: '频域柱状' },
@@ -87,10 +96,67 @@ let gainNode: GainNode | null = null
 let micStream: MediaStream | null = null
 let micSource: MediaStreamAudioSourceNode | null = null
 let rafId = 0
+let resizeObserver: ResizeObserver | null = null
+let ctxScaled = false
 
 // BPM detection
 const energyHistory: number[] = []
 const beatTimes: number[] = []
+let lastBeatTime = 0
+
+function resizeCanvas() {
+  const el = canvasEl.value
+  if (!el) return
+  const container = containerEl.value
+  if (!container) return
+  cw = container.clientWidth || 800
+  ch = Math.round(cw * 0.45)
+  el.width = cw * PIXEL_RATIO
+  el.height = ch * PIXEL_RATIO
+  el.style.width = cw + 'px'
+  el.style.height = ch + 'px'
+  ctxScaled = false
+}
+
+function getScaledCtx(): CanvasRenderingContext2D | null {
+  const el = canvasEl.value
+  if (!el) return null
+  const ctx = el.getContext('2d')
+  if (!ctx) return null
+  if (!ctxScaled) {
+    ctx.setTransform(PIXEL_RATIO, 0, 0, PIXEL_RATIO, 0, 0)
+    ctxScaled = true
+  }
+  return ctx
+}
+
+// Logarithmic frequency bins
+function logBins(data: Uint8Array, bars: number): number[] {
+  const nyquist = (audioCtx?.sampleRate ?? 44100) / 2
+  const result = []
+  for (let i = 0; i < bars; i++) {
+    const logStart = Math.pow(10, Math.log10(20) + (i / bars) * (Math.log10(nyquist) - Math.log10(20)))
+    const logEnd = Math.pow(10, Math.log10(20) + ((i + 1) / bars) * (Math.log10(nyquist) - Math.log10(20)))
+    const binStart = Math.floor(logStart / nyquist * data.length)
+    const binEnd = Math.ceil(logEnd / nyquist * data.length)
+    let max = 0
+    for (let j = Math.max(binStart, 0); j < Math.min(binEnd, data.length); j++) max = Math.max(max, data[j])
+    result.push(max / 255)
+  }
+  return result
+}
+
+function onMouseMove(e: MouseEvent) {
+  const el = canvasEl.value
+  if (!el || !analyser) { hoverFreq.value = null; return }
+  const rect = el.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const ratio = x / cw
+  const nyquist = (audioCtx?.sampleRate ?? 44100) / 2
+  // map x to log frequency
+  const freq = Math.pow(10, Math.log10(20) + ratio * (Math.log10(nyquist) - Math.log10(20)))
+  hoverFreq.value = Math.round(freq)
+}
 
 async function toggleActive() {
   if (active.value) {
@@ -105,7 +171,7 @@ async function startAudio() {
   try {
     audioCtx = new AudioContext()
     analyser = audioCtx.createAnalyser()
-    analyser.fftSize = 2048
+    analyser.fftSize = 4096
     analyser.smoothingTimeConstant = 0.8
 
     gainNode = audioCtx.createGain()
@@ -126,6 +192,7 @@ async function startAudio() {
     }
 
     active.value = true
+    ctxScaled = false
     draw()
   } catch (e: any) {
     error.value = e.message || '无法启动音频'
@@ -145,17 +212,15 @@ function stopAll() {
   gainNode = null
   analyser?.disconnect()
   analyser = null
-  audioCtx?.close()
+  audioCtx?.close().catch(() => {})
   audioCtx = null
   active.value = false
   bpm.value = null
 
-  // Clear canvas
-  const canvas = canvasEl.value
-  if (canvas) {
-    const ctx = canvas.getContext('2d')!
+  const ctx = getScaledCtx()
+  if (ctx) {
     ctx.fillStyle = '#050508'
-    ctx.fillRect(0, 0, canvasW, canvasH)
+    ctx.fillRect(0, 0, cw, ch)
   }
 }
 
@@ -176,9 +241,7 @@ function setSource(s: 'mic'|'tone') {
 
 function draw() {
   if (!analyser || !canvasEl.value) return
-  const canvas = canvasEl.value
-  const ctx = canvas.getContext('2d')!
-  const bufLen = analyser.frequencyBinCount
+  const bufLen = analyser.frequencyBinCount  // 2048
   const freqData = new Uint8Array(bufLen)
   const timeData = new Uint8Array(bufLen)
 
@@ -190,44 +253,73 @@ function draw() {
 
     detectBeat(freqData)
 
+    const ctx = getScaledCtx()
+    if (!ctx) return
+
     ctx.fillStyle = 'rgba(5,5,8,0.85)'
-    ctx.fillRect(0, 0, canvasW, canvasH)
+    ctx.fillRect(0, 0, cw, ch)
 
     if (mode.value === 'bars') drawBars(ctx, freqData)
     else if (mode.value === 'wave') drawWave(ctx, timeData)
-    else drawPolar(ctx, freqData)
+    else drawPolar(ctx, freqData, timeData)
   }
   frame()
 }
 
 function drawBars(ctx: CanvasRenderingContext2D, data: Uint8Array) {
-  const bars = 64
-  const step = Math.floor(data.length / bars)
-  const barW = canvasW / bars - 1
+  const bars = 96
+  const bins = logBins(data, bars)
+  const barW = (cw - bars) / bars
+
   for (let i = 0; i < bars; i++) {
-    const val = data[i * step] / 255
-    const h = val * canvasH * 0.9
-    const hue = 120 + i / bars * 180 // green→cyan→purple
-    const color = `hsl(${hue},100%,60%)`
+    const val = bins[i]
+    const h = val * ch * 0.9
+    // neon green → cyan gradient
+    const t = i / bars
+    const r = Math.round(0 + t * 0)
+    const g = Math.round(255 - t * (255 - 212))
+    const b = Math.round(136 + t * (255 - 136))
+    const color = `rgb(${r},${g},${b})`
     ctx.fillStyle = color
     ctx.shadowColor = color
     ctx.shadowBlur = 8
-    ctx.fillRect(i * (barW + 1), canvasH - h, barW, h)
+    ctx.fillRect(i * (barW + 1), ch - h, barW, h)
   }
   ctx.shadowBlur = 0
+
+  // center line
+  ctx.beginPath()
+  ctx.strokeStyle = 'rgba(0,255,136,0.15)'
+  ctx.lineWidth = 1
+  ctx.moveTo(0, ch / 2)
+  ctx.lineTo(cw, ch / 2)
+  ctx.stroke()
 }
 
 function drawWave(ctx: CanvasRenderingContext2D, data: Uint8Array) {
+  // Center line
   ctx.beginPath()
-  ctx.strokeStyle = '#00ff88'
+  ctx.strokeStyle = 'rgba(0,255,136,0.15)'
+  ctx.lineWidth = 1
+  ctx.moveTo(0, ch / 2)
+  ctx.lineTo(cw, ch / 2)
+  ctx.stroke()
+
+  // Neon green → cyan gradient stroke
+  const grad = ctx.createLinearGradient(0, 0, cw, 0)
+  grad.addColorStop(0, '#00ff88')
+  grad.addColorStop(1, '#00d4ff')
+
+  ctx.beginPath()
+  ctx.strokeStyle = grad
   ctx.lineWidth = 2
   ctx.shadowColor = '#00ff88'
   ctx.shadowBlur = 10
-  const sliceW = canvasW / data.length
+  const sliceW = cw / data.length
   let x = 0
   for (let i = 0; i < data.length; i++) {
     const v = data[i] / 128 - 1
-    const y = (v * canvasH / 2) + canvasH / 2
+    const y = (v * ch / 2) + ch / 2
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
     x += sliceW
   }
@@ -235,18 +327,39 @@ function drawWave(ctx: CanvasRenderingContext2D, data: Uint8Array) {
   ctx.shadowBlur = 0
 }
 
-function drawPolar(ctx: CanvasRenderingContext2D, data: Uint8Array) {
-  const cx = canvasW / 2, cy = canvasH / 2
-  const bars = 128
-  const step = Math.floor(data.length / bars)
+function drawPolar(ctx: CanvasRenderingContext2D, freqData: Uint8Array, timeData: Uint8Array) {
+  const cx = cw / 2, cy = ch / 2
   const baseR = Math.min(cx, cy) * 0.3
+  const outerR = Math.min(cx, cy) * 0.85
+
+  // Inner circle: time-domain waveform
+  ctx.beginPath()
+  for (let i = 0; i < timeData.length; i++) {
+    const v = timeData[i] / 128 - 1
+    const angle = (i / timeData.length) * Math.PI * 2 - Math.PI / 2
+    const r = baseR + v * baseR * 0.6
+    const x = cx + Math.cos(angle) * r
+    const y = cy + Math.sin(angle) * r
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+  }
+  ctx.closePath()
+  ctx.strokeStyle = 'rgba(0,255,136,0.7)'
+  ctx.lineWidth = 1.5
+  ctx.shadowColor = '#00ff88'
+  ctx.shadowBlur = 8
+  ctx.stroke()
+  ctx.shadowBlur = 0
+
+  // Outer ring: frequency bars
+  const bars = 128
+  const bins = logBins(freqData, bars)
 
   ctx.save()
   for (let i = 0; i < bars; i++) {
-    const val = data[i * step] / 255
+    const val = bins[i]
     const angle = (i / bars) * Math.PI * 2 - Math.PI / 2
-    const r1 = baseR
-    const r2 = baseR + val * baseR * 1.8
+    const r1 = baseR * 1.1
+    const r2 = r1 + val * (outerR - r1)
     const hue = (i / bars) * 360
     const color = `hsl(${hue},100%,65%)`
     ctx.beginPath()
@@ -260,10 +373,10 @@ function drawPolar(ctx: CanvasRenderingContext2D, data: Uint8Array) {
   }
   ctx.restore()
 
-  // inner circle
+  // base circle
   ctx.beginPath()
   ctx.arc(cx, cy, baseR, 0, Math.PI * 2)
-  ctx.strokeStyle = 'rgba(0,212,255,0.3)'
+  ctx.strokeStyle = 'rgba(0,212,255,0.2)'
   ctx.lineWidth = 1
   ctx.shadowBlur = 0
   ctx.stroke()
@@ -279,10 +392,14 @@ function detectBeat(freqData: Uint8Array) {
   if (energyHistory.length > 43) energyHistory.shift()
 
   const avg = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length
-  if (energy > avg * 1.5 && energy > 0.1) {
-    const now = performance.now()
+  // variance-based threshold
+  const variance = energyHistory.reduce((a, b) => a + (b - avg) ** 2, 0) / energyHistory.length
+  const stddev = Math.sqrt(variance)
+
+  const now = performance.now()
+  if (energy > avg + 1.5 * stddev && energy > 0.05 && now - lastBeatTime > 200) {
+    lastBeatTime = now
     beatTimes.push(now)
-    // keep last 8 beats
     while (beatTimes.length > 8) beatTimes.shift()
     if (beatTimes.length >= 2) {
       const intervals: number[] = []
@@ -293,7 +410,23 @@ function detectBeat(freqData: Uint8Array) {
   }
 }
 
+onMounted(() => {
+  resizeCanvas()
+  resizeObserver = new ResizeObserver(() => {
+    resizeCanvas()
+    if (!active.value) {
+      const ctx = getScaledCtx()
+      if (ctx) {
+        ctx.fillStyle = '#050508'
+        ctx.fillRect(0, 0, cw, ch)
+      }
+    }
+  })
+  if (containerEl.value) resizeObserver.observe(containerEl.value)
+})
+
 onUnmounted(() => {
   stopAll()
+  resizeObserver?.disconnect()
 })
 </script>

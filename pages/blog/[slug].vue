@@ -21,7 +21,7 @@
             </NuxtLink>
           </div>
 
-          <h1 class="text-3xl sm:text-4xl font-bold font-mono leading-tight mb-6 text-[var(--color-text-primary)]">
+          <h1 class="text-3xl sm:text-4xl font-bold font-mono leading-tight mb-6 text-[var(--color-text-primary)]" style="text-shadow:0 0 30px rgba(0,255,136,0.15),0 0 60px rgba(0,255,136,0.05)">
             {{ post.title }}
           </h1>
 

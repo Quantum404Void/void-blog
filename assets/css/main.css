@@ -71,17 +71,23 @@
   }
 
   ::selection {
-    background-color: rgba(0, 255, 136, 0.2);
-    color: var(--color-neon-green);
+    background: rgba(0,212,255,0.25);
+    color: #e8e8f0;
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--color-void); }
+  ::-webkit-scrollbar-track { background: #0a0a0f; }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-void-muted);
+    background: rgba(0,212,255,0.3);
     border-radius: 3px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: var(--color-neon-green); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.6); }
+
+  :focus-visible {
+    outline: 2px solid rgba(0,212,255,0.5);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
   pre {
     border-radius: 0.75rem;
@@ -354,6 +360,7 @@ body::after {
 /* ── 代码块终端风格头部 ── */
 .prose pre {
   position: relative;
+  border-left: 3px solid rgba(0,212,255,0.4);
 }
 .prose pre::before {
   content: '';
