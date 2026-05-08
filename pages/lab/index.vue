@@ -10,7 +10,7 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">13</span> 游戏</span>
+          <span><span style="color:rgba(180,0,255,0.9)">16</span> 游戏</span>
           <span><span style="color:rgba(0,212,255,0.9)">19</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
@@ -85,8 +85,11 @@ const games = [
   { href: '/lab/flappy', icon: '🐦', label: 'Flappy Bird', desc: '赛博朋克风霓虹管道', tag: 'CASUAL', color: '#ffa500' },
   { href: '/lab/life', icon: '🔬', label: "Conway's Life", desc: '细胞自动机，点击绘制 · 预设图案', tag: 'SIM', color: '#00ff88' },
   { href: '/lab/breakout', icon: '🧱', label: 'Breakout', desc: '霓虹打砖块，鼠标/键盘控制', tag: 'CLASSIC', color: '#00d4ff' },
-  { href: '/lab/pathfinding', icon: '🗺️', label: 'Pathfinding', desc: 'A*/BFS/DFS/Dijkstra 路径寻找可视化', tag: 'ALGO', color: '#00d4ff' },
+  { href: '/lab/pathfinding', icon: '🗺️', label: 'Pathfinding', desc: 'A*/BFS/DFS/Dijkstra/Greedy 路径寻找可视化', tag: 'ALGO', color: '#00d4ff' },
   { href: '/lab/doom-fire', icon: '🔥', label: 'Doom Fire', desc: '经典 DOOM 火焰算法，实时渲染', tag: 'VISUAL', color: '#ff4500' },
+  { href: '/lab/binary-tree', icon: '🌲', label: 'Binary Tree', desc: 'BST 插入/查找/删除 + 三种遍历动画', tag: 'ALGO', color: '#00ff88' },
+  { href: '/lab/cpu-sim', icon: '💾', label: 'CPU Sim', desc: '8-bit CPU 模拟器，支持 MOV/ADD/JMP 等指令', tag: 'SIM', color: '#b400ff' },
+  { href: '/lab/lissajous', icon: '〰️', label: 'Lissajous', desc: '利萨如图形生成器，实时参数控制', tag: 'VISUAL', color: '#ff00aa' },
 ]
 
 const tools = [

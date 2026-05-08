@@ -47,11 +47,42 @@
         </div>
 
         <div class="control-group">
+          <label class="label">MOVEMENT</label>
+          <div class="algo-buttons">
+            <button
+              class="algo-btn"
+              :class="{ active: !diagonal }"
+              @click="diagonal = false"
+            >4-DIR</button>
+            <button
+              class="algo-btn"
+              :class="{ active: diagonal }"
+              @click="diagonal = true"
+            >8-DIR</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="label">SPEED</label>
+          <div class="speed-control">
+            <input
+              type="range"
+              min="1"
+              max="20"
+              v-model.number="animSpeed"
+              class="speed-slider"
+            />
+            <span class="speed-val neon-cyan">{{ animSpeed }}</span>
+          </div>
+        </div>
+
+        <div class="control-group">
           <label class="label">ACTIONS</label>
           <div class="algo-buttons">
             <button class="action-btn run" @click="runAlgorithm" :disabled="isRunning">
               {{ isRunning ? 'RUNNING...' : '▶ RUN' }}
             </button>
+            <button class="action-btn" @click="generateMaze" :disabled="isRunning">MAZE</button>
             <button class="action-btn" @click="clearWalls" :disabled="isRunning">CLEAR WALLS</button>
             <button class="action-btn reset" @click="resetGrid" :disabled="isRunning">RESET</button>
           </div>
@@ -107,12 +138,54 @@ const CELL = 28
 
 type CellState = 'empty' | 'wall' | 'start' | 'end' | 'visited' | 'path'
 
+// ── MinHeap ───────────────────────────────────────────────────────────────────
+class MinHeap<T> {
+  private data: { priority: number; item: T }[] = []
+  push(item: T, priority: number) {
+    this.data.push({ priority, item })
+    this._bubbleUp(this.data.length - 1)
+  }
+  pop(): T | undefined {
+    const top = this.data[0]
+    const last = this.data.pop()!
+    if (this.data.length > 0) {
+      this.data[0] = last
+      this._sinkDown(0)
+    }
+    return top?.item
+  }
+  get size() { return this.data.length }
+  private _bubbleUp(i: number) {
+    while (i > 0) {
+      const p = (i - 1) >> 1
+      if (this.data[p].priority <= this.data[i].priority) break
+      ;[this.data[p], this.data[i]] = [this.data[i], this.data[p]]
+      i = p
+    }
+  }
+  private _sinkDown(i: number) {
+    const n = this.data.length
+    while (true) {
+      let min = i
+      const l = 2 * i + 1, r = 2 * i + 2
+      if (l < n && this.data[l].priority < this.data[min].priority) min = l
+      if (r < n && this.data[r].priority < this.data[min].priority) min = r
+      if (min === i) break
+      ;[this.data[min], this.data[i]] = [this.data[i], this.data[min]]
+      i = min
+    }
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const isRunning = ref(false)
 const drawMode = ref<'wall' | 'start' | 'end'>('wall')
-const selectedAlgo = ref<'astar' | 'bfs' | 'dfs' | 'dijkstra'>('astar')
+const selectedAlgo = ref<'astar' | 'bfs' | 'dfs' | 'dijkstra' | 'greedy'>('astar')
 const isMouseDown = ref(false)
 const eraseMode = ref(false)
+const animSpeed = ref(4)
+const diagonal = ref(false)
 
 const stats = ref<{ time: number | null; visited: number; pathLength: number | null }>({
   time: null, visited: 0, pathLength: null
@@ -120,9 +193,10 @@ const stats = ref<{ time: number | null; visited: number; pathLength: number | n
 
 const algorithms = [
   { id: 'astar', name: 'A*' },
+  { id: 'greedy', name: 'Greedy' },
+  { id: 'dijkstra', name: 'Dijkstra' },
   { id: 'bfs', name: 'BFS' },
   { id: 'dfs', name: 'DFS' },
-  { id: 'dijkstra', name: 'Dijkstra' },
 ]
 
 const legend = [
@@ -162,7 +236,6 @@ function draw() {
       const x = c * CELL
       const y = r * CELL
 
-      // Cell fill
       if (state === 'wall') {
         ctx.fillStyle = '#1a1a2e'
       } else if (state === 'start') {
@@ -178,7 +251,6 @@ function draw() {
       }
       ctx.fillRect(x + 1, y + 1, CELL - 2, CELL - 2)
 
-      // Labels for start/end
       if (state === 'start') {
         ctx.fillStyle = '#0a0a0f'
         ctx.font = `bold ${CELL * 0.55}px monospace`
@@ -193,7 +265,6 @@ function draw() {
         ctx.fillText('E', x + CELL / 2, y + CELL / 2)
       }
 
-      // Grid lines
       ctx.strokeStyle = 'rgba(255,255,255,0.04)'
       ctx.lineWidth = 1
       ctx.strokeRect(x, y, CELL, CELL)
@@ -256,13 +327,25 @@ function onMouseUp() {
 type Pos = { r: number; c: number }
 
 function neighbors(r: number, c: number): Pos[] {
-  const dirs = [[-1,0],[1,0],[0,-1],[0,1]]
+  const dirs4 = [[-1,0],[1,0],[0,-1],[0,1]]
+  const dirs8 = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]
+  const dirs = diagonal.value ? dirs8 : dirs4
   return dirs
     .map(([dr, dc]) => ({ r: r + dr, c: c + dc }))
     .filter(p => p.r >= 0 && p.r < ROWS && p.c >= 0 && p.c < COLS && grid.value[p.r][p.c] !== 'wall')
 }
 
+function moveCost(from: Pos, to: Pos) {
+  return from.r !== to.r && from.c !== to.c ? 1.414 : 1
+}
+
 function heuristic(a: Pos, b: Pos) {
+  if (diagonal.value) {
+    // Octile distance for 8-dir
+    const dr = Math.abs(a.r - b.r)
+    const dc = Math.abs(a.c - b.c)
+    return Math.max(dr, dc) + (1.414 - 1) * Math.min(dr, dc)
+  }
   return Math.abs(a.r - b.r) + Math.abs(a.c - b.c)
 }
 
@@ -285,7 +368,6 @@ function bfsSearch(): { visited: Pos[]; path: Pos[] } {
     }
   }
 
-  // Reconstruct path
   const path: Pos[] = []
   let cur: Pos | null | undefined = endPos
   while (cur) {
@@ -329,9 +411,9 @@ function dfsSearch(): { visited: Pos[]; path: Pos[] } {
 }
 
 function dijkstraSearch(): { visited: Pos[]; path: Pos[] } {
+  const key = (p: Pos) => `${p.r},${p.c}`
   const dist = new Map<string, number>()
   const prev = new Map<string, Pos | null>()
-  const key = (p: Pos) => `${p.r},${p.c}`
   const visited: Pos[] = []
 
   for (let r = 0; r < ROWS; r++)
@@ -341,30 +423,23 @@ function dijkstraSearch(): { visited: Pos[]; path: Pos[] } {
   dist.set(key(startPos), 0)
   prev.set(key(startPos), null)
 
-  const open = new Set<string>()
-  open.add(key(startPos))
+  const heap = new MinHeap<Pos>()
+  heap.push(startPos, 0)
 
-  while (open.size) {
-    // Pick min dist
-    let minKey = ''
-    let minDist = Infinity
-    for (const k of open) {
-      const d = dist.get(k)!
-      if (d < minDist) { minDist = d; minKey = k }
-    }
-    open.delete(minKey)
-    const [r, c] = minKey.split(',').map(Number)
-    const cur = { r, c }
+  while (heap.size > 0) {
+    const cur = heap.pop()!
+    const ck = key(cur)
+    if (visited.some(v => v.r === cur.r && v.c === cur.c)) continue
     visited.push(cur)
     if (cur.r === endPos.r && cur.c === endPos.c) break
 
     for (const nb of neighbors(cur.r, cur.c)) {
       const nk = key(nb)
-      const nd = minDist + 1
-      if (nd < dist.get(nk)!) {
+      const nd = (dist.get(ck) ?? Infinity) + moveCost(cur, nb)
+      if (nd < (dist.get(nk) ?? Infinity)) {
         dist.set(nk, nd)
         prev.set(nk, cur)
-        open.add(nk)
+        heap.push(nb, nd)
       }
     }
   }
@@ -382,38 +457,71 @@ function dijkstraSearch(): { visited: Pos[]; path: Pos[] } {
 function astarSearch(): { visited: Pos[]; path: Pos[] } {
   const key = (p: Pos) => `${p.r},${p.c}`
   const g = new Map<string, number>()
-  const f = new Map<string, number>()
   const prev = new Map<string, Pos | null>()
   const visited: Pos[] = []
+  const closed = new Set<string>()
 
   g.set(key(startPos), 0)
-  f.set(key(startPos), heuristic(startPos, endPos))
   prev.set(key(startPos), null)
 
-  const open = new Set<string>()
-  open.add(key(startPos))
+  const heap = new MinHeap<Pos>()
+  heap.push(startPos, heuristic(startPos, endPos))
 
-  while (open.size) {
-    let minKey = ''
-    let minF = Infinity
-    for (const k of open) {
-      const fv = f.get(k) ?? Infinity
-      if (fv < minF) { minF = fv; minKey = k }
-    }
-    open.delete(minKey)
-    const [r, c] = minKey.split(',').map(Number)
-    const cur = { r, c }
+  while (heap.size > 0) {
+    const cur = heap.pop()!
+    const ck = key(cur)
+    if (closed.has(ck)) continue
+    closed.add(ck)
     visited.push(cur)
     if (cur.r === endPos.r && cur.c === endPos.c) break
 
     for (const nb of neighbors(cur.r, cur.c)) {
       const nk = key(nb)
-      const ng = (g.get(minKey) ?? Infinity) + 1
+      if (closed.has(nk)) continue
+      const ng = (g.get(ck) ?? Infinity) + moveCost(cur, nb)
       if (ng < (g.get(nk) ?? Infinity)) {
         g.set(nk, ng)
-        f.set(nk, ng + heuristic(nb, endPos))
         prev.set(nk, cur)
-        open.add(nk)
+        heap.push(nb, ng + heuristic(nb, endPos))
+      }
+    }
+  }
+
+  if (!prev.has(key(endPos))) return { visited, path: [] }
+  const path: Pos[] = []
+  let cur: Pos | null | undefined = endPos
+  while (cur && !(cur.r === startPos.r && cur.c === startPos.c)) {
+    path.unshift(cur)
+    cur = prev.get(`${cur.r},${cur.c}`)
+  }
+  return { visited, path }
+}
+
+function greedySearch(): { visited: Pos[]; path: Pos[] } {
+  const key = (p: Pos) => `${p.r},${p.c}`
+  const prev = new Map<string, Pos | null>()
+  const visited: Pos[] = []
+  const closed = new Set<string>()
+
+  prev.set(key(startPos), null)
+
+  const heap = new MinHeap<Pos>()
+  heap.push(startPos, heuristic(startPos, endPos))
+
+  while (heap.size > 0) {
+    const cur = heap.pop()!
+    const ck = key(cur)
+    if (closed.has(ck)) continue
+    closed.add(ck)
+    visited.push(cur)
+    if (cur.r === endPos.r && cur.c === endPos.c) break
+
+    for (const nb of neighbors(cur.r, cur.c)) {
+      const nk = key(nb)
+      if (closed.has(nk)) continue
+      if (!prev.has(nk)) {
+        prev.set(nk, cur)
+        heap.push(nb, heuristic(nb, endPos))
       }
     }
   }
@@ -432,7 +540,6 @@ let animRaf: number | null = null
 
 function runAlgorithm() {
   if (isRunning.value) return
-  // Clear previous visited/path
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       if (grid.value[r][c] === 'visited' || grid.value[r][c] === 'path')
@@ -445,27 +552,28 @@ function runAlgorithm() {
   if (selectedAlgo.value === 'bfs') result = bfsSearch()
   else if (selectedAlgo.value === 'dfs') result = dfsSearch()
   else if (selectedAlgo.value === 'dijkstra') result = dijkstraSearch()
+  else if (selectedAlgo.value === 'greedy') result = greedySearch()
   else result = astarSearch()
   const elapsed = performance.now() - t0
 
   isRunning.value = true
   stats.value = { time: null, visited: 0, pathLength: null }
 
-  const STEPS_PER_FRAME = 4
   let vi = 0
   let pi = 0
   let phase: 'visit' | 'path' = 'visit'
 
   function animate() {
+    const steps = animSpeed.value
     if (phase === 'visit') {
-      for (let i = 0; i < STEPS_PER_FRAME && vi < result.visited.length; i++, vi++) {
+      for (let i = 0; i < steps && vi < result.visited.length; i++, vi++) {
         const p = result.visited[vi]
         if (grid.value[p.r][p.c] === 'empty') grid.value[p.r][p.c] = 'visited'
         stats.value.visited = vi + 1
       }
       if (vi >= result.visited.length) phase = 'path'
     } else {
-      for (let i = 0; i < STEPS_PER_FRAME && pi < result.path.length; i++, pi++) {
+      for (let i = 0; i < steps && pi < result.path.length; i++, pi++) {
         const p = result.path[pi]
         if (grid.value[p.r][p.c] !== 'start' && grid.value[p.r][p.c] !== 'end')
           grid.value[p.r][p.c] = 'path'
@@ -486,6 +594,16 @@ function runAlgorithm() {
   }
 
   animRaf = requestAnimationFrame(animate)
+}
+
+function generateMaze() {
+  initGrid()
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) {
+      if ((r === startPos.r && c === startPos.c) || (r === endPos.r && c === endPos.c)) continue
+      if (Math.random() < 0.28) grid.value[r][c] = 'wall'
+    }
+  draw()
 }
 
 function clearWalls() {
@@ -601,6 +719,43 @@ onUnmounted(() => {
   border-color: #00ff88;
   color: #00ff88;
   background: rgba(0, 255, 136, 0.07);
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.speed-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  cursor: pointer;
+}
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #00d4ff;
+  cursor: pointer;
+  border: none;
+}
+.speed-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #00d4ff;
+  cursor: pointer;
+  border: none;
+}
+
+.speed-val {
+  font-size: 0.85rem;
+  min-width: 1.5rem;
 }
 
 .action-btn {

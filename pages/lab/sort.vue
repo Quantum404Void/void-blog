@@ -153,4 +153,5 @@ function stepOne(){if(stepResolve){const r=stepResolve;stepResolve=null;r()}}
 function stop(){stopFlag=true;paused.value=false;if(stepResolve){stepResolve();stepResolve=null}}
 
 onMounted(()=>shuffle())
+onUnmounted(()=>{stopFlag=true;if(stepResolve){stepResolve();stepResolve=null}})
 </script>

@@ -48,6 +48,8 @@
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Snake | ${siteName}` })
 
+let _loopTimer: ReturnType<typeof setTimeout> | null = null
+
 onMounted(() => {
   const COLS = 20, ROWS = 20
   const CELL = 400 / COLS
@@ -212,6 +214,10 @@ onMounted(() => {
   })
 
   draw(); highEl.textContent=String(highScore)
+})
+
+onUnmounted(()=>{
+  if(_loopTimer) clearTimeout(_loopTimer)
 })
 </script>
 
