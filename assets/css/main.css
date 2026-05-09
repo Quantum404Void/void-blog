@@ -535,3 +535,17 @@ body::after {
 .prose pre:has(.code-line) {
   padding-left: 1.5rem;
 }
+
+/* Page transition: slide-up */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}

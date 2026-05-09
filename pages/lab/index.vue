@@ -10,7 +10,7 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">20</span> 游戏</span>
+          <span><span style="color:rgba(180,0,255,0.9)">21</span> 游戏</span>
           <span><span style="color:rgba(0,212,255,0.9)">23</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
@@ -133,6 +133,7 @@ const games = [
   { href: '/lab/games/binary-tree', icon: '🌲', label: 'Binary Tree', desc: 'BST 插入/查找/删除 + 三种遍历动画', tag: 'ALGO', color: '#00ff88' },
   { href: '/lab/games/cpu-sim', icon: '💾', label: 'CPU Sim', desc: '8-bit CPU 模拟器，支持 MOV/ADD/JMP 等指令', tag: 'SIM', color: '#b400ff' },
   { href: '/lab/games/lissajous', icon: '〰️', label: 'Lissajous', desc: '利萨如图形生成器，实时参数控制', tag: 'VISUAL', color: '#ff00aa' },
+  { href: '/lab/games/silk', icon: '🪡', label: 'Silk', desc: '丝绸画布——划出发光对称图案', tag: 'VISUAL', color: '#ff69b4' },
 ]
 
 const tools = [
