@@ -20,8 +20,9 @@
       >
         <div class="text-center border border-[var(--color-void-border)] p-8 rounded-lg bg-[var(--color-void-card)]">
           <div class="text-[var(--color-neon-cyan)] text-4xl mb-4">⚠</div>
-          <div class="text-lg mb-2">WebGL 不可用</div>
+          <div class="text-lg mb-2">WebGL 不可用或 Shader 编译失败</div>
           <div class="text-sm text-gray-400">请使用支持 WebGL 的浏览器</div>
+          <pre v-if="shaderError" class="text-xs text-red-400 mt-2 max-w-lg overflow-auto text-left">{{shaderError}}</pre>
         </div>
       </div>
 
@@ -105,6 +106,7 @@ const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Ray Marching | ${siteName}` })
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const webglError = ref(false)
+const shaderError = ref('')
 const fps = ref(0)
 const paused = ref(false)
 const currentScene = ref(0)
@@ -150,7 +152,7 @@ precision highp float;
 
 uniform float u_time;
 uniform vec2  u_resolution;
-uniform int   u_scene;
+uniform float u_scene;
 uniform vec3  u_lightDir;
 uniform float u_ao;
 uniform float u_fog;
@@ -244,9 +246,9 @@ float sdScene3(vec3 p) {
 }
 
 float sceneDist(vec3 p) {
-  if (u_scene == 0) return sdScene0(p);
-  if (u_scene == 1) return sdScene1(p);
-  if (u_scene == 2) return sdScene2(p);
+  if (u_scene < 0.5) return sdScene0(p);
+  if (u_scene < 1.5) return sdScene1(p);
+  if (u_scene < 2.5) return sdScene2(p);
   return sdScene3(p);
 }
 
@@ -300,8 +302,8 @@ float calcAO(vec3 p, vec3 n) {
 }
 
 // ---- Material color by scene/position ----
-vec3 getMaterial(vec3 p, vec3 n, int scene) {
-  if (scene == 0) {
+vec3 getMaterial(vec3 p, vec3 n, float scene) {
+  if (scene < 0.5) {
     float d0 = sdSphere(p - vec3(0.0, 0.0, 0.0), 0.8);
     float d1 = sdSphere(p - vec3(2.0, 0.3, 0.0), 0.5);
     float d2 = sdSphere(p - vec3(-1.5, 0.2, 0.5), 0.6);
@@ -317,11 +319,11 @@ vec3 getMaterial(vec3 p, vec3 n, int scene) {
     if (abs(minD - d1) < 0.01) return vec3(1.0, 0.0, 0.67);   // pink
     return vec3(0.22, 1.0, 0.08);                               // green
   }
-  if (scene == 1) {
+  if (scene < 1.5) {
     float stripe = sin(p.z * 4.0 + u_time * 2.0) * 0.5 + 0.5;
     return mix(vec3(0.0, 0.83, 1.0), vec3(1.0, 0.0, 0.67), stripe);
   }
-  if (scene == 2) {
+  if (scene < 2.5) {
     vec3 c = abs(sin(p * 2.0 + u_time * 0.3));
     return mix(vec3(0.0, 0.83, 1.0), c, 0.4);
   }
@@ -343,7 +345,7 @@ void main() {
 
   // Camera setup
   vec3 ro, ta;
-  if (u_scene == 1) {
+  if (u_scene > 0.5 && u_scene < 1.5) {
     // Flying through tunnel
     float tz = u_time * 3.0;
     ro = vec3(0.0, 0.0, tz);
@@ -387,7 +389,7 @@ void main() {
 
     // Shadow
     float sha = 1.0;
-    if (u_scene != 1) {
+    if (u_scene < 0.5 || u_scene > 1.5) {
       sha = softShadow(p + n * 0.002, lightDir, 0.02, 10.0, 8.0);
     }
 
@@ -402,7 +404,7 @@ void main() {
     col = (ambient + diffuse + specular) * ao;
 
     // Neon glow emission (for sphere scene)
-    if (u_scene == 0) {
+    if (u_scene < 0.5) {
       float glow = exp(-max(sdSphere(p - vec3(0.0,0.0,0.0), 0.8), 0.0) * 8.0);
       col += vec3(0.0, 0.5, 0.8) * glow * 0.5;
     }
@@ -433,7 +435,9 @@ function createShader(g: WebGLRenderingContext, type: number, src: string) {
   g.shaderSource(s, src)
   g.compileShader(s)
   if (!g.getShaderParameter(s, g.COMPILE_STATUS)) {
-    console.error(g.getShaderInfoLog(s))
+    const err = g.getShaderInfoLog(s) || 'unknown'
+    console.error(err)
+    shaderError.value = err
     return null
   }
   return s
@@ -521,7 +525,7 @@ function render() {
 
   setUniform('u_time', elapsed)
   setUniform('u_resolution', canvas.width, canvas.height)
-  setUniformI('u_scene', currentScene.value)
+  setUniform('u_scene', currentScene.value)
   setUniform('u_lightDir', lightX.value, lightY.value, 0)
   setUniform('u_ao', aoStrength.value)
   setUniform('u_fog', fogDensity.value)

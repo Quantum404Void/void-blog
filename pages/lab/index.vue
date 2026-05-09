@@ -10,7 +10,7 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">37</span> 游戏</span>
+          <span><span style="color:rgba(180,0,255,0.9)">38</span> 游戏</span>
           <span><span style="color:rgba(0,212,255,0.9)">28</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
@@ -150,6 +150,7 @@ const games = [
   { href: '/lab/games/x86-playground', icon: '⚡', label: 'x86 Playground', desc: 'x86 汇编执行器，寄存器/栈/内存实时展示', tag: 'SYS', color: '#ff00aa' },
   { href: '/lab/games/chip8', icon: '🕹️', label: 'CHIP-8', desc: 'CHIP-8 模拟器，内置 IBM Logo / Pong ROM', tag: 'EMU', color: '#39ff14' },
   { href: '/lab/games/ray-march', icon: '✨', label: 'Ray Marching', desc: 'WebGL SDF 实时光追，4 个霓虹场景', tag: 'WEBGL', color: '#00d4ff' },
+  { href: '/lab/games/ai-flow', icon: '🤖', label: 'AI Flow', desc: '拖拽搭建 AI 流水线，5 关从分类器到 RAG', tag: 'AI', color: '#00d4ff' },
 ]
 
 const tools = [

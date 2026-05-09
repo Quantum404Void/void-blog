@@ -17,9 +17,9 @@
           </select>
         </div>
         <div>
-          <label class="font-mono text-xs text-[var(--color-text-muted)] block mb-1">malloc(size)</label>
+          <label class="font-mono text-xs text-[var(--color-text-muted)] block mb-1">malloc(size) 1-120</label>
           <div class="flex gap-2">
-            <input v-model.number="mallocSize" type="number" min="1" max="128" placeholder="bytes"
+            <input v-model.number="mallocSize" type="number" min="1" max="120" placeholder="bytes"
               class="font-mono text-sm bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-primary)] px-3 py-2 rounded w-24" />
             <button @click="doMalloc" :disabled="animating"
               class="font-mono text-sm px-4 py-2 rounded border border-[var(--color-neon-cyan)] text-[var(--color-neon-cyan)] hover:bg-[var(--color-neon-cyan)] hover:text-black transition-colors disabled:opacity-40">
@@ -28,7 +28,7 @@
           </div>
         </div>
         <div>
-          <label class="font-mono text-xs text-[var(--color-text-muted)] block mb-1">free(ptr)</label>
+          <label class="font-mono text-xs text-[var(--color-text-muted)] block mb-1">free(id)</label>
           <div class="flex gap-2">
             <input v-model.number="freeId" type="number" min="0" placeholder="block id"
               class="font-mono text-sm bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-primary)] px-3 py-2 rounded w-24" />
@@ -47,8 +47,8 @@
           重置
         </button>
         <div class="self-end">
-          <label class="font-mono text-xs text-[var(--color-text-muted)] block mb-1">速度</label>
-          <input type="range" min="1" max="10" v-model.number="speed" class="w-24" />
+          <label class="font-mono text-xs text-[var(--color-text-muted)] block mb-1">速度 {{ speed }}x</label>
+          <input type="range" min="0.5" max="4" step="0.5" v-model.number="speed" class="w-24" />
         </div>
       </div>
 
@@ -59,25 +59,60 @@
 
       <!-- Memory visualization -->
       <div class="bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg p-4 mb-6">
-        <div class="font-mono text-xs text-[var(--color-text-muted)] mb-2">堆内存 ({{ TOTAL_BYTES }} bytes, 每格 {{ CELL_SIZE }} bytes)</div>
-        <div class="flex flex-wrap gap-px">
+        <div class="font-mono text-xs text-[var(--color-text-muted)] mb-2">堆内存 ({{ TOTAL_BYTES }} bytes)</div>
+        <!-- Memory bar -->
+        <div class="relative w-full h-14 flex rounded overflow-hidden border border-[var(--color-void-border)]"
+             @mouseleave="tooltip = null">
           <div
-            v-for="(cell, i) in cells"
-            :key="i"
-            :class="cellClass(cell, i)"
-            :title="`offset: ${i * CELL_SIZE}`"
-            class="transition-all duration-200"
-            style="width: 18px; height: 28px; border-radius: 2px;"
+            v-for="block in blocks"
+            :key="block.id + '-' + block.free"
+            class="relative h-full flex-shrink-0 transition-all duration-200 overflow-hidden cursor-pointer"
+            :style="blockStyle(block)"
+            @mouseenter="tooltip = block"
           >
+            <!-- Header section -->
+            <div class="absolute left-0 top-0 bottom-0" :style="{ width: headerWidthPct(block) + '%' }"
+                 style="background: rgba(180,0,255,0.55); border-right: 1px solid rgba(180,0,255,0.8);">
+            </div>
+            <!-- Internal frag overlay -->
+            <div v-if="!block.free && internalFrag(block) > 0"
+                 class="absolute right-0 top-0 bottom-0"
+                 :style="{ width: fragWidthPct(block) + '%', background: 'repeating-linear-gradient(45deg, rgba(234,179,8,0.35) 0px, rgba(234,179,8,0.35) 4px, transparent 4px, transparent 8px)' }">
+            </div>
+            <!-- Search highlight overlay -->
+            <div v-if="searchHighlight === block.start"
+                 class="absolute inset-0 animate-pulse"
+                 style="background: rgba(255,255,255,0.35); border: 1px solid white;">
+            </div>
+            <!-- Label -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span v-if="blockPxWidth(block) > 30" class="font-mono text-xs drop-shadow select-none"
+                    :style="{ color: block.free ? 'rgba(255,255,255,0.5)' : 'white', fontSize: '10px' }">
+                {{ block.free ? block.size + 'B' : '#' + block.id }}
+              </span>
+            </div>
           </div>
         </div>
+
+        <!-- Tooltip -->
+        <div v-if="tooltip" class="mt-2 font-mono text-xs bg-[#0a0a14] border border-[var(--color-void-border)] rounded px-3 py-2 inline-block">
+          <span class="text-[var(--color-text-muted)]">
+            {{ tooltip.free ? '空闲块' : `块 #${tooltip.id}` }}
+            · start={{ tooltip.start }}
+            · size={{ tooltip.size }}B
+            <template v-if="!tooltip.free">
+              · data={{ tooltip.dataSize }}B
+              · frag={{ internalFrag(tooltip) }}B
+            </template>
+          </span>
+        </div>
+
         <!-- Legend -->
         <div class="flex flex-wrap gap-4 mt-3 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span class="inline-block w-3 h-3 rounded-sm bg-[#1a1a2e] border border-gray-700 mr-1"></span>空闲</span>
+          <span><span class="inline-block w-3 h-3 rounded-sm mr-1" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.3)"></span>空闲</span>
           <span><span class="inline-block w-3 h-3 rounded-sm bg-purple-600 mr-1"></span>Header</span>
-          <span><span class="inline-block w-3 h-3 rounded-sm bg-[var(--color-neon-cyan)] mr-1" style="opacity:0.7"></span>已分配</span>
-          <span><span class="inline-block w-3 h-3 rounded-sm bg-yellow-500 mr-1" style="opacity:0.6"></span>内部碎片</span>
-          <span><span class="inline-block w-3 h-3 rounded-sm bg-red-700 mr-1" style="opacity:0.5"></span>外部碎片</span>
+          <span><span class="inline-block w-3 h-3 rounded-sm mr-1" style="background:hsl(47,80%,55%)"></span>已分配</span>
+          <span><span class="inline-block w-3 h-3 rounded-sm mr-1" style="background:repeating-linear-gradient(45deg,rgba(234,179,8,0.6) 0px,rgba(234,179,8,0.6) 4px,transparent 4px,transparent 8px)"></span>内部碎片</span>
           <span><span class="inline-block w-3 h-3 rounded-sm bg-white mr-1" style="opacity:0.9"></span>搜索中</span>
         </div>
       </div>
@@ -86,16 +121,15 @@
         <!-- Free list -->
         <div class="lg:col-span-1 bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg p-4">
           <div class="font-mono text-xs text-[var(--color-text-muted)] mb-3">空闲链表 (Free List)</div>
-          <div v-if="freeList.length === 0" class="font-mono text-xs text-[var(--color-text-muted)] italic">链表为空</div>
+          <div v-if="freeBlocks.length === 0" class="font-mono text-xs text-[var(--color-text-muted)] italic">链表为空</div>
           <div class="space-y-2">
-            <div v-for="(node, i) in freeList" :key="i" class="font-mono text-xs">
-              <div class="border border-[var(--color-void-border)] rounded p-2 bg-[#0a0a14]">
-                <div class="text-[var(--color-neon-green)]">[ offset: {{ node.offset }} ]</div>
+            <div v-for="(node, i) in freeBlocks" :key="node.start">
+              <div class="font-mono text-xs border border-[var(--color-void-border)] rounded p-2 bg-[#0a0a14]">
+                <div class="text-[var(--color-neon-green)]">[ offset: {{ node.start }} ]</div>
                 <div class="text-[var(--color-text-muted)]">size: {{ node.size }} bytes</div>
-                <div class="text-[var(--color-text-muted)]">prev: {{ node.prev !== null ? node.prev : 'NULL' }}</div>
-                <div class="text-[var(--color-text-muted)]">next: {{ node.next !== null ? node.next : 'NULL' }}</div>
+                <div class="text-[var(--color-text-muted)]">usable: {{ node.size - HEADER }} bytes</div>
               </div>
-              <div v-if="i < freeList.length - 1" class="text-[var(--color-text-muted)] text-center">↓</div>
+              <div v-if="i < freeBlocks.length - 1" class="text-[var(--color-text-muted)] text-center font-mono text-sm">↓</div>
             </div>
           </div>
         </div>
@@ -107,11 +141,13 @@
             <div class="font-mono text-xs text-[var(--color-text-muted)] mb-3">统计</div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
-                <div class="font-mono text-xl text-[var(--color-neon-cyan)]">{{ utilization }}%</div>
+                <div class="font-mono text-xl text-[var(--color-neon-cyan)]">{{ stats.utilization }}%</div>
                 <div class="font-mono text-xs text-[var(--color-text-muted)]">内存利用率</div>
               </div>
               <div>
-                <div class="font-mono text-xl text-yellow-400">{{ fragmentation }}%</div>
+                <div class="font-mono text-xl" :class="stats.fragRatio > 0.8 ? 'text-red-400' : 'text-yellow-400'">
+                  {{ stats.fragPct }}%
+                </div>
                 <div class="font-mono text-xs text-[var(--color-text-muted)]">碎片率</div>
               </div>
               <div>
@@ -123,6 +159,7 @@
                 <div class="font-mono text-xs text-[var(--color-text-muted)]">释放次数</div>
               </div>
             </div>
+            <div v-if="oomCount > 0" class="mt-2 font-mono text-xs text-red-400">OOM 次数: {{ oomCount }}</div>
           </div>
 
           <!-- Allocated blocks table -->
@@ -134,18 +171,18 @@
                 <tr class="text-[var(--color-text-muted)] border-b border-[var(--color-void-border)]">
                   <th class="text-left pb-1">ID</th>
                   <th class="text-left pb-1">offset</th>
-                  <th class="text-left pb-1">req</th>
-                  <th class="text-left pb-1">actual</th>
+                  <th class="text-left pb-1">data</th>
+                  <th class="text-left pb-1">total</th>
                   <th class="text-left pb-1">内部碎片</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="b in allocatedBlocks" :key="b.id" :style="{ color: blockColor(b.id) }">
                   <td class="py-0.5">#{{ b.id }}</td>
-                  <td>{{ b.offset }}</td>
-                  <td>{{ b.reqSize }}</td>
-                  <td>{{ b.size }}</td>
-                  <td class="text-yellow-500">{{ b.size - b.reqSize - HEADER_SIZE }}</td>
+                  <td>{{ b.start }}</td>
+                  <td>{{ b.dataSize }}B</td>
+                  <td>{{ b.size }}B</td>
+                  <td class="text-yellow-500">{{ internalFrag(b) }}B</td>
                 </tr>
               </tbody>
             </table>
@@ -159,217 +196,193 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Mem Allocator | ${siteName}` })
+
 const TOTAL_BYTES = 512
-const CELL_SIZE = 8 // bytes per cell
-const HEADER_SIZE = 8 // header bytes per block
-const TOTAL_CELLS = TOTAL_BYTES / CELL_SIZE
+const HEADER = 8  // header overhead per block
 
-const BLOCK_COLORS = [
-  '#00d4ff', '#39ff14', '#ff6b6b', '#ffd700', '#ff69b4',
-  '#00ff7f', '#ff4500', '#7b68ee', '#00ced1', '#ff1493',
-]
-
-type CellType = 'free' | 'header' | 'allocated' | 'padding' | 'search' | 'external-frag'
-
-interface Cell {
-  type: CellType
-  blockId: number | null
-}
-
-interface Block {
-  id: number
-  offset: number // in bytes
-  size: number   // total allocated size including header
-  reqSize: number // user requested size
-  freed: boolean
-}
-
-interface FreeNode {
-  offset: number
-  size: number
-  prev: number | null
-  next: number | null
+interface MemBlock {
+  id: number      // -1 for free blocks
+  start: number   // byte offset
+  size: number    // total size (incl header)
+  dataSize: number // user requested size
+  free: boolean
+  color?: string
 }
 
 const strategy = ref<'first' | 'best' | 'worst'>('first')
 const mallocSize = ref(32)
 const freeId = ref<number | null>(null)
 const animating = ref(false)
-const speed = ref(5)
+const speed = ref(2)
 const statusMsg = ref('就绪 · 选择策略并开始分配')
 const statusColor = ref('text-[var(--color-text-muted)]')
 const allocCount = ref(0)
 const freeCount = ref(0)
+const oomCount = ref(0)
+const searchHighlight = ref(-1)
+const tooltip = ref<MemBlock | null>(null)
 
-// Memory state
-const cells = ref<Cell[]>(Array.from({ length: TOTAL_CELLS }, () => ({ type: 'free', blockId: null })))
-const blocks = ref<Block[]>([])
 let nextId = 0
+let animCancel = false
 
-const allocatedBlocks = computed(() => blocks.value.filter(b => !b.freed))
+const blocks = ref<MemBlock[]>([
+  { id: -1, start: 0, size: TOTAL_BYTES, dataSize: 0, free: true }
+])
 
-const freeList = computed((): FreeNode[] => {
-  // Build free list from cells
-  const result: FreeNode[] = []
+const freeBlocks = computed(() => blocks.value.filter(b => b.free))
+const allocatedBlocks = computed(() => blocks.value.filter(b => !b.free))
+
+const stats = computed(() => {
+  const totalFree = freeBlocks.value.reduce((s, b) => s + b.size, 0)
+  const totalAlloc = allocatedBlocks.value.reduce((s, b) => s + b.size, 0)
+  const utilization = Math.round((totalAlloc / TOTAL_BYTES) * 100)
+
+  const freeSizes = freeBlocks.value.map(b => b.size)
+  const maxFree = freeSizes.length ? Math.max(...freeSizes) : 0
+  const fragRatio = totalFree > 0 ? maxFree / totalFree : 1
+  const fragPct = totalFree > 0 ? Math.round((1 - fragRatio) * 100) : 0
+
+  return { utilization, fragRatio, fragPct }
+})
+
+function internalFrag(b: MemBlock) {
+  if (b.free) return 0
+  return b.size - HEADER - b.dataSize
+}
+
+function blockColor(id: number) {
+  return `hsl(${(id * 47) % 360}, 80%, 55%)`
+}
+
+function blockStyle(b: MemBlock) {
+  const widthPct = (b.size / TOTAL_BYTES) * 100
+  if (b.free) {
+    return {
+      width: widthPct + '%',
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(255,255,255,0.15)',
+    }
+  }
+  return {
+    width: widthPct + '%',
+    background: blockColor(b.id) + '33',
+    border: `1px solid ${blockColor(b.id)}88`,
+  }
+}
+
+function headerWidthPct(b: MemBlock) {
+  return (HEADER / b.size) * 100
+}
+
+function fragWidthPct(b: MemBlock) {
+  const frag = internalFrag(b)
+  return frag > 0 ? (frag / b.size) * 100 : 0
+}
+
+function blockPxWidth(b: MemBlock) {
+  // estimate pixel width (rough)
+  return (b.size / TOTAL_BYTES) * 800
+}
+
+function sleep(ms: number) {
+  return new Promise<void>(r => setTimeout(r, ms))
+}
+
+function coalesce() {
   let i = 0
-  while (i < TOTAL_CELLS) {
-    if (cells.value[i].type === 'free' || cells.value[i].type === 'external-frag') {
-      let start = i
-      while (i < TOTAL_CELLS && (cells.value[i].type === 'free' || cells.value[i].type === 'external-frag')) i++
-      const size = (i - start) * CELL_SIZE
-      result.push({ offset: start * CELL_SIZE, size, prev: null, next: null })
+  while (i < blocks.value.length - 1) {
+    if (blocks.value[i].free && blocks.value[i + 1].free) {
+      blocks.value[i].size += blocks.value[i + 1].size
+      blocks.value.splice(i + 1, 1)
     } else {
       i++
     }
   }
-  // Link
-  for (let j = 0; j < result.length; j++) {
-    result[j].prev = j > 0 ? result[j - 1].offset : null
-    result[j].next = j < result.length - 1 ? result[j + 1].offset : null
-  }
-  return result
-})
-
-const utilization = computed(() => {
-  const used = cells.value.filter(c => c.type === 'allocated' || c.type === 'header' || c.type === 'padding').length
-  return Math.round((used / TOTAL_CELLS) * 100)
-})
-
-const fragmentation = computed(() => {
-  // External fragmentation: free cells that are too small to satisfy even 1 byte (less than header+1)
-  const minAlloc = Math.ceil((HEADER_SIZE + 1) / CELL_SIZE)
-  const freeRuns: number[] = []
-  let i = 0
-  while (i < TOTAL_CELLS) {
-    if (cells.value[i].type === 'free') {
-      let start = i
-      while (i < TOTAL_CELLS && cells.value[i].type === 'free') i++
-      freeRuns.push(i - start)
-    } else i++
-  }
-  if (freeRuns.length === 0) return 0
-  const externalFrag = freeRuns.filter(r => r < minAlloc).reduce((a, b) => a + b, 0)
-  const totalFree = freeRuns.reduce((a, b) => a + b, 0)
-  if (totalFree === 0) return 0
-  return Math.round((externalFrag / TOTAL_CELLS) * 100)
-})
-
-function blockColor(id: number) {
-  return BLOCK_COLORS[id % BLOCK_COLORS.length]
 }
-
-function cellClass(cell: Cell, _i: number) {
-  const base = 'inline-block'
-  switch (cell.type) {
-    case 'free': return `${base} bg-[#1a1a2e] border border-gray-800`
-    case 'header': return `${base} bg-purple-700 border border-purple-500`
-    case 'allocated': return `${base} border border-transparent`
-    case 'padding': return `${base} bg-yellow-600 border border-yellow-400 opacity-60`
-    case 'external-frag': return `${base} bg-red-900 border border-red-700 opacity-50`
-    case 'search': return `${base} bg-white border border-white opacity-90`
-    default: return base
-  }
-}
-
-// Override style for allocated cells with block color
-function getAllocStyle(cell: Cell) {
-  if (cell.type === 'allocated' && cell.blockId !== null) {
-    return { backgroundColor: BLOCK_COLORS[cell.blockId % BLOCK_COLORS.length] + 'aa' }
-  }
-  return {}
-}
-
-// Find free runs
-function getFreeRuns() {
-  const runs: { start: number; len: number }[] = []
-  let i = 0
-  while (i < TOTAL_CELLS) {
-    if (cells.value[i].type === 'free') {
-      let start = i
-      while (i < TOTAL_CELLS && cells.value[i].type === 'free') i++
-      runs.push({ start, len: i - start })
-    } else i++
-  }
-  return runs
-}
-
-const delay = () => new Promise(r => setTimeout(r, Math.round(600 / speed.value)))
 
 async function doMalloc() {
   if (animating.value) return
-  const reqBytes = mallocSize.value
-  if (!reqBytes || reqBytes < 1) return
+  const reqSize = mallocSize.value
+  if (!reqSize || reqSize < 1 || reqSize > 120) return
+
   animating.value = true
+  animCancel = false
+  const total = reqSize + HEADER
 
-  const totalNeeded = reqBytes + HEADER_SIZE
-  const cellsNeeded = Math.ceil(totalNeeded / CELL_SIZE)
-
-  const runs = getFreeRuns()
-  const eligible = runs.filter(r => r.len >= cellsNeeded)
-
-  if (eligible.length === 0) {
-    statusMsg.value = `❌ malloc(${reqBytes}) 失败 · 无足够连续空间`
+  const candidates = blocks.value.filter(b => b.free && b.size >= total)
+  if (candidates.length === 0) {
+    statusMsg.value = `❌ malloc(${reqSize}) OOM · 无足够连续空间`
     statusColor.value = 'text-red-400'
+    oomCount.value++
     animating.value = false
     return
   }
 
-  let chosen: { start: number; len: number }
+  let target: MemBlock
   if (strategy.value === 'first') {
-    chosen = eligible[0]
+    target = candidates[0]
   } else if (strategy.value === 'best') {
-    chosen = eligible.reduce((a, b) => a.len < b.len ? a : b)
+    target = candidates.reduce((a, b) => a.size < b.size ? a : b)
   } else {
-    chosen = eligible.reduce((a, b) => a.len > b.len ? a : b)
+    target = candidates.reduce((a, b) => a.size > b.size ? a : b)
   }
 
-  // Animate search
-  statusMsg.value = `🔍 ${strategy.value === 'first' ? 'First' : strategy.value === 'best' ? 'Best' : 'Worst'} Fit 搜索中...`
+  // Search animation: highlight each free block being examined
+  const stratLabel = strategy.value === 'first' ? 'First' : strategy.value === 'best' ? 'Best' : 'Worst'
+  statusMsg.value = `🔍 ${stratLabel} Fit 搜索中...`
   statusColor.value = 'text-white'
-  for (const run of runs) {
-    for (let j = run.start; j < run.start + run.len; j++) {
-      cells.value[j] = { type: 'search', blockId: null }
-    }
-    await delay()
-    const isChosen = run.start === chosen.start
-    if (!isChosen) {
-      // restore to free
-      for (let j = run.start; j < run.start + run.len; j++) {
-        cells.value[j] = { type: 'free', blockId: null }
-      }
-    }
-    if (strategy.value === 'first' && isChosen) break
+
+  const freeOnly = blocks.value.filter(b => b.free)
+  for (const b of freeOnly) {
+    if (animCancel) break
+    searchHighlight.value = b.start
+    await sleep(50 / speed.value)
+    if (b === target) break
+    searchHighlight.value = -1
   }
+  searchHighlight.value = -1
 
-  await delay()
+  if (animCancel) { animating.value = false; return }
 
-  // Allocate
+  await sleep(120 / speed.value)
+
+  // Find target index in blocks array
+  const idx = blocks.value.indexOf(target)
+  if (idx === -1) { animating.value = false; return }
+
+  const remaining = target.size - total
   const id = nextId++
-  const headerCells = Math.ceil(HEADER_SIZE / CELL_SIZE)
-  const dataCells = cellsNeeded - headerCells
-  const paddingBytes = cellsNeeded * CELL_SIZE - totalNeeded
-  const paddingCells = Math.ceil(paddingBytes / CELL_SIZE)
 
-  for (let j = chosen.start; j < chosen.start + headerCells; j++) {
-    cells.value[j] = { type: 'header', blockId: id }
+  if (remaining > HEADER + 1) {
+    // Split
+    const newFree: MemBlock = {
+      id: -1,
+      start: target.start + total,
+      size: remaining,
+      dataSize: 0,
+      free: true,
+    }
+    blocks.value[idx] = {
+      id,
+      start: target.start,
+      size: total,
+      dataSize: reqSize,
+      free: false,
+    }
+    blocks.value.splice(idx + 1, 0, newFree)
+  } else {
+    // Internal fragmentation: use whole block
+    blocks.value[idx] = {
+      id,
+      start: target.start,
+      size: target.size,
+      dataSize: reqSize,
+      free: false,
+    }
   }
-  for (let j = chosen.start + headerCells; j < chosen.start + cellsNeeded - paddingCells; j++) {
-    cells.value[j] = { type: 'allocated', blockId: id }
-  }
-  for (let j = chosen.start + cellsNeeded - paddingCells; j < chosen.start + cellsNeeded; j++) {
-    cells.value[j] = { type: 'padding', blockId: id }
-  }
-
-  blocks.value.push({
-    id,
-    offset: chosen.start * CELL_SIZE,
-    size: cellsNeeded * CELL_SIZE,
-    reqSize: reqBytes,
-    freed: false,
-  })
 
   allocCount.value++
-  statusMsg.value = `✅ malloc(${reqBytes}) → 块 #${id} @ offset ${chosen.start * CELL_SIZE}`
+  statusMsg.value = `✅ malloc(${reqSize}) → 块 #${id} @ offset ${blocks.value[idx].start}`
   statusColor.value = 'text-[var(--color-neon-green)]'
   animating.value = false
 }
@@ -378,9 +391,9 @@ async function doFree() {
   if (animating.value) return
   const id = freeId.value
   if (id === null) return
-  animating.value = true
 
-  const block = blocks.value.find(b => b.id === id && !b.freed)
+  animating.value = true
+  const block = blocks.value.find(b => b.id === id && !b.free)
   if (!block) {
     statusMsg.value = `❌ free(#${id}) 失败 · 块不存在或已释放`
     statusColor.value = 'text-red-400'
@@ -388,27 +401,23 @@ async function doFree() {
     return
   }
 
-  const startCell = block.offset / CELL_SIZE
-  const endCell = startCell + block.size / CELL_SIZE
+  // Flash the block before freeing
+  searchHighlight.value = block.start
+  await sleep(200 / speed.value)
+  searchHighlight.value = -1
 
-  // Animate free
-  for (let j = startCell; j < endCell; j++) {
-    cells.value[j] = { type: 'search', blockId: null }
-  }
-  await delay()
+  block.free = true
+  block.id = -1
+  block.dataSize = 0
 
-  block.freed = true
-  for (let j = startCell; j < endCell; j++) {
-    cells.value[j] = { type: 'free', blockId: null }
-  }
-
-  statusMsg.value = `🔗 尝试合并相邻空闲块...`
+  statusMsg.value = `🔗 合并相邻空闲块...`
   statusColor.value = 'text-yellow-400'
-  await delay()
+  await sleep(150 / speed.value)
 
-  // Coalescing is automatic since we track by cells; already done
+  coalesce()
+
   freeCount.value++
-  statusMsg.value = `✅ free(#${id}) 完成 · 已尝试合并`
+  statusMsg.value = `✅ free(#${id}) 完成`
   statusColor.value = 'text-[var(--color-neon-cyan)]'
   animating.value = false
 }
@@ -416,26 +425,35 @@ async function doFree() {
 async function runRandom() {
   if (animating.value) return
   const sizes = [16, 24, 32, 48, 64, 80]
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     mallocSize.value = sizes[Math.floor(Math.random() * sizes.length)]
     await doMalloc()
-    await new Promise(r => setTimeout(r, 200))
+    await sleep(150)
   }
-  // Free some
-  const alive = blocks.value.filter(b => !b.freed)
-  if (alive.length > 1) {
-    freeId.value = alive[Math.floor(Math.random() * alive.length)].id
+  // Free some random allocated blocks
+  const alive = blocks.value.filter(b => !b.free)
+  const toFree = alive.slice(0, Math.ceil(alive.length / 2))
+  for (const b of toFree) {
+    freeId.value = b.id
     await doFree()
+    await sleep(100)
   }
+  // Allocate again to show coalescing effect
+  mallocSize.value = sizes[Math.floor(Math.random() * sizes.length)]
+  await doMalloc()
 }
 
 function resetMem() {
-  cells.value = Array.from({ length: TOTAL_CELLS }, () => ({ type: 'free', blockId: null }))
-  blocks.value = []
+  animCancel = true
+  blocks.value = [{ id: -1, start: 0, size: TOTAL_BYTES, dataSize: 0, free: true }]
   nextId = 0
   allocCount.value = 0
   freeCount.value = 0
+  oomCount.value = 0
+  searchHighlight.value = -1
+  tooltip.value = null
   statusMsg.value = '已重置'
   statusColor.value = 'text-[var(--color-text-muted)]'
+  setTimeout(() => { animating.value = false }, 50)
 }
 </script>
