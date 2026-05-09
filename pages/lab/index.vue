@@ -10,7 +10,7 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">21</span> 游戏</span>
+          <span><span style="color:rgba(180,0,255,0.9)">37</span> 游戏</span>
           <span><span style="color:rgba(0,212,255,0.9)">23</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
@@ -134,6 +134,22 @@ const games = [
   { href: '/lab/games/cpu-sim', icon: '💾', label: 'CPU Sim', desc: '8-bit CPU 模拟器，支持 MOV/ADD/JMP 等指令', tag: 'SIM', color: '#b400ff' },
   { href: '/lab/games/lissajous', icon: '〰️', label: 'Lissajous', desc: '利萨如图形生成器，实时参数控制', tag: 'VISUAL', color: '#ff00aa' },
   { href: '/lab/games/silk', icon: '🪡', label: 'Silk', desc: '丝绸画布——划出发光对称图案', tag: 'VISUAL', color: '#ff69b4' },
+  { href: '/lab/games/brainfuck', icon: '🧬', label: 'Brainfuck', desc: 'Brainfuck 解释器，内存带可视化，单步调试', tag: 'ESOTERIC', color: '#00ff88' },
+  { href: '/lab/games/base64-visual', icon: '🔡', label: 'Base64 可视化', desc: '字节级 UTF-8 → Base64 编解码对应关系', tag: 'ENCODE', color: '#ffa500' },
+  { href: '/lab/games/hash-collision', icon: '💥', label: '哈希碰撞', desc: '生日悖论模拟 + 哈希桶碰撞可视化', tag: 'CRYPTO', color: '#ff00aa' },
+  { href: '/lab/games/cpu-scheduler', icon: '⚙️', label: 'CPU 调度器', desc: 'FCFS/SJF/RR/优先级调度甘特图动画', tag: 'SYS', color: '#b400ff' },
+  { href: '/lab/games/tcp-handshake', icon: '🤝', label: 'TCP 握手', desc: '三次握手/四次挥手/滑动窗口可视化', tag: 'NET', color: '#00d4ff' },
+  { href: '/lab/games/dns-trace', icon: '🔍', label: 'DNS 追踪', desc: '递归解析路径动画，根服务器到权威服务器', tag: 'NET', color: '#39ff14' },
+  { href: '/lab/games/http-compare', icon: '📡', label: 'HTTP 对比', desc: 'HTTP/1.1 vs HTTP/2 vs HTTP/3 瀑布图对比', tag: 'NET', color: '#ff4500' },
+  { href: '/lab/games/shell-sim', icon: '💻', label: 'Shell 模拟器', desc: '浏览器里的 Linux Shell，含彩蛋', tag: 'SYS', color: '#39ff14' },
+  { href: '/lab/games/git-objects', icon: '🌿', label: 'Git 对象模型', desc: 'blob/tree/commit/ref 关系图可视化', tag: 'SYS', color: '#ff6b35' },
+  { href: '/lab/games/regex-nfa', icon: '🕸️', label: '正则 NFA', desc: 'Thompson 构造 NFA + 逐字符匹配动画', tag: 'ALGO', color: '#b400ff' },
+  { href: '/lab/games/neural-net', icon: '🧠', label: '神经网络', desc: '前向传播可视化，权重/激活值动画', tag: 'AI', color: '#00d4ff' },
+  { href: '/lab/games/btree', icon: '🌳', label: 'B+ 树', desc: '插入/删除分裂合并动画，叶节点链表', tag: 'ALGO', color: '#00ff88' },
+  { href: '/lab/games/mem-allocator', icon: '🗃️', label: '内存分配器', desc: 'First/Best/Worst Fit + 碎片可视化', tag: 'SYS', color: '#ffa500' },
+  { href: '/lab/games/x86-playground', icon: '⚡', label: 'x86 Playground', desc: 'x86 汇编执行器，寄存器/栈/内存实时展示', tag: 'SYS', color: '#ff00aa' },
+  { href: '/lab/games/chip8', icon: '🕹️', label: 'CHIP-8', desc: 'CHIP-8 模拟器，内置 IBM Logo / Pong ROM', tag: 'EMU', color: '#39ff14' },
+  { href: '/lab/games/ray-march', icon: '✨', label: 'Ray Marching', desc: 'WebGL SDF 实时光追，4 个霓虹场景', tag: 'WEBGL', color: '#00d4ff' },
 ]
 
 const tools = [
