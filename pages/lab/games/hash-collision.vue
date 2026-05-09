@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)] font-mono">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'hash-collision' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'hash-collision' }]" />
 
     <div class="max-w-5xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold text-[var(--color-neon-cyan)] mb-2">Hash Collision & Birthday Paradox</h1>

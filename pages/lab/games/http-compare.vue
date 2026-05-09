@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'http-compare' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'http-compare' }]" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <h1 class="font-mono text-2xl text-[var(--color-neon-cyan)] mb-2">HTTP/1.1 vs HTTP/2 vs HTTP/3</h1>

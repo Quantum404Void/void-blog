@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)] font-mono">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'brainfuck' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'brainfuck' }]" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold text-[var(--color-neon-cyan)] mb-2">Brainfuck Interpreter</h1>

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'git-objects' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'git-objects' }]" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="mb-6">

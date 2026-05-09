@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)] font-mono">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'cpu-scheduler' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'cpu-scheduler' }]" />
 
     <div class="max-w-6xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold text-[var(--color-neon-cyan)] mb-2">CPU Scheduler Simulator</h1>

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'btree' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'btree' }]" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <h1 class="font-mono text-2xl text-[var(--color-neon-cyan)] mb-2">B+ 树操作动画</h1>

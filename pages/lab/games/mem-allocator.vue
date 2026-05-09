@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'mem-allocator' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'mem-allocator' }]" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <h1 class="font-mono text-2xl text-[var(--color-neon-cyan)] mb-2">Memory Allocator</h1>

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-black relative overflow-hidden">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'silk' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'silk' }]" />
 
     <!-- 底层：永久画布 -->
     <canvas ref="baseCanvas" class="absolute inset-0 w-full h-full" style="touch-action:none;" />

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-[var(--color-text-primary)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'regex-nfa' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'regex-nfa' }]" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <h1 class="font-mono text-2xl text-[var(--color-neon-cyan)] mb-2">正则引擎 NFA 可视化</h1>

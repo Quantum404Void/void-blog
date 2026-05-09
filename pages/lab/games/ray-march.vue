@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)] text-white font-mono">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'ray-march' }]" />
+    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'ray-march' }]" />
 
     <div class="relative w-full" style="height: calc(100vh - 56px)">
       <!-- Canvas -->
