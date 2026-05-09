@@ -1,107 +1,87 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] relative overflow-hidden">
+  <div class="min-h-screen bg-black relative overflow-hidden">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'silk' }]" />
 
-    <canvas ref="canvasRef" class="absolute inset-0 w-full h-full" style="touch-action: none;" />
+    <!-- 底层：永久画布 -->
+    <canvas ref="baseCanvas" class="absolute inset-0 w-full h-full" style="touch-action:none;" />
+    <!-- 顶层：fade 层，每帧半透明黑色覆盖 -->
+    <canvas ref="fadeCanvas" class="absolute inset-0 w-full h-full pointer-events-none" />
 
     <!-- Control Panel -->
-    <div class="absolute top-14 right-4 z-10 flex flex-col gap-2 font-mono text-xs">
-      <div class="bg-black/70 border border-[#ff69b4]/30 rounded-xl p-3 backdrop-blur-sm flex flex-col gap-3 min-w-[160px]">
-        <p class="text-[#ff69b4] text-[10px] tracking-widest uppercase mb-1">silk controls</p>
+    <div class="absolute top-14 right-4 z-10 font-mono text-xs select-none">
+      <div class="bg-black/80 border border-white/10 rounded-xl p-3 backdrop-blur-sm flex flex-col gap-3" style="min-width:160px">
+        <p class="text-white/40 text-[9px] tracking-widest uppercase">silk</p>
 
         <!-- Symmetry -->
         <div>
-          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">symmetry</label>
+          <label class="text-white/30 text-[9px] block mb-1.5">symmetry</label>
           <div class="flex gap-1">
-            <button
-              v-for="n in [2, 4, 6, 8]"
-              :key="n"
-              @click="symmetry = n"
-              class="flex-1 py-1 rounded border text-[10px] transition-colors"
-              :style="symmetry === n
-                ? 'border-color:#ff69b4;color:#ff69b4;background:#ff69b41a'
-                : 'border-color:#ff69b430;color:#666;background:transparent'"
-            >{{ n }}</button>
+            <button v-for="n in [2,4,6,8]" :key="n" @click="symmetry=n"
+              class="flex-1 py-1 rounded text-[10px] border transition-all"
+              :style="symmetry===n ? 'border-color:rgba(255,255,255,0.5);color:#fff' : 'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3)'"
+            >{{n}}</button>
           </div>
+        </div>
+
+        <!-- Fade -->
+        <div>
+          <label class="text-white/30 text-[9px] block mb-1">fade <span class="text-white/50">{{fadeAmount}}</span></label>
+          <input v-model.number="fadeAmount" type="range" min="0" max="40" step="1" class="w-full h-1 accent-white" />
         </div>
 
         <!-- Color Mode -->
         <div>
-          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">color mode</label>
-          <div class="flex gap-1">
-            <button
-              @click="colorMode = 'rainbow'"
-              class="flex-1 py-1 rounded border text-[10px] transition-colors"
-              :style="colorMode === 'rainbow'
-                ? 'border-color:#ff69b4;color:#ff69b4;background:#ff69b41a'
-                : 'border-color:#ff69b430;color:#666;background:transparent'"
+          <label class="text-white/30 text-[9px] block mb-1.5">color</label>
+          <div class="flex gap-1 mb-2">
+            <button @click="colorMode='rainbow'"
+              class="flex-1 py-1 rounded text-[10px] border transition-all"
+              :style="colorMode==='rainbow' ? 'border-color:rgba(255,255,255,0.5);color:#fff' : 'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3)'"
             >rainbow</button>
-            <button
-              @click="colorMode = 'fixed'"
-              class="flex-1 py-1 rounded border text-[10px] transition-colors"
-              :style="colorMode === 'fixed'
-                ? 'border-color:#ff69b4;color:#ff69b4;background:#ff69b41a'
-                : 'border-color:#ff69b430;color:#666;background:transparent'"
+            <button @click="colorMode='fixed'"
+              class="flex-1 py-1 rounded text-[10px] border transition-all"
+              :style="colorMode==='fixed' ? 'border-color:rgba(255,255,255,0.5);color:#fff' : 'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3)'"
             >fixed</button>
           </div>
-        </div>
 
-        <!-- Hue Speed (rainbow only) -->
-        <div v-if="colorMode === 'rainbow'">
-          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">hue speed</label>
-          <input
-            v-model.number="hueSpeed"
-            type="range" min="0" max="3" step="0.1"
-            class="w-full accent-[#ff69b4] h-1"
-          />
-        </div>
-
-        <!-- Lightness (rainbow only) -->
-        <div v-if="colorMode === 'rainbow'">
-          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">lightness {{ lightness }}%</label>
-          <input
-            v-model.number="lightness"
-            type="range" min="0" max="100" step="1"
-            class="w-full accent-[#ff69b4] h-1"
-          />
-        </div>
-
-        <!-- Fixed Color Presets -->
-        <div v-if="colorMode === 'fixed'">
-          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">color</label>
-          <div class="flex gap-1 flex-wrap mb-1">
-            <button
-              v-for="c in presetColors"
-              :key="c"
-              @click="fixedColor = c"
-              class="w-6 h-6 rounded-full border-2 transition-all"
-              :style="`background:${c};border-color:${fixedColor === c ? '#fff' : 'transparent'}`"
-            />
+          <!-- Rainbow: hue speed -->
+          <div v-if="colorMode==='rainbow'">
+            <label class="text-white/30 text-[9px] block mb-1">hue speed</label>
+            <input v-model.number="hueSpeed" type="range" min="0" max="4" step="0.1" class="w-full h-1 accent-white" />
           </div>
-          <input
-            v-model="fixedColor"
-            type="color"
-            class="w-full h-6 rounded cursor-pointer"
-          />
+
+          <!-- Fixed: presets + picker -->
+          <div v-else class="flex flex-col gap-1.5">
+            <div class="flex gap-1 flex-wrap">
+              <button v-for="c in presets" :key="c" @click="fixedHex=c"
+                class="w-5 h-5 rounded-full transition-all"
+                :style="`background:${c};outline:${fixedHex===c?'2px solid #fff':'2px solid transparent'};outline-offset:1px`"
+              />
+            </div>
+            <input v-model="fixedHex" type="color" class="w-full h-6 rounded cursor-pointer bg-transparent border-0" />
+          </div>
         </div>
 
-        <!-- Clear -->
-        <button
-          @click="clearCanvas"
-          class="py-1.5 rounded border border-[#ff69b4]/30 text-[#ff69b4]/80 hover:bg-[#ff69b4]/10 transition-colors text-[10px] tracking-wider"
-        >clear</button>
+        <!-- Brush size -->
+        <div>
+          <label class="text-white/30 text-[9px] block mb-1">brush <span class="text-white/50">{{brushMax}}</span></label>
+          <input v-model.number="brushMax" type="range" min="2" max="30" step="1" class="w-full h-1 accent-white" />
+        </div>
 
-        <!-- Save -->
-        <button
-          @click="saveImage"
-          class="py-1.5 rounded border border-[#ff69b4]/30 text-[#ff69b4]/80 hover:bg-[#ff69b4]/10 transition-colors text-[10px] tracking-wider"
-        >save png</button>
+        <!-- Clear + Save -->
+        <button @click="clearAll"
+          class="py-1.5 rounded border border-white/10 text-white/40 hover:text-white/70 hover:border-white/30 transition-all text-[10px] tracking-wider">
+          clear
+        </button>
+        <button @click="saveImage"
+          class="py-1.5 rounded border border-white/10 text-white/40 hover:text-white/70 hover:border-white/30 transition-all text-[10px] tracking-wider">
+          save png
+        </button>
       </div>
     </div>
 
     <!-- Hint -->
-    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] text-[var(--color-text-muted)] opacity-50 pointer-events-none">
-      move mouse or touch to paint · {{ symmetry }}-axis symmetry
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/20 pointer-events-none whitespace-nowrap">
+      move mouse to paint · {{symmetry}}-axis symmetry
     </div>
   </div>
 </template>
@@ -110,54 +90,196 @@
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Silk | ${siteName}` })
 
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-const symmetry = ref(6)
-const hueSpeed = ref(0.3)
-const colorMode = ref<'rainbow' | 'fixed'>('rainbow')
-const fixedColor = ref('#00d4ff')
-const lightness = ref(65)
-const presetColors = ['#00d4ff', '#ff00aa', '#39ff14', '#b400ff', '#ffa500', '#ff4444']
+// ---- refs ----
+const baseCanvas = ref<HTMLCanvasElement | null>(null)
+const fadeCanvas  = ref<HTMLCanvasElement | null>(null)
 
-function hexToRgba(hex: string, alpha: number) {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r},${g},${b},${alpha})`
+// ---- settings ----
+const symmetry   = ref(6)
+const fadeAmount = ref(8)        // 每帧 fade 强度（0=不消散，40=快速消散）
+const hueSpeed   = ref(0.5)
+const brushMax   = ref(12)       // 最大笔刷半径
+const colorMode  = ref<'rainbow'|'fixed'>('rainbow')
+const fixedHex   = ref('#00d4ff')
+const presets    = ['#00d4ff','#ff00aa','#ff6b35','#39ff14','#b400ff','#ffffff']
+
+// ---- state ----
+let baseCtx: CanvasRenderingContext2D | null = null
+let fadeCtx:  CanvasRenderingContext2D | null = null
+let hue      = 0
+let rafId    = 0
+
+// 鼠标轨迹：最近N个点，用于 tapered 笔触
+const TRAIL  = 8
+let trail: { x:number; y:number }[] = []
+let mouseX   = -9999
+let mouseY   = -9999
+let prevX    = -9999
+let prevY    = -9999
+let moving   = false   // 鼠标是否在移动（用于判断是否绘制）
+
+// ---- 颜色 ----
+function hexToRgb(hex: string) {
+  return {
+    r: parseInt(hex.slice(1,3),16),
+    g: parseInt(hex.slice(3,5),16),
+    b: parseInt(hex.slice(5,7),16),
+  }
 }
 
-let ctx: CanvasRenderingContext2D | null = null
-let hue = 0
-let isDrawing = false
-let points: { x: number; y: number }[] = []
-let lastSpeed = 0
-let animFrameId: number | null = null
-
-function resize() {
-  const canvas = canvasRef.value
-  if (!canvas || !ctx) return
-  // Preserve content
-  const tmp = document.createElement('canvas')
-  tmp.width = canvas.width
-  tmp.height = canvas.height
-  tmp.getContext('2d')!.drawImage(canvas, 0, 0)
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-  ctx.globalCompositeOperation = 'source-over'
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.drawImage(tmp, 0, 0)
+function getStrokeColor(alpha: number): string {
+  if (colorMode.value === 'fixed') {
+    const {r,g,b} = hexToRgb(fixedHex.value)
+    return `rgba(${r},${g},${b},${alpha})`
+  }
+  // rainbow：用当前 hue，饱和度100%，亮度70%（比纯hsla更亮）
+  return `hsla(${hue},100%,70%,${alpha})`
 }
 
-function clearCanvas() {
-  const canvas = canvasRef.value
-  if (!canvas || !ctx) return
+// ---- 核心绘制：tapered stroke ----
+// 模拟 weavesilk 的笔触：从起点到终点，线宽从细到粗再到细
+function drawTaperedLine(
+  ctx: CanvasRenderingContext2D,
+  x1: number, y1: number,
+  x2: number, y2: number,
+  speed: number
+) {
+  const dist = Math.hypot(x2-x1, y2-y1)
+  if (dist < 0.5) return
+
+  // 速度越快线越细，停止时最粗
+  const maxW = Math.max(1, brushMax.value - speed * 0.3)
+  const segments = Math.max(2, Math.ceil(dist / 2))
+
+  ctx.globalCompositeOperation = 'lighter'
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+
+  for (let i = 0; i < segments; i++) {
+    const t0 = i / segments
+    const t1 = (i+1) / segments
+    const tx0 = x1 + (x2-x1)*t0
+    const ty0 = y1 + (y2-y1)*t0
+    const tx1 = x1 + (x2-x1)*t1
+    const ty1 = y1 + (y2-y1)*t1
+
+    // tapered：两端细，中间粗（bell curve）
+    const taper = Math.sin(Math.PI * ((t0+t1)/2))
+    const w = Math.max(0.3, maxW * taper)
+
+    // 外层光晕（更大更透明）
+    ctx.lineWidth  = w * 3
+    ctx.strokeStyle = getStrokeColor(0.04)
+    ctx.beginPath(); ctx.moveTo(tx0,ty0); ctx.lineTo(tx1,ty1); ctx.stroke()
+
+    // 中层
+    ctx.lineWidth  = w * 1.5
+    ctx.strokeStyle = getStrokeColor(0.12)
+    ctx.beginPath(); ctx.moveTo(tx0,ty0); ctx.lineTo(tx1,ty1); ctx.stroke()
+
+    // 核心线
+    ctx.lineWidth  = Math.max(0.3, w * 0.5)
+    ctx.strokeStyle = getStrokeColor(0.5)
+    ctx.beginPath(); ctx.moveTo(tx0,ty0); ctx.lineTo(tx1,ty1); ctx.stroke()
+  }
+}
+
+// ---- 对称绘制 ----
+function drawSymmetric(mx: number, my: number, px: number, py: number) {
+  const ctx = baseCtx
+  if (!ctx || !baseCanvas.value) return
+  const canvas = baseCanvas.value
+  const cx = canvas.width / 2
+  const cy = canvas.height / 2
+  const n  = symmetry.value
+  const speed = Math.hypot(mx-px, my-py)
+
+  for (let i = 0; i < n; i++) {
+    const angle = (Math.PI * 2 / n) * i
+    ctx.save()
+    ctx.translate(cx, cy)
+    ctx.rotate(angle)
+
+    // 正向
+    drawTaperedLine(ctx, px-cx, py-cy, mx-cx, my-cy, speed)
+
+    // 镜像（weavesilk 在每个轴上同时画镜像）
+    ctx.scale(1, -1)
+    drawTaperedLine(ctx, px-cx, -(py-cy), mx-cx, -(my-cy), speed)
+
+    ctx.restore()
+  }
+}
+
+// ---- Fade（顶层每帧淡化）----
+function applyFade() {
+  const ctx = fadeCtx
+  const canvas = fadeCanvas.value
+  if (!ctx || !canvas) return
+  const alpha = fadeAmount.value / 255
+  if (alpha < 0.001) return
   ctx.globalCompositeOperation = 'source-over'
-  ctx.fillStyle = '#000'
+  ctx.fillStyle = `rgba(0,0,0,${alpha})`
   ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+// ---- 主循环 ----
+function loop() {
+  hue = (hue + hueSpeed.value) % 360
+
+  if (moving && prevX > -9000) {
+    drawSymmetric(mouseX, mouseY, prevX, prevY)
+  }
+
+  // fade 作用于 base canvas 上（直接在 baseCtx 叠一层半透明黑）
+  if (fadeAmount.value > 0 && baseCtx && baseCanvas.value) {
+    const c = baseCanvas.value
+    baseCtx.globalCompositeOperation = 'source-over'
+    baseCtx.fillStyle = `rgba(0,0,0,${fadeAmount.value/2000})`
+    baseCtx.fillRect(0, 0, c.width, c.height)
+  }
+
+  prevX = mouseX
+  prevY = mouseY
+  moving = false
+
+  rafId = requestAnimationFrame(loop)
+}
+
+// ---- 事件处理 ----
+function getPos(e: MouseEvent | Touch) {
+  const canvas = baseCanvas.value!
+  const rect = canvas.getBoundingClientRect()
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+}
+
+function onMouseMove(e: MouseEvent) {
+  const pos = getPos(e)
+  mouseX = pos.x; mouseY = pos.y; moving = true
+}
+function onTouchMove(e: TouchEvent) {
+  e.preventDefault()
+  const pos = getPos(e.touches[0])
+  mouseX = pos.x; mouseY = pos.y; moving = true
+}
+function onTouchStart(e: TouchEvent) {
+  e.preventDefault()
+  const pos = getPos(e.touches[0])
+  mouseX = pos.x; mouseY = pos.y; prevX = pos.x; prevY = pos.y; moving = false
+}
+
+// ---- 工具 ----
+function clearAll() {
+  if (!baseCtx || !baseCanvas.value) return
+  baseCtx.globalCompositeOperation = 'source-over'
+  baseCtx.fillStyle = '#000'
+  baseCtx.fillRect(0, 0, baseCanvas.value.width, baseCanvas.value.height)
+  trail = []
+  prevX = -9999; prevY = -9999
 }
 
 function saveImage() {
-  const canvas = canvasRef.value
+  const canvas = baseCanvas.value
   if (!canvas) return
   const a = document.createElement('a')
   a.href = canvas.toDataURL('image/png')
@@ -165,124 +287,56 @@ function saveImage() {
   a.click()
 }
 
-function drawSymmetric(x: number, y: number, px: number, py: number, ppx: number, ppy: number) {
-  if (!ctx || !canvasRef.value) return
-  const canvas = canvasRef.value
-  const cx = canvas.width / 2
-  const cy = canvas.height / 2
-  const count = symmetry.value
-  const speed = Math.hypot(x - px, y - py)
-  lastSpeed = speed
-  const lw = Math.max(1.5, 8 - speed * 0.25)
+function resizeCanvases() {
+  const base = baseCanvas.value
+  const fade = fadeCanvas.value
+  if (!base || !fade || !baseCtx) return
 
-  ctx.globalCompositeOperation = 'lighter'
-  ctx.strokeStyle = colorMode.value === 'fixed'
-    ? hexToRgba(fixedColor.value, 0.6)
-    : `hsla(${hue}, 100%, ${lightness.value}%, 0.6)`
-  ctx.lineWidth = lw
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
+  // 保留内容
+  const tmp = document.createElement('canvas')
+  tmp.width = base.width; tmp.height = base.height
+  tmp.getContext('2d')!.drawImage(base, 0, 0)
 
-  for (let i = 0; i < count; i++) {
-    const angle = (Math.PI * 2 / count) * i
-    ctx.save()
-    ctx.translate(cx, cy)
-    ctx.rotate(angle)
-    ctx.beginPath()
-    ctx.moveTo(ppx - cx, ppy - cy)
-    ctx.quadraticCurveTo(px - cx, py - cy, x - cx, y - cy)
-    ctx.stroke()
-    ctx.restore()
-  }
+  const w = window.innerWidth, h = window.innerHeight
+  base.width = w; base.height = h
+  fade.width = w; fade.height = h
+
+  baseCtx.globalCompositeOperation = 'source-over'
+  baseCtx.fillStyle = '#000'
+  baseCtx.fillRect(0, 0, w, h)
+  baseCtx.drawImage(tmp, 0, 0)
 }
 
-function getPos(e: MouseEvent | Touch) {
-  const canvas = canvasRef.value!
-  const rect = canvas.getBoundingClientRect()
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top }
-}
-
-function onPointerDown(e: MouseEvent) {
-  isDrawing = true
-  const pos = getPos(e)
-  points = [pos, pos, pos]
-}
-
-function onPointerMove(e: MouseEvent) {
-  if (!isDrawing) return
-  const pos = getPos(e)
-  points.push(pos)
-  if (points.length >= 3) {
-    const [pp, p, cur] = points.slice(-3)
-    drawSymmetric(cur.x, cur.y, p.x, p.y, pp.x, pp.y)
-  }
-}
-
-function onPointerUp() {
-  isDrawing = false
-  points = []
-}
-
-function onTouchStart(e: TouchEvent) {
-  e.preventDefault()
-  isDrawing = true
-  const pos = getPos(e.touches[0])
-  points = [pos, pos, pos]
-}
-
-function onTouchMove(e: TouchEvent) {
-  e.preventDefault()
-  if (!isDrawing) return
-  const pos = getPos(e.touches[0])
-  points.push(pos)
-  if (points.length >= 3) {
-    const [pp, p, cur] = points.slice(-3)
-    drawSymmetric(cur.x, cur.y, p.x, p.y, pp.x, pp.y)
-  }
-}
-
-function onTouchEnd() {
-  isDrawing = false
-  points = []
-}
-
-function tick() {
-  hue = (hue + hueSpeed.value) % 360
-  animFrameId = requestAnimationFrame(tick)
-}
-
+// ---- 生命周期 ----
 onMounted(() => {
-  const canvas = canvasRef.value!
-  ctx = canvas.getContext('2d')!
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  const base = baseCanvas.value!
+  const fade = fadeCanvas.value!
+  baseCtx = base.getContext('2d')!
+  fadeCtx  = fade.getContext('2d')!
 
-  canvas.addEventListener('mousedown', onPointerDown)
-  canvas.addEventListener('mousemove', onPointerMove)
-  canvas.addEventListener('mouseup', onPointerUp)
-  canvas.addEventListener('mouseleave', onPointerUp)
-  canvas.addEventListener('touchstart', onTouchStart, { passive: false })
-  canvas.addEventListener('touchmove', onTouchMove, { passive: false })
-  canvas.addEventListener('touchend', onTouchEnd)
+  const w = window.innerWidth, h = window.innerHeight
+  base.width = w; base.height = h
+  fade.width = w; fade.height = h
 
-  window.addEventListener('resize', resize)
-  tick()
+  baseCtx.fillStyle = '#000'
+  baseCtx.fillRect(0, 0, w, h)
+
+  base.addEventListener('mousemove',  onMouseMove)
+  base.addEventListener('touchstart', onTouchStart, { passive: false })
+  base.addEventListener('touchmove',  onTouchMove,  { passive: false })
+  window.addEventListener('resize', resizeCanvases)
+
+  rafId = requestAnimationFrame(loop)
 })
 
 onUnmounted(() => {
-  const canvas = canvasRef.value
-  if (canvas) {
-    canvas.removeEventListener('mousedown', onPointerDown)
-    canvas.removeEventListener('mousemove', onPointerMove)
-    canvas.removeEventListener('mouseup', onPointerUp)
-    canvas.removeEventListener('mouseleave', onPointerUp)
-    canvas.removeEventListener('touchstart', onTouchStart)
-    canvas.removeEventListener('touchmove', onTouchMove)
-    canvas.removeEventListener('touchend', onTouchEnd)
+  cancelAnimationFrame(rafId)
+  const base = baseCanvas.value
+  if (base) {
+    base.removeEventListener('mousemove',  onMouseMove)
+    base.removeEventListener('touchstart', onTouchStart)
+    base.removeEventListener('touchmove',  onTouchMove)
   }
-  window.removeEventListener('resize', resize)
-  if (animFrameId !== null) cancelAnimationFrame(animFrameId)
+  window.removeEventListener('resize', resizeCanvases)
 })
 </script>

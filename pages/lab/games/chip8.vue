@@ -672,26 +672,67 @@ onUnmounted(() => {
 
 <style scoped>
 .chip8-btn {
-  @apply px-3 py-1.5 text-sm font-mono rounded border transition-colors;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: monospace;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  transition: colors 0.15s;
+  cursor: pointer;
+  background: transparent;
 }
 .btn-run {
-  @apply border-[var(--color-neon-green)] text-[var(--color-neon-green)] hover:bg-[var(--color-neon-green)] hover:text-black;
+  border-color: var(--color-neon-green);
+  color: var(--color-neon-green);
+}
+.btn-run:hover {
+  background: var(--color-neon-green);
+  color: #000;
 }
 .btn-pause {
-  @apply border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black;
+  border-color: #facc15;
+  color: #facc15;
+}
+.btn-pause:hover {
+  background: #facc15;
+  color: #000;
 }
 .btn-step {
-  @apply border-[var(--color-neon-cyan)] text-[var(--color-neon-cyan)] hover:bg-[var(--color-neon-cyan)] hover:text-black disabled:opacity-40 disabled:cursor-not-allowed;
+  border-color: var(--color-neon-cyan);
+  color: var(--color-neon-cyan);
+}
+.btn-step:hover {
+  background: var(--color-neon-cyan);
+  color: #000;
+}
+.btn-step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .btn-reset {
-  @apply border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-red-400 hover:text-red-400;
+  border-color: var(--color-void-border);
+  color: var(--color-text-muted);
+}
+.btn-reset:hover {
+  border-color: #f87171;
+  color: #f87171;
 }
 
 .key-cell {
-  @apply flex flex-col items-center justify-center bg-black/40 border border-[var(--color-void-border)] rounded px-2 py-1 text-xs transition-colors;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--color-void-border);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  transition: all 0.15s;
 }
 .key-active {
-  @apply border-[var(--color-neon-green)] bg-[rgba(57,255,20,0.1)];
+  border-color: var(--color-neon-green);
+  background: rgba(57,255,20,0.1);
 }
 
 .scanlines {
