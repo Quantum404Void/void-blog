@@ -29,7 +29,6 @@ export default defineNuxtConfig({
   },
 
   app: {
-    pageTransition: { name: 'slide-up', mode: 'out-in' },
     head: {
       link: [
         // sitemap href: 生产地址，如需多域部署改这里
