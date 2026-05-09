@@ -101,6 +101,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Ray Marching | ${siteName}` })
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const webglError = ref(false)
 const fps = ref(0)

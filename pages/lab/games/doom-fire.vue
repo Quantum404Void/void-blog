@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Doom Fire · lab' })
 
 const W = 320

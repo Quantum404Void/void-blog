@@ -11,7 +11,7 @@
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
           <span><span style="color:rgba(180,0,255,0.9)">37</span> 游戏</span>
-          <span><span style="color:rgba(0,212,255,0.9)">23</span> 工具</span>
+          <span><span style="color:rgba(0,212,255,0.9)">28</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
 
@@ -175,5 +175,10 @@ const tools = [
   { href: '/lab/tools/subnet', icon: '🌐', label: 'IP 子网计算', desc: 'CIDR 子网掩码 / 地址范围 / 二进制展示', tag: 'NET', color: '#b400ff' },
   { href: '/lab/tools/bitwise', icon: '🔢', label: '位运算计算器', desc: '32-bit AND/OR/XOR/移位可视化', tag: 'SYS', color: '#00d4ff' },
   { href: '/lab/tools/number-theory', icon: 'π', label: '数论工具箱', desc: '质因数分解 / GCD / Miller-Rabin / 快速幂', tag: 'MATH', color: '#00ff88' },
+  { href: '/lab/tools/ascii-table', icon: 'AS', label: 'ASCII 码表', desc: '完整 ASCII 0-127，字节级详情，一键复制', tag: 'REF', color: '#00d4ff' },
+  { href: '/lab/tools/http-status', icon: '🌐', label: 'HTTP 状态码', desc: '1xx-5xx 完整查询，含 418 茶壶彩蛋', tag: 'NET', color: '#ff4500' },
+  { href: '/lab/tools/lorem-ipsum', icon: '📄', label: 'Lorem Ipsum', desc: '乱数假文生成，支持中文/代码/赛博朋克风', tag: 'TEXT', color: '#b400ff' },
+  { href: '/lab/tools/yaml-json', icon: '⇄', label: 'YAML ↔ JSON', desc: 'YAML 与 JSON 实时互转，双栏编辑器', tag: 'FORMAT', color: '#39ff14' },
+  { href: '/lab/tools/password-gen', icon: '🔐', label: '密码生成器', desc: '熵值强度评估，可记忆词组，批量生成', tag: 'CRYPTO', color: '#ff00aa' },
 ]
 </script>

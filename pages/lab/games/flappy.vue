@@ -16,6 +16,7 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useHead({ title: `Flappy Void | ${siteName}` })
+useSeoMeta({ title: `Flappy Bird | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const score = ref(0), best = ref(0)
 const W=380,H=540,GRAVITY=0.45,JUMP=-7.5,PIPE_SPEED=2.5,GAP=140,PW=52,PI=1900

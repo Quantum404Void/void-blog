@@ -130,6 +130,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Pathfinding — Lab' })
 
 const COLS = 30

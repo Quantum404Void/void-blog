@@ -35,6 +35,7 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useHead({ title: `Tetris | ${siteName}` })
+useSeoMeta({ title: `Tetris | ${siteName}` })
 const mainCanvas = ref<HTMLCanvasElement>()
 const nextCanvas = ref<HTMLCanvasElement>()
 const overlay = ref<HTMLElement>()
@@ -142,22 +143,24 @@ function endGame() {
   if(overlay.value){overlay.value.style.display='flex';overlay.value.innerHTML=`<div style="font-size:2.5rem;margin-bottom:0.75rem">💀</div><div style="color:#ff4444;font-family:monospace;font-size:1.2rem;font-weight:bold;margin-bottom:0.5rem">GAME OVER</div><div style="color:#8888aa;font-family:monospace;font-size:0.875rem;margin-bottom:1.5rem">Score: <span style="color:#b400ff">${score}</span></div><button onclick="this.dispatchEvent(new CustomEvent('retry',{bubbles:true}))" style="font-family:monospace;font-size:0.875rem;padding:0.5rem 1.5rem;border:1px solid rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08);border-radius:0.5rem;cursor:pointer">RETRY</button>`; overlay.value.querySelector('button')?.addEventListener('click',startGame)}
 }
 
+const handleKeydown = (e: KeyboardEvent) => {
+  if(!started||gameOver){if(e.code==='Space'||e.code==='Enter')startGame();return}
+  if(e.code==='KeyP'||e.code==='Escape'){paused=!paused;if(!paused){dropTimer=performance.now();animFrame=requestAnimationFrame(gameLoop)};return}
+  if(paused) return
+  switch(e.code){
+    case 'ArrowLeft': if(isValid(current.shape,pos.x-1,pos.y))pos.x--;break
+    case 'ArrowRight': if(isValid(current.shape,pos.x+1,pos.y))pos.x++;break
+    case 'ArrowDown': if(isValid(current.shape,pos.x,pos.y+1)){pos.y++;score++;updateUI()};break
+    case 'ArrowUp': case 'KeyZ': {const r=rotate(current.shape);if(isValid(r,pos.x,pos.y))current.shape=r;else if(isValid(r,pos.x-1,pos.y)){current.shape=r;pos.x--}else if(isValid(r,pos.x+1,pos.y)){current.shape=r;pos.x++};break}
+    case 'Space': e.preventDefault(); hardDrop(); break
+  }
+  drawBoard()
+}
+
 onMounted(() => {
   bestVal.value=parseInt(localStorage.getItem('tetris-best')||'0')
-  window.addEventListener('keydown',(e: KeyboardEvent)=>{
-    if(!started||gameOver){if(e.code==='Space'||e.code==='Enter')startGame();return}
-    if(e.code==='KeyP'||e.code==='Escape'){paused=!paused;if(!paused){dropTimer=performance.now();animFrame=requestAnimationFrame(gameLoop)};return}
-    if(paused) return
-    switch(e.code){
-      case 'ArrowLeft': if(isValid(current.shape,pos.x-1,pos.y))pos.x--;break
-      case 'ArrowRight': if(isValid(current.shape,pos.x+1,pos.y))pos.x++;break
-      case 'ArrowDown': if(isValid(current.shape,pos.x,pos.y+1)){pos.y++;score++;updateUI()};break
-      case 'ArrowUp': case 'KeyZ': {const r=rotate(current.shape);if(isValid(r,pos.x,pos.y))current.shape=r;else if(isValid(r,pos.x-1,pos.y)){current.shape=r;pos.x--}else if(isValid(r,pos.x+1,pos.y)){current.shape=r;pos.x++};break}
-      case 'Space': e.preventDefault(); hardDrop(); break
-    }
-    drawBoard()
-  })
+  window.addEventListener('keydown', handleKeydown)
 })
 
-onUnmounted(()=>cancelAnimationFrame(animFrame))
+onUnmounted(() => { cancelAnimationFrame(animFrame); window.removeEventListener('keydown', handleKeydown) })
 </script>

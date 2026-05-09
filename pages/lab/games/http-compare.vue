@@ -138,6 +138,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `HTTP Compare | ${siteName}` })
 import { ref, reactive } from 'vue'
 
 definePageMeta({ layout: false })

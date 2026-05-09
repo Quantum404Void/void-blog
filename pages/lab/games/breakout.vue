@@ -31,6 +31,7 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useHead({ title: `Breakout | ${siteName}` })
+useSeoMeta({ title: `Breakout | ${siteName}` })
 
 onMounted(() => {
   const canvas = document.getElementById('breakout-canvas') as HTMLCanvasElement

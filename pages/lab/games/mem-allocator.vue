@@ -157,6 +157,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Mem Allocator | ${siteName}` })
 const TOTAL_BYTES = 512
 const CELL_SIZE = 8 // bytes per cell
 const HEADER_SIZE = 8 // header bytes per block

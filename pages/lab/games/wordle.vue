@@ -32,6 +32,7 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useHead({ title: `Wordle | ${siteName}` })
+useSeoMeta({ title: `Wordle | ${siteName}` })
 const WORDS=['ARRAY','STACK','QUEUE','CLASS','ASYNC','AWAIT','YIELD','CATCH','THROW','CONST','BREAK','DEBUG','ERROR','EVENT','FETCH','FRAME','GUARD','HOOKS','INDEX','INPUT','JUDGE','LOGIC','MATCH','MUTEX','NODES','OAUTH','PARSE','PROXY','QUERY','REACT','ROUTE','SCOPE','STATE','TABLE','TOKEN','TYPES','UNION','VALID','WATCH','XPATH','BUILD','CACHE','CLONE','DRAFT','EQUAL','FIXED','GRANT','HOIST','INNER','JOINT','LAYER','MERGE','NEVER','OUTER','PATCH','QUICK','REGEX','SLICE','STORE','TRACE','USING','VISIT','WRITE','BLOCK','CHECK','DEFER','EMPTY','FLAGS','GRAPH','LIMIT','ORDER','PRINT','QUOTE','READS','SETUP','TIMER','VALUE','ABORT','ADAPT','AGENT']
 const keyRows=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['↵','Z','X','C','V','B','N','M','⌫']]
 

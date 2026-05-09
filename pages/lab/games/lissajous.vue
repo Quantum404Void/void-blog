@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Lissajous — Lab' })
 
 // ── Parameters ────────────────────────────────────────────────────────────────

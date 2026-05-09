@@ -31,6 +31,8 @@ const items=ref([
   {label:'Timezone',value:'',color:'#ffa500'},
 ])
 const online=ref(true),connType=ref('未知')
+const onOnline = () => { online.value = true }
+const onOffline = () => { online.value = false }
 onMounted(()=>{
   items.value[0].value=navigator.userAgent.slice(0,80)+'...'
   items.value[1].value=navigator.language
@@ -41,7 +43,11 @@ onMounted(()=>{
   online.value=navigator.onLine
   const conn=(navigator as any).connection
   if(conn) connType.value=conn.effectiveType||conn.type||'未知'
-  window.addEventListener('online',()=>online.value=true)
-  window.addEventListener('offline',()=>online.value=false)
+  window.addEventListener('online', onOnline)
+  window.addEventListener('offline', onOffline)
+})
+onUnmounted(() => {
+  window.removeEventListener('online', onOnline)
+  window.removeEventListener('offline', onOffline)
 })
 </script>

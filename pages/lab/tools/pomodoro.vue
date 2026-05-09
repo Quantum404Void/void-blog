@@ -95,6 +95,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Pomodoro Timer — void.lab' })
 
 type Mode = 'focus' | 'short' | 'long'

@@ -99,6 +99,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Brainfuck | ${siteName}` })
 const MAX_STEPS = 100000
 const TAPE_SIZE = 30000
 

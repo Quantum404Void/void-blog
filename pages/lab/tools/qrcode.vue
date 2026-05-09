@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'QR Code Generator — void.lab' })
 
 const text = ref('https://void.cat')

@@ -43,6 +43,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Binary Tree — Lab' })
 
 // ── Node ────────────────────────────────────────────────────────────────────

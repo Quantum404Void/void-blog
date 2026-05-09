@@ -53,6 +53,7 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useHead({ title: `Sort Visualizer | ${siteName}` })
+useSeoMeta({ title: `Sort Visualizer | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const currentAlgo = ref('bubble'), currentColor = ref('#00d4ff')
 const hasData = ref(false), running = ref(false), paused = ref(false)

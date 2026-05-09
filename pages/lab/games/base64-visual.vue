@@ -161,6 +161,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Base64 Visual | ${siteName}` })
 const mode = ref<'encode' | 'decode'>('encode')
 const encodeInput = ref('Hello')
 const decodeInput = ref('')

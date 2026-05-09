@@ -152,6 +152,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `CPU Scheduler | ${siteName}` })
 interface Process {
   id: number
   name: string

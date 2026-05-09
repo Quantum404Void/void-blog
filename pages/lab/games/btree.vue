@@ -91,6 +91,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `B+ Tree | ${siteName}` })
 // ─── B+ Tree Implementation ──────────────────────────────────────────────────
 interface BNode {
   id: number

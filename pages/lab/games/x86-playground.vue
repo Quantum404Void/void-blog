@@ -137,6 +137,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `x86 Playground | ${siteName}` })
 const GP_REGS = ['EAX','EBX','ECX','EDX','ESP','EBP','ESI','EDI'] as const
 type GpReg = typeof GP_REGS[number]
 

@@ -145,6 +145,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Regex NFA | ${siteName}` })
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface NFAState {
   id: number

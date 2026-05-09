@@ -193,6 +193,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Hash Collision | ${siteName}` })
 const tab = ref<'birthday' | 'hash'>('birthday')
 
 // ===== BIRTHDAY PARADOX =====

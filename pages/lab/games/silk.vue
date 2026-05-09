@@ -25,13 +25,63 @@
           </div>
         </div>
 
-        <!-- Hue Speed -->
+        <!-- Color Mode -->
         <div>
-          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">color speed</label>
+          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">color mode</label>
+          <div class="flex gap-1">
+            <button
+              @click="colorMode = 'rainbow'"
+              class="flex-1 py-1 rounded border text-[10px] transition-colors"
+              :style="colorMode === 'rainbow'
+                ? 'border-color:#ff69b4;color:#ff69b4;background:#ff69b41a'
+                : 'border-color:#ff69b430;color:#666;background:transparent'"
+            >rainbow</button>
+            <button
+              @click="colorMode = 'fixed'"
+              class="flex-1 py-1 rounded border text-[10px] transition-colors"
+              :style="colorMode === 'fixed'
+                ? 'border-color:#ff69b4;color:#ff69b4;background:#ff69b41a'
+                : 'border-color:#ff69b430;color:#666;background:transparent'"
+            >fixed</button>
+          </div>
+        </div>
+
+        <!-- Hue Speed (rainbow only) -->
+        <div v-if="colorMode === 'rainbow'">
+          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">hue speed</label>
           <input
             v-model.number="hueSpeed"
             type="range" min="0" max="3" step="0.1"
             class="w-full accent-[#ff69b4] h-1"
+          />
+        </div>
+
+        <!-- Lightness (rainbow only) -->
+        <div v-if="colorMode === 'rainbow'">
+          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">lightness {{ lightness }}%</label>
+          <input
+            v-model.number="lightness"
+            type="range" min="0" max="100" step="1"
+            class="w-full accent-[#ff69b4] h-1"
+          />
+        </div>
+
+        <!-- Fixed Color Presets -->
+        <div v-if="colorMode === 'fixed'">
+          <label class="text-[var(--color-text-muted)] text-[10px] block mb-1">color</label>
+          <div class="flex gap-1 flex-wrap mb-1">
+            <button
+              v-for="c in presetColors"
+              :key="c"
+              @click="fixedColor = c"
+              class="w-6 h-6 rounded-full border-2 transition-all"
+              :style="`background:${c};border-color:${fixedColor === c ? '#fff' : 'transparent'}`"
+            />
+          </div>
+          <input
+            v-model="fixedColor"
+            type="color"
+            class="w-full h-6 rounded cursor-pointer"
           />
         </div>
 
@@ -63,6 +113,17 @@ useSeoMeta({ title: `Silk | ${siteName}` })
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const symmetry = ref(6)
 const hueSpeed = ref(0.3)
+const colorMode = ref<'rainbow' | 'fixed'>('rainbow')
+const fixedColor = ref('#00d4ff')
+const lightness = ref(65)
+const presetColors = ['#00d4ff', '#ff00aa', '#39ff14', '#b400ff', '#ffa500', '#ff4444']
+
+function hexToRgba(hex: string, alpha: number) {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
 
 let ctx: CanvasRenderingContext2D | null = null
 let hue = 0
@@ -81,6 +142,7 @@ function resize() {
   tmp.getContext('2d')!.drawImage(canvas, 0, 0)
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
+  ctx.globalCompositeOperation = 'source-over'
   ctx.fillStyle = '#000'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.drawImage(tmp, 0, 0)
@@ -89,6 +151,7 @@ function resize() {
 function clearCanvas() {
   const canvas = canvasRef.value
   if (!canvas || !ctx) return
+  ctx.globalCompositeOperation = 'source-over'
   ctx.fillStyle = '#000'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
@@ -113,7 +176,9 @@ function drawSymmetric(x: number, y: number, px: number, py: number, ppx: number
   const lw = Math.max(1.5, 8 - speed * 0.25)
 
   ctx.globalCompositeOperation = 'lighter'
-  ctx.strokeStyle = `hsla(${hue}, 100%, 65%, 0.6)`
+  ctx.strokeStyle = colorMode.value === 'fixed'
+    ? hexToRgba(fixedColor.value, 0.6)
+    : `hsla(${hue}, 100%, ${lightness.value}%, 0.6)`
   ctx.lineWidth = lw
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'

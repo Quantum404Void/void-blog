@@ -144,6 +144,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `DNS Trace | ${siteName}` })
 import { ref, onUnmounted } from 'vue'
 
 definePageMeta({ layout: false })

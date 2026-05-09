@@ -153,6 +153,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `CHIP-8 | ${siteName}` })
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 
 // ─── ROM Data ───────────────────────────────────────────────────────────────

@@ -177,6 +177,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `TCP Handshake | ${siteName}` })
 import { ref, computed, onUnmounted } from 'vue'
 
 definePageMeta({ layout: false })

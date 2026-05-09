@@ -22,6 +22,7 @@
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useHead({ title: `Matrix Rain | ${siteName}` })
+useSeoMeta({ title: `Matrix Rain | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const themeNameEl = ref<HTMLElement>()
 const paused = ref(false)

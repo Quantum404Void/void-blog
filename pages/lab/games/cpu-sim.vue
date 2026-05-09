@@ -83,6 +83,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, onUnmounted } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'CPU Simulator — Lab' })
 
 // ── CPU State ────────────────────────────────────────────────────────────────

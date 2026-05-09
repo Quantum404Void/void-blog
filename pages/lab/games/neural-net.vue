@@ -128,6 +128,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Neural Net | ${siteName}` })
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface NodeDef { layerIdx: number; nodeIdx: number; x: number; y: number; r: number
   activation: number; preact: number; label: string; highlight: boolean; key: string }

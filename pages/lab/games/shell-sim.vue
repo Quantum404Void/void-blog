@@ -70,6 +70,8 @@
 </template>
 
 <script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Shell Sim | ${siteName}` })
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 
 definePageMeta({ layout: 'default' })

@@ -104,6 +104,7 @@
 <script setup lang="ts">
 import { ref, computed, defineComponent, h } from 'vue'
 
+const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Subnet Calculator — void.lab' })
 
 const input = ref('192.168.1.0/24')
