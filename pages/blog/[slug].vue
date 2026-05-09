@@ -183,7 +183,7 @@
   <button
     v-if="tocHeadings.length > 1"
     @click="tocOpen = !tocOpen"
-    class="xl:hidden fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
+    class="xl:hidden fixed bottom-20 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
     style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--color-neon-cyan);backdrop-filter:blur(8px);"
     title="目录"
   >
