@@ -14,6 +14,10 @@
 </template>
 
 <script setup lang="ts">
+// Safe localStorage wrapper (private mode safe)
+const safeGet = (k: string, def = '') => { try { return localStorage.getItem(k) ?? def } catch { return def } }
+const safeSet = (k: string, v: string) => { try { localStorage.setItem(k, v) } catch {} }
+
 const { siteName } = useSiteConfig()
 useHead({ title: `Flappy Void | ${siteName}` })
 useSeoMeta({ title: `Flappy Bird | ${siteName}` })
@@ -39,7 +43,7 @@ function update(now: number,dt: number){
   spawnPipe(now)
   for(const p of pipes){
     p.x-=PIPE_SPEED*(dt/16)
-    if(!p.scored&&p.x+PW<bird.x){p.scored=true;score.value++;best.value=Math.max(best.value,score.value);localStorage.setItem('flappy-best',String(best.value))}
+    if(!p.scored&&p.x+PW<bird.x){p.scored=true;score.value++;best.value=Math.max(best.value,score.value);safeSet('flappy-best',String(best.value))}
   }
   pipes=pipes.filter(p=>p.x>-PW-10)
   if(bird.y<0||bird.y>H-20) die()
@@ -94,7 +98,7 @@ function frame(ts: number){
 }
 
 onMounted(()=>{
-  best.value=parseInt(localStorage.getItem('flappy-best')||'0')
+  best.value=parseInt(safeGet('flappy-best','0'))
   initBird()
   const cv=canvasEl.value!
   cv.addEventListener('click',jump)

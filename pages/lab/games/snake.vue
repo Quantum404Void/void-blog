@@ -45,6 +45,10 @@
 </template>
 
 <script setup lang="ts">
+// Safe localStorage wrapper (private mode safe)
+const safeGet = (k: string, def = '') => { try { return localStorage.getItem(k) ?? def } catch { return def } }
+const safeSet = (k: string, v: string) => { try { localStorage.setItem(k, v) } catch {} }
+
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Snake | ${siteName}` })
 
@@ -71,7 +75,7 @@ onMounted(() => {
   let dir: Dir = 'RIGHT', nextDir: Dir = 'RIGHT'
   let food: Pt = {x:0,y:0}
   let score = 0
-  let highScore = parseInt(localStorage.getItem('snake-hs') || '0')
+  let highScore = parseInt(safeGet('snake-hs','0'))
   let level = 1
   let gameState: 'idle'|'running'|'paused'|'dead' = 'idle'
   let wallMode = true
@@ -107,7 +111,7 @@ onMounted(() => {
     snake.unshift(newHead)
     if (newHead.x===food.x&&newHead.y===food.y) {
       score += 10*level; scoreEl.textContent = String(score)
-      if (score>highScore) { highScore=score; highEl.textContent=String(highScore); localStorage.setItem('snake-hs',String(highScore)) }
+      if (score>highScore) { highScore=score; highEl.textContent=String(highScore); safeSet('snake-hs',String(highScore)) }
       if (score>=level*80) { level++; levelEl.textContent=String(level) }
       placeFood()
     } else { snake.pop() }

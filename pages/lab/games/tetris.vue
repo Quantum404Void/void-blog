@@ -33,6 +33,10 @@
 </template>
 
 <script setup lang="ts">
+// Safe localStorage wrapper (private mode safe)
+const safeGet = (k: string, def = '') => { try { return localStorage.getItem(k) ?? def } catch { return def } }
+const safeSet = (k: string, v: string) => { try { localStorage.setItem(k, v) } catch {} }
+
 const { siteName } = useSiteConfig()
 useHead({ title: `Tetris | ${siteName}` })
 useSeoMeta({ title: `Tetris | ${siteName}` })
@@ -94,8 +98,8 @@ function drop() { if(isValid(current.shape,pos.x,pos.y+1)) pos.y++; else lockPie
 
 function updateUI() {
   scoreVal.value=score; levelVal.value=level; linesVal.value=lines
-  const best=parseInt(localStorage.getItem('tetris-best')||'0')
-  if(score>best){localStorage.setItem('tetris-best',String(score));bestVal.value=score}
+  const best=parseInt(safeGet('tetris-best','0'))
+  if(score>best){safeSet('tetris-best',String(score));bestVal.value=score}
 }
 
 function drawBoard() {
@@ -130,7 +134,7 @@ function gameLoop(now: number) {
 function startGame() {
   board=createBoard(); score=0; lines=0; level=1; dropInterval=500; gameOver=false; paused=false; started=true
   dropTimer=performance.now()
-  bestVal.value=parseInt(localStorage.getItem('tetris-best')||'0')
+  bestVal.value=parseInt(safeGet('tetris-best','0'))
   next=randomPiece(); spawnPiece(); updateUI()
   if(overlay.value) overlay.value.style.display='none'
   cancelAnimationFrame(animFrame); animFrame=requestAnimationFrame(gameLoop)
@@ -138,8 +142,8 @@ function startGame() {
 
 function endGame() {
   gameOver=true; started=false
-  const best=parseInt(localStorage.getItem('tetris-best')||'0')
-  if(score>best) localStorage.setItem('tetris-best',String(score))
+  const best=parseInt(safeGet('tetris-best','0'))
+  if(score>best) safeSet('tetris-best',String(score))
   if(overlay.value){overlay.value.style.display='flex';overlay.value.innerHTML=`<div style="font-size:2.5rem;margin-bottom:0.75rem">💀</div><div style="color:#ff4444;font-family:monospace;font-size:1.2rem;font-weight:bold;margin-bottom:0.5rem">GAME OVER</div><div style="color:#8888aa;font-family:monospace;font-size:0.875rem;margin-bottom:1.5rem">Score: <span style="color:#b400ff">${score}</span></div><button onclick="this.dispatchEvent(new CustomEvent('retry',{bubbles:true}))" style="font-family:monospace;font-size:0.875rem;padding:0.5rem 1.5rem;border:1px solid rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08);border-radius:0.5rem;cursor:pointer">RETRY</button>`; overlay.value.querySelector('button')?.addEventListener('click',startGame)}
 }
 
@@ -158,7 +162,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 }
 
 onMounted(() => {
-  bestVal.value=parseInt(localStorage.getItem('tetris-best')||'0')
+  bestVal.value=parseInt(safeGet('tetris-best','0'))
   window.addEventListener('keydown', handleKeydown)
 })
 
