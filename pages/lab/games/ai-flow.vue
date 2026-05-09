@@ -201,8 +201,8 @@ function makeNode(type: string, x: number, y: number): NodeDef {
     category: cat.category,
     x,
     y,
-    inputs: [{ id: `${id}-in`, nodeId: id, kind: 'input', x: 0, y: NODE_H / 2 }],
-    outputs: [{ id: `${id}-out`, nodeId: id, kind: 'output', x: NODE_W, y: NODE_H / 2 }],
+    inputs: [{ id: `${id}-in`, nodeId: id, kind: 'input', x: -6, y: NODE_H / 2 }],
+    outputs: [{ id: `${id}-out`, nodeId: id, kind: 'output', x: NODE_W + 6, y: NODE_H / 2 }],
     description: cat.description,
   }
 }
@@ -608,7 +608,8 @@ initLevel(0)
           <div
             class="port absolute w-3 h-3 rounded-full border-2 cursor-crosshair"
             :style="`left: -7px; top: ${NODE_H/2 - 6}px; background: ${node.color}; border-color: #08080f; z-index: 20`"
-            @click.stop="onInputPortClick($event, node, node.inputs[0])"
+            @mousedown.stop="onInputPortClick($event, node, node.inputs[0])"
+            @click.stop
           />
           <span class="text-base leading-none flex-shrink-0" style="font-size: 1.1em">{{ node.icon }}</span>
           <div class="flex-1 min-w-0">
@@ -619,7 +620,8 @@ initLevel(0)
           <div
             class="port absolute w-3 h-3 rounded-full border-2 cursor-crosshair"
             :style="`right: -7px; top: ${NODE_H/2 - 6}px; background: ${node.color}; border-color: #08080f; z-index: 20`"
-            @click.stop="onOutputPortClick($event, node, node.outputs[0])"
+            @mousedown.stop="onOutputPortClick($event, node, node.outputs[0])"
+            @click.stop
           />
         </div>
 

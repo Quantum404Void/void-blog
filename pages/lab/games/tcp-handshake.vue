@@ -32,7 +32,7 @@
       </div>
 
       <!-- Handshake/Teardown Tab -->
-      <div v-if="activeTab === 'handshake'" class="bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg p-6">
+      <div v-if="activeTab === 'handshake'" class="bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg p-6 overflow-y-auto" :style="{ maxHeight: mode === 'full' ? '90vh' : 'none' }">
 
         <!-- Three-column layout -->
         <div class="grid grid-cols-[1fr_2fr_1fr] gap-4 mb-6">
@@ -61,7 +61,7 @@
         </div>
 
         <!-- Packet animation area -->
-        <div class="relative min-h-[400px]">
+        <div class="relative" :style="{ minHeight: mode === 'full' ? '780px' : '400px' }">
           <!-- Vertical timeline lines -->
           <div class="absolute left-0 top-0 bottom-0 w-px bg-[var(--color-neon-cyan)]/30" style="left: calc(1/6 * 100%)"></div>
           <div class="absolute top-0 bottom-0 w-px bg-[var(--color-neon-green)]/30" style="left: calc(5/6 * 100%)"></div>
