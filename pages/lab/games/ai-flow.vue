@@ -287,8 +287,11 @@ function onCanvasMousemove(e: MouseEvent) {
 function onCanvasMouseup() { dragging.value = null }
 
 // ── Port connection ───────────────────────────────────────────────────────
+let _portTs = 0  // timestamp of last port mousedown, to suppress canvas click
+
 function onOutputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
   e.stopPropagation()
+  _portTs = Date.now()
   const rect = canvasEl.value!.getBoundingClientRect()
   pendingConn.value = {
     fromNode: node.id,
@@ -300,6 +303,7 @@ function onOutputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
 
 function onInputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
   e.stopPropagation()
+  _portTs = Date.now()
   if (!pendingConn.value) return
   if (pendingConn.value.fromNode === node.id) { pendingConn.value = null; return }
   // Avoid duplicate
@@ -317,7 +321,11 @@ function onInputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
   validate()
 }
 
-function onCanvasClick() { pendingConn.value = null }
+// Only cancel pendingConn if user clicked the blank canvas (not a port)
+function onCanvasClick() {
+  if (Date.now() - _portTs < 200) return  // port just fired, ignore
+  pendingConn.value = null
+}
 
 // ── Delete ────────────────────────────────────────────────────────────────
 function deleteNode(node: NodeDef) {
