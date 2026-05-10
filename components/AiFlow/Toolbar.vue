@@ -98,6 +98,15 @@
 
     <button
       class="px-2 py-1.5 rounded border text-xs font-mono transition-all"
+      :style="snapToGrid
+        ? 'border-color:rgba(0,255,136,0.4);color:var(--color-neon-green)'
+        : 'border-color:rgba(100,100,150,0.3);color:var(--color-text-muted)'"
+      title="网格对齐 (G)"
+      @click="$emit('toggleSnap')"
+    >⊞</button>
+
+    <button
+      class="px-2 py-1.5 rounded border text-xs font-mono transition-all"
       style="border-color:rgba(100,100,150,0.3);color:var(--color-text-muted)"
       title="快捷键帮助 (?)"
       @click="$emit('help')"
@@ -110,6 +119,7 @@ defineProps<{
   hasSelection: boolean
   canUndo: boolean
   canRedo: boolean
+  snapToGrid: boolean
 }>()
 
 defineEmits<{
@@ -127,5 +137,6 @@ defineEmits<{
   (e: 'copyJson'): void
   (e: 'quickAdd'): void
   (e: 'help'): void
+  (e: 'toggleSnap'): void
 }>()
 </script>
