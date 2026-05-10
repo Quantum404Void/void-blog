@@ -386,7 +386,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col" style="background:#08080f;color:var(--color-text-primary)">
+  <div class="h-screen flex flex-col overflow-hidden" style="background:#08080f;color:var(--color-text-primary)">
     <AppNav :crumbs="crumbs" />
 
     <!-- 顶部工具栏 -->

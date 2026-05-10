@@ -2,6 +2,7 @@
   <aside
     class="w-72 shrink-0 p-3 border-r overflow-y-auto"
     style="border-color:var(--color-void-border);background:var(--color-void-card)"
+    @wheel.stop
   >
     <!-- 简介 -->
     <div class="text-[10px] font-mono leading-5 p-2 mb-1" style="color:var(--color-text-muted)">

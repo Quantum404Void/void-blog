@@ -2,6 +2,7 @@
   <aside
     class="w-80 shrink-0 p-3 border-l overflow-y-auto"
     style="border-color:var(--color-void-border);background:var(--color-void-card)"
+    @wheel.stop
   >
     <!-- Runtime 状态 -->
     <div class="text-xs font-mono font-bold mb-2" style="color:var(--color-neon-cyan)">Runtime</div>
