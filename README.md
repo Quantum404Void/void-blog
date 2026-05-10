@@ -35,9 +35,8 @@
                        │          │ D1 Binding         │   │
                        │   ┌──────▼───────┐           │   │
                        │   │  D1 Database │           │   │
-                       │   │  void-blog   │           │   │
-                       │   │   -posts     │           │   │
-                       │   └─────────────-┘           │   │
+                       │   │  void-blog-posts         │   │
+                       │   └──────────────┘           │   │
                        │                              │   │
                        │   Service Worker (PWA) ──────┘   │
                        └─────────────────────────────────-┘
@@ -45,167 +44,193 @@
 
 ## 技术栈
 
-| 层         | 技术                          | 备注                        |
-|------------|------------------------------|-----------------------------|
-| 框架       | Nuxt 3 + Vue 3               | SSR + ISR，部分页面预渲染     |
-| 样式       | Tailwind CSS v4              | 原子化，暗色主题             |
-| 数据库     | Cloudflare D1                | SQLite at the edge          |
-| 部署       | Cloudflare Pages             | `wrangler pages deploy`     |
-| PWA        | `@vite-pwa/nuxt`             | autoUpdate，离线缓存         |
-| 构建工具   | Vite 内置（Nuxt 集成）        | TS 严格模式                 |
+| 层         | 技术                          | 备注                              |
+|------------|------------------------------|-----------------------------------|
+| 框架       | Nuxt 3 + Vue 3               | SSR + ISR，边缘渲染                |
+| 样式       | Tailwind CSS v4              | 原子化，终端暗色主题               |
+| 数据库     | Cloudflare D1                | SQLite at the edge，零冷启动       |
+| 部署       | Cloudflare Pages             | Git push 自动触发                  |
+| PWA        | `@vite-pwa/nuxt`             | autoUpdate SW，离线缓存            |
+| Markdown   | markdown-it + highlight.js   | 单例渲染，callout / 代码高亮       |
+| 评论       | Giscus                       | GitHub Discussions 驱动            |
 
 ## 目录结构
 
 ```
 void-blog/
 ├── pages/
-│   ├── index.vue              # 首页：文章流 + 侧边栏
-│   ├── blog/                  # 文章详情（markdown 渲染 + TOC + 评论）
-│   ├── tags/                  # 标签归档（热力云 + 分类列表）
+│   ├── index.vue              # 首页：打字机 Hero + 文章流 + 侧边栏
+│   ├── blog/
+│   │   ├── index.vue          # 文章列表（按年归档 + 标签过滤）
+│   │   └── [slug].vue         # 文章详情（TOC / 评论 / 上下篇 / 浏览量）
+│   ├── tags/
+│   │   ├── index.vue          # 标签热力云
+│   │   └── [tag].vue          # 标签分类列表
 │   ├── search.vue             # 全文搜索（实时 debounce）
-│   ├── stats.vue              # 站点统计（热力图 + 图表）
-│   ├── about.vue              # 关于页
+│   ├── stats.vue              # 站点统计（GitHub 热力图风格 + Chart.js）
+│   ├── about.vue              # 关于页（终端风格）
 │   ├── lab/
-│   │   ├── index.vue          # Lab 入口（游戏 + 工具目录）
-│   │   ├── games/
-│   │   │   └── ai-flow/       # AI Flow 可执行流程图编辑器
-│   │   └── tools/             # 在线工具集合
+│   │   ├── index.vue          # Lab 入口（游戏 + 工具目录，动态计数）
+│   │   ├── games/             # 37 个技术宅游戏
+│   │   │   ├── ai-flow/       # ★ AI Flow 可执行流程图编辑器
+│   │   │   ├── chip8.vue      # CHIP-8 模拟器
+│   │   │   ├── x86-playground.vue  # x86 汇编沙盒
+│   │   │   ├── silk.vue       # Weavesilk 风格生成艺术
+│   │   │   └── ...            # snake / tetris / 2048 / flappy 等
+│   │   └── tools/             # 27 个在线工具
+│   │       ├── json.vue       # JSON 格式化
+│   │       ├── regex.vue      # 正则测试
+│   │       ├── hash.vue       # 哈希计算
+│   │       └── ...
 │   └── admin/                 # 管理后台（JWT 保护）
 ├── server/
-│   ├── api/                   # Nitro server routes（绑定 D1）
-│   ├── middleware/             # 鉴权中间件
-│   ├── routes/                # 自定义路由（RSS / Sitemap）
-│   └── utils/                 # 服务端工具（d1.ts / auth.ts）
+│   ├── api/
+│   │   ├── posts/             # 文章 CRUD（D1 binding）
+│   │   ├── tags/              # 标签统计
+│   │   ├── search.get.ts      # 全文搜索（D1 FTS）
+│   │   └── stats/             # 浏览量 / 点赞
+│   ├── routes/
+│   │   ├── rss.xml.ts         # RSS Feed（ISR 1h）
+│   │   ├── sitemap.xml.ts     # Sitemap（ISR 1h）
+│   │   └── og/[slug].ts       # ★ 动态 OG 图（SVG，边缘生成）
+│   ├── middleware/             # JWT 鉴权
+│   └── utils/
+│       ├── d1.ts              # D1 binding helper
+│       └── auth.ts            # JWT 工具
 ├── components/
 │   ├── AiFlow/                # AI Flow 编辑器子组件
-│   │   ├── Toolbar.vue        # 顶部操作栏
+│   │   ├── Toolbar.vue        # 工具栏（Snap-to-Grid / Run / Undo 等）
 │   │   ├── NodePalette.vue    # 左侧节点面板 + Presets
-│   │   ├── LogPanel.vue       # 右侧运行日志 + 导出
-│   │   ├── QuickAdd.vue       # Tab 快速添加节点
+│   │   ├── LogPanel.vue       # 右侧运行日志 + JSON/Mermaid 导出
+│   │   ├── QuickAdd.vue       # Tab 快速搜索添加节点
 │   │   └── Minimap.vue        # 右下角缩略图
-│   ├── AppNav.vue             # 顶部导航（面包屑 + 移动端菜单）
-│   ├── AppFooter.vue          # 统一页脚组件
-│   ├── PostCard.vue           # 文章卡片（search / tags 复用）
-│   ├── TableOfContents.vue    # 文章目录
+│   ├── AppNav.vue             # 顶部导航（路径显示 + 面包屑 + 移动端菜单）
+│   ├── AppFooter.vue          # 统一页脚
+│   ├── PostCard.vue           # 文章卡片（hover 箭头动画）
+│   ├── TableOfContents.vue    # 文章目录（IntersectionObserver 激活）
 │   ├── GiscusComments.vue     # Giscus 评论
-│   ├── ReadingProgress.vue    # 阅读进度条
-│   ├── GlobalActions.vue      # 全局浮动操作（主题 / 回顶）
+│   ├── ReadingProgress.vue    # 阅读进度条（transform: scaleX，GPU 加速）
+│   ├── GlobalActions.vue      # 回顶按钮 + 键盘彩蛋（Konami / DOOM / sudo）
 │   └── Chart.vue              # Chart.js 封装
 ├── composables/
-│   ├── useSiteConfig.ts       # 站点配置（从 runtimeConfig 统一读取）
-│   ├── useMarkdown.ts         # markdown-it 单例（含语法高亮 / callout）
-│   ├── useFormatDate.ts       # 日期格式化（formatDate / Long / MonthDay）
+│   ├── useSiteConfig.ts       # 站点配置（runtimeConfig 统一读取）
+│   ├── useMarkdown.ts         # markdown-it 单例（hljs / callout / 懒加载图）
+│   ├── useFormatDate.ts       # 日期格式化
 │   ├── useTagColor.ts         # 标签颜色哈希（neon 四色）
-│   ├── useReadingTime.ts      # CJK 感知阅读时长估算
-│   └── useCodeCopy.ts         # 代码块一键复制按钮注入
-├── types/
-│   ├── post.ts                # PostSummary / Post 接口
-│   ├── ai-flow.ts             # AI Flow 所有 TypeScript 类型
-│   └── cloudflare.d.ts        # D1 全局类型声明
+│   ├── useReadingTime.ts      # CJK 感知阅读时长 + 字数统计
+│   ├── useCodeCopy.ts         # 代码块复制按钮（copy → copied! 动画）
+│   ├── useCanonical.ts        # Canonical URL 注入
+│   └── useAiFlow.ts           # AI Flow 核心状态 composable
 ├── utils/
-│   ├── ai-flow.ts             # NODE_SPECS（36 节点）+ helper 函数
-│   └── ai-flow-presets.ts     # 5 个内置 Preset 数据工厂
-├── assets/css/main.css        # 全局样式 + Tailwind v4 主题变量
-├── migrations/                # D1 Schema 迁移文件
-├── scripts/                   # 工具脚本（Obsidian 同步等）
-├── nuxt.config.ts             # Nuxt 配置（PWA / runtimeConfig / routeRules）
-└── wrangler.toml              # CF Workers / D1 绑定配置
+│   ├── ai-flow.ts             # NODE_SPECS（36 节点）+ helper
+│   ├── ai-flow-presets.ts     # 5 个内置 Preset 工厂
+│   └── ai-flow-runner.ts      # ★ 纯函数拓扑执行器（零副作用）
+├── types/
+│   ├── post.ts                # PostSummary / Post
+│   ├── ai-flow.ts             # AI Flow 全量类型定义
+│   └── cloudflare.d.ts        # D1 全局声明
+├── assets/css/main.css        # 全局样式（Tailwind v4 + prose + 终端特效）
+├── migrations/                # D1 Schema 迁移
+├── scripts/                   # Obsidian 同步脚本
+├── nuxt.config.ts             # PWA / runtimeConfig / routeRules / nitro
+└── wrangler.toml              # CF D1 绑定配置
 ```
 
 ## AI Flow 编辑器
 
-`/lab/ai-flow` — 一个运行在浏览器里的可执行流程图编辑器，数据流向即执行顺序。
+`/lab/ai-flow` — 浏览器内可执行流程图编辑器，数据流向即执行顺序，DAG 拓扑排序执行。
 
-**36 个内置节点（6 类）：**
+**36 个内置节点（7 类）：**
 
 | 类别 | 节点 |
 |------|------|
-| Source | Number / Boolean / Text / Array / Range / Random |
-| Array | Map / Filter / Reduce / Sort / Unique / Take / Flatten / Chunk / Zip / Count / Reverse |
-| Math | Add / Multiply / Compare / Round |
+| Source | Number / Boolean / Text / Array / Range / **Random** |
+| Array | Map / Filter / Reduce / Sort / Unique / Take / **Flatten / Chunk / Zip / Count / Reverse** |
+| Math | Add / Multiply / Compare / **Round** |
 | Control | Merge / Branch |
-| Object | Object.keys / Object.values / Object.pick |
-| String | Split / Join / Uppercase / Lowercase / Regex Match / Regex Replace / Slice |
+| Object | **Object.keys / Object.values / Object.pick** |
+| String | Split / Join / Uppercase / Lowercase / **Regex Match / Regex Replace / Slice** |
 | Output | Preview / JSON.parse / JSON.stringify / Stats |
 
-**功能：**
-- Zoom / Pan / Fit View（Wheel 缩放，Space+拖 平移）
-- Minimap 点击跳转 · 框选 / 多选 · 批量拖动
-- Undo / Redo · Arrow key Nudge · Auto Layout
-- Group 容器 · Quick Add 搜索（Tab）
+**编辑器功能：**
+- Zoom / Pan（Ctrl+Wheel 缩放，Wheel 平移，Space+拖）
+- Minimap 点击跳转 · 框选多选 · 批量拖动
+- Snap to Grid（G 键切换，20px 网格吸附）
+- Undo / Redo（80 步历史）· Arrow key Nudge
+- Auto Layout（Sugiyama 拓扑分层）
+- Group 容器 · Quick Add（Tab 搜索）
 - 右键上下文菜单（Duplicate / Group / Delete）
-- `?` 键快捷键帮助 Overlay
+- `?` 快捷键 Overlay（14 条快捷键）
+- 连线视觉：执行成功实线 / 未执行虚线
+- 节点状态：🟢 成功 / 🔴 失败 / ⚪ 未执行
 - JSON Export / Import · Mermaid 导出
 - LocalStorage 自动保存 / 恢复
 - 5 个内置 Preset（squares / text / json / branch / math）
 
+## SEO & 性能
+
+| 功能 | 实现 |
+|------|------|
+| Canonical URL | `useCanonical.ts` 注入所有页面 |
+| 动态 OG 图 | `server/routes/og/[slug].ts` SVG 边缘生成，含标题/标签 |
+| RSS 自动发现 | `<link rel="alternate">` 在 `<head>` |
+| 文章预取 | `<link rel="prefetch">` 上下篇 |
+| 图片懒加载 | markdown-it image renderer 注入 `loading="lazy"` |
+| 阅读进度 | `transform: scaleX()` GPU 加速，不触发 layout |
+| 字数统计 | CJK 感知，`1.2k字 · 约 3min` |
+| 代码块 | 语言 badge（`data-lang` + CSS `::after`）+ 复制按钮 |
+
 ## 本地开发
 
 ```bash
-# 安装依赖
 npm install
 
-# 本地开发服务器（http://localhost:3000）
+# 开发服务器
 npm run dev
 
-# 本地 D1 预览（需要 wrangler 登录）
+# 本地 D1 预览（需 wrangler 登录）
 wrangler pages dev dist --d1=void_blog_posts
 
 # 类型检查
 npx nuxi typecheck
 
-# 构建
+# 生产构建
 npm run build
 ```
 
 ## 部署
 
 ```bash
-# 一键生成 + 部署 + 同步 Obsidian
 npm run deploy
-
 # 等价于：
-nuxt generate
-wrangler pages deploy dist --project-name void-blog
-python3 scripts/sync-obsidian.py --direction=to-obsidian
+# nuxt generate && wrangler pages deploy dist --project-name void-blog
+# python3 scripts/sync-obsidian.py --direction=to-obsidian
 ```
 
-> **CF Pages 环境变量**
+> **CF Pages 必需环境变量**
 >
-> | 变量名                | 说明              |
-> |----------------------|-------------------|
-> | `NUXT_ADMIN_PASSWORD` | 管理后台登录密码  |
-> | `NUXT_JWT_SECRET`     | JWT 签名密钥      |
-
-## 数据库
-
-```bash
-# 查看 D1 绑定
-cat wrangler.toml
-
-# 本地执行迁移
-wrangler d1 execute void-blog-posts --local --file=migrations/xxx.sql
-
-# 生产执行迁移
-wrangler d1 execute void-blog-posts --remote --file=migrations/xxx.sql
-```
+> | 变量名 | 说明 |
+> |--------|------|
+> | `NUXT_ADMIN_PASSWORD` | 管理后台登录密码 |
+> | `NUXT_JWT_SECRET` | JWT 签名密钥 |
 
 ## 路由规则
 
-| 路径           | 策略         | 说明                    |
-|---------------|-------------|------------------------|
-| `/`           | 不预渲染     | 动态从 D1 加载          |
-| `/api/**`     | NetworkOnly  | 永不缓存                |
-| `/rss.xml`    | ISR 3600s   | 每小时重新生成           |
-| `/sitemap.xml`| ISR 3600s   | 每小时重新生成           |
+| 路径 | 策略 | 说明 |
+|------|------|------|
+| `/` | 不预渲染 | 动态 D1 |
+| `/api/**` | NetworkOnly | 永不缓存 |
+| `/og/**` | Cache 24h | 动态 OG SVG |
+| `/rss.xml` | ISR 3600s | 每小时重生成 |
+| `/sitemap.xml` | ISR 3600s | 每小时重生成 |
 
 ## 设计原则
 
-- **内容优先**：D1 作为单一数据源，无外部 CMS 依赖
-- **边缘优先**：Nitro preset = `cloudflare-pages`，离用户最近的节点响应
-- **零冷启动**：Pages Functions 不同于 Workers，无冷启动惩罚
-- **渐进增强**：PWA 离线缓存静态资源，API 永远走网络
-- **组件化**：composable 统一共享逻辑，PostCard / AppFooter 跨页面复用
+- **SSR 安全**：所有 `localStorage` / `document` 访问在 `onMounted` 内，无 SSR 副作用
+- **内容优先**：D1 单一数据源，无外部 CMS
+- **边缘优先**：`cloudflare-pages` preset，用户最近节点响应
+- **组件化**：composable 抽象共享逻辑，类型全覆盖
+- **性能**：GPU 动画、`v-memo` 节点优化、`transform` 代替 `width`
 
 ---
 
