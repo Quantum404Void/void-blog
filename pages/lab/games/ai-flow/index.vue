@@ -720,14 +720,20 @@ function onCanvasMouseUp() {
 }
 
 function onCanvasWheel(e: WheelEvent) {
-  if (e.ctrlKey) return
   e.preventDefault()
   const point = pointerToWorld(e.clientX, e.clientY)
-  const beforeX = point.x; const beforeY = point.y
-  const nextScale = clamp(view.scale * (e.deltaY < 0 ? 1.1 : 0.9), 0.35, 2.5)
-  view.scale = nextScale
-  view.x = point.screenX - beforeX * view.scale
-  view.y = point.screenY - beforeY * view.scale
+  // Ctrl+Wheel 或 Pinch（trackpad pinch 会带 ctrlKey=true）→ 缩放，以鼠标位置为中心
+  if (e.ctrlKey) {
+    const beforeX = point.x; const beforeY = point.y
+    const nextScale = clamp(view.scale * (e.deltaY < 0 ? 1.1 : 0.9), 0.35, 2.5)
+    view.scale = nextScale
+    view.x = point.screenX - beforeX * view.scale
+    view.y = point.screenY - beforeY * view.scale
+    return
+  }
+  // 普通滚轮 / 触控板双指滑动 → 平移（deltaX 横向，deltaY 纵向）
+  view.x -= e.deltaX
+  view.y -= e.deltaY
 }
 
 function startWire(e: MouseEvent, node: FlowNode, port: number) {

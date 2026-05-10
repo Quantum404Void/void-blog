@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+const { siteUrl, siteName } = useSiteConfig()
 
 useSeoMeta({
   title: `搜索 | ${siteName}`,
