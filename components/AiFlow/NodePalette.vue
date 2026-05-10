@@ -4,27 +4,9 @@
     style="border-color:var(--color-void-border);background:var(--color-void-card)"
   >
     <!-- 简介 -->
-    <div class="text-xs font-mono leading-6" style="color:var(--color-text-muted)">
-      这版开始像 <span style="color:var(--color-neon-cyan)">正经 flow editor</span> 了：
-      鼠标滚轮缩放，<span style="color:#c9f8d8">Alt/Space + 拖拽</span> 平移，拖框多选，右下角还有 minimap。
-    </div>
-
-    <!-- 快捷键 -->
-    <div
-      class="mt-4 rounded-lg border p-3 text-[10px] font-mono leading-5"
-      style="border-color:var(--color-void-border);background:rgba(255,255,255,0.02);color:var(--color-text-muted)"
-    >
-      - Wheel：Zoom<br>
-      - Alt/Space + Drag：Pan<br>
-      - Blank Area Drag：框选<br>
-      - Delete / Backspace：删除选中<br>
-      - Tab：Quick Add 搜索建节点<br>
-      - Ctrl/Cmd + D：复制选中<br>
-      - Ctrl/Cmd + G：选中节点成组<br>
-      - Ctrl/Cmd + L：自动布局<br>
-      - Ctrl/Cmd + Z / Shift+Z / Y：撤销重做<br>
-      - Arrow / Shift+Arrow：微调选中节点<br>
-      - Ctrl/Cmd + A：全选
+    <div class="text-[10px] font-mono leading-5 p-2 mb-1" style="color:var(--color-text-muted)">
+      拖节点到画布；从右端口拉线；Wheel 缩放；Space+拖 平移；框选多节点。
+      <button class="text-[var(--color-neon-cyan)] hover:underline ml-1" @click="$emit('openHelp')">查看全部快捷键 →</button>
     </div>
 
     <!-- Presets -->
@@ -78,5 +60,6 @@ defineProps<{
 defineEmits<{
   (e: 'loadPreset', key: string): void
   (e: 'dragStart', event: DragEvent, type: string): void
+  (e: 'openHelp'): void
 }>()
 </script>

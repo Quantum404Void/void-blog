@@ -621,3 +621,270 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     run: ({ inputs }) => inputs[0],
   },
 }
+
+// ──────────────────────────────────────────────────────────
+// New node types
+// ──────────────────────────────────────────────────────────
+
+// Append to NODE_SPECS is done via direct object mutation after the declaration
+// (workaround: we patch at module level below)
+
+Object.assign(NODE_SPECS, {
+  // ---- Math ----
+  'math-round': {
+    title: 'Round',
+    icon: '🔵',
+    color: '#ffd400',
+    category: 'Math',
+    description: '对数值做 round / ceil / floor。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      {
+        key: 'mode', label: 'mode', kind: 'select' as const, options: [
+          { label: 'round', value: 'round' },
+          { label: 'ceil',  value: 'ceil'  },
+          { label: 'floor', value: 'floor' },
+        ],
+      },
+      { key: 'decimals', label: 'decimals', kind: 'number' as const, step: 1, min: 0, max: 10 },
+    ],
+    createParams: () => ({ mode: 'round', decimals: 0 }),
+    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+      const n = requireNumber(inputs[0])
+      const d = Number(params.decimals ?? 0)
+      const factor = 10 ** d
+      switch (params.mode) {
+        case 'ceil':  return Math.ceil(n * factor) / factor
+        case 'floor': return Math.floor(n * factor) / factor
+        default:      return Math.round(n * factor) / factor
+      }
+    },
+  },
+
+  // ---- Array ----
+  'flatten': {
+    title: 'Flatten',
+    icon: '📐',
+    color: '#39ff14',
+    category: 'Array',
+    description: '嵌套数组展平一层（depth=1）。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }: { inputs: any[] }) => requireArray(inputs[0]).flat(),
+  },
+  'chunk': {
+    title: 'Chunk',
+    icon: '🍰',
+    color: '#39ff14',
+    category: 'Array',
+    description: '把数组切成固定大小的子数组。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'size', label: 'size', kind: 'number' as const, step: 1, min: 1 },
+    ],
+    createParams: () => ({ size: 2 }),
+    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+      const arr = requireArray(inputs[0])
+      const size = Math.max(1, Number(params.size ?? 2))
+      const chunks: any[][] = []
+      for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size))
+      return chunks
+    },
+  },
+  'zip': {
+    title: 'Zip',
+    icon: '🤐',
+    color: '#39ff14',
+    category: 'Array',
+    description: '把两个数组逐元素配对为 [a,b] 对。',
+    inputs: 2,
+    outputs: 1,
+    inputLabels: ['arr1', 'arr2'],
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }: { inputs: any[] }) => {
+      const a = requireArray(inputs[0], 'arr1')
+      const b = requireArray(inputs[1], 'arr2')
+      const len = Math.min(a.length, b.length)
+      return Array.from({ length: len }, (_, i) => [a[i], b[i]])
+    },
+  },
+  'count': {
+    title: 'Count',
+    icon: '#️⃣',
+    color: '#39ff14',
+    category: 'Array',
+    description: '输出数组长度。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }: { inputs: any[] }) => requireArray(inputs[0]).length,
+  },
+  'reverse': {
+    title: 'Reverse',
+    icon: '🔄',
+    color: '#39ff14',
+    category: 'Array',
+    description: '反转数组顺序。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }: { inputs: any[] }) => [...requireArray(inputs[0])].reverse(),
+  },
+
+  // ---- Object ----
+  'obj-keys': {
+    title: 'Object.keys',
+    icon: '🗝️',
+    color: '#aa88ff',
+    category: 'Object',
+    description: '提取对象的 key 数组。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }: { inputs: any[] }) => {
+      const v = inputs[0]
+      if (v && typeof v === 'object' && !Array.isArray(v)) return Object.keys(v)
+      throw new Error('输入需要 object')
+    },
+  },
+  'obj-values': {
+    title: 'Object.values',
+    icon: '📋',
+    color: '#aa88ff',
+    category: 'Object',
+    description: '提取对象的 value 数组。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }: { inputs: any[] }) => {
+      const v = inputs[0]
+      if (v && typeof v === 'object' && !Array.isArray(v)) return Object.values(v)
+      throw new Error('输入需要 object')
+    },
+  },
+  'obj-pick': {
+    title: 'Object.pick',
+    icon: '🎯',
+    color: '#aa88ff',
+    category: 'Object',
+    description: '从对象中选取指定 key，逗号分隔。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'keys', label: 'keys', kind: 'text' as const, placeholder: 'name, age' },
+    ],
+    createParams: () => ({ keys: 'name, age' }),
+    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+      const v = inputs[0]
+      if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('输入需要 object')
+      const ks = String(params.keys ?? '').split(',').map((k: string) => k.trim()).filter(Boolean)
+      return Object.fromEntries(ks.filter((k: string) => k in v).map((k: string) => [k, (v as any)[k]]))
+    },
+  },
+
+  // ---- String ----
+  'regex-match': {
+    title: 'Regex Match',
+    icon: '🔍',
+    color: '#ff7a00',
+    category: 'String',
+    description: '正则匹配，输出所有匹配项。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'pattern', label: 'pattern', kind: 'text' as const, placeholder: '\\d+' },
+      { key: 'flags',   label: 'flags',   kind: 'text' as const, placeholder: 'g' },
+    ],
+    createParams: () => ({ pattern: '\\d+', flags: 'g' }),
+    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+      const str = requireString(inputs[0])
+      const re = new RegExp(String(params.pattern ?? ''), String(params.flags ?? ''))
+      if (String(params.flags ?? '').includes('g')) {
+        return [...str.matchAll(re)].map(m => m[0])
+      }
+      const m = str.match(re)
+      return m ? [...m] : []
+    },
+  },
+  'regex-replace': {
+    title: 'Regex Replace',
+    icon: '✏️',
+    color: '#ff7a00',
+    category: 'String',
+    description: '正则替换字符串。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'pattern',     label: 'pattern',     kind: 'text' as const, placeholder: '\\s+' },
+      { key: 'replacement', label: 'replacement', kind: 'text' as const, placeholder: '_' },
+      { key: 'flags',       label: 'flags',       kind: 'text' as const, placeholder: 'g' },
+    ],
+    createParams: () => ({ pattern: '\\s+', replacement: '_', flags: 'g' }),
+    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+      const str = requireString(inputs[0])
+      const re = new RegExp(String(params.pattern ?? ''), String(params.flags ?? ''))
+      return str.replace(re, String(params.replacement ?? ''))
+    },
+  },
+  'string-slice': {
+    title: 'Slice',
+    icon: '🔪',
+    color: '#ff7a00',
+    category: 'String',
+    description: '字符串切片 str.slice(start, end)。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'start', label: 'start', kind: 'number' as const, step: 1 },
+      { key: 'end',   label: 'end',   kind: 'number' as const, step: 1 },
+    ],
+    createParams: () => ({ start: 0, end: 10 }),
+    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+      const str = requireString(inputs[0])
+      const s = Number(params.start ?? 0)
+      const e = (params.end !== '' && params.end !== null && params.end !== undefined) ? Number(params.end) : undefined
+      return str.slice(s, e)
+    },
+  },
+
+  // ---- Source ----
+  'source-random': {
+    title: 'Random',
+    icon: '🎲',
+    color: '#00d4ff',
+    category: 'Source',
+    description: '生成随机数数组（min~max 之间）。',
+    inputs: 0,
+    outputs: 1,
+    params: [
+      { key: 'count', label: 'count', kind: 'number' as const, step: 1, min: 1 },
+      { key: 'min',   label: 'min',   kind: 'number' as const, step: 1 },
+      { key: 'max',   label: 'max',   kind: 'number' as const, step: 1 },
+      {
+        key: 'mode', label: 'mode', kind: 'select' as const, options: [
+          { label: 'float', value: 'float' },
+          { label: 'int',   value: 'int'   },
+        ],
+      },
+    ],
+    createParams: () => ({ count: 8, min: 1, max: 100, mode: 'int' }),
+    run: ({ params }: { inputs: any[]; params: Record<string, any> }) => {
+      const count = Math.min(1000, Math.max(1, Number(params.count ?? 8)))
+      const min = Number(params.min ?? 0)
+      const max = Number(params.max ?? 100)
+      return Array.from({ length: count }, () => {
+        const r = Math.random() * (max - min) + min
+        return params.mode === 'int' ? Math.floor(r) : Math.round(r * 1000) / 1000
+      })
+    },
+  },
+})

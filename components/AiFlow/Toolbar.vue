@@ -95,6 +95,13 @@
       style="border-color:var(--color-void-border);color:var(--color-text-muted)"
       @click="$emit('copyJson')"
     >Copy JSON</button>
+
+    <button
+      class="px-2 py-1.5 rounded border text-xs font-mono transition-all"
+      style="border-color:rgba(100,100,150,0.3);color:var(--color-text-muted)"
+      title="快捷键帮助 (?)"
+      @click="$emit('help')"
+    >?</button>
   </div>
 </template>
 
@@ -119,5 +126,6 @@ defineEmits<{
   (e: 'copyMermaid'): void
   (e: 'copyJson'): void
   (e: 'quickAdd'): void
+  (e: 'help'): void
 }>()
 </script>

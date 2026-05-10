@@ -45,6 +45,8 @@ const suspendHistory = ref(false)
 const lastSnapshot = ref('')
 const quickAddOpen = ref(false)
 const quickAddQuery = ref('')
+const contextMenu = ref<{ x: number; y: number; nodeId: string } | null>(null)
+const helpOpen = ref(false)
 
 const view = reactive({ x: 120, y: 80, scale: 1 })
 
@@ -758,6 +760,31 @@ function deleteNode(nodeId: string) {
   selectedNodeIds.value = selectedNodeIds.value.filter(id => id !== nodeId)
 }
 
+// Context Menu
+function openContextMenu(e: MouseEvent, nodeId: string) {
+  e.preventDefault()
+  e.stopPropagation()
+  contextMenu.value = { x: e.clientX, y: e.clientY, nodeId }
+}
+function closeContextMenu() { contextMenu.value = null }
+function ctxDelete() {
+  if (!contextMenu.value) return
+  deleteNode(contextMenu.value.nodeId)
+  closeContextMenu()
+}
+function ctxDuplicate() {
+  if (!contextMenu.value) return
+  selectedNodeIds.value = [contextMenu.value.nodeId]
+  duplicateSelected()
+  closeContextMenu()
+}
+function ctxGroup() {
+  if (!contextMenu.value) return
+  selectedNodeIds.value = [contextMenu.value.nodeId]
+  createGroupFromSelection()
+  closeContextMenu()
+}
+
 function deleteSelected() {
   if (!selectedNodeIds.value.length) return
   const set = new Set(selectedNodeIds.value)
@@ -785,6 +812,10 @@ function onWindowKeyDown(e: KeyboardEvent) {
   if (isEditableTarget(e.target)) return
   if (e.key === 'Tab') { quickAddOpen.value = !quickAddOpen.value; if (!quickAddOpen.value) quickAddQuery.value = ''; e.preventDefault(); return }
   if (e.code === 'Space') { spacePressed.value = true; e.preventDefault() }
+  if (e.key === '?') { helpOpen.value = !helpOpen.value; return }
+  if (e.key === 'f' || e.key === 'F') { fitView(); e.preventDefault(); return }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { runGraph(); e.preventDefault(); return }
+  if (e.key === '0') { resetZoom(); e.preventDefault(); return }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeIds.value.length) { deleteSelected(); e.preventDefault() }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') { selectedNodeIds.value = nodes.value.map(n => n.id); e.preventDefault() }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') { duplicateSelected(); e.preventDefault() }
@@ -822,6 +853,10 @@ onMounted(() => {
   window.addEventListener('resize', updateViewportSize)
   window.addEventListener('keydown', onWindowKeyDown)
   window.addEventListener('keyup', onWindowKeyUp)
+
+  // 清理旧版 key
+  const OLD_KEYS = ['void-b\u2026w:v1', 'void-aiflow', 'ai-flow-state', 'aiflow-v1', 'void-blog:ai-flow:v1']
+  OLD_KEYS.forEach(k => { try { localStorage.removeItem(k) } catch {} })
 
   try {
     const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
@@ -871,6 +906,7 @@ onUnmounted(() => {
       @copy-mermaid="copyText(mermaidCode, 'Mermaid')"
       @copy-json="copyText(graphJson, 'JSON')"
       @quick-add="quickAddOpen = true"
+      @help="helpOpen = true"
     />
 
     <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 96px)">
@@ -881,6 +917,7 @@ onUnmounted(() => {
         :selected-preset="selectedPreset"
         @load-preset="loadPreset"
         @drag-start="(e, type) => e.dataTransfer?.setData('nodeType', type)"
+        @open-help="helpOpen = true"
       />
 
       <!-- 画布 -->
@@ -890,7 +927,7 @@ onUnmounted(() => {
         style="background:#08080f"
         @dragover.prevent
         @drop.prevent="(e) => { const type = e.dataTransfer?.getData('nodeType'); if (type) { const p = pointerToWorld(e.clientX, e.clientY); nodes.push(makeNode(type, p.x - NODE_W / 2, p.y - 24)) } }"
-        @mousedown="onCanvasMouseDown"
+        @mousedown="onCanvasMouseDown($event); if (contextMenu) closeContextMenu()"
         @mousemove="onCanvasMouseMove"
         @mouseup="onCanvasMouseUp"
         @mouseleave="onCanvasMouseUp"
@@ -972,6 +1009,7 @@ onUnmounted(() => {
                 z-index:${isNodeSelected(node.id) ? 30 : 10};
               `"
               @mousedown="onNodeMouseDown($event, node)"
+              @contextmenu.prevent="openContextMenu($event, node.id)"
             >
               <!-- 节点头部 -->
               <div
@@ -1105,4 +1143,67 @@ onUnmounted(() => {
       />
     </div>
   </div>
+
+  <!-- Context Menu -->
+  <Teleport to="body">
+    <div
+      v-if="contextMenu"
+      class="fixed z-[200] min-w-[140px] rounded-xl border shadow-2xl py-1 font-mono text-xs"
+      style="background:rgba(13,13,20,0.97);border-color:rgba(0,212,255,0.25);backdrop-filter:blur(12px)"
+      :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
+      @click.stop
+    >
+      <button
+        class="w-full px-4 py-2 text-left transition-colors hover:bg-[rgba(0,212,255,0.1)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)]"
+        @click="ctxDuplicate"
+      >⊕ Duplicate</button>
+      <button
+        class="w-full px-4 py-2 text-left transition-colors hover:bg-[rgba(180,76,255,0.1)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-purple)]"
+        @click="ctxGroup"
+      >⬡ Group</button>
+      <div class="my-1 h-px mx-3" style="background:rgba(255,255,255,0.06)"></div>
+      <button
+        class="w-full px-4 py-2 text-left transition-colors hover:bg-[rgba(255,45,120,0.1)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)]"
+        @click="ctxDelete"
+      >✕ Delete</button>
+    </div>
+  </Teleport>
+
+  <!-- Keyboard Help Overlay -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div v-if="helpOpen"
+        class="fixed inset-0 z-[300] flex items-center justify-center"
+        style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)"
+        @click="helpOpen = false"
+      >
+        <div
+          class="rounded-2xl border p-6 w-[480px] max-h-[70vh] overflow-y-auto"
+          style="background:rgba(13,13,20,0.98);border-color:rgba(0,212,255,0.25)"
+          @click.stop
+        >
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-mono text-sm font-bold" style="color:var(--color-neon-cyan)">⌨ 快捷键</span>
+            <button @click="helpOpen = false" class="font-mono text-xs text-[var(--color-text-muted)] hover:text-white">✕</button>
+          </div>
+          <div class="grid grid-cols-2 gap-x-8 gap-y-2 font-mono text-xs text-[var(--color-text-muted)]">
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">▶ Run</kbd> Ctrl+Enter</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Undo</kbd> Ctrl+Z</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Redo</kbd> Ctrl+Shift+Z</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Delete</kbd> Del / Backspace</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Quick Add</kbd> Tab</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Fit View</kbd> F</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">100%</kbd> 0</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Select All</kbd> Ctrl+A</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Duplicate</kbd> Ctrl+D</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Group</kbd> Ctrl+G</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Pan</kbd> Space+Drag</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Nudge</kbd> Arrow Keys</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Help</kbd> ?</div>
+            <div><kbd class="px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.15)] text-white">Right Click</kbd> 节点菜单</div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>

@@ -76,18 +76,6 @@
       >Load Export</button>
     </div>
 
-    <!-- 说明 -->
-    <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">这轮增强</div>
-    <div class="text-[10px] font-mono leading-5" style="color:var(--color-text-muted)">
-      - Zoom / Pan / Fit / Reset Zoom<br>
-      - Minimap + 点击跳转视口<br>
-      - 框选 / 多选 / 批量拖动 / Duplicate<br>
-      - Auto Layout + Local Autosave / Restore<br>
-      - JSON Export / Import<br>
-      - Undo / Redo + Arrow-key Nudge<br>
-      - Group 容器 + Quick Add 搜索建节点
-    </div>
-
     <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">玩法说明</div>
     <div class="text-[10px] font-mono leading-5" style="color:var(--color-text-muted)">
       1. 左侧拖节点到画布。<br>
