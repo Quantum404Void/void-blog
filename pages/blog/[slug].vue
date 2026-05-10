@@ -380,14 +380,18 @@ function jumpToSaved() {
 
 const { attachCopyButtons } = useCodeCopy()
 
-// watch renderedContent — immediate:true 保证首次加载也触发
+// SPA 内跳转时 renderedContent 变化 → 重新注入（非首次）
 watch(renderedContent, async () => {
   await nextTick()
   const articleEl = document.querySelector('.prose') as HTMLElement | null
   attachCopyButtons(articleEl)
-}, { flush: 'post', immediate: true })
+}, { flush: 'post' })
 
-onMounted(() => {
+onMounted(async () => {
+  // 首次挂载注入复制按钮（客户端 hydration 完成后）
+  await nextTick()
+  attachCopyButtons(document.querySelector('.prose') as HTMLElement | null)
+
   // Continue reading: check saved progress
   const saved = localStorage.getItem(PROGRESS_KEY.value)
   if (saved) {
