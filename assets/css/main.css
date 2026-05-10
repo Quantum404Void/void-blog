@@ -427,3 +427,82 @@ body::after {
 
 .prose pre .hljs-ln-numbers { display: none; }
 
+
+/* ── 复制按钮 copy-btn 增强（配合 useCodeCopy） ── */
+.copy-btn {
+  font-family: var(--font-mono) !important;
+  letter-spacing: 0.04em;
+}
+.copy-btn:focus-visible {
+  outline: 2px solid rgba(0,212,255,0.5);
+  outline-offset: 2px;
+}
+
+/* ── 文章标签 hover glow 底线 ── */
+.prose-tag:hover {
+  text-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+
+/* ── TOC 激活项左侧指示线 ── */
+.toc-active {
+  color: var(--color-neon-cyan) !important;
+  border-left-color: var(--color-neon-cyan) !important;
+}
+
+/* ── 文章卡片时间线连接线渐变增强 ── */
+.timeline-dot-active {
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.15), 0 0 8px rgba(0,212,255,0.4);
+}
+
+/* ── 选择高亮赛博色 ── */
+::selection {
+  background: rgba(0,212,255,0.2);
+  color: #e8e8f0;
+}
+::-moz-selection {
+  background: rgba(0,212,255,0.2);
+  color: #e8e8f0;
+}
+
+/* ── prose 内 strong 加强颜色 ── */
+.prose strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+/* ── prose 内 kbd 键盘按键样式 ── */
+.prose kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  padding: 0.15em 0.45em;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  color: var(--color-text-secondary);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* ── prose 内 mark 高亮 ── */
+.prose mark {
+  background: rgba(255,200,0,0.18);
+  color: #ffd400;
+  border-radius: 2px;
+  padding: 0 0.2em;
+}
+
+/* ── 文章 footer 分割线 ── */
+.prose-footer-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0,212,255,0.2), transparent);
+  margin: 2rem 0;
+}
+
+/* ── 首页 Hero 脉冲增强 ── */
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); opacity: 1; }
+  50%       { box-shadow: 0 0 0 6px rgba(0,255,136,0); opacity: 0.6; }
+}
+.hero-online-dot {
+  animation: pulse-green 2s ease-in-out infinite;
+}

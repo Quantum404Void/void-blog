@@ -10,14 +10,14 @@
       <!-- Article -->
       <main class="flex-1 min-w-0 max-w-3xl">
         <header class="mb-12">
-          <div v-if="post.tags.length" class="flex flex-wrap gap-2 mb-6">
+          <div v-if="post.tags.length" class="flex flex-wrap gap-2 mb-5">
             <NuxtLink
               v-for="tag in post.tags"
               :key="tag"
               :href="`/tags/${tag}`"
-              class="font-mono text-xs px-3 py-1 rounded-full border border-[rgba(0,212,255,0.3)] text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.05)] hover:border-[rgba(0,212,255,0.6)] hover:bg-[rgba(0,212,255,0.1)] transition-all"
+              class="group font-mono text-xs px-3 py-1 rounded-full border border-[rgba(0,212,255,0.2)] text-[var(--color-text-muted)] bg-[rgba(0,212,255,0.03)] hover:border-[rgba(0,212,255,0.5)] hover:text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.08)] transition-all duration-150"
             >
-              #{{ tag }}
+              <span class="text-[var(--color-neon-cyan)] opacity-50 group-hover:opacity-100">#</span>{{ tag }}
             </NuxtLink>
           </div>
 
@@ -29,14 +29,22 @@
             {{ post.description }}
           </p>
 
-          <div class="flex items-center gap-4 text-sm text-[var(--color-text-muted)] font-mono border-t border-[var(--color-void-border)] pt-4">
-            <time :datetime="post.pub_date">
-              <span class="text-[var(--color-neon-green)]">$</span> {{ formatDateLong(post.pub_date) }}
-            </time>
-            <span class="text-[var(--color-void-border)]">|</span>
-            <span class="flex items-center gap-1">
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-[var(--color-text-muted)] border-t border-[var(--color-void-border)] pt-4 mt-6">
+            <span class="flex items-center gap-1.5">
+              <span class="text-[var(--color-neon-green)]">$</span>
+              <time :datetime="post.pub_date" class="text-[var(--color-text-secondary)]">{{ formatDateLong(post.pub_date) }}</time>
+            </span>
+            <span class="text-[var(--color-void-muted)]">·</span>
+            <span class="flex items-center gap-1.5">
               <span class="text-[var(--color-neon-purple)]">⏱</span>
-              {{ formatCount(wordCount) }} 字 · 约 {{ readingTime }} 分钟
+              <span>{{ formatCount(wordCount) }} 字</span>
+              <span class="text-[var(--color-void-muted)]">/</span>
+              <span>约 {{ readingTime }} min</span>
+            </span>
+            <span class="text-[var(--color-void-muted)]">·</span>
+            <span class="flex items-center gap-1.5">
+              <span class="text-[var(--color-neon-cyan)]">👁</span>
+              <span>{{ postViews || '—' }} views</span>
             </span>
           </div>
         </header>

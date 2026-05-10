@@ -12,10 +12,10 @@
 
       <div class="relative max-w-5xl mx-auto px-6">
         <div class="flex items-start gap-4 mb-8">
-          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0" style="animation: pulse 1.5s ease-in-out infinite;"></div>
+          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
             <p class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2">
-              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)]" style="animation:pulse 1.5s ease-in-out infinite"></span>
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)] hero-online-dot"></span>
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
