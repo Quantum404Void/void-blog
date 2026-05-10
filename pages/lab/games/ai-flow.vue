@@ -674,6 +674,10 @@ const spacePressed = ref(false)
 const importJson = ref('')
 const saveState = ref('not-saved')
 const hasHydrated = ref(false)
+const historyPast = ref<string[]>([])
+const historyFuture = ref<string[]>([])
+const suspendHistory = ref(false)
+const lastSnapshot = ref('')
 
 const view = reactive({
   x: 120,
@@ -970,6 +974,49 @@ function saveGraphToLocal() {
   saveState.value = `saved ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
 }
 
+function commitHistorySnapshot(snapshot: string) {
+  if (!hasHydrated.value || suspendHistory.value) return
+  if (!lastSnapshot.value) {
+    lastSnapshot.value = snapshot
+    return
+  }
+  if (snapshot === lastSnapshot.value) return
+  historyPast.value.push(lastSnapshot.value)
+  if (historyPast.value.length > 80) historyPast.value.shift()
+  historyFuture.value = []
+  lastSnapshot.value = snapshot
+}
+
+function applySnapshot(snapshot: string, mode: 'undo' | 'redo') {
+  try {
+    suspendHistory.value = true
+    restoreGraph(JSON.parse(snapshot))
+    selectedPreset.value = 'custom'
+    lastSnapshot.value = snapshot
+    lastRunSummary.value = mode == 'undo' ? '已撤销一步' : '已重做一步'
+    runGraph()
+    saveGraphToLocal()
+  } finally {
+    suspendHistory.value = false
+  }
+}
+
+function undo() {
+  if (!historyPast.value.length) return
+  const current = graphJson.value
+  const snapshot = historyPast.value.pop()!
+  historyFuture.value.push(current)
+  applySnapshot(snapshot, 'undo')
+}
+
+function redo() {
+  if (!historyFuture.value.length) return
+  const current = graphJson.value
+  const snapshot = historyFuture.value.pop()!
+  historyPast.value.push(current)
+  applySnapshot(snapshot, 'redo')
+}
+
 async function copyText(text: string, label: string) {
   try {
     await navigator.clipboard.writeText(text)
@@ -1053,6 +1100,17 @@ function autoLayout() {
 
   lastRunSummary.value = '已自动布局'
   fitView()
+}
+
+function nudgeSelected(dx: number, dy: number) {
+  if (!selectedNodeIds.value.length) return
+  for (const id of selectedNodeIds.value) {
+    const node = getNode(id)
+    if (!node) continue
+    node.x += dx
+    node.y += dy
+  }
+  lastRunSummary.value = `已微调 ${selectedNodeIds.value.length} 个节点`
 }
 
 function duplicateSelected() {
@@ -1563,6 +1621,22 @@ function onWindowKeyDown(e: KeyboardEvent) {
     autoLayout()
     e.preventDefault()
   }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+    undo()
+    e.preventDefault()
+  }
+  if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && e.shiftKey) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y')) {
+    redo()
+    e.preventDefault()
+  }
+  if (selectedNodeIds.value.length && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    const step = e.shiftKey ? 16 : 4
+    if (e.key === 'ArrowUp') nudgeSelected(0, -step)
+    if (e.key === 'ArrowDown') nudgeSelected(0, step)
+    if (e.key === 'ArrowLeft') nudgeSelected(-step, 0)
+    if (e.key === 'ArrowRight') nudgeSelected(step, 0)
+    e.preventDefault()
+  }
 }
 
 function onWindowKeyUp(e: KeyboardEvent) {
@@ -1571,12 +1645,13 @@ function onWindowKeyUp(e: KeyboardEvent) {
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 
-watch([nodes, wires, () => view.x, () => view.y, () => view.scale], () => {
-  if (!hasHydrated.value) return
+watch(() => graphJson.value, (snapshot) => {
+  commitHistorySnapshot(snapshot)
+  if (!hasHydrated.value || suspendHistory.value) return
   saveState.value = 'saving…'
   if (saveTimer) clearTimeout(saveTimer)
   saveTimer = setTimeout(() => saveGraphToLocal(), 250)
-}, { deep: true })
+})
 
 onMounted(() => {
   updateViewportSize()
@@ -1640,6 +1715,20 @@ onUnmounted(() => {
       >100%</button>
       <button
         class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        :style="historyPast.length
+          ? 'border-color:#f59e0b;color:#fcd34d;background:rgba(245,158,11,0.08)'
+          : 'border-color:var(--color-void-border);color:var(--color-text-muted)'"
+        @click="undo"
+      >Undo</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        :style="historyFuture.length
+          ? 'border-color:#f59e0b;color:#fcd34d;background:rgba(245,158,11,0.08)'
+          : 'border-color:var(--color-void-border);color:var(--color-text-muted)'"
+        @click="redo"
+      >Redo</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
         style="border-color:var(--color-void-border);color:var(--color-text-muted)"
         @click="clearCanvas"
       >Clear</button>
@@ -1683,6 +1772,8 @@ onUnmounted(() => {
           - Delete / Backspace：删除选中<br>
           - Ctrl/Cmd + D：复制选中<br>
           - Ctrl/Cmd + L：自动布局<br>
+          - Ctrl/Cmd + Z / Shift+Z / Y：撤销重做<br>
+          - Arrow / Shift+Arrow：微调选中节点<br>
           - Ctrl/Cmd + A：全选
         </div>
 
@@ -1977,6 +2068,7 @@ onUnmounted(() => {
           <div>nodes: <span style="color:#e7f7ff">{{ nodes.length }}</span></div>
           <div>wires: <span style="color:#e7f7ff">{{ wires.length }}</span></div>
           <div>selected: <span style="color:#e7f7ff">{{ selectedNodeIds.length }}</span></div>
+          <div>history: <span style="color:#e7f7ff">{{ historyPast.length }}</span> / <span style="color:#e7f7ff">{{ historyFuture.length }}</span></div>
           <div>view: <span style="color:#e7f7ff">{{ Math.round(view.scale * 100) }}%</span></div>
           <div>autosave: <span style="color:#e7f7ff">{{ saveState }}</span></div>
           <div class="mt-2" style="color:#c9f8d8">{{ lastRunSummary }}</div>
@@ -2039,7 +2131,8 @@ onUnmounted(() => {
           - Minimap + 点击跳转视口<br>
           - 框选 / 多选 / 批量拖动 / Duplicate<br>
           - Auto Layout + Local Autosave / Restore<br>
-          - JSON Export / Import
+          - JSON Export / Import<br>
+          - Undo / Redo + Arrow-key Nudge
         </div>
 
         <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">玩法说明</div>
