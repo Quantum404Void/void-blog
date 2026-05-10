@@ -328,12 +328,12 @@ body::after {
   opacity: 0.7;
 }
 
-/* 语言 badge — data-lang 属性驱动 */
+/* 语言 badge — data-lang 属性驱动，右侧留出复制按钮空间 */
 .prose pre[data-lang]::after {
   content: attr(data-lang);
   position: absolute;
   top: 0.65rem;
-  right: 0.75rem;
+  right: 2.75rem;  /* 避开复制按钮（约 36px） */
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.05em;
@@ -454,34 +454,5 @@ body::after {
   backdrop-filter: blur(8px);
 }
 
-/* ── 代码块行号（CSS counter，与 markdown-it fence renderer 配合）── */
-.prose pre code {
-  counter-reset: code-line;
-  position: relative;
-  display: block;
-}
-.prose pre .code-line {
-  counter-increment: code-line;
-  display: block;
-  position: relative;
-  padding-left: 3rem;
-}
-.prose pre .code-line::before {
-  content: counter(code-line);
-  position: absolute;
-  left: 0;
-  width: 2.25rem;
-  text-align: right;
-  color: rgba(100, 100, 150, 0.35);
-  font-size: 11px;
-  line-height: inherit;
-  user-select: none;
-  border-right: 1px solid rgba(100, 100, 150, 0.1);
-  padding-right: 0.5rem;
-}
-/* 有行号时 pre 不需要额外 padding-left */
-.prose pre:has(.code-line) {
-  padding-left: 1.5rem;
-}
 .prose pre .hljs-ln-numbers { display: none; }
 

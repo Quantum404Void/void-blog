@@ -54,23 +54,33 @@ md.renderer.rules.fence = (tokens: any[], idx: number, o: any, env: any, self: a
     ? _defaultFence(tokens, idx, o, env, self)
     : self.renderToken(tokens, idx, o)
 
-  // 加行号（≥4行）
-  const withLineNumbers = raw.replace(
-    /(<code[^>]*>)([\s\S]*?)(<\/code>)/,
-    (_m: string, open: string, body: string, close: string) => {
-      const lines = body.split('\n')
-      const last = lines[lines.length - 1] === '' ? lines.slice(0, -1) : lines
-      if (last.length < 4) return open + body + close
-      const wrapped = last.map((l: string) => `<span class="code-line">${l}</span>`).join('\n')
-      return open + wrapped + '\n' + close
-    }
-  )
+  // 不再手动切行包 span，完全交给 CSS line-numbers 处理
+  // 只提取行数，如果 >= 4 行则在 pre 上加 data-lines class
+  const lineCount = (raw.match(/\n/g) || []).length
+  const hasLineNumbers = lineCount >= 3
 
-  // 注入 data-lang 到 <pre> 标签
-  if (lang) {
-    return withLineNumbers.replace('<pre', `<pre data-lang="${lang}"`)
+  let result = raw
+
+  // 注入 data-lang + class 到 <pre> 标签
+  const extraAttrs = [
+    lang ? `data-lang="${lang}"` : '',
+    hasLineNumbers ? 'class="line-numbers"' : '',
+  ].filter(Boolean).join(' ')
+
+  if (extraAttrs) {
+    // 如果已有 class 属性，合并而不是替换
+    result = result.replace(/^<pre([^>]*)>/, (match, attrs) => {
+      const hasClass = /class="([^"]*)"/.test(attrs)
+      if (hasClass && hasLineNumbers) {
+        attrs = attrs.replace(/class="([^"]*)"/, 'class="$1 line-numbers"')
+      } else {
+        attrs = attrs + (lang ? ` data-lang="${lang}"` : '') + (hasLineNumbers && !hasClass ? ' class="line-numbers"' : '')
+      }
+      return `<pre${attrs}>`
+    })
   }
-  return withLineNumbers
+
+  return result
 }
 
 // 图片懒加载
