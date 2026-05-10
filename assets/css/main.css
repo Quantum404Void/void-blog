@@ -46,9 +46,11 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;  /* 防止任何元素溢出导致页面水平拉宽 */
   }
 
   body {
+    overflow-x: hidden;
     background-color: var(--color-void);
     color: var(--color-text-primary);
     font-family: var(--font-sans);
