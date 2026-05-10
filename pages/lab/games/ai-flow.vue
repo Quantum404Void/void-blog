@@ -5,756 +5,1193 @@ useSeoMeta({ title: `AI Flow | ${siteName}` })
 const crumbs = [
   { label: 'lab', href: '/lab' },
   { label: 'games', href: '/lab' },
-  { label: 'ai-flow' }
+  { label: 'ai-flow' },
 ]
 
-// ── Types ──────────────────────────────────────────────────────────────────
-interface Port {
-  id: string
-  nodeId: string
-  kind: 'input' | 'output'
-  x: number
-  y: number
+type ParamKind = 'number' | 'text' | 'textarea' | 'select' | 'boolean'
+
+interface ParamOption {
+  label: string
+  value: string | number | boolean
 }
 
-interface NodeDef {
-  id: string
-  type: string
+interface ParamSpec {
+  key: string
   label: string
+  kind: ParamKind
+  placeholder?: string
+  min?: number
+  max?: number
+  step?: number
+  options?: ParamOption[]
+}
+
+interface NodeSpec {
+  title: string
   icon: string
   color: string
   category: string
+  description: string
+  inputs: number
+  outputs: number
+  params: ParamSpec[]
+  createParams: () => Record<string, any>
+  run: (ctx: { inputs: any[]; params: Record<string, any> }) => any
+}
+
+interface FlowNode {
+  id: string
+  type: string
   x: number
   y: number
-  inputs: Port[]
-  outputs: Port[]
-  description: string
+  params: Record<string, any>
+  result?: any
+  error?: string
 }
 
-interface Connection {
+interface Wire {
   id: string
   fromNode: string
-  fromPort: string
+  fromPort: number
   toNode: string
-  toPort: string
+  toPort: number
 }
 
-interface LevelDef {
-  title: string
-  goal: string
-  nodeTypes: string[]
-  requiredConnections: { from: string; to: string }[]
-  hint: string[]
-  successInfo: string
+interface Preset {
+  key: string
+  label: string
+  desc: string
 }
 
-// ── Node type catalogue ────────────────────────────────────────────────────
-const NODE_CATALOGUE: Record<string, { icon: string; color: string; category: string; description: string }> = {
-  DataLoader:     { icon: '🗂️', color: '#00d4ff', category: 'data',      description: '加载批量训练数据' },
-  Normalize:      { icon: '📐', color: '#39ff14', category: 'preprocess', description: '归一化输入特征' },
-  LinearLayer:    { icon: '⚡', color: '#b400ff', category: 'model',      description: '全连接线性变换' },
-  Sigmoid:        { icon: '∿',  color: '#ff00aa', category: 'activation', description: '将输出压缩到 (0,1)' },
-  Threshold:      { icon: '✂️', color: '#ff4500', category: 'output',     description: '阈值二分类判断' },
-  ImageLoader:    { icon: '🖼️', color: '#00d4ff', category: 'data',      description: '加载图片数据' },
-  'Resize(224)':  { icon: '📏', color: '#39ff14', category: 'preprocess', description: '缩放到 224×224' },
-  ToTensor:       { icon: '🔢', color: '#39ff14', category: 'preprocess', description: '转换为张量格式' },
-  BatchLoader:    { icon: '📦', color: '#00d4ff', category: 'data',      description: '组装 mini-batch' },
-  TextInput:      { icon: '📝', color: '#00d4ff', category: 'data',      description: '原始文本输入' },
-  Tokenizer:      { icon: '✂️', color: '#39ff14', category: 'preprocess', description: '分词 & 编码' },
-  Embedding:      { icon: '🔤', color: '#b400ff', category: 'model',      description: '词向量嵌入层' },
-  LSTM:           { icon: '🔄', color: '#b400ff', category: 'model',      description: '长短期记忆网络' },
-  Dropout:        { icon: '💧', color: '#ff00aa', category: 'regularize', description: '随机丢弃防过拟合' },
-  Softmax:        { icon: '∿',  color: '#ff00aa', category: 'activation', description: '多分类概率输出' },
-  ArgMax:         { icon: '🏆', color: '#ff4500', category: 'output',     description: '取概率最大类别' },
-  Model:          { icon: '🧠', color: '#b400ff', category: 'model',      description: '神经网络模型' },
-  'Loss(CrossEntropy)': { icon: '💥', color: '#ff4500', category: 'loss', description: '交叉熵损失函数' },
-  Backward:       { icon: '↩️', color: '#ffa500', category: 'train',      description: '反向传播梯度' },
-  'Optimizer(Adam)': { icon: '🔧', color: '#ffa500', category: 'train',   description: 'Adam 自适应优化器' },
-  Update:         { icon: '✅', color: '#39ff14', category: 'train',      description: '更新模型参数' },
-  UserQuery:      { icon: '❓', color: '#00d4ff', category: 'data',      description: '用户输入的问题' },
-  Embedder:       { icon: '🔤', color: '#b400ff', category: 'model',      description: '文本向量化' },
-  VectorDB:       { icon: '🗄️', color: '#00d4ff', category: 'data',      description: '向量数据库' },
-  Retriever:      { icon: '🔍', color: '#39ff14', category: 'preprocess', description: '检索相关文档' },
-  ContextMerger:  { icon: '🔀', color: '#ffa500', category: 'preprocess', description: '合并问题与上下文' },
-  LLM:            { icon: '🤖', color: '#00d4ff', category: 'model',      description: '大语言模型' },
-  Output:         { icon: '📤', color: '#39ff14', category: 'output',     description: '最终输出结果' },
+const NODE_W = 260
+const HEADER_H = 40
+const DESC_H = 38
+const RESULT_H = 78
+const PORT_R = 6
+
+function parseArrayInput(raw: string) {
+  const text = String(raw ?? '').trim()
+  if (!text) return []
+  if (text.startsWith('[')) {
+    const parsed = JSON.parse(text)
+    if (!Array.isArray(parsed)) throw new Error('不是合法 JSON 数组')
+    return parsed
+  }
+  return text
+    .split(/[\n,]+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const n = Number(item)
+      return Number.isFinite(n) && /^-?\d+(\.\d+)?$/.test(item) ? n : item
+    })
 }
 
-const NODE_W = 150
-const NODE_H = 60
+function requireArray(value: any, label = '输入') {
+  if (!Array.isArray(value)) throw new Error(`${label} 需要数组`) 
+  return value
+}
 
-// ── Levels ────────────────────────────────────────────────────────────────
-const levels: LevelDef[] = [
-  {
-    title: '关卡 1：Hello 分类器',
-    goal: '把「原始数据」处理成「二分类结果」',
-    nodeTypes: ['DataLoader', 'Normalize', 'LinearLayer', 'Sigmoid', 'Threshold'],
-    requiredConnections: [
-      { from: 'DataLoader', to: 'Normalize' },
-      { from: 'Normalize', to: 'LinearLayer' },
-      { from: 'LinearLayer', to: 'Sigmoid' },
-      { from: 'Sigmoid', to: 'Threshold' },
-    ],
-    hint: ['DataLoader → Normalize → LinearLayer → Sigmoid → Threshold'],
-    successInfo: '🎓 Sigmoid 把线性输出压缩到 (0,1)，Threshold（通常 0.5）将概率转化为 0/1 类别标签 —— 这就是最简单的二元分类器！',
-  },
-  {
-    title: '关卡 2：图像预处理',
-    goal: '把「原始图片」变成「可训练的张量」',
-    nodeTypes: ['ImageLoader', 'Resize(224)', 'ToTensor', 'Normalize', 'BatchLoader'],
-    requiredConnections: [
-      { from: 'ImageLoader', to: 'Resize(224)' },
-      { from: 'Resize(224)', to: 'ToTensor' },
-      { from: 'ToTensor', to: 'Normalize' },
-      { from: 'Normalize', to: 'BatchLoader' },
-    ],
-    hint: ['ImageLoader → Resize(224) → ToTensor → Normalize → BatchLoader'],
-    successInfo: '🎓 ImageNet 标准预处理：先 resize 到 224px，再转张量 [0,1]，最后用均值/标准差归一化。BatchLoader 把单张图片打包成 batch，GPU 才能高效并行！',
-  },
-  {
-    title: '关卡 3：NLP Pipeline',
-    goal: '文本 → 情感分类',
-    nodeTypes: ['TextInput', 'Tokenizer', 'Embedding', 'LSTM', 'Dropout', 'Softmax', 'ArgMax'],
-    requiredConnections: [
-      { from: 'TextInput', to: 'Tokenizer' },
-      { from: 'Tokenizer', to: 'Embedding' },
-      { from: 'Embedding', to: 'LSTM' },
-      { from: 'LSTM', to: 'Dropout' },
-      { from: 'Dropout', to: 'Softmax' },
-      { from: 'Softmax', to: 'ArgMax' },
-    ],
-    hint: ['TextInput → Tokenizer → Embedding → LSTM → Dropout → Softmax → ArgMax', '提示：Dropout 必须在 Softmax 之前'],
-    successInfo: '🎓 LSTM 能记住文本的长程依赖；Dropout 在训练时随机关掉神经元，防止过拟合；Softmax 输出各类别概率；ArgMax 选出最高概率的情感类别！',
-  },
-  {
-    title: '关卡 4：训练循环',
-    goal: '搭建完整的训练循环',
-    nodeTypes: ['DataLoader', 'Model', 'Loss(CrossEntropy)', 'Backward', 'Optimizer(Adam)', 'Update'],
-    requiredConnections: [
-      { from: 'DataLoader', to: 'Model' },
-      { from: 'Model', to: 'Loss(CrossEntropy)' },
-      { from: 'Loss(CrossEntropy)', to: 'Backward' },
-      { from: 'Backward', to: 'Optimizer(Adam)' },
-      { from: 'Optimizer(Adam)', to: 'Update' },
-    ],
-    hint: ['DataLoader → Model → Loss → Backward → Optimizer → Update'],
-    successInfo: '🎓 训练循环：前向传播得到预测 → 计算损失 → 反向传播求梯度 → Adam 自适应地调整学习率 → 更新参数。循环千次，模型越来越准！',
-  },
-  {
-    title: '关卡 5：RAG Pipeline',
-    goal: 'Retrieval-Augmented Generation',
-    nodeTypes: ['UserQuery', 'Embedder', 'VectorDB', 'Retriever', 'ContextMerger', 'LLM', 'Output'],
-    requiredConnections: [
-      { from: 'UserQuery', to: 'Embedder' },
-      { from: 'Embedder', to: 'VectorDB' },
-      { from: 'VectorDB', to: 'Retriever' },
-      { from: 'Retriever', to: 'ContextMerger' },
-      { from: 'UserQuery', to: 'ContextMerger' },
-      { from: 'ContextMerger', to: 'LLM' },
-      { from: 'LLM', to: 'Output' },
-    ],
-    hint: [
-      'UserQuery → Embedder → VectorDB → Retriever → ContextMerger → LLM → Output',
-      '提示：UserQuery 同时直连 ContextMerger（query 直接传入）',
-    ],
-    successInfo: '🎓 RAG 的核心：把用户问题向量化，在知识库里检索相关片段，再把原始问题 + 检索内容一起喂给 LLM。LLM 有了"参考资料"，幻觉大幅减少！',
-  },
-]
+function requireString(value: any, label = '输入') {
+  if (typeof value !== 'string') throw new Error(`${label} 需要字符串`)
+  return value
+}
 
-// ── State ─────────────────────────────────────────────────────────────────
-const currentLevel = ref(0)
-const unlockedLevel = ref(0)
-const canvasNodes = ref<NodeDef[]>([])
-const connections = ref<Connection[]>([])
+function requireNumberArray(value: any, label = '输入') {
+  const arr = requireArray(value, label)
+  if (!arr.every(v => typeof v === 'number' && Number.isFinite(v))) throw new Error(`${label} 需要 number[]`)
+  return arr as number[]
+}
 
-// Dragging node on canvas
-const dragging = ref<{ nodeId: string; ox: number; oy: number } | null>(null)
-
-// Port connection
-const pendingConn = ref<{ fromNode: string; fromPort: string; mx: number; my: number } | null>(null)
-
-// Animation
-const dashOffset = ref(0)
-const runningAnim = ref(false)
-const animPacketPos = ref<{ x: number; y: number; opacity: number }[]>([])
-const showSuccess = ref(false)
-const showHint = ref(false)
-const hintNodes = ref<string[]>([])
-
-// Validation
-const validationErrors = ref<string[]>([])
-const isValid = ref(false)
-
-// Canvas ref
-const canvasEl = ref<HTMLDivElement | null>(null)
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-function makeNode(type: string, x: number, y: number): NodeDef {
-  const cat = NODE_CATALOGUE[type] ?? { icon: '❔', color: '#888', category: 'misc', description: '' }
-  const id = `node-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
-  return {
-    id,
-    type,
-    label: type,
-    icon: cat.icon,
-    color: cat.color,
-    category: cat.category,
-    x,
-    y,
-    inputs: [{ id: `${id}-in`, nodeId: id, kind: 'input', x: -6, y: NODE_H / 2 }],
-    outputs: [{ id: `${id}-out`, nodeId: id, kind: 'output', x: NODE_W + 6, y: NODE_H / 2 }],
-    description: cat.description,
+function mapValue(value: any, mode: string) {
+  switch (mode) {
+    case 'double': return Number(value) * 2
+    case 'square': return Number(value) ** 2
+    case 'negate': return -Number(value)
+    case 'abs': return Math.abs(Number(value))
+    case 'string': return String(value)
+    case 'trim': return String(value).trim()
+    case 'upper': return String(value).toUpperCase()
+    case 'lower': return String(value).toLowerCase()
+    default: return value
   }
 }
 
-function getNodeById(id: string) {
-  return canvasNodes.value.find(n => n.id === id)
+const NODE_SPECS: Record<string, NodeSpec> = {
+  'source-number': {
+    title: 'Number',
+    icon: '🔢',
+    color: '#00d4ff',
+    category: 'Source',
+    description: '固定数值源，适合测试算子。',
+    inputs: 0,
+    outputs: 1,
+    params: [
+      { key: 'value', label: 'value', kind: 'number', step: 1 },
+    ],
+    createParams: () => ({ value: 42 }),
+    run: ({ params }) => Number(params.value ?? 0),
+  },
+  'source-text': {
+    title: 'Text',
+    icon: '📝',
+    color: '#00d4ff',
+    category: 'Source',
+    description: '文本源，可接字符串链路或 JSON。',
+    inputs: 0,
+    outputs: 1,
+    params: [
+      { key: 'text', label: 'text', kind: 'textarea', placeholder: 'hello world' },
+    ],
+    createParams: () => ({ text: 'hello void, hello flow' }),
+    run: ({ params }) => String(params.text ?? ''),
+  },
+  'source-array': {
+    title: 'Array',
+    icon: '📦',
+    color: '#00d4ff',
+    category: 'Source',
+    description: '数组源，支持 CSV / 换行 / JSON 数组。',
+    inputs: 0,
+    outputs: 1,
+    params: [
+      { key: 'items', label: 'items', kind: 'textarea', placeholder: '1, 2, 3' },
+    ],
+    createParams: () => ({ items: '1, 2, 3, 5, 8, 13' }),
+    run: ({ params }) => parseArrayInput(params.items),
+  },
+  'source-range': {
+    title: 'Range',
+    icon: '📏',
+    color: '#00d4ff',
+    category: 'Source',
+    description: '生成 start..end 的数列。',
+    inputs: 0,
+    outputs: 1,
+    params: [
+      { key: 'start', label: 'start', kind: 'number', step: 1 },
+      { key: 'end', label: 'end', kind: 'number', step: 1 },
+      { key: 'step', label: 'step', kind: 'number', step: 1 },
+    ],
+    createParams: () => ({ start: 1, end: 10, step: 1 }),
+    run: ({ params }) => {
+      const start = Number(params.start ?? 0)
+      const end = Number(params.end ?? 0)
+      const step = Number(params.step ?? 1)
+      if (!step) throw new Error('step 不能为 0')
+      const out: number[] = []
+      if (step > 0) {
+        for (let i = start; i <= end; i += step) out.push(i)
+      } else {
+        for (let i = start; i >= end; i += step) out.push(i)
+      }
+      return out
+    },
+  },
+
+  map: {
+    title: 'Map',
+    icon: '🧮',
+    color: '#39ff14',
+    category: 'Array',
+    description: '对数组每个元素做同构变换。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      {
+        key: 'mode', label: 'mode', kind: 'select', options: [
+          { label: 'x * 2', value: 'double' },
+          { label: 'x²', value: 'square' },
+          { label: '-x', value: 'negate' },
+          { label: '|x|', value: 'abs' },
+          { label: 'toString()', value: 'string' },
+          { label: 'trim()', value: 'trim' },
+          { label: 'toUpperCase()', value: 'upper' },
+          { label: 'toLowerCase()', value: 'lower' },
+        ],
+      },
+    ],
+    createParams: () => ({ mode: 'square' }),
+    run: ({ inputs, params }) => requireArray(inputs[0]).map(item => mapValue(item, String(params.mode))),
+  },
+  filter: {
+    title: 'Filter',
+    icon: '🧲',
+    color: '#39ff14',
+    category: 'Array',
+    description: '过滤数组元素。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      {
+        key: 'mode', label: 'mode', kind: 'select', options: [
+          { label: 'even', value: 'even' },
+          { label: 'odd', value: 'odd' },
+          { label: '>= threshold', value: 'gte' },
+          { label: 'contains text', value: 'contains' },
+          { label: 'truthy', value: 'truthy' },
+        ],
+      },
+      { key: 'threshold', label: 'threshold', kind: 'number', step: 1 },
+      { key: 'text', label: 'text', kind: 'text', placeholder: 'hello' },
+    ],
+    createParams: () => ({ mode: 'gte', threshold: 10, text: 'void' }),
+    run: ({ inputs, params }) => {
+      const arr = requireArray(inputs[0])
+      const mode = String(params.mode)
+      const threshold = Number(params.threshold ?? 0)
+      const text = String(params.text ?? '')
+      return arr.filter((item) => {
+        switch (mode) {
+          case 'even': return Number(item) % 2 === 0
+          case 'odd': return Math.abs(Number(item) % 2) === 1
+          case 'gte': return Number(item) >= threshold
+          case 'contains': return String(item).includes(text)
+          case 'truthy': return Boolean(item)
+          default: return true
+        }
+      })
+    },
+  },
+  reduce: {
+    title: 'Reduce',
+    icon: '∑',
+    color: '#39ff14',
+    category: 'Array',
+    description: '把数组折叠为单值。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      {
+        key: 'mode', label: 'mode', kind: 'select', options: [
+          { label: 'sum', value: 'sum' },
+          { label: 'product', value: 'product' },
+          { label: 'max', value: 'max' },
+          { label: 'min', value: 'min' },
+          { label: 'concat', value: 'concat' },
+        ],
+      },
+      { key: 'separator', label: 'separator', kind: 'text', placeholder: ', ' },
+    ],
+    createParams: () => ({ mode: 'sum', separator: ', ' }),
+    run: ({ inputs, params }) => {
+      const arr = requireArray(inputs[0])
+      switch (params.mode) {
+        case 'sum': return requireNumberArray(arr).reduce((a, b) => a + b, 0)
+        case 'product': return requireNumberArray(arr).reduce((a, b) => a * b, 1)
+        case 'max': return Math.max(...requireNumberArray(arr))
+        case 'min': return Math.min(...requireNumberArray(arr))
+        case 'concat': return arr.map(v => String(v)).join(String(params.separator ?? ', '))
+        default: return arr
+      }
+    },
+  },
+  sort: {
+    title: 'Sort',
+    icon: '↕️',
+    color: '#39ff14',
+    category: 'Array',
+    description: '数组排序。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      {
+        key: 'mode', label: 'mode', kind: 'select', options: [
+          { label: 'numeric ↑', value: 'num-asc' },
+          { label: 'numeric ↓', value: 'num-desc' },
+          { label: 'alpha ↑', value: 'str-asc' },
+          { label: 'alpha ↓', value: 'str-desc' },
+        ],
+      },
+    ],
+    createParams: () => ({ mode: 'num-asc' }),
+    run: ({ inputs, params }) => {
+      const arr = [...requireArray(inputs[0])]
+      switch (params.mode) {
+        case 'num-asc': return arr.sort((a, b) => Number(a) - Number(b))
+        case 'num-desc': return arr.sort((a, b) => Number(b) - Number(a))
+        case 'str-desc': return arr.sort((a, b) => String(b).localeCompare(String(a)))
+        default: return arr.sort((a, b) => String(a).localeCompare(String(b)))
+      }
+    },
+  },
+  unique: {
+    title: 'Unique',
+    icon: '🧬',
+    color: '#39ff14',
+    category: 'Array',
+    description: '去重但保留原顺序。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => {
+      const arr = requireArray(inputs[0])
+      const seen = new Set<string>()
+      return arr.filter((item) => {
+        const key = JSON.stringify(item)
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+    },
+  },
+  take: {
+    title: 'Take',
+    icon: '✂️',
+    color: '#39ff14',
+    category: 'Array',
+    description: '截取前 N 个元素。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'count', label: 'count', kind: 'number', step: 1 },
+    ],
+    createParams: () => ({ count: 5 }),
+    run: ({ inputs, params }) => requireArray(inputs[0]).slice(0, Number(params.count ?? 0)),
+  },
+
+  split: {
+    title: 'Split',
+    icon: '🔪',
+    color: '#ff7a00',
+    category: 'String',
+    description: '字符串切片为数组。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'separator', label: 'separator', kind: 'text', placeholder: ' ' },
+    ],
+    createParams: () => ({ separator: ' ' }),
+    run: ({ inputs, params }) => requireString(inputs[0]).split(String(params.separator ?? ' ')).filter(Boolean),
+  },
+  join: {
+    title: 'Join',
+    icon: '🔗',
+    color: '#ff7a00',
+    category: 'String',
+    description: '数组拼接为字符串。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'separator', label: 'separator', kind: 'text', placeholder: ', ' },
+    ],
+    createParams: () => ({ separator: ', ' }),
+    run: ({ inputs, params }) => requireArray(inputs[0]).map(v => String(v)).join(String(params.separator ?? ', ')),
+  },
+  uppercase: {
+    title: 'Uppercase',
+    icon: '🔠',
+    color: '#ff7a00',
+    category: 'String',
+    description: '字符串转大写。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => requireString(inputs[0]).toUpperCase(),
+  },
+  lowercase: {
+    title: 'Lowercase',
+    icon: '🔡',
+    color: '#ff7a00',
+    category: 'String',
+    description: '字符串转小写。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => requireString(inputs[0]).toLowerCase(),
+  },
+
+  length: {
+    title: 'Length',
+    icon: '📐',
+    color: '#b400ff',
+    category: 'Utility',
+    description: '返回长度或键数量。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => {
+      const value = inputs[0]
+      if (Array.isArray(value) || typeof value === 'string') return value.length
+      if (value && typeof value === 'object') return Object.keys(value).length
+      return 0
+    },
+  },
+  stats: {
+    title: 'Stats',
+    icon: '📊',
+    color: '#b400ff',
+    category: 'Utility',
+    description: '输出 count / min / max / avg / sum。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => {
+      const arr = requireNumberArray(inputs[0])
+      const count = arr.length
+      const sum = arr.reduce((a, b) => a + b, 0)
+      return {
+        count,
+        min: count ? Math.min(...arr) : null,
+        max: count ? Math.max(...arr) : null,
+        avg: count ? Number((sum / count).toFixed(4)) : null,
+        sum,
+      }
+    },
+  },
+  'json-parse': {
+    title: 'JSON.parse',
+    icon: '🧾',
+    color: '#b400ff',
+    category: 'Utility',
+    description: '把 JSON 字符串解析成对象。',
+    inputs: 1,
+    outputs: 1,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => JSON.parse(requireString(inputs[0])),
+  },
+  'json-stringify': {
+    title: 'JSON.stringify',
+    icon: '🗜️',
+    color: '#b400ff',
+    category: 'Utility',
+    description: '把任意值序列化为 JSON。',
+    inputs: 1,
+    outputs: 1,
+    params: [
+      { key: 'pretty', label: 'pretty', kind: 'boolean' },
+    ],
+    createParams: () => ({ pretty: true }),
+    run: ({ inputs, params }) => JSON.stringify(inputs[0], null, params.pretty ? 2 : 0),
+  },
+
+  preview: {
+    title: 'Preview',
+    icon: '🖥️',
+    color: '#00ffaa',
+    category: 'Sink',
+    description: '终端节点，专门用于展示最终结果。',
+    inputs: 1,
+    outputs: 0,
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => inputs[0],
+  },
 }
 
-function portAbsPos(node: NodeDef, port: Port) {
-  return { x: node.x + port.x, y: node.y + port.y }
+const presets: Preset[] = [
+  { key: 'squares', label: 'Square Filter', desc: 'Range → Map(x²) → Filter(>=10) → Stats → Preview' },
+  { key: 'text', label: 'Text Clean', desc: 'Text → Split → Unique → Sort → Join → Preview' },
+  { key: 'json', label: 'JSON Inspect', desc: 'Text(JSON) → JSON.parse → JSON.stringify(pretty) → Preview' },
+]
+
+const nodes = ref<FlowNode[]>([])
+const wires = ref<Wire[]>([])
+const canvasEl = ref<HTMLDivElement | null>(null)
+const dragging = ref<{ nodeId: string; dx: number; dy: number } | null>(null)
+const pendingWire = ref<{ fromNode: string; fromPort: number; mx: number; my: number } | null>(null)
+const runLog = ref<string[]>([])
+const globalError = ref('')
+const lastRunSummary = ref('尚未运行')
+const selectedPreset = ref('squares')
+
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function specFor(type: string) {
+  return NODE_SPECS[type]
+}
+
+function makeNode(type: string, x: number, y: number): FlowNode {
+  const spec = specFor(type)
+  return {
+    id: makeId('node'),
+    type,
+    x,
+    y,
+    params: spec.createParams(),
+    result: undefined,
+    error: '',
+  }
+}
+
+function nodeHeight(node: FlowNode) {
+  const spec = specFor(node.type)
+  const paramsH = spec.params.reduce((sum, param) => sum + (param.kind === 'textarea' ? 88 : 42), 0)
+  return HEADER_H + DESC_H + paramsH + RESULT_H
+}
+
+function inputPortY(node: FlowNode, index: number) {
+  const spec = specFor(node.type)
+  const h = nodeHeight(node)
+  if (spec.inputs <= 1) return h / 2
+  return (index + 1) * (h / (spec.inputs + 1))
+}
+
+function outputPortY(node: FlowNode, index: number) {
+  const spec = specFor(node.type)
+  const h = nodeHeight(node)
+  if (spec.outputs <= 1) return h / 2
+  return (index + 1) * (h / (spec.outputs + 1))
+}
+
+function getNode(nodeId: string) {
+  return nodes.value.find(n => n.id === nodeId)
+}
+
+function outputPoint(node: FlowNode, port: number) {
+  return { x: node.x + NODE_W, y: node.y + outputPortY(node, port) }
+}
+
+function inputPoint(node: FlowNode, port: number) {
+  return { x: node.x, y: node.y + inputPortY(node, port) }
 }
 
 function bezierPath(fromX: number, fromY: number, toX: number, toY: number) {
-  const cx = (fromX + toX) / 2
-  return `M ${fromX} ${fromY} C ${cx} ${fromY}, ${cx} ${toY}, ${toX} ${toY}`
+  const cx = Math.max(60, Math.abs(toX - fromX) * 0.45)
+  return `M ${fromX} ${fromY} C ${fromX + cx} ${fromY}, ${toX - cx} ${toY}, ${toX} ${toY}`
 }
 
-function connPath(conn: Connection) {
-  const fn = getNodeById(conn.fromNode)
-  const tn = getNodeById(conn.toNode)
-  if (!fn || !tn) return ''
-  const fp = fn.outputs[0]
-  const tp = tn.inputs[0]
-  return bezierPath(fn.x + fp.x, fn.y + fp.y, tn.x + tp.x, tn.y + tp.y)
+function wirePath(wire: Wire) {
+  const from = getNode(wire.fromNode)
+  const to = getNode(wire.toNode)
+  if (!from || !to) return ''
+  const start = outputPoint(from, wire.fromPort)
+  const end = inputPoint(to, wire.toPort)
+  return bezierPath(start.x, start.y, end.x, end.y)
 }
 
-// ── Level init ────────────────────────────────────────────────────────────
-function initLevel(idx: number) {
-  currentLevel.value = idx
-  canvasNodes.value = []
-  connections.value = []
-  pendingConn.value = null
-  showSuccess.value = false
-  showHint.value = false
-  hintNodes.value = []
-  validationErrors.value = []
-  isValid.value = false
-  runningAnim.value = false
-  animPacketPos.value = []
+const pendingWirePath = computed(() => {
+  if (!pendingWire.value) return ''
+  const from = getNode(pendingWire.value.fromNode)
+  if (!from) return ''
+  const start = outputPoint(from, pendingWire.value.fromPort)
+  return bezierPath(start.x, start.y, pendingWire.value.mx, pendingWire.value.my)
+})
+
+const groupedSpecs = computed(() => {
+  const out: Record<string, Array<{ type: string; spec: NodeSpec }>> = {}
+  for (const [type, spec] of Object.entries(NODE_SPECS)) {
+    if (!out[spec.category]) out[spec.category] = []
+    out[spec.category].push({ type, spec })
+  }
+  return out
+})
+
+function formatValue(value: any) {
+  if (value === undefined) return '—'
+  if (typeof value === 'string') return value.length > 220 ? `${value.slice(0, 220)}…` : value
+  try {
+    const json = JSON.stringify(value, null, 2)
+    return json.length > 220 ? `${json.slice(0, 220)}…` : json
+  } catch {
+    return String(value)
+  }
 }
 
-// ── Drop from panel ───────────────────────────────────────────────────────
+function formatLogValue(value: any) {
+  if (typeof value === 'string') return value.length > 80 ? `${value.slice(0, 80)}…` : value
+  try {
+    const json = JSON.stringify(value)
+    return json.length > 80 ? `${json.slice(0, 80)}…` : json
+  } catch {
+    return String(value)
+  }
+}
+
+const mermaidCode = computed(() => {
+  const idMap = new Map<string, string>()
+  nodes.value.forEach((node, idx) => idMap.set(node.id, `n${idx + 1}`))
+  const lines = ['flowchart LR']
+  for (const node of nodes.value) {
+    const spec = specFor(node.type)
+    const id = idMap.get(node.id)
+    const label = `${spec.title}\\n${node.type}`.replace(/"/g, '\\"')
+    lines.push(`  ${id}["${label}"]`)
+  }
+  for (const wire of wires.value) {
+    const from = idMap.get(wire.fromNode)
+    const to = idMap.get(wire.toNode)
+    if (from && to) lines.push(`  ${from} --> ${to}`)
+  }
+  return lines.join('\n')
+})
+
+const graphJson = computed(() => JSON.stringify({
+  nodes: nodes.value.map(n => ({ id: n.id, type: n.type, x: n.x, y: n.y, params: n.params })),
+  wires: wires.value,
+}, null, 2))
+
+async function copyText(text: string, label: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    lastRunSummary.value = `${label} 已复制到剪贴板`
+  } catch {
+    lastRunSummary.value = `${label} 复制失败，请手动复制`
+  }
+}
+
+function clearCanvas() {
+  nodes.value = []
+  wires.value = []
+  pendingWire.value = null
+  runLog.value = []
+  globalError.value = ''
+  lastRunSummary.value = '已清空画布'
+}
+
 function onPanelDragStart(e: DragEvent, type: string) {
   e.dataTransfer?.setData('nodeType', type)
+}
+
+function onCanvasDragOver(e: DragEvent) {
+  e.preventDefault()
 }
 
 function onCanvasDrop(e: DragEvent) {
   e.preventDefault()
   const type = e.dataTransfer?.getData('nodeType')
-  if (!type) return
-  const rect = canvasEl.value!.getBoundingClientRect()
-  const x = e.clientX - rect.left - NODE_W / 2
-  const y = e.clientY - rect.top - NODE_H / 2
-  canvasNodes.value.push(makeNode(type, x, y))
-  validate()
+  if (!type || !canvasEl.value) return
+  const rect = canvasEl.value.getBoundingClientRect()
+  nodes.value.push(makeNode(type, e.clientX - rect.left - NODE_W / 2, e.clientY - rect.top - 24))
 }
 
-function onCanvasDragOver(e: DragEvent) { e.preventDefault() }
-
-// ── Node dragging ─────────────────────────────────────────────────────────
-function onNodeMousedown(e: MouseEvent, node: NodeDef) {
-  if ((e.target as HTMLElement).classList.contains('port')) return
+function onNodeMouseDown(e: MouseEvent, node: FlowNode) {
+  const target = e.target as HTMLElement
+  if (target.closest('input, textarea, select, button, label, .port')) return
   e.preventDefault()
-  const rect = canvasEl.value!.getBoundingClientRect()
-  dragging.value = { nodeId: node.id, ox: e.clientX - rect.left - node.x, oy: e.clientY - rect.top - node.y }
+  dragging.value = { nodeId: node.id, dx: e.clientX - node.x, dy: e.clientY - node.y }
 }
 
-function onCanvasMousemove(e: MouseEvent) {
-  const rect = canvasEl.value!.getBoundingClientRect()
+function onCanvasMouseMove(e: MouseEvent) {
+  if (!canvasEl.value) return
+  const rect = canvasEl.value.getBoundingClientRect()
   const mx = e.clientX - rect.left
   const my = e.clientY - rect.top
   if (dragging.value) {
-    const node = getNodeById(dragging.value.nodeId)
-    if (node) { node.x = mx - dragging.value.ox; node.y = my - dragging.value.oy }
+    const node = getNode(dragging.value.nodeId)
+    if (node) {
+      node.x = mx - dragging.value.dx
+      node.y = my - dragging.value.dy
+    }
   }
-  if (pendingConn.value) {
-    pendingConn.value.mx = mx
-    pendingConn.value.my = my
+  if (pendingWire.value) {
+    pendingWire.value.mx = mx
+    pendingWire.value.my = my
   }
 }
 
-function onCanvasMouseup() { dragging.value = null }
+function onCanvasMouseUp() {
+  dragging.value = null
+}
 
-// ── Port connection ───────────────────────────────────────────────────────
-let _portTs = 0  // timestamp of last port mousedown, to suppress canvas click
+function onCanvasClick() {
+  pendingWire.value = null
+}
 
-function onOutputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
+function startWire(e: MouseEvent, node: FlowNode, port: number) {
   e.stopPropagation()
-  _portTs = Date.now()
-  const rect = canvasEl.value!.getBoundingClientRect()
-  pendingConn.value = {
+  if (!canvasEl.value) return
+  const rect = canvasEl.value.getBoundingClientRect()
+  pendingWire.value = {
     fromNode: node.id,
-    fromPort: port.id,
+    fromPort: port,
     mx: e.clientX - rect.left,
     my: e.clientY - rect.top,
   }
 }
 
-function onInputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
+function finishWire(e: MouseEvent, node: FlowNode, port: number) {
   e.stopPropagation()
-  _portTs = Date.now()
-  if (!pendingConn.value) return
-  if (pendingConn.value.fromNode === node.id) { pendingConn.value = null; return }
-  // Avoid duplicate
-  const dup = connections.value.find(c => c.fromNode === pendingConn.value!.fromNode && c.toNode === node.id)
-  if (!dup) {
-    connections.value.push({
-      id: `conn-${Date.now()}`,
-      fromNode: pendingConn.value.fromNode,
-      fromPort: pendingConn.value.fromPort,
-      toNode: node.id,
-      toPort: port.id,
-    })
+  const pending = pendingWire.value
+  if (!pending) return
+  if (pending.fromNode === node.id) {
+    pendingWire.value = null
+    return
   }
-  pendingConn.value = null
-  validate()
-}
-
-// Support drag-to-connect: complete connection on mouseup over input port
-function onInputPortMouseup(e: MouseEvent, node: NodeDef, port: Port) {
-  e.stopPropagation()
-  _portTs = Date.now()
-  if (!pendingConn.value) return
-  onInputPortClick(e, node, port)
-}
-
-// Only cancel pendingConn if user clicked the blank canvas (not a port)
-function onCanvasClick() {
-  if (Date.now() - _portTs < 200) return  // port just fired, ignore
-  pendingConn.value = null
-}
-
-// ── Delete ────────────────────────────────────────────────────────────────
-function deleteNode(node: NodeDef) {
-  connections.value = connections.value.filter(c => c.fromNode !== node.id && c.toNode !== node.id)
-  canvasNodes.value = canvasNodes.value.filter(n => n.id !== node.id)
-  validate()
-}
-
-function deleteConn(id: string) {
-  connections.value = connections.value.filter(c => c.id !== id)
-  validate()
-}
-
-// ── Validate ──────────────────────────────────────────────────────────────
-function validate() {
-  const level = levels[currentLevel.value]
-  const errors: string[] = []
-  for (const req of level.requiredConnections) {
-    const found = connections.value.some(c => {
-      const fn = getNodeById(c.fromNode)
-      const tn = getNodeById(c.toNode)
-      return fn?.type === req.from && tn?.type === req.to
-    })
-    if (!found) errors.push(`缺少连接：${req.from} → ${req.to}`)
+  const targetSpec = specFor(node.type)
+  if (port >= targetSpec.inputs) return
+  const dup = wires.value.find(w => w.fromNode === pending.fromNode && w.fromPort === pending.fromPort && w.toNode === node.id && w.toPort === port)
+  if (dup) {
+    pendingWire.value = null
+    return
   }
-  validationErrors.value = errors
-  isValid.value = errors.length === 0
+  wires.value = wires.value.filter(w => !(w.toNode === node.id && w.toPort === port))
+  wires.value.push({
+    id: makeId('wire'),
+    fromNode: pending.fromNode,
+    fromPort: pending.fromPort,
+    toNode: node.id,
+    toPort: port,
+  })
+  pendingWire.value = null
 }
 
-// ── Hint ──────────────────────────────────────────────────────────────────
-function showHintFn() {
-  const level = levels[currentLevel.value]
-  // Find first missing connection
-  for (const req of level.requiredConnections) {
-    const found = connections.value.some(c => {
-      const fn = getNodeById(c.fromNode)
-      const tn = getNodeById(c.toNode)
-      return fn?.type === req.from && tn?.type === req.to
-    })
-    if (!found) {
-      hintNodes.value = [req.from, req.to]
-      showHint.value = true
-      setTimeout(() => { showHint.value = false }, 2500)
-      return
-    }
+function deleteWire(wireId: string) {
+  wires.value = wires.value.filter(w => w.id !== wireId)
+}
+
+function deleteNode(nodeId: string) {
+  nodes.value = nodes.value.filter(n => n.id !== nodeId)
+  wires.value = wires.value.filter(w => w.fromNode !== nodeId && w.toNode !== nodeId)
+}
+
+function resetNodeState() {
+  for (const node of nodes.value) {
+    node.result = undefined
+    node.error = ''
   }
 }
 
-// ── Run pipeline ──────────────────────────────────────────────────────────
-async function runPipeline() {
-  if (!isValid.value || runningAnim.value) return
-  runningAnim.value = true
-  animPacketPos.value = []
+function runGraph() {
+  resetNodeState()
+  runLog.value = []
+  globalError.value = ''
 
-  // Topological order via required connections
-  const level = levels[currentLevel.value]
+  const nodeMap = new Map(nodes.value.map(node => [node.id, node]))
+  const incoming = new Map<string, Wire[]>()
+  const outgoing = new Map<string, Wire[]>()
+  const indegree = new Map<string, number>()
+
+  for (const node of nodes.value) {
+    incoming.set(node.id, [])
+    outgoing.set(node.id, [])
+    indegree.set(node.id, 0)
+  }
+
+  for (const wire of wires.value) {
+    if (!nodeMap.has(wire.fromNode) || !nodeMap.has(wire.toNode)) continue
+    incoming.get(wire.toNode)!.push(wire)
+    outgoing.get(wire.fromNode)!.push(wire)
+    indegree.set(wire.toNode, (indegree.get(wire.toNode) ?? 0) + 1)
+  }
+
+  const queue = nodes.value.filter(node => (indegree.get(node.id) ?? 0) === 0).map(node => node.id)
   const order: string[] = []
-  const visited = new Set<string>()
-  function visit(type: string) {
-    if (visited.has(type)) return
-    visited.add(type)
-    order.push(type)
-  }
-  // Walk required connections in order
-  for (const req of level.requiredConnections) {
-    visit(req.from)
-    visit(req.to)
-  }
-
-  // Find canvas nodes in that order
-  const orderedNodes: NodeDef[] = []
-  for (const t of order) {
-    const n = canvasNodes.value.find(n => n.type === t)
-    if (n) orderedNodes.push(n)
-  }
-
-  // Animate packet along connections
-  for (let i = 0; i < orderedNodes.length - 1; i++) {
-    const a = orderedNodes[i]
-    const b = orderedNodes[i + 1]
-    const startX = a.x + NODE_W
-    const startY = a.y + NODE_H / 2
-    const endX = b.x
-    const endY = b.y + NODE_H / 2
-
-    // Flash current node
-    a._flash = true
-    await sleep(120)
-    a._flash = false
-
-    // Animate packet
-    const steps = 30
-    for (let s = 0; s <= steps; s++) {
-      const t2 = s / steps
-      const cx = (startX + endX) / 2
-      const bx = lerp3(startX, cx, endX, t2)
-      const by = lerp3(startY, cx, endY, t2) // reuse cx intentionally for cubic feel
-      // Actually use proper bezier:
-      const px = cubicBezierX(startX, cx, cx, endX, t2)
-      const py = cubicBezierX(startY, startY, endY, endY, t2)
-      animPacketPos.value = [{ x: px, y: py, opacity: 1 }]
-      await sleep(16)
+  while (queue.length) {
+    const id = queue.shift()!
+    order.push(id)
+    for (const wire of outgoing.get(id) ?? []) {
+      indegree.set(wire.toNode, (indegree.get(wire.toNode) ?? 0) - 1)
+      if ((indegree.get(wire.toNode) ?? 0) === 0) queue.push(wire.toNode)
     }
   }
-  // Flash last node
-  if (orderedNodes.length > 0) {
-    orderedNodes[orderedNodes.length - 1]._flash = true
-    await sleep(200)
-    orderedNodes[orderedNodes.length - 1]._flash = false
+
+  if (order.length !== nodes.value.length) {
+    globalError.value = '图里存在环，当前执行器只支持 DAG（无环图）'
+    lastRunSummary.value = '执行失败：检测到循环依赖'
+    return
   }
 
-  animPacketPos.value = []
-  runningAnim.value = false
-  showSuccess.value = true
-  if (currentLevel.value >= unlockedLevel.value) {
-    unlockedLevel.value = currentLevel.value + 1
+  for (const nodeId of order) {
+    const node = nodeMap.get(nodeId)!
+    const spec = specFor(node.type)
+    const inWires = [...(incoming.get(node.id) ?? [])].sort((a, b) => a.toPort - b.toPort)
+    const inputs = Array.from({ length: spec.inputs }, () => undefined)
+    for (const wire of inWires) {
+      const source = nodeMap.get(wire.fromNode)
+      inputs[wire.toPort] = source?.result
+    }
+    if (spec.inputs > 0 && inputs.some(v => v === undefined)) {
+      node.error = '输入未连完整'
+      runLog.value.push(`✗ ${spec.title}: 输入未连完整`)
+      continue
+    }
+    try {
+      const result = spec.run({ inputs, params: node.params })
+      node.result = result
+      runLog.value.push(`✓ ${spec.title}: ${formatLogValue(result)}`)
+    } catch (error: any) {
+      node.error = error?.message || '运行失败'
+      runLog.value.push(`✗ ${spec.title}: ${node.error}`)
+    }
   }
+
+  const ok = nodes.value.filter(node => !node.error).length
+  lastRunSummary.value = `执行完成：${ok}/${nodes.value.length} 节点成功`
 }
 
-function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)) }
-function cubicBezierX(p0: number, p1: number, p2: number, p3: number, t: number) {
-  return (1-t)**3*p0 + 3*(1-t)**2*t*p1 + 3*(1-t)*t**2*p2 + t**3*p3
-}
-function lerp3(a: number, _b: number, c: number, t: number) { return a + (c - a) * t }
-
-// ── Dash animation ─────────────────────────────────────────────────────────
-let dashTimer: ReturnType<typeof setInterval>
-onMounted(() => { dashTimer = setInterval(() => { dashOffset.value = (dashOffset.value + 1) % 24 }, 40) })
-onUnmounted(() => clearInterval(dashTimer))
-
-// ── Next level ────────────────────────────────────────────────────────────
-function goNextLevel() {
-  if (currentLevel.value < levels.length - 1) initLevel(currentLevel.value + 1)
-  else showSuccess.value = false
+function wireCountForInput(nodeId: string, toPort: number) {
+  return wires.value.some(w => w.toNode === nodeId && w.toPort === toPort)
 }
 
-// Init first level
-initLevel(0)
+function loadPreset(key: string) {
+  clearCanvas()
+  selectedPreset.value = key
+
+  if (key === 'squares') {
+    const a = makeNode('source-range', 50, 70)
+    a.params = { start: 1, end: 12, step: 1 }
+    const b = makeNode('map', 360, 70)
+    b.params = { mode: 'square' }
+    const c = makeNode('filter', 690, 70)
+    c.params = { mode: 'gte', threshold: 20, text: 'void' }
+    const d = makeNode('stats', 1020, 40)
+    const e = makeNode('preview', 1020, 280)
+    nodes.value = [a, b, c, d, e]
+    wires.value = [
+      { id: makeId('wire'), fromNode: a.id, fromPort: 0, toNode: b.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: b.id, fromPort: 0, toNode: c.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: d.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: e.id, toPort: 0 },
+    ]
+  } else if (key === 'text') {
+    const a = makeNode('source-text', 50, 60)
+    a.params = { text: 'kernel  tcp  tcp  epoll  bpf  kernel  io_uring' }
+    const b = makeNode('split', 360, 60)
+    b.params = { separator: ' ' }
+    const c = makeNode('filter', 690, 60)
+    c.params = { mode: 'truthy', threshold: 0, text: '' }
+    const d = makeNode('unique', 1010, 60)
+    const e = makeNode('sort', 1310, 60)
+    e.params = { mode: 'str-asc' }
+    const f = makeNode('join', 1620, 60)
+    f.params = { separator: ' | ' }
+    const g = makeNode('preview', 1930, 60)
+    nodes.value = [a, b, c, d, e, f, g]
+    wires.value = [
+      { id: makeId('wire'), fromNode: a.id, fromPort: 0, toNode: b.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: b.id, fromPort: 0, toNode: c.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: d.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: d.id, fromPort: 0, toNode: e.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: e.id, fromPort: 0, toNode: f.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: f.id, fromPort: 0, toNode: g.id, toPort: 0 },
+    ]
+  } else {
+    const a = makeNode('source-text', 60, 80)
+    a.params = { text: '{"name":"void","skills":["nuxt","ts","d1"],"stars":3}' }
+    const b = makeNode('json-parse', 380, 80)
+    const c = makeNode('json-stringify', 700, 80)
+    c.params = { pretty: true }
+    const d = makeNode('preview', 1030, 80)
+    nodes.value = [a, b, c, d]
+    wires.value = [
+      { id: makeId('wire'), fromNode: a.id, fromPort: 0, toNode: b.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: b.id, fromPort: 0, toNode: c.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: d.id, toPort: 0 },
+    ]
+  }
+
+  lastRunSummary.value = `已载入 preset: ${key}`
+  runGraph()
+}
+
+onMounted(() => {
+  loadPreset('squares')
+})
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col" style="background: #08080f; color: var(--color-text-primary)">
+  <div class="min-h-screen flex flex-col" style="background:#08080f;color:var(--color-text-primary)">
     <AppNav :crumbs="crumbs" />
 
-    <!-- Level tabs -->
-    <div class="flex gap-1 px-4 pt-3 pb-1 flex-wrap">
+    <div class="px-4 pt-3 pb-2 flex flex-wrap gap-2 items-center border-b" style="border-color:var(--color-void-border)">
+      <div class="text-sm font-mono font-bold" style="color:var(--color-neon-cyan)">AI Flow / Executable Flowchart</div>
+      <div class="text-xs font-mono" style="color:var(--color-text-muted)">不是拼图关卡，是真能跑的数据流图。</div>
       <button
-        v-for="(lv, idx) in levels"
-        :key="idx"
-        class="px-3 py-1 rounded text-xs font-mono transition-all border"
-        :class="idx === currentLevel
-          ? 'border-[var(--color-neon-cyan)] text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.08)]'
-          : idx <= unlockedLevel
-            ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-[var(--color-neon-cyan)] cursor-pointer'
-            : 'border-[var(--color-void-border)] text-[var(--color-text-muted)] opacity-40 cursor-not-allowed'"
-        @click="idx <= unlockedLevel && initLevel(idx)"
-      >
-        L{{ idx + 1 }} <span class="hidden sm:inline">{{ idx <= unlockedLevel ? '' : '🔒' }}</span>
-      </button>
+        class="ml-auto px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        style="border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.08)"
+        @click="runGraph"
+      >▶ Run</button>
       <button
-        class="ml-auto px-3 py-1 rounded text-xs font-mono border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-orange-400 hover:text-orange-400"
-        @click="initLevel(currentLevel)"
-      >清空</button>
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        style="border-color:var(--color-void-border);color:var(--color-text-muted)"
+        @click="clearCanvas"
+      >Clear</button>
       <button
-        v-if="currentLevel < levels.length - 1"
-        class="px-3 py-1 rounded text-xs font-mono border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-yellow-400 hover:text-yellow-400"
-        @click="unlockedLevel = Math.max(unlockedLevel, currentLevel + 1); initLevel(currentLevel + 1)"
-      >跳过</button>
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        style="border-color:var(--color-void-border);color:var(--color-text-muted)"
+        @click="copyText(mermaidCode, 'Mermaid')"
+      >Copy Mermaid</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        style="border-color:var(--color-void-border);color:var(--color-text-muted)"
+        @click="copyText(graphJson, 'JSON')"
+      >Copy JSON</button>
     </div>
 
-    <!-- Main layout -->
-    <div class="flex flex-1 overflow-hidden" style="height: calc(100vh - 96px)">
-
-      <!-- Left panel: nodes + goal -->
-      <div class="w-52 flex-shrink-0 flex flex-col gap-3 p-3 border-r overflow-y-auto" style="border-color: var(--color-void-border); background: var(--color-void-card)">
-        <div>
-          <div class="text-xs font-mono font-bold mb-1" style="color: var(--color-neon-cyan)">{{ levels[currentLevel].title }}</div>
-          <div class="text-xs font-mono leading-relaxed" style="color: var(--color-text-muted)">目标：{{ levels[currentLevel].goal }}</div>
+    <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 96px)">
+      <aside class="w-72 shrink-0 p-3 border-r overflow-y-auto" style="border-color:var(--color-void-border);background:var(--color-void-card)">
+        <div class="text-xs font-mono leading-6" style="color:var(--color-text-muted)">
+          我直接换了方向：<span style="color:var(--color-neon-cyan)">可执行流程图编辑器</span>。
+          节点不是摆样子，每个节点都会真实产出结果，右侧还能导出 Mermaid / JSON。
         </div>
-        <div class="h-px" style="background: var(--color-void-border)"></div>
-        <div class="text-xs font-mono mb-1" style="color: var(--color-text-muted)">可用节点（拖拽到画布）</div>
-        <div
-          v-for="type in levels[currentLevel].nodeTypes"
-          :key="type"
-          draggable="true"
-          @dragstart="onPanelDragStart($event, type)"
-          class="flex items-center gap-2 px-2 py-2 rounded border cursor-grab active:cursor-grabbing transition-all select-none group"
-          :style="`border-color: ${NODE_CATALOGUE[type]?.color ?? '#888'}33; background: ${NODE_CATALOGUE[type]?.color ?? '#888'}0d`"
+
+        <div class="mt-4 mb-2 text-xs font-mono font-bold" style="color:var(--color-neon-cyan)">Presets</div>
+        <button
+          v-for="preset in presets"
+          :key="preset.key"
+          class="w-full text-left rounded-lg border p-3 mb-2 transition-all"
+          :style="selectedPreset === preset.key
+            ? 'border-color:#00d4ff;background:rgba(0,212,255,0.08);color:#e6faff'
+            : 'border-color:var(--color-void-border);background:rgba(255,255,255,0.02);color:var(--color-text-primary)'"
+          @click="loadPreset(preset.key)"
         >
-          <span class="text-base leading-none">{{ NODE_CATALOGUE[type]?.icon }}</span>
-          <div class="flex-1 min-w-0">
-            <div class="text-xs font-mono font-semibold truncate" :style="`color: ${NODE_CATALOGUE[type]?.color}`">{{ type }}</div>
-            <div class="text-[10px] font-mono truncate" style="color: var(--color-text-muted)">{{ NODE_CATALOGUE[type]?.description }}</div>
+          <div class="text-xs font-mono font-bold">{{ preset.label }}</div>
+          <div class="text-[10px] font-mono mt-1" style="color:var(--color-text-muted)">{{ preset.desc }}</div>
+        </button>
+
+        <div class="mt-4 mb-2 text-xs font-mono font-bold" style="color:var(--color-neon-cyan)">Node Palette</div>
+        <div v-for="(items, category) in groupedSpecs" :key="category" class="mb-4">
+          <div class="text-[11px] font-mono mb-2 uppercase tracking-wide" style="color:var(--color-text-muted)">{{ category }}</div>
+          <div
+            v-for="item in items"
+            :key="item.type"
+            draggable="true"
+            @dragstart="onPanelDragStart($event, item.type)"
+            class="rounded-lg border p-3 mb-2 cursor-grab active:cursor-grabbing transition-all"
+            :style="`border-color:${item.spec.color}44;background:${item.spec.color}12`"
+          >
+            <div class="flex items-center gap-2">
+              <span>{{ item.spec.icon }}</span>
+              <span class="text-xs font-mono font-bold" :style="`color:${item.spec.color}`">{{ item.spec.title }}</span>
+            </div>
+            <div class="text-[10px] font-mono mt-1" style="color:var(--color-text-muted)">{{ item.spec.description }}</div>
           </div>
         </div>
-      </div>
+      </aside>
 
-      <!-- Canvas -->
-      <div
+      <main
         ref="canvasEl"
-        class="flex-1 relative overflow-hidden select-none"
-        style="background: #08080f; cursor: default"
+        class="flex-1 relative overflow-auto select-none"
+        style="background:#08080f"
         @dragover="onCanvasDragOver"
         @drop="onCanvasDrop"
-        @mousemove="onCanvasMousemove"
-        @mouseup="onCanvasMouseup"
+        @mousemove="onCanvasMouseMove"
+        @mouseup="onCanvasMouseUp"
+        @mouseleave="onCanvasMouseUp"
         @click="onCanvasClick"
       >
-        <!-- SVG layer -->
-        <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0">
-          <defs>
-            <pattern id="aiflow-grid" width="30" height="30" patternUnits="userSpaceOnUse">
-              <circle cx="15" cy="15" r="0.8" fill="rgba(255,255,255,0.05)" />
-            </pattern>
-            <!-- Glow filter -->
-            <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#aiflow-grid)" />
+        <div style="position:relative;min-width:2400px;min-height:1400px">
+          <svg class="absolute inset-0 w-full h-full" style="z-index:0">
+            <defs>
+              <pattern id="flow-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <circle cx="14" cy="14" r="0.8" fill="rgba(255,255,255,0.08)" />
+              </pattern>
+              <filter id="flow-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#flow-grid)" />
 
-          <!-- Connections -->
-          <g v-for="conn in connections" :key="conn.id" class="pointer-events-auto">
+            <g v-for="wire in wires" :key="wire.id">
+              <path
+                :d="wirePath(wire)"
+                stroke="#00d4ff"
+                stroke-width="2.2"
+                fill="none"
+                stroke-dasharray="10 6"
+                opacity="0.9"
+                filter="url(#flow-glow)"
+                style="pointer-events:none"
+              />
+              <path
+                :d="wirePath(wire)"
+                stroke="transparent"
+                stroke-width="16"
+                fill="none"
+                style="cursor:pointer"
+                @click.stop="deleteWire(wire.id)"
+              />
+            </g>
+
             <path
-              :d="connPath(conn)"
-              stroke="#00d4ff"
-              stroke-width="2"
+              v-if="pendingWire"
+              :d="pendingWirePath"
+              stroke="rgba(57,255,20,0.8)"
+              stroke-width="2.2"
+              stroke-dasharray="8 5"
               fill="none"
-              stroke-dasharray="8 4"
-              :stroke-dashoffset="dashOffset"
-              filter="url(#glow)"
-              opacity="0.85"
+              filter="url(#flow-glow)"
             />
-            <!-- Click zone -->
-            <path
-              :d="connPath(conn)"
-              stroke="transparent"
-              stroke-width="12"
-              fill="none"
-              class="cursor-pointer"
-              @click.stop="deleteConn(conn.id)"
-            />
-          </g>
+          </svg>
 
-          <!-- Pending connection line -->
-          <path
-            v-if="pendingConn"
-            :d="(() => {
-              const fn = getNodeById(pendingConn.fromNode)
-              if (!fn) return ''
-              const fp = fn.outputs[0]
-              return bezierPath(fn.x + fp.x, fn.y + fp.y, pendingConn.mx, pendingConn.my)
-            })()"
-            stroke="rgba(0,212,255,0.45)"
-            stroke-width="2"
-            stroke-dasharray="6 3"
-            fill="none"
-          />
-
-          <!-- Animated data packet -->
-          <g v-for="(pkt, i) in animPacketPos" :key="i">
-            <circle :cx="pkt.x" :cy="pkt.y" r="7" fill="#39ff14" :opacity="pkt.opacity" filter="url(#glow)" />
-            <circle :cx="pkt.x" :cy="pkt.y" r="3" fill="#fff" :opacity="pkt.opacity" />
-          </g>
-        </svg>
-
-        <!-- Nodes -->
-        <div
-          v-for="node in canvasNodes"
-          :key="node.id"
-          class="absolute rounded-lg border-2 flex items-center gap-2 font-mono select-none"
-          :style="`
-            left: ${node.x}px; top: ${node.y}px;
-            width: ${NODE_W}px; height: ${NODE_H}px;
-            border-color: ${node.color};
-            background: ${node.color}18;
-            box-shadow: 0 0 12px ${node.color}55${showHint && hintNodes.includes(node.type) ? ', 0 0 28px ' + node.color + 'cc' : ''};
-            padding: 0 10px;
-            z-index: 10;
-            cursor: move;
-            transition: box-shadow 0.2s;
-          `"
-          @mousedown="onNodeMousedown($event, node)"
-          @dblclick.stop="deleteNode(node)"
-        >
-          <!-- Input port -->
           <div
-            class="port absolute w-3 h-3 rounded-full border-2 cursor-crosshair"
-            :style="`left: -7px; top: ${NODE_H/2 - 6}px; background: ${node.color}; border-color: #08080f; z-index: 20`"
-            @mousedown.stop="onInputPortClick($event, node, node.inputs[0])"
-            @mouseup.stop="onInputPortMouseup($event, node, node.inputs[0])"
-            @click.stop
-          />
-          <span class="text-base leading-none flex-shrink-0" style="font-size: 1.1em">{{ node.icon }}</span>
-          <div class="flex-1 min-w-0">
-            <div class="text-[11px] font-bold truncate leading-tight" :style="`color: ${node.color}`">{{ node.label }}</div>
-            <div class="text-[9px] truncate" style="color: rgba(255,255,255,0.4)">{{ node.category }}</div>
-          </div>
-          <!-- Output port -->
-          <div
-            class="port absolute w-3 h-3 rounded-full border-2 cursor-crosshair"
-            :style="`right: -7px; top: ${NODE_H/2 - 6}px; background: ${node.color}; border-color: #08080f; z-index: 20`"
-            @mousedown.stop="onOutputPortClick($event, node, node.outputs[0])"
-            @click.stop
-          />
-        </div>
-
-        <!-- Empty hint -->
-        <div
-          v-if="canvasNodes.length === 0"
-          class="absolute inset-0 flex items-center justify-center pointer-events-none"
-        >
-          <div class="text-center font-mono" style="color: rgba(255,255,255,0.12)">
-            <div class="text-4xl mb-3">🧩</div>
-            <div class="text-sm">从左侧拖拽节点到画布</div>
-            <div class="text-xs mt-1">点击输出端口 → 点击输入端口 建立连接</div>
-            <div class="text-xs mt-1">双击节点删除 | 点击连接线删除</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right panel: status + run -->
-      <div class="w-52 flex-shrink-0 flex flex-col gap-3 p-3 border-l overflow-y-auto" style="border-color: var(--color-void-border); background: var(--color-void-card)">
-        <!-- Progress -->
-        <div class="text-xs font-mono" style="color: var(--color-text-muted)">
-          关卡进度 <span :style="`color: var(--color-neon-cyan)`">{{ currentLevel + 1 }}/{{ levels.length }}</span>
-        </div>
-        <div class="flex gap-1">
-          <div
-            v-for="i in levels.length" :key="i"
-            class="flex-1 h-1 rounded-full"
-            :style="i <= currentLevel + 1 ? 'background: var(--color-neon-cyan)' : 'background: rgba(255,255,255,0.1)'"
-          />
-        </div>
-
-        <div class="h-px" style="background: var(--color-void-border)"></div>
-
-        <!-- Validation -->
-        <div class="text-xs font-mono font-bold" style="color: var(--color-text-muted)">连接状态</div>
-        <div class="flex flex-col gap-1">
-          <div
-            v-for="req in levels[currentLevel].requiredConnections"
-            :key="`${req.from}-${req.to}`"
-            class="flex items-center gap-1 text-[10px] font-mono"
+            v-for="node in nodes"
+            :key="node.id"
+            class="absolute rounded-xl border-2 overflow-hidden"
+            :style="`
+              left:${node.x}px;
+              top:${node.y}px;
+              width:${NODE_W}px;
+              height:${nodeHeight(node)}px;
+              border-color:${specFor(node.type).color};
+              background:rgba(7,10,18,0.92);
+              box-shadow:0 0 0 1px rgba(255,255,255,0.03),0 0 24px ${specFor(node.type).color}22;
+              z-index:10;
+            `"
+            @mousedown="onNodeMouseDown($event, node)"
           >
-            <span :style="connections.some(c => { const fn = getNodeById(c.fromNode); const tn = getNodeById(c.toNode); return fn?.type === req.from && tn?.type === req.to }) ? 'color:#39ff14' : 'color:#ff4444'">
-              {{ connections.some(c => { const fn = getNodeById(c.fromNode); const tn = getNodeById(c.toNode); return fn?.type === req.from && tn?.type === req.to }) ? '✓' : '✗' }}
-            </span>
-            <span style="color: rgba(255,255,255,0.5)" class="truncate">{{ req.from }}→{{ req.to }}</span>
+            <div
+              class="flex items-center gap-2 px-3"
+              :style="`
+                height:${HEADER_H}px;
+                background:${specFor(node.type).color}18;
+                border-bottom:1px solid ${specFor(node.type).color}44;
+                cursor:move;
+              `"
+            >
+              <span>{{ specFor(node.type).icon }}</span>
+              <div class="min-w-0 flex-1">
+                <div class="text-xs font-mono font-bold truncate" :style="`color:${specFor(node.type).color}`">{{ specFor(node.type).title }}</div>
+                <div class="text-[10px] font-mono truncate" style="color:var(--color-text-muted)">{{ node.type }}</div>
+              </div>
+              <button
+                class="w-6 h-6 rounded border text-[10px] font-mono"
+                style="border-color:rgba(255,255,255,0.08);color:var(--color-text-muted);background:rgba(255,255,255,0.03)"
+                @click.stop="deleteNode(node.id)"
+              >x</button>
+            </div>
+
+            <div class="px-3 py-2 text-[10px] font-mono leading-5" style="height:38px;color:var(--color-text-muted)">
+              {{ specFor(node.type).description }}
+            </div>
+
+            <div class="px-3 pb-2">
+              <div v-for="param in specFor(node.type).params" :key="param.key" class="mb-2">
+                <label class="block text-[10px] font-mono mb-1" style="color:var(--color-text-muted)">{{ param.label }}</label>
+
+                <input
+                  v-if="param.kind === 'number'"
+                  v-model.number="node.params[param.key]"
+                  type="number"
+                  :step="param.step ?? 1"
+                  :min="param.min"
+                  :max="param.max"
+                  class="w-full rounded border px-2 py-1.5 text-xs font-mono"
+                  style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff"
+                >
+
+                <input
+                  v-else-if="param.kind === 'text'"
+                  v-model="node.params[param.key]"
+                  type="text"
+                  :placeholder="param.placeholder"
+                  class="w-full rounded border px-2 py-1.5 text-xs font-mono"
+                  style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff"
+                >
+
+                <textarea
+                  v-else-if="param.kind === 'textarea'"
+                  v-model="node.params[param.key]"
+                  :placeholder="param.placeholder"
+                  rows="3"
+                  class="w-full rounded border px-2 py-1.5 text-xs font-mono resize-none"
+                  style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff"
+                />
+
+                <select
+                  v-else-if="param.kind === 'select'"
+                  v-model="node.params[param.key]"
+                  class="w-full rounded border px-2 py-1.5 text-xs font-mono"
+                  style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff"
+                >
+                  <option v-for="option in param.options" :key="String(option.value)" :value="option.value">{{ option.label }}</option>
+                </select>
+
+                <label v-else class="flex items-center gap-2 text-xs font-mono" style="color:#e7f7ff">
+                  <input v-model="node.params[param.key]" type="checkbox">
+                  enabled
+                </label>
+              </div>
+            </div>
+
+            <div class="mx-3 mt-1 rounded-lg border p-2" style="min-height:62px;border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)">
+              <div class="text-[10px] font-mono mb-1" style="color:var(--color-text-muted)">runtime</div>
+              <pre class="text-[10px] font-mono whitespace-pre-wrap break-all leading-5" :style="node.error ? 'color:#ff7878' : 'color:#c9f8d8'">{{ node.error || formatValue(node.result) }}</pre>
+            </div>
+
+            <template v-for="i in specFor(node.type).inputs" :key="`in-${i}`">
+              <div
+                class="port absolute rounded-full border-2"
+                :style="`
+                  left:-8px;
+                  top:${inputPortY(node, i - 1) - PORT_R}px;
+                  width:${PORT_R * 2}px;
+                  height:${PORT_R * 2}px;
+                  border-color:#08080f;
+                  background:${wireCountForInput(node.id, i - 1) ? '#39ff14' : specFor(node.type).color};
+                  box-shadow:0 0 10px ${specFor(node.type).color};
+                  cursor:crosshair;
+                `"
+                @mouseup.stop="finishWire($event, node, i - 1)"
+              />
+            </template>
+
+            <template v-for="i in specFor(node.type).outputs" :key="`out-${i}`">
+              <div
+                class="port absolute rounded-full border-2"
+                :style="`
+                  right:-8px;
+                  top:${outputPortY(node, i - 1) - PORT_R}px;
+                  width:${PORT_R * 2}px;
+                  height:${PORT_R * 2}px;
+                  border-color:#08080f;
+                  background:${specFor(node.type).color};
+                  box-shadow:0 0 10px ${specFor(node.type).color};
+                  cursor:crosshair;
+                `"
+                @mousedown.stop="startWire($event, node, i - 1)"
+              />
+            </template>
+          </div>
+
+          <div v-if="nodes.length === 0" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="text-center font-mono" style="color:rgba(255,255,255,0.14)">
+              <div class="text-5xl mb-4">🕸️</div>
+              <div class="text-sm">拖节点进来，连成一张真能跑的 flow graph</div>
+              <div class="text-xs mt-2">拖拽节点 · 从右侧端口拉线到左侧端口 · 点线可删除</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="w-80 shrink-0 p-3 border-l overflow-y-auto" style="border-color:var(--color-void-border);background:var(--color-void-card)">
+        <div class="text-xs font-mono font-bold mb-2" style="color:var(--color-neon-cyan)">Runtime</div>
+        <div class="rounded-lg border p-3 text-xs font-mono" style="border-color:var(--color-void-border);background:rgba(255,255,255,0.02);color:var(--color-text-muted)">
+          <div>nodes: <span style="color:#e7f7ff">{{ nodes.length }}</span></div>
+          <div>wires: <span style="color:#e7f7ff">{{ wires.length }}</span></div>
+          <div class="mt-2" style="color:#c9f8d8">{{ lastRunSummary }}</div>
+          <div v-if="globalError" class="mt-2" style="color:#ff7878">{{ globalError }}</div>
+        </div>
+
+        <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">Execution Log</div>
+        <div class="rounded-lg border p-3" style="border-color:var(--color-void-border);background:rgba(255,255,255,0.02)">
+          <div v-if="runLog.length === 0" class="text-[10px] font-mono" style="color:var(--color-text-muted)">还没跑，点一下 Run。</div>
+          <div v-for="(line, idx) in runLog" :key="idx" class="text-[10px] font-mono leading-5 break-all" :style="line.startsWith('✗') ? 'color:#ff7878' : 'color:#c9f8d8'">
+            {{ line }}
           </div>
         </div>
 
-        <div class="h-px" style="background: var(--color-void-border)"></div>
+        <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">Mermaid Export</div>
+        <textarea
+          :value="mermaidCode"
+          readonly
+          rows="12"
+          class="w-full rounded-lg border p-3 text-[10px] font-mono resize-none"
+          style="border-color:var(--color-void-border);background:#0f1320;color:#d9f3ff"
+        />
 
-        <!-- Hint -->
-        <button
-          class="text-xs font-mono px-3 py-2 rounded border transition-all"
-          style="border-color: var(--color-void-border); color: var(--color-text-muted)"
-          :class="showHint ? 'border-yellow-400 text-yellow-400' : 'hover:border-yellow-400 hover:text-yellow-400'"
-          @click="showHintFn"
-        >
-          💡 提示下一步
-        </button>
-
-        <div v-if="showHint" class="text-[10px] font-mono p-2 rounded" style="background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.3); color: #ffd700">
-          连接 <b>{{ hintNodes[0] }}</b> → <b>{{ hintNodes[1] }}</b>
+        <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">玩法说明</div>
+        <div class="text-[10px] font-mono leading-5" style="color:var(--color-text-muted)">
+          1. 左侧拖节点到画布。<br>
+          2. 从节点右侧输出端口拉线到目标左侧输入端口。<br>
+          3. 点击 Run，节点会按拓扑顺序执行。<br>
+          4. 结果直接显示在节点 runtime 里，线还能导出 Mermaid。<br>
+          5. 当前执行器只支持 DAG，不支持环。
         </div>
-
-        <!-- Run button -->
-        <button
-          class="mt-auto text-sm font-mono font-bold px-4 py-3 rounded-lg border-2 transition-all"
-          :class="isValid && !runningAnim
-            ? 'cursor-pointer'
-            : 'opacity-40 cursor-not-allowed'"
-          :style="isValid && !runningAnim
-            ? 'border-color: #39ff14; color: #39ff14; background: rgba(57,255,20,0.1); box-shadow: 0 0 16px rgba(57,255,20,0.3)'
-            : 'border-color: var(--color-void-border); color: var(--color-text-muted)'"
-          @click="runPipeline"
-        >
-          {{ runningAnim ? '⏳ 运行中...' : '▶ 运行流水线' }}
-        </button>
-        <div v-if="!isValid && canvasNodes.length > 0" class="text-[10px] font-mono" style="color: #ff6666">
-          还差 {{ validationErrors.length }} 条连接
-        </div>
-      </div>
+      </aside>
     </div>
-
-    <!-- Success modal -->
-    <Teleport to="body">
-      <div
-        v-if="showSuccess"
-        class="fixed inset-0 flex items-center justify-center z-50"
-        style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px)"
-        @click.self="showSuccess = false"
-      >
-        <div
-          class="rounded-2xl border-2 p-8 max-w-md w-full mx-4 font-mono"
-          style="border-color: var(--color-neon-cyan); background: #0a0a1a; box-shadow: 0 0 48px rgba(0,212,255,0.3)"
-        >
-          <div class="text-3xl text-center mb-4">🎉</div>
-          <div class="text-center text-lg font-bold mb-2" style="color: var(--color-neon-cyan)">流水线运行成功！</div>
-          <div class="text-sm leading-relaxed mb-6" style="color: var(--color-text-muted)">
-            {{ levels[currentLevel].successInfo }}
-          </div>
-          <div class="flex gap-3 justify-center">
-            <button
-              class="px-4 py-2 rounded border text-sm transition-all hover:opacity-80"
-              style="border-color: var(--color-void-border); color: var(--color-text-muted)"
-              @click="showSuccess = false"
-            >继续探索</button>
-            <button
-              v-if="currentLevel < levels.length - 1"
-              class="px-4 py-2 rounded border-2 text-sm font-bold transition-all"
-              style="border-color: #39ff14; color: #39ff14; background: rgba(57,255,20,0.1)"
-              @click="goNextLevel"
-            >下一关 →</button>
-            <div v-else class="px-4 py-2 text-sm" style="color: var(--color-neon-cyan)">🏆 全部通关！</div>
-          </div>
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
