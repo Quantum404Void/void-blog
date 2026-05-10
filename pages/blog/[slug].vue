@@ -372,12 +372,12 @@ function jumpToSaved() {
 
 const { attachCopyButtons } = useCodeCopy()
 
-// 当文章内容渲染后重新注入复制按钮（SPA 跳转时 renderedContent 会更新）
+// watch renderedContent — immediate:true 保证首次加载也触发
 watch(renderedContent, async () => {
   await nextTick()
   const articleEl = document.querySelector('.prose') as HTMLElement | null
   attachCopyButtons(articleEl)
-}, { flush: 'post' })
+}, { flush: 'post', immediate: true })
 
 onMounted(() => {
   // Continue reading: check saved progress
