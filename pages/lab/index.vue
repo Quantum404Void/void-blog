@@ -10,8 +10,8 @@
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
         <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span><span style="color:rgba(180,0,255,0.9)">37</span> 游戏</span>
-          <span><span style="color:rgba(0,212,255,0.9)">28</span> 工具</span>
+          <span><span style="color:rgba(180,0,255,0.9)">{{ games.length }}</span> 游戏</span>
+          <span><span style="color:rgba(0,212,255,0.9)">{{ tools.length }}</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
 

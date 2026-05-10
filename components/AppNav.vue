@@ -22,6 +22,9 @@
 
       <!-- 右侧固定导航 -->
       <div class="ml-auto flex items-center gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
+        <span class="hidden md:block font-mono text-[10px] text-[var(--color-text-muted)] opacity-40 select-none tracking-widest border-r border-[var(--color-void-border)] pr-4 mr-1">
+          {{ route.path }}
+        </span>
         <NuxtLink v-for="link in navLinks" :key="link.href" :href="link.href"
           class="hidden sm:block transition-colors relative pb-0.5"
           :class="isActive(link.href)
@@ -35,6 +38,7 @@
             :style="`background:${link.glowColor};box-shadow:0 0 6px ${link.glowColor}`">
           </span>
         </NuxtLink>
+        <span class="hidden lg:block font-mono text-[9px] text-[var(--color-void-muted)] select-none">v1.0</span>
         <!-- 移动端 hamburger -->
         <button
           class="sm:hidden flex flex-col gap-1 p-1"
@@ -69,6 +73,9 @@
         >
           {{ link.label }}
         </NuxtLink>
+        <div class="pt-2 border-t border-[var(--color-void-border)] mt-1">
+          <span class="font-mono text-[9px] text-[var(--color-text-muted)] opacity-40">/ → search  ? → help</span>
+        </div>
       </div>
     </Transition>
   </nav>

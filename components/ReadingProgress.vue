@@ -1,8 +1,8 @@
 <template>
   <div
-    :style="{ width: progress + '%' }"
-    class="fixed top-0 left-0 h-[2px] z-[100] transition-none"
+    class="fixed top-0 left-0 h-[2px] z-[100] transition-none origin-left"
     style="background: linear-gradient(to right, #00ff88, #00d4ff, #b44cff, #ff2d78); box-shadow: 0 0 8px rgba(0,212,255,0.6);"
+    :style="{ transform: `scaleX(${progress})` }"
   />
 </template>
 
@@ -14,7 +14,7 @@ const progress = ref(0)
 function updateProgress() {
   const scrollTop = window.scrollY
   const docHeight = document.documentElement.scrollHeight - window.innerHeight
-  progress.value = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0
+  progress.value = docHeight > 0 ? Math.min(1, scrollTop / docHeight) : 0
 }
 
 onMounted(() => {
