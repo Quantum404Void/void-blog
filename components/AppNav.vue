@@ -1,6 +1,6 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-2">
+    <div class="w-full px-6 h-14 flex items-center gap-2">
       <!-- Logo -->
       <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest shrink-0 cursor-blink">
         {{ siteName }}
