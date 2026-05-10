@@ -26,6 +26,11 @@ interface ParamSpec {
   options?: ParamOption[]
 }
 
+interface NodeRunResult {
+  result?: any
+  outputs?: any[]
+}
+
 interface NodeSpec {
   title: string
   icon: string
@@ -34,9 +39,11 @@ interface NodeSpec {
   description: string
   inputs: number
   outputs: number
+  inputLabels?: string[]
+  outputLabels?: string[]
   params: ParamSpec[]
   createParams: () => Record<string, any>
-  run: (ctx: { inputs: any[]; params: Record<string, any> }) => any
+  run: (ctx: { inputs: any[]; params: Record<string, any> }) => any | NodeRunResult
 }
 
 interface FlowNode {
@@ -46,6 +53,7 @@ interface FlowNode {
   y: number
   params: Record<string, any>
   result?: any
+  outputsData?: any[]
   error?: string
 }
 
@@ -68,6 +76,7 @@ const HEADER_H = 40
 const DESC_H = 38
 const RESULT_H = 78
 const PORT_R = 6
+const NO_FLOW = Symbol('NO_FLOW')
 
 function parseArrayInput(raw: string) {
   const text = String(raw ?? '').trim()
@@ -88,13 +97,26 @@ function parseArrayInput(raw: string) {
 }
 
 function requireArray(value: any, label = '输入') {
-  if (!Array.isArray(value)) throw new Error(`${label} 需要数组`) 
+  if (!Array.isArray(value)) throw new Error(`${label} 需要数组`)
   return value
 }
 
 function requireString(value: any, label = '输入') {
   if (typeof value !== 'string') throw new Error(`${label} 需要字符串`)
   return value
+}
+
+function requireNumber(value: any, label = '输入') {
+  const num = Number(value)
+  if (!Number.isFinite(num)) throw new Error(`${label} 需要 number`)
+  return num
+}
+
+function requireBoolean(value: any, label = '输入') {
+  if (typeof value === 'boolean') return value
+  if (value === 'true') return true
+  if (value === 'false') return false
+  throw new Error(`${label} 需要 boolean`)
 }
 
 function requireNumberArray(value: any, label = '输入') {
@@ -117,6 +139,35 @@ function mapValue(value: any, mode: string) {
   }
 }
 
+function normalizeRunResult(raw: any, outputCount: number) {
+  if (raw && typeof raw === 'object' && Array.isArray(raw.outputs)) {
+    const result = Object.prototype.hasOwnProperty.call(raw, 'result') ? raw.result : raw.outputs[0]
+    return {
+      result,
+      outputs: Array.from({ length: outputCount }, (_, idx) => raw.outputs[idx] ?? NO_FLOW),
+    }
+  }
+  return {
+    result: raw,
+    outputs: outputCount > 0
+      ? Array.from({ length: outputCount }, (_, idx) => idx === 0 ? raw : NO_FLOW)
+      : [],
+  }
+}
+
+function safeCompare(left: any, right: any, mode: string) {
+  switch (mode) {
+    case 'eq': return left === right
+    case 'neq': return left !== right
+    case 'gt': return requireNumber(left, '左输入') > requireNumber(right, '右输入')
+    case 'gte': return requireNumber(left, '左输入') >= requireNumber(right, '右输入')
+    case 'lt': return requireNumber(left, '左输入') < requireNumber(right, '右输入')
+    case 'lte': return requireNumber(left, '左输入') <= requireNumber(right, '右输入')
+    case 'contains': return String(left).includes(String(right))
+    default: return false
+  }
+}
+
 const NODE_SPECS: Record<string, NodeSpec> = {
   'source-number': {
     title: 'Number',
@@ -131,6 +182,25 @@ const NODE_SPECS: Record<string, NodeSpec> = {
     ],
     createParams: () => ({ value: 42 }),
     run: ({ params }) => Number(params.value ?? 0),
+  },
+  'source-boolean': {
+    title: 'Boolean',
+    icon: '🔘',
+    color: '#00d4ff',
+    category: 'Source',
+    description: '布尔值源，适合控制分支。',
+    inputs: 0,
+    outputs: 1,
+    params: [
+      {
+        key: 'value', label: 'value', kind: 'select', options: [
+          { label: 'true', value: true },
+          { label: 'false', value: false },
+        ],
+      },
+    ],
+    createParams: () => ({ value: true }),
+    run: ({ params }) => Boolean(params.value),
   },
   'source-text': {
     title: 'Text',
@@ -351,6 +421,99 @@ const NODE_SPECS: Record<string, NodeSpec> = {
     run: ({ inputs, params }) => requireArray(inputs[0]).slice(0, Number(params.count ?? 0)),
   },
 
+  add: {
+    title: 'Add',
+    icon: '➕',
+    color: '#ffd400',
+    category: 'Math',
+    description: '双输入数值相加。',
+    inputs: 2,
+    outputs: 1,
+    inputLabels: ['a', 'b'],
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => requireNumber(inputs[0], 'a') + requireNumber(inputs[1], 'b'),
+  },
+  multiply: {
+    title: 'Multiply',
+    icon: '✖️',
+    color: '#ffd400',
+    category: 'Math',
+    description: '双输入数值相乘。',
+    inputs: 2,
+    outputs: 1,
+    inputLabels: ['a', 'b'],
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => requireNumber(inputs[0], 'a') * requireNumber(inputs[1], 'b'),
+  },
+  compare: {
+    title: 'Compare',
+    icon: '⚖️',
+    color: '#ffd400',
+    category: 'Math',
+    description: '双输入比较，输出 boolean。',
+    inputs: 2,
+    outputs: 1,
+    inputLabels: ['left', 'right'],
+    params: [
+      {
+        key: 'mode', label: 'mode', kind: 'select', options: [
+          { label: '===', value: 'eq' },
+          { label: '!==', value: 'neq' },
+          { label: '>', value: 'gt' },
+          { label: '>=', value: 'gte' },
+          { label: '<', value: 'lt' },
+          { label: '<=', value: 'lte' },
+          { label: 'contains', value: 'contains' },
+        ],
+      },
+    ],
+    createParams: () => ({ mode: 'gt' }),
+    run: ({ inputs, params }) => safeCompare(inputs[0], inputs[1], String(params.mode)),
+  },
+
+  merge: {
+    title: 'Merge',
+    icon: '🔀',
+    color: '#ffa500',
+    category: 'Control',
+    description: '双输入合并，数组 concat / 对象 merge / 字符串拼接。',
+    inputs: 2,
+    outputs: 1,
+    inputLabels: ['left', 'right'],
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => {
+      const [left, right] = inputs
+      if (Array.isArray(left) && Array.isArray(right)) return [...left, ...right]
+      if (typeof left === 'string' || typeof right === 'string') return `${String(left)}${String(right)}`
+      if (left && right && typeof left === 'object' && typeof right === 'object') return { ...left, ...right }
+      return [left, right]
+    },
+  },
+  branch: {
+    title: 'Branch',
+    icon: '🌿',
+    color: '#ffa500',
+    category: 'Control',
+    description: '根据条件把 payload 路由到 true / false 分支。',
+    inputs: 2,
+    outputs: 2,
+    inputLabels: ['cond', 'payload'],
+    outputLabels: ['true', 'false'],
+    params: [],
+    createParams: () => ({}),
+    run: ({ inputs }) => {
+      const cond = requireBoolean(inputs[0], 'cond')
+      const payload = inputs[1]
+      return {
+        result: { routed: cond ? 'true' : 'false', payload },
+        outputs: cond ? [payload, NO_FLOW] : [NO_FLOW, payload],
+      }
+    },
+  },
+
   split: {
     title: 'Split',
     icon: '🔪',
@@ -486,9 +649,11 @@ const NODE_SPECS: Record<string, NodeSpec> = {
 }
 
 const presets: Preset[] = [
-  { key: 'squares', label: 'Square Filter', desc: 'Range → Map(x²) → Filter(>=10) → Stats → Preview' },
+  { key: 'squares', label: 'Square Filter', desc: 'Range → Map(x²) → Filter(>=20) → Stats / Preview' },
   { key: 'text', label: 'Text Clean', desc: 'Text → Split → Unique → Sort → Join → Preview' },
   { key: 'json', label: 'JSON Inspect', desc: 'Text(JSON) → JSON.parse → JSON.stringify(pretty) → Preview' },
+  { key: 'branch', label: 'Branch Demo', desc: 'Compare → Branch(true/false) → 双 Preview' },
+  { key: 'math', label: 'Math Demo', desc: 'Number + Number → Multiply → Preview' },
 ]
 
 const nodes = ref<FlowNode[]>([])
@@ -518,6 +683,7 @@ function makeNode(type: string, x: number, y: number): FlowNode {
     y,
     params: spec.createParams(),
     result: undefined,
+    outputsData: [],
     error: '',
   }
 }
@@ -540,6 +706,14 @@ function outputPortY(node: FlowNode, index: number) {
   const h = nodeHeight(node)
   if (spec.outputs <= 1) return h / 2
   return (index + 1) * (h / (spec.outputs + 1))
+}
+
+function inputLabel(spec: NodeSpec, index: number) {
+  return spec.inputLabels?.[index] ?? `in${index + 1}`
+}
+
+function outputLabel(spec: NodeSpec, index: number) {
+  return spec.outputLabels?.[index] ?? `out${index + 1}`
 }
 
 function getNode(nodeId: string) {
@@ -568,6 +742,10 @@ function wirePath(wire: Wire) {
   return bezierPath(start.x, start.y, end.x, end.y)
 }
 
+function wireColor(wire: Wire) {
+  return specFor(getNode(wire.fromNode)?.type ?? 'preview').color || '#00d4ff'
+}
+
 const pendingWirePath = computed(() => {
   if (!pendingWire.value) return ''
   const from = getNode(pendingWire.value.fromNode)
@@ -587,6 +765,7 @@ const groupedSpecs = computed(() => {
 
 function formatValue(value: any) {
   if (value === undefined) return '—'
+  if (value === NO_FLOW) return '⏭ no flow'
   if (typeof value === 'string') return value.length > 220 ? `${value.slice(0, 220)}…` : value
   try {
     const json = JSON.stringify(value, null, 2)
@@ -597,6 +776,7 @@ function formatValue(value: any) {
 }
 
 function formatLogValue(value: any) {
+  if (value === NO_FLOW) return 'no-flow'
   if (typeof value === 'string') return value.length > 80 ? `${value.slice(0, 80)}…` : value
   try {
     const json = JSON.stringify(value)
@@ -619,7 +799,14 @@ const mermaidCode = computed(() => {
   for (const wire of wires.value) {
     const from = idMap.get(wire.fromNode)
     const to = idMap.get(wire.toNode)
-    if (from && to) lines.push(`  ${from} --> ${to}`)
+    const source = getNode(wire.fromNode)
+    const target = getNode(wire.toNode)
+    const sourceSpec = source ? specFor(source.type) : null
+    const targetSpec = target ? specFor(target.type) : null
+    const label = sourceSpec?.outputs && sourceSpec.outputs > 1
+      ? `${outputLabel(sourceSpec, wire.fromPort)}→${targetSpec ? inputLabel(targetSpec, wire.toPort) : `in${wire.toPort + 1}`}`
+      : ''
+    if (from && to) lines.push(label ? `  ${from} -->|${label}| ${to}` : `  ${from} --> ${to}`)
   }
   return lines.join('\n')
 })
@@ -746,6 +933,7 @@ function deleteNode(nodeId: string) {
 function resetNodeState() {
   for (const node of nodes.value) {
     node.result = undefined
+    node.outputsData = []
     node.error = ''
   }
 }
@@ -795,27 +983,49 @@ function runGraph() {
     const spec = specFor(node.type)
     const inWires = [...(incoming.get(node.id) ?? [])].sort((a, b) => a.toPort - b.toPort)
     const inputs = Array.from({ length: spec.inputs }, () => undefined)
-    for (const wire of inWires) {
-      const source = nodeMap.get(wire.fromNode)
-      inputs[wire.toPort] = source?.result
-    }
-    if (spec.inputs > 0 && inputs.some(v => v === undefined)) {
+    const linkedPorts = new Set(inWires.map(w => w.toPort))
+
+    if (spec.inputs > 0 && Array.from({ length: spec.inputs }, (_, idx) => idx).some(idx => !linkedPorts.has(idx))) {
       node.error = '输入未连完整'
+      node.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
       runLog.value.push(`✗ ${spec.title}: 输入未连完整`)
       continue
     }
+
+    for (const wire of inWires) {
+      const source = nodeMap.get(wire.fromNode)
+      const sourceValue = source?.outputsData?.[wire.fromPort]
+      inputs[wire.toPort] = sourceValue === undefined ? source?.result : sourceValue
+    }
+
+    if (inputs.includes(NO_FLOW)) {
+      node.result = '⏭ skipped (no flow)'
+      node.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
+      runLog.value.push(`↷ ${spec.title}: skipped (no flow)`)
+      continue
+    }
+
+    if (spec.inputs > 0 && inputs.some(v => v === undefined)) {
+      node.error = '上游结果缺失'
+      node.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
+      runLog.value.push(`✗ ${spec.title}: 上游结果缺失`)
+      continue
+    }
+
     try {
-      const result = spec.run({ inputs, params: node.params })
-      node.result = result
-      runLog.value.push(`✓ ${spec.title}: ${formatLogValue(result)}`)
+      const normalized = normalizeRunResult(spec.run({ inputs, params: node.params }), spec.outputs)
+      node.result = normalized.result
+      node.outputsData = normalized.outputs
+      runLog.value.push(`✓ ${spec.title}: ${formatLogValue(normalized.result)}`)
     } catch (error: any) {
       node.error = error?.message || '运行失败'
+      node.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
       runLog.value.push(`✗ ${spec.title}: ${node.error}`)
     }
   }
 
   const ok = nodes.value.filter(node => !node.error).length
-  lastRunSummary.value = `执行完成：${ok}/${nodes.value.length} 节点成功`
+  lastRunSummary.value = `执行完成：${ok}/${nodes.value.length} 节点可用`
 }
 
 function wireCountForInput(nodeId: string, toPort: number) {
@@ -864,7 +1074,7 @@ function loadPreset(key: string) {
       { id: makeId('wire'), fromNode: e.id, fromPort: 0, toNode: f.id, toPort: 0 },
       { id: makeId('wire'), fromNode: f.id, fromPort: 0, toNode: g.id, toPort: 0 },
     ]
-  } else {
+  } else if (key === 'json') {
     const a = makeNode('source-text', 60, 80)
     a.params = { text: '{"name":"void","skills":["nuxt","ts","d1"],"stars":3}' }
     const b = makeNode('json-parse', 380, 80)
@@ -877,6 +1087,45 @@ function loadPreset(key: string) {
       { id: makeId('wire'), fromNode: b.id, fromPort: 0, toNode: c.id, toPort: 0 },
       { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: d.id, toPort: 0 },
     ]
+  } else if (key === 'branch') {
+    const a = makeNode('source-number', 50, 60)
+    a.params = { value: 12 }
+    const b = makeNode('source-number', 50, 280)
+    b.params = { value: 10 }
+    const c = makeNode('compare', 380, 140)
+    c.params = { mode: 'gt' }
+    const d = makeNode('source-text', 380, 360)
+    d.params = { text: 'packet: high-priority job' }
+    const e = makeNode('branch', 760, 180)
+    const f = makeNode('preview', 1130, 80)
+    const g = makeNode('preview', 1130, 300)
+    nodes.value = [a, b, c, d, e, f, g]
+    wires.value = [
+      { id: makeId('wire'), fromNode: a.id, fromPort: 0, toNode: c.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: b.id, fromPort: 0, toNode: c.id, toPort: 1 },
+      { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: e.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: d.id, fromPort: 0, toNode: e.id, toPort: 1 },
+      { id: makeId('wire'), fromNode: e.id, fromPort: 0, toNode: f.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: e.id, fromPort: 1, toNode: g.id, toPort: 0 },
+    ]
+  } else {
+    const a = makeNode('source-number', 60, 60)
+    a.params = { value: 8 }
+    const b = makeNode('source-number', 60, 260)
+    b.params = { value: 13 }
+    const c = makeNode('add', 380, 140)
+    const d = makeNode('source-number', 380, 360)
+    d.params = { value: 3 }
+    const e = makeNode('multiply', 730, 220)
+    const f = makeNode('preview', 1080, 220)
+    nodes.value = [a, b, c, d, e, f]
+    wires.value = [
+      { id: makeId('wire'), fromNode: a.id, fromPort: 0, toNode: c.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: b.id, fromPort: 0, toNode: c.id, toPort: 1 },
+      { id: makeId('wire'), fromNode: c.id, fromPort: 0, toNode: e.id, toPort: 0 },
+      { id: makeId('wire'), fromNode: d.id, fromPort: 0, toNode: e.id, toPort: 1 },
+      { id: makeId('wire'), fromNode: e.id, fromPort: 0, toNode: f.id, toPort: 0 },
+    ]
   }
 
   lastRunSummary.value = `已载入 preset: ${key}`
@@ -884,7 +1133,7 @@ function loadPreset(key: string) {
 }
 
 onMounted(() => {
-  loadPreset('squares')
+  loadPreset('branch')
 })
 </script>
 
@@ -894,7 +1143,7 @@ onMounted(() => {
 
     <div class="px-4 pt-3 pb-2 flex flex-wrap gap-2 items-center border-b" style="border-color:var(--color-void-border)">
       <div class="text-sm font-mono font-bold" style="color:var(--color-neon-cyan)">AI Flow / Executable Flowchart</div>
-      <div class="text-xs font-mono" style="color:var(--color-text-muted)">不是拼图关卡，是真能跑的数据流图。</div>
+      <div class="text-xs font-mono" style="color:var(--color-text-muted)">现在支持多输入节点、条件分支、真实 no-flow 语义。</div>
       <button
         class="ml-auto px-3 py-1.5 rounded border text-xs font-mono transition-all"
         style="border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.08)"
@@ -920,8 +1169,8 @@ onMounted(() => {
     <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 96px)">
       <aside class="w-72 shrink-0 p-3 border-r overflow-y-auto" style="border-color:var(--color-void-border);background:var(--color-void-card)">
         <div class="text-xs font-mono leading-6" style="color:var(--color-text-muted)">
-          我直接换了方向：<span style="color:var(--color-neon-cyan)">可执行流程图编辑器</span>。
-          节点不是摆样子，每个节点都会真实产出结果，右侧还能导出 Mermaid / JSON。
+          这版更像 <span style="color:var(--color-neon-cyan)">Node-RED / LabVIEW</span> 了：
+          不只是看起来像流程图，而是真的能算、能分支、能导出结构。
         </div>
 
         <div class="mt-4 mb-2 text-xs font-mono font-bold" style="color:var(--color-neon-cyan)">Presets</div>
@@ -988,7 +1237,7 @@ onMounted(() => {
             <g v-for="wire in wires" :key="wire.id">
               <path
                 :d="wirePath(wire)"
-                stroke="#00d4ff"
+                :stroke="wireColor(wire)"
                 stroke-width="2.2"
                 fill="none"
                 stroke-dasharray="10 6"
@@ -1020,7 +1269,7 @@ onMounted(() => {
           <div
             v-for="node in nodes"
             :key="node.id"
-            class="absolute rounded-xl border-2 overflow-hidden"
+            class="absolute rounded-xl border-2 overflow-visible"
             :style="`
               left:${node.x}px;
               top:${node.y}px;
@@ -1034,7 +1283,7 @@ onMounted(() => {
             @mousedown="onNodeMouseDown($event, node)"
           >
             <div
-              class="flex items-center gap-2 px-3"
+              class="flex items-center gap-2 px-3 rounded-t-xl"
               :style="`
                 height:${HEADER_H}px;
                 background:${specFor(node.type).color}18;
@@ -1114,6 +1363,16 @@ onMounted(() => {
 
             <template v-for="i in specFor(node.type).inputs" :key="`in-${i}`">
               <div
+                class="absolute text-[9px] font-mono"
+                :style="`
+                  left:-42px;
+                  top:${inputPortY(node, i - 1) - 6}px;
+                  width:30px;
+                  text-align:right;
+                  color:${wireCountForInput(node.id, i - 1) ? '#39ff14' : 'rgba(255,255,255,0.45)'};
+                `"
+              >{{ inputLabel(specFor(node.type), i - 1) }}</div>
+              <div
                 class="port absolute rounded-full border-2"
                 :style="`
                   left:-8px;
@@ -1130,6 +1389,16 @@ onMounted(() => {
             </template>
 
             <template v-for="i in specFor(node.type).outputs" :key="`out-${i}`">
+              <div
+                class="absolute text-[9px] font-mono"
+                :style="`
+                  right:-48px;
+                  top:${outputPortY(node, i - 1) - 6}px;
+                  width:38px;
+                  text-align:left;
+                  color:rgba(255,255,255,0.45);
+                `"
+              >{{ outputLabel(specFor(node.type), i - 1) }}</div>
               <div
                 class="port absolute rounded-full border-2"
                 :style="`
@@ -1169,7 +1438,12 @@ onMounted(() => {
         <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">Execution Log</div>
         <div class="rounded-lg border p-3" style="border-color:var(--color-void-border);background:rgba(255,255,255,0.02)">
           <div v-if="runLog.length === 0" class="text-[10px] font-mono" style="color:var(--color-text-muted)">还没跑，点一下 Run。</div>
-          <div v-for="(line, idx) in runLog" :key="idx" class="text-[10px] font-mono leading-5 break-all" :style="line.startsWith('✗') ? 'color:#ff7878' : 'color:#c9f8d8'">
+          <div
+            v-for="(line, idx) in runLog"
+            :key="idx"
+            class="text-[10px] font-mono leading-5 break-all"
+            :style="line.startsWith('✗') ? 'color:#ff7878' : line.startsWith('↷') ? 'color:#ffd166' : 'color:#c9f8d8'"
+          >
             {{ line }}
           </div>
         </div>
@@ -1183,12 +1457,20 @@ onMounted(() => {
           style="border-color:var(--color-void-border);background:#0f1320;color:#d9f3ff"
         />
 
+        <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">新能力</div>
+        <div class="text-[10px] font-mono leading-5" style="color:var(--color-text-muted)">
+          - Add / Multiply / Compare / Merge 多输入节点<br>
+          - Branch 双输出节点（true / false）<br>
+          - 未命中的分支会显示 skipped，不再误报错误<br>
+          - Mermaid 导出会带多输出端口标签
+        </div>
+
         <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">玩法说明</div>
         <div class="text-[10px] font-mono leading-5" style="color:var(--color-text-muted)">
           1. 左侧拖节点到画布。<br>
           2. 从节点右侧输出端口拉线到目标左侧输入端口。<br>
           3. 点击 Run，节点会按拓扑顺序执行。<br>
-          4. 结果直接显示在节点 runtime 里，线还能导出 Mermaid。<br>
+          4. runtime 会显示结果；未走到的分支显示 skipped。<br>
           5. 当前执行器只支持 DAG，不支持环。
         </div>
       </aside>
