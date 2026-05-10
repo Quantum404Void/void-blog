@@ -96,7 +96,9 @@ async function doSearch() {
   }
 }
 
-// Auto-search if q from URL
-if (q.value) doSearch()
+// Auto-search if q from URL — 在客户端执行，避免 SSR 副作用
+onMounted(() => {
+  if (q.value) doSearch()
+})
 
 </script>
