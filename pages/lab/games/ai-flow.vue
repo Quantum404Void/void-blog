@@ -81,6 +81,7 @@ const STAGE_H = 2000
 const MINIMAP_W = 220
 const MINIMAP_H = 140
 const NO_FLOW = Symbol('NO_FLOW')
+const STORAGE_KEY = 'void-blog:ai-flow:v2'
 
 function parseArrayInput(raw: string) {
   const text = String(raw ?? '').trim()
@@ -670,6 +671,9 @@ const selectedPreset = ref('branch')
 const selectedNodeIds = ref<string[]>([])
 const viewportSize = ref({ width: 0, height: 0 })
 const spacePressed = ref(false)
+const importJson = ref('')
+const saveState = ref('not-saved')
+const hasHydrated = ref(false)
 
 const view = reactive({
   x: 120,
@@ -882,11 +886,13 @@ const mermaidCode = computed(() => {
   return lines.join('\n')
 })
 
-const graphJson = computed(() => JSON.stringify({
+const graphJsonObject = computed(() => ({
   nodes: nodes.value.map(n => ({ id: n.id, type: n.type, x: n.x, y: n.y, params: n.params })),
   wires: wires.value,
   view: { x: view.x, y: view.y, scale: view.scale },
-}, null, 2))
+}))
+
+const graphJson = computed(() => JSON.stringify(graphJsonObject.value, null, 2))
 
 const selectionRectStyle = computed(() => {
   if (!selecting.value) return null
@@ -915,6 +921,54 @@ const minimapViewportStyle = computed(() => ({
   width: `${clamp((viewportWorld.value.width / STAGE_W) * MINIMAP_W, 12, MINIMAP_W)}px`,
   height: `${clamp((viewportWorld.value.height / STAGE_H) * MINIMAP_H, 12, MINIMAP_H)}px`,
 }))
+
+function restoreGraph(payload: any) {
+  if (!payload || typeof payload !== 'object') throw new Error('无效的 graph payload')
+  if (!Array.isArray(payload.nodes) || !Array.isArray(payload.wires)) throw new Error('缺少 nodes / wires')
+
+  const validNodes = payload.nodes
+    .filter((node: any) => node && typeof node.id === 'string' && typeof node.type === 'string' && NODE_SPECS[node.type])
+    .map((node: any) => ({
+      id: node.id,
+      type: node.type,
+      x: Number(node.x ?? 0),
+      y: Number(node.y ?? 0),
+      params: { ...specFor(node.type).createParams(), ...(node.params || {}) },
+      result: undefined,
+      outputsData: [],
+      error: '',
+    }))
+
+  const nodeIds = new Set(validNodes.map((node: any) => node.id))
+  const validWires = payload.wires
+    .filter((wire: any) => wire && typeof wire.id === 'string' && nodeIds.has(wire.fromNode) && nodeIds.has(wire.toNode))
+    .map((wire: any) => ({
+      id: wire.id,
+      fromNode: wire.fromNode,
+      fromPort: Number(wire.fromPort ?? 0),
+      toNode: wire.toNode,
+      toPort: Number(wire.toPort ?? 0),
+    }))
+
+  nodes.value = validNodes
+  wires.value = validWires
+  selectedNodeIds.value = []
+  pendingWire.value = null
+  runLog.value = []
+  globalError.value = ''
+
+  if (payload.view && typeof payload.view === 'object') {
+    view.x = Number(payload.view.x ?? 120)
+    view.y = Number(payload.view.y ?? 80)
+    view.scale = clamp(Number(payload.view.scale ?? 1), 0.35, 2.5)
+  }
+}
+
+function saveGraphToLocal() {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(STORAGE_KEY, graphJson.value)
+  saveState.value = `saved ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
+}
 
 async function copyText(text: string, label: string) {
   try {
@@ -952,6 +1006,108 @@ function resetZoom() {
   view.y = 80
 }
 
+function autoLayout() {
+  if (!nodes.value.length) return
+
+  const nodeMap = new Map(nodes.value.map(node => [node.id, node]))
+  const indegree = new Map(nodes.value.map(node => [node.id, 0]))
+  const outgoing = new Map(nodes.value.map(node => [node.id, [] as Wire[]]))
+
+  for (const wire of wires.value) {
+    if (!nodeMap.has(wire.fromNode) || !nodeMap.has(wire.toNode)) continue
+    indegree.set(wire.toNode, (indegree.get(wire.toNode) ?? 0) + 1)
+    outgoing.get(wire.fromNode)!.push(wire)
+  }
+
+  const queue = nodes.value.filter(node => (indegree.get(node.id) ?? 0) === 0).map(node => node.id)
+  const level = new Map<string, number>(nodes.value.map(node => [node.id, 0]))
+  const visited: string[] = []
+
+  while (queue.length) {
+    const id = queue.shift()!
+    visited.push(id)
+    for (const wire of outgoing.get(id) ?? []) {
+      level.set(wire.toNode, Math.max(level.get(wire.toNode) ?? 0, (level.get(id) ?? 0) + 1))
+      indegree.set(wire.toNode, (indegree.get(wire.toNode) ?? 0) - 1)
+      if ((indegree.get(wire.toNode) ?? 0) === 0) queue.push(wire.toNode)
+    }
+  }
+
+  const layers = new Map<number, FlowNode[]>()
+  for (const node of nodes.value) {
+    const l = level.get(node.id) ?? 0
+    if (!layers.has(l)) layers.set(l, [])
+    layers.get(l)!.push(node)
+  }
+
+  const layerXs = Array.from(layers.keys()).sort((a, b) => a - b)
+  for (const layerIndex of layerXs) {
+    const layerNodes = layers.get(layerIndex)!
+    let y = 80
+    for (const node of layerNodes) {
+      node.x = 80 + layerIndex * 360
+      node.y = y
+      y += nodeHeight(node) + 60
+    }
+  }
+
+  lastRunSummary.value = '已自动布局'
+  fitView()
+}
+
+function duplicateSelected() {
+  if (!selectedNodeIds.value.length) return
+  const selectedSet = new Set(selectedNodeIds.value)
+  const idMap = new Map<string, string>()
+  const clones: FlowNode[] = []
+
+  for (const id of selectedNodeIds.value) {
+    const node = getNode(id)
+    if (!node) continue
+    const cloneId = makeId('node')
+    idMap.set(id, cloneId)
+    clones.push({
+      id: cloneId,
+      type: node.type,
+      x: node.x + 48,
+      y: node.y + 48,
+      params: JSON.parse(JSON.stringify(node.params)),
+      result: undefined,
+      outputsData: [],
+      error: '',
+    })
+  }
+
+  const cloneWires = wires.value
+    .filter(wire => selectedSet.has(wire.fromNode) && selectedSet.has(wire.toNode))
+    .map(wire => ({
+      id: makeId('wire'),
+      fromNode: idMap.get(wire.fromNode)!,
+      fromPort: wire.fromPort,
+      toNode: idMap.get(wire.toNode)!,
+      toPort: wire.toPort,
+    }))
+
+  nodes.value.push(...clones)
+  wires.value.push(...cloneWires)
+  selectedNodeIds.value = clones.map(node => node.id)
+  lastRunSummary.value = `已复制 ${clones.length} 个节点`
+}
+
+function importGraphJson() {
+  try {
+    const payload = JSON.parse(importJson.value)
+    restoreGraph(payload)
+    selectedPreset.value = 'custom'
+    hasHydrated.value = true
+    lastRunSummary.value = 'JSON 导入成功'
+    fitView()
+    runGraph()
+  } catch (error: any) {
+    globalError.value = `导入失败：${error?.message || '未知错误'}`
+  }
+}
+
 function clearCanvas() {
   nodes.value = []
   wires.value = []
@@ -959,6 +1115,8 @@ function clearCanvas() {
   runLog.value = []
   globalError.value = ''
   selectedNodeIds.value = []
+  selectedPreset.value = 'custom'
+  importJson.value = ''
   lastRunSummary.value = '已清空画布'
 }
 
@@ -1397,21 +1555,56 @@ function onWindowKeyDown(e: KeyboardEvent) {
     selectedNodeIds.value = nodes.value.map(n => n.id)
     e.preventDefault()
   }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+    duplicateSelected()
+    e.preventDefault()
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+    autoLayout()
+    e.preventDefault()
+  }
 }
 
 function onWindowKeyUp(e: KeyboardEvent) {
   if (e.code === 'Space') spacePressed.value = false
 }
 
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+watch([nodes, wires, () => view.x, () => view.y, () => view.scale], () => {
+  if (!hasHydrated.value) return
+  saveState.value = 'saving…'
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => saveGraphToLocal(), 250)
+}, { deep: true })
+
 onMounted(() => {
   updateViewportSize()
   window.addEventListener('resize', updateViewportSize)
   window.addEventListener('keydown', onWindowKeyDown)
   window.addEventListener('keyup', onWindowKeyUp)
+
+  try {
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+    if (saved) {
+      restoreGraph(JSON.parse(saved))
+      selectedPreset.value = 'custom'
+      hasHydrated.value = true
+      importJson.value = saved
+      lastRunSummary.value = '已恢复上次编辑状态'
+      runGraph()
+      return
+    }
+  } catch (error: any) {
+    saveState.value = `restore failed: ${error?.message || 'unknown'}`
+  }
+
+  hasHydrated.value = true
   loadPreset('branch')
 })
 
 onUnmounted(() => {
+  if (saveTimer) clearTimeout(saveTimer)
   window.removeEventListener('resize', updateViewportSize)
   window.removeEventListener('keydown', onWindowKeyDown)
   window.removeEventListener('keyup', onWindowKeyUp)
@@ -1438,6 +1631,11 @@ onUnmounted(() => {
       <button
         class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
         style="border-color:var(--color-void-border);color:var(--color-text-muted)"
+        @click="autoLayout"
+      >Auto Layout</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        style="border-color:var(--color-void-border);color:var(--color-text-muted)"
         @click="resetZoom"
       >100%</button>
       <button
@@ -1452,6 +1650,13 @@ onUnmounted(() => {
           : 'border-color:var(--color-void-border);color:var(--color-text-muted)'"
         @click="deleteSelected"
       >Delete Selected</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        :style="selectedNodeIds.length
+          ? 'border-color:#8b5cf6;color:#c4b5fd;background:rgba(139,92,246,0.08)'
+          : 'border-color:var(--color-void-border);color:var(--color-text-muted)'"
+        @click="duplicateSelected"
+      >Duplicate</button>
       <button
         class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
         style="border-color:var(--color-void-border);color:var(--color-text-muted)"
@@ -1476,6 +1681,8 @@ onUnmounted(() => {
           - Alt/Space + Drag：Pan<br>
           - Blank Area Drag：框选<br>
           - Delete / Backspace：删除选中<br>
+          - Ctrl/Cmd + D：复制选中<br>
+          - Ctrl/Cmd + L：自动布局<br>
           - Ctrl/Cmd + A：全选
         </div>
 
@@ -1771,6 +1978,7 @@ onUnmounted(() => {
           <div>wires: <span style="color:#e7f7ff">{{ wires.length }}</span></div>
           <div>selected: <span style="color:#e7f7ff">{{ selectedNodeIds.length }}</span></div>
           <div>view: <span style="color:#e7f7ff">{{ Math.round(view.scale * 100) }}%</span></div>
+          <div>autosave: <span style="color:#e7f7ff">{{ saveState }}</span></div>
           <div class="mt-2" style="color:#c9f8d8">{{ lastRunSummary }}</div>
           <div v-if="globalError" class="mt-2" style="color:#ff7878">{{ globalError }}</div>
         </div>
@@ -1792,17 +2000,46 @@ onUnmounted(() => {
         <textarea
           :value="mermaidCode"
           readonly
-          rows="12"
+          rows="10"
           class="w-full rounded-lg border p-3 text-[10px] font-mono resize-none"
           style="border-color:var(--color-void-border);background:#0f1320;color:#d9f3ff"
         />
+
+        <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">JSON Export / Import</div>
+        <textarea
+          :value="graphJson"
+          readonly
+          rows="10"
+          class="w-full rounded-lg border p-3 text-[10px] font-mono resize-none"
+          style="border-color:var(--color-void-border);background:#0f1320;color:#d9f3ff"
+        />
+        <textarea
+          v-model="importJson"
+          rows="8"
+          placeholder="把之前导出的 JSON 粘贴到这里，然后点 Import JSON"
+          class="w-full rounded-lg border p-3 text-[10px] font-mono resize-none mt-2"
+          style="border-color:var(--color-void-border);background:#0f1320;color:#d9f3ff"
+        />
+        <div class="flex gap-2 mt-2">
+          <button
+            class="flex-1 px-3 py-2 rounded border text-[10px] font-mono transition-all"
+            style="border-color:#00d4ff;color:#9aeaff;background:rgba(0,212,255,0.08)"
+            @click="importGraphJson"
+          >Import JSON</button>
+          <button
+            class="px-3 py-2 rounded border text-[10px] font-mono transition-all"
+            style="border-color:var(--color-void-border);color:var(--color-text-muted)"
+            @click="importJson = graphJson"
+          >Load Export</button>
+        </div>
 
         <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">这轮增强</div>
         <div class="text-[10px] font-mono leading-5" style="color:var(--color-text-muted)">
           - Zoom / Pan / Fit / Reset Zoom<br>
           - Minimap + 点击跳转视口<br>
-          - 框选 / 多选 / 批量拖动<br>
-          - Delete Selected + 键盘快捷键
+          - 框选 / 多选 / 批量拖动 / Duplicate<br>
+          - Auto Layout + Local Autosave / Restore<br>
+          - JSON Export / Import
         </div>
 
         <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">玩法说明</div>
