@@ -321,6 +321,14 @@ function onInputPortClick(e: MouseEvent, node: NodeDef, port: Port) {
   validate()
 }
 
+// Support drag-to-connect: complete connection on mouseup over input port
+function onInputPortMouseup(e: MouseEvent, node: NodeDef, port: Port) {
+  e.stopPropagation()
+  _portTs = Date.now()
+  if (!pendingConn.value) return
+  onInputPortClick(e, node, port)
+}
+
 // Only cancel pendingConn if user clicked the blank canvas (not a port)
 function onCanvasClick() {
   if (Date.now() - _portTs < 200) return  // port just fired, ignore
@@ -617,6 +625,7 @@ initLevel(0)
             class="port absolute w-3 h-3 rounded-full border-2 cursor-crosshair"
             :style="`left: -7px; top: ${NODE_H/2 - 6}px; background: ${node.color}; border-color: #08080f; z-index: 20`"
             @mousedown.stop="onInputPortClick($event, node, node.inputs[0])"
+            @mouseup.stop="onInputPortMouseup($event, node, node.inputs[0])"
             @click.stop
           />
           <span class="text-base leading-none flex-shrink-0" style="font-size: 1.1em">{{ node.icon }}</span>
