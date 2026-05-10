@@ -65,6 +65,13 @@ interface Wire {
   toPort: number
 }
 
+interface FlowGroup {
+  id: string
+  title: string
+  color: string
+  nodeIds: string[]
+}
+
 interface Preset {
   key: string
   label: string
@@ -663,6 +670,7 @@ const presets: Preset[] = [
 
 const nodes = ref<FlowNode[]>([])
 const wires = ref<Wire[]>([])
+const groups = ref<FlowGroup[]>([])
 const canvasEl = ref<HTMLDivElement | null>(null)
 const runLog = ref<string[]>([])
 const globalError = ref('')
@@ -678,6 +686,8 @@ const historyPast = ref<string[]>([])
 const historyFuture = ref<string[]>([])
 const suspendHistory = ref(false)
 const lastSnapshot = ref('')
+const quickAddOpen = ref(false)
+const quickAddQuery = ref('')
 
 const view = reactive({
   x: 120,
@@ -697,6 +707,12 @@ const panning = ref<{
   startScreenY: number
   originX: number
   originY: number
+} | null>(null)
+const groupDragging = ref<{
+  groupId: string
+  startX: number
+  startY: number
+  origins: Record<string, { x: number; y: number }>
 } | null>(null)
 const selecting = ref<{
   startX: number
@@ -805,6 +821,74 @@ function wireColor(wire: Wire) {
   return node ? specFor(node.type).color : '#00d4ff'
 }
 
+function groupBounds(group: FlowGroup) {
+  const members = group.nodeIds.map(id => getNode(id)).filter(Boolean) as FlowNode[]
+  if (!members.length) return { x: 0, y: 0, width: 220, height: 140 }
+  const minX = Math.min(...members.map(node => node.x)) - 28
+  const minY = Math.min(...members.map(node => node.y)) - 52
+  const maxX = Math.max(...members.map(node => node.x + NODE_W)) + 28
+  const maxY = Math.max(...members.map(node => node.y + nodeHeight(node))) + 28
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+}
+
+function normalizeGroups() {
+  const nodeIds = new Set(nodes.value.map(node => node.id))
+  groups.value = groups.value
+    .map(group => ({ ...group, nodeIds: group.nodeIds.filter(id => nodeIds.has(id)) }))
+    .filter(group => group.nodeIds.length > 0)
+}
+
+function filteredQuickAddItems() {
+  const q = quickAddQuery.value.trim().toLowerCase()
+  const all = Object.entries(NODE_SPECS).map(([type, spec]) => ({ type, spec }))
+  if (!q) return all.slice(0, 16)
+  return all.filter(({ type, spec }) => [type, spec.title, spec.category, spec.description].join(' ').toLowerCase().includes(q)).slice(0, 24)
+}
+
+const quickAddItems = computed(() => filteredQuickAddItems())
+
+function createNodeAtViewportCenter(type: string) {
+  const x = -view.x / view.scale + viewportSize.value.width / view.scale / 2 - NODE_W / 2
+  const y = -view.y / view.scale + viewportSize.value.height / view.scale / 2 - 120
+  const node = makeNode(type, x, y)
+  nodes.value.push(node)
+  selectedNodeIds.value = [node.id]
+  quickAddOpen.value = false
+  quickAddQuery.value = ''
+  lastRunSummary.value = `已创建节点 ${specFor(type).title}`
+}
+
+function createGroupFromSelection() {
+  if (!selectedNodeIds.value.length) return
+  const colors = ['#00d4ff', '#8b5cf6', '#39ff14', '#f59e0b', '#ff5ea8']
+  groups.value.push({
+    id: makeId('group'),
+    title: `Group ${groups.value.length + 1}`,
+    color: colors[groups.value.length % colors.length],
+    nodeIds: [...selectedNodeIds.value],
+  })
+  lastRunSummary.value = `已将 ${selectedNodeIds.value.length} 个节点编组`
+}
+
+function deleteGroup(groupId: string) {
+  groups.value = groups.value.filter(group => group.id !== groupId)
+}
+
+function onGroupMouseDown(e: MouseEvent, group: FlowGroup) {
+  const target = e.target as HTMLElement
+  if (target.closest('input, button')) return
+  e.preventDefault()
+  e.stopPropagation()
+  const point = pointerToWorld(e.clientX, e.clientY)
+  selectedNodeIds.value = [...group.nodeIds]
+  groupDragging.value = {
+    groupId: group.id,
+    startX: point.x,
+    startY: point.y,
+    origins: Object.fromEntries(group.nodeIds.map(id => { const n = getNode(id)!; return [id, { x: n.x, y: n.y }] })),
+  }
+}
+
 function pointerToWorld(clientX: number, clientY: number) {
   if (!canvasEl.value) return { x: 0, y: 0, screenX: 0, screenY: 0 }
   const rect = canvasEl.value.getBoundingClientRect()
@@ -893,6 +977,7 @@ const mermaidCode = computed(() => {
 const graphJsonObject = computed(() => ({
   nodes: nodes.value.map(n => ({ id: n.id, type: n.type, x: n.x, y: n.y, params: n.params })),
   wires: wires.value,
+  groups: groups.value,
   view: { x: view.x, y: view.y, scale: view.scale },
 }))
 
@@ -954,8 +1039,21 @@ function restoreGraph(payload: any) {
       toPort: Number(wire.toPort ?? 0),
     }))
 
+  const validGroups = Array.isArray(payload.groups)
+    ? payload.groups
+      .filter((group: any) => group && typeof group.id === 'string')
+      .map((group: any) => ({
+        id: group.id,
+        title: String(group.title || 'Group'),
+        color: String(group.color || '#00d4ff'),
+        nodeIds: Array.isArray(group.nodeIds) ? group.nodeIds.filter((id: any) => nodeIds.has(String(id))).map(String) : [],
+      }))
+      .filter((group: any) => group.nodeIds.length > 0)
+    : []
+
   nodes.value = validNodes
   wires.value = validWires
+  groups.value = validGroups
   selectedNodeIds.value = []
   pendingWire.value = null
   runLog.value = []
@@ -1169,12 +1267,15 @@ function importGraphJson() {
 function clearCanvas() {
   nodes.value = []
   wires.value = []
+  groups.value = []
   pendingWire.value = null
   runLog.value = []
   globalError.value = ''
   selectedNodeIds.value = []
   selectedPreset.value = 'custom'
   importJson.value = ''
+  quickAddOpen.value = false
+  quickAddQuery.value = ''
   lastRunSummary.value = '已清空画布'
 }
 
@@ -1286,6 +1387,17 @@ function onCanvasMouseMove(e: MouseEvent) {
     view.y = panning.value.originY + (point.screenY - panning.value.startScreenY)
     return
   }
+  if (groupDragging.value) {
+    const dx = point.x - groupDragging.value.startX
+    const dy = point.y - groupDragging.value.startY
+    for (const [id, origin] of Object.entries(groupDragging.value.origins)) {
+      const node = getNode(id)
+      if (node) {
+        node.x = origin.x + dx
+        node.y = origin.y + dy
+      }
+    }
+  }
   if (dragging.value) {
     const dx = point.x - dragging.value.startX
     const dy = point.y - dragging.value.startY
@@ -1313,6 +1425,7 @@ function onCanvasMouseMove(e: MouseEvent) {
 
 function onCanvasMouseUp() {
   dragging.value = null
+  groupDragging.value = null
   panning.value = null
   selecting.value = null
 }
@@ -1381,6 +1494,7 @@ function deleteSelected() {
   const set = new Set(selectedNodeIds.value)
   nodes.value = nodes.value.filter(n => !set.has(n.id))
   wires.value = wires.value.filter(w => !set.has(w.fromNode) && !set.has(w.toNode))
+  normalizeGroups()
   selectedNodeIds.value = []
   lastRunSummary.value = '已删除选中节点'
 }
@@ -1600,7 +1714,17 @@ function onMinimapClick(e: MouseEvent) {
 }
 
 function onWindowKeyDown(e: KeyboardEvent) {
+  if (quickAddOpen.value) {
+    if (e.key === 'Escape') { quickAddOpen.value = false; quickAddQuery.value = ''; e.preventDefault(); return }
+    if (e.key === 'Enter' && quickAddItems.value.length) { createNodeAtViewportCenter(quickAddItems.value[0].type); e.preventDefault(); return }
+  }
   if (isEditableTarget(e.target)) return
+  if (e.key === 'Tab') {
+    quickAddOpen.value = !quickAddOpen.value
+    if (!quickAddOpen.value) quickAddQuery.value = ''
+    e.preventDefault()
+    return
+  }
   if (e.code === 'Space') {
     spacePressed.value = true
     e.preventDefault()
@@ -1615,6 +1739,10 @@ function onWindowKeyDown(e: KeyboardEvent) {
   }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
     duplicateSelected()
+    e.preventDefault()
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
+    createGroupFromSelection()
     e.preventDefault()
   }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
@@ -1695,6 +1823,11 @@ onUnmounted(() => {
       <div class="text-xs font-mono" style="color:var(--color-text-muted)">现在带 Zoom / Pan / Minimap / 框选，多输入和分支也都在。</div>
       <button
         class="ml-auto px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        style="border-color:#00d4ff;color:#9aeaff;background:rgba(0,212,255,0.08)"
+        @click="quickAddOpen = true"
+      >+ Node</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
         style="border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.08)"
         @click="runGraph"
       >▶ Run</button>
@@ -1742,6 +1875,13 @@ onUnmounted(() => {
       <button
         class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
         :style="selectedNodeIds.length
+          ? 'border-color:#22c55e;color:#bbf7d0;background:rgba(34,197,94,0.08)'
+          : 'border-color:var(--color-void-border);color:var(--color-text-muted)'"
+        @click="createGroupFromSelection"
+      >Group</button>
+      <button
+        class="px-3 py-1.5 rounded border text-xs font-mono transition-all"
+        :style="selectedNodeIds.length
           ? 'border-color:#8b5cf6;color:#c4b5fd;background:rgba(139,92,246,0.08)'
           : 'border-color:var(--color-void-border);color:var(--color-text-muted)'"
         @click="duplicateSelected"
@@ -1770,7 +1910,9 @@ onUnmounted(() => {
           - Alt/Space + Drag：Pan<br>
           - Blank Area Drag：框选<br>
           - Delete / Backspace：删除选中<br>
+          - Tab：Quick Add 搜索建节点<br>
           - Ctrl/Cmd + D：复制选中<br>
+          - Ctrl/Cmd + G：选中节点成组<br>
           - Ctrl/Cmd + L：自动布局<br>
           - Ctrl/Cmd + Z / Shift+Z / Y：撤销重做<br>
           - Arrow / Shift+Arrow：微调选中节点<br>
@@ -1871,6 +2013,36 @@ onUnmounted(() => {
                 filter="url(#flow-glow)"
               />
             </svg>
+
+            <div
+              v-for="group in groups"
+              :key="group.id"
+              class="absolute rounded-2xl border border-dashed overflow-visible"
+              :style="`
+                left:${groupBounds(group).x}px;
+                top:${groupBounds(group).y}px;
+                width:${groupBounds(group).width}px;
+                height:${groupBounds(group).height}px;
+                border-color:${group.color};
+                background:${group.color}10;
+                box-shadow:0 0 24px ${group.color}18 inset;
+                z-index:2;
+              `"
+            >
+              <div
+                class="absolute left-3 -top-4 flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-mono"
+                :style="`border-color:${group.color};background:#0b1020;color:${group.color};cursor:move;`"
+                @mousedown="onGroupMouseDown($event, group)"
+              >
+                <input
+                  v-model="group.title"
+                  class="bg-transparent outline-none w-24"
+                  :style="`color:${group.color}`"
+                >
+                <span style="color:rgba(255,255,255,0.5)">{{ group.nodeIds.length }} nodes</span>
+                <button @click.stop="deleteGroup(group.id)" style="color:rgba(255,255,255,0.65)">×</button>
+              </div>
+            </div>
 
             <div
               v-for="node in nodes"
@@ -2036,6 +2208,36 @@ onUnmounted(() => {
             </div>
           </div>
 
+
+          <div v-if="quickAddOpen" class="absolute left-1/2 top-6 -translate-x-1/2 rounded-2xl border p-3" style="width:420px;border-color:rgba(255,255,255,0.08);background:rgba(7,10,18,0.96);backdrop-filter:blur(8px);z-index:90">
+            <div class="text-xs font-mono mb-2" style="color:var(--color-neon-cyan)">Quick Add · Tab</div>
+            <input
+              v-model="quickAddQuery"
+              autofocus
+              type="text"
+              placeholder="搜节点：map / branch / json / preview..."
+              class="w-full rounded-lg border px-3 py-2 text-xs font-mono"
+              style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff"
+            >
+            <div class="mt-2 max-h-80 overflow-y-auto">
+              <button
+                v-for="item in quickAddItems"
+                :key="item.type"
+                class="w-full text-left rounded-lg border p-3 mb-2 transition-all"
+                :style="`border-color:${item.spec.color}33;background:${item.spec.color}12`"
+                @click="createNodeAtViewportCenter(item.type)"
+              >
+                <div class="flex items-center gap-2">
+                  <span>{{ item.spec.icon }}</span>
+                  <span class="text-xs font-mono font-bold" :style="`color:${item.spec.color}`">{{ item.spec.title }}</span>
+                  <span class="text-[10px] font-mono ml-auto" style="color:var(--color-text-muted)">{{ item.spec.category }}</span>
+                </div>
+                <div class="text-[10px] font-mono mt-1" style="color:var(--color-text-muted)">{{ item.type }} · {{ item.spec.description }}</div>
+              </button>
+              <div v-if="quickAddItems.length === 0" class="text-[10px] font-mono p-3" style="color:var(--color-text-muted)">没搜到，换个关键词试试。</div>
+            </div>
+          </div>
+
           <div class="minimap-box absolute right-4 bottom-4 rounded-xl border p-2" style="width:240px;border-color:rgba(255,255,255,0.08);background:rgba(7,10,18,0.88);backdrop-filter:blur(4px);z-index:80">
             <div class="flex items-center justify-between mb-2">
               <div class="text-[10px] font-mono" style="color:var(--color-neon-cyan)">minimap</div>
@@ -2067,6 +2269,7 @@ onUnmounted(() => {
         <div class="rounded-lg border p-3 text-xs font-mono" style="border-color:var(--color-void-border);background:rgba(255,255,255,0.02);color:var(--color-text-muted)">
           <div>nodes: <span style="color:#e7f7ff">{{ nodes.length }}</span></div>
           <div>wires: <span style="color:#e7f7ff">{{ wires.length }}</span></div>
+          <div>groups: <span style="color:#e7f7ff">{{ groups.length }}</span></div>
           <div>selected: <span style="color:#e7f7ff">{{ selectedNodeIds.length }}</span></div>
           <div>history: <span style="color:#e7f7ff">{{ historyPast.length }}</span> / <span style="color:#e7f7ff">{{ historyFuture.length }}</span></div>
           <div>view: <span style="color:#e7f7ff">{{ Math.round(view.scale * 100) }}%</span></div>
@@ -2132,7 +2335,8 @@ onUnmounted(() => {
           - 框选 / 多选 / 批量拖动 / Duplicate<br>
           - Auto Layout + Local Autosave / Restore<br>
           - JSON Export / Import<br>
-          - Undo / Redo + Arrow-key Nudge
+          - Undo / Redo + Arrow-key Nudge<br>
+          - Group 容器 + Quick Add 搜索建节点
         </div>
 
         <div class="text-xs font-mono font-bold mt-4 mb-2" style="color:var(--color-neon-cyan)">玩法说明</div>
@@ -2141,7 +2345,8 @@ onUnmounted(() => {
           2. 从节点右侧输出端口拉线到目标左侧输入端口。<br>
           3. Wheel 缩放；Alt/Space + Drag 平移视图。<br>
           4. 在空白区拖拽可框选多个节点，然后一起移动。<br>
-          5. 当前执行器只支持 DAG，不支持环。
+          5. Tab 打开 Quick Add；Ctrl/Cmd + G 可把选中节点编组。<br>
+          6. 当前执行器只支持 DAG，不支持环。
         </div>
       </aside>
     </div>
