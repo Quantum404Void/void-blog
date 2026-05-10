@@ -22,7 +22,7 @@
 const { siteUrl, siteName } = useSiteConfig()
 const route = useRoute()
 const tag = route.params.tag as string
-
+useCanonical(`/tags/${tag}`)
 useSeoMeta({
   title: `#${tag} | ${siteName}`,
   description: `${siteName} 上关于 #${tag} 的所有技术文章`,

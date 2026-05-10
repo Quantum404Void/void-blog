@@ -169,6 +169,7 @@
 
 <script setup lang="ts">
 const { siteUrl, siteName, siteDescription, authorName, authorGithub } = useSiteConfig()
+useCanonical('/')
 useSeoMeta({
   title: siteName,
   description: `${authorName}的技术博客 — C++ / Python / AI Agent / 桌面应用。涵盖 C++、Python、Vue3、AI Agent、Electron 等主题`,

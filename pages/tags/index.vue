@@ -29,8 +29,8 @@
 
 <script setup lang="ts">
 const { siteUrl, siteName } = useSiteConfig()
+useCanonical('/tags')
 useSeoMeta({
-  title: `Tags | ${siteName}`,
   description: `按标签浏览技术文章，涵盖 C++、Vue3、TypeScript、AI、Linux、算法等主题`,
   ogTitle: `Tags | ${siteName}`,
   ogUrl: `${siteUrl}/tags`,

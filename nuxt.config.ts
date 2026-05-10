@@ -33,6 +33,12 @@ export default defineNuxtConfig({
       link: [
         // sitemap href: 生产地址，如需多域部署改这里
         { rel: 'sitemap', type: 'application/xml', href: '/sitemap.xml' },
+        // canonical 默认指向首页（各页面会覆盖）
+        { rel: 'canonical', href: 'https://void.redx.space' },
+        // RSS 自动发现
+        { rel: 'alternate', type: 'application/rss+xml', title: 'void.dev RSS', href: '/rss.xml' },
+        // JetBrains Mono 系统字体栈，无需 preconnect，只做 dns-prefetch
+        { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' },
       ],
       meta: [
         { name: 'robots', content: 'index, follow' },

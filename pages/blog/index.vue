@@ -93,8 +93,8 @@
 
 <script setup lang="ts">
 const { siteUrl, siteName } = useSiteConfig()
+useCanonical('/blog')
 useSeoMeta({
-  title: `全部文章 | ${siteName}`,
   description: `${siteName} 所有技术文章列表，按年份归档，涵盖 C++、Vue3、AI Agent、Linux 等主题`,
   ogTitle: `全部文章 | ${siteName}`,
   ogDescription: '所有技术文章列表，按年份归档',

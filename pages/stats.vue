@@ -102,8 +102,8 @@
 
 <script setup lang="ts">
 const { siteUrl, siteName } = useSiteConfig()
+useCanonical('/stats')
 useSeoMeta({
-  title: `统计看板 | ${siteName}`,
   description: `${siteName} 博客内容统计：文章数、标签分布、每年产出可视化`,
   ogTitle: `统计看板 | ${siteName}`,
   ogDescription: `${siteName} 博客内容统计：文章数、标签分布、每年产出可视化`,

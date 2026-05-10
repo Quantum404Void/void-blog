@@ -165,6 +165,7 @@
 
 <script setup lang="ts">
 const { siteUrl, siteName, authorName, authorEmail, authorGithub, authorMotto } = useSiteConfig()
+useCanonical('/about')
 useSeoMeta({
   title: `About | ${siteName}`,
   description: `${authorName} — 好奇心驱动的工程师，专注 C++ / Python / AI Agent / 桌面应用。${authorMotto}`,

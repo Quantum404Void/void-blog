@@ -59,9 +59,8 @@
 
 <script setup lang="ts">
 const { siteUrl, siteName } = useSiteConfig()
-
+useCanonical('/search')
 useSeoMeta({
-  title: `搜索 | ${siteName}`,
   description: `搜索 ${siteName} 所有技术文章，支持标题、正文内容全文检索`,
   ogTitle: `搜索 | ${siteName}`,
   ogDescription: `搜索 ${siteName} 所有技术文章，支持标题、正文内容全文检索`,

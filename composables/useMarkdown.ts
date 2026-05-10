@@ -44,13 +44,18 @@ for (const { name, icon, label } of callouts) {
   })
 }
 
-// 代码块行号
+// 代码块行号 + 语言 badge
 const _defaultFence = md.renderer.rules.fence
 md.renderer.rules.fence = (tokens: any[], idx: number, o: any, env: any, self: any) => {
+  const token = tokens[idx]
+  const lang = token.info?.trim().split(/\s+/)[0] || ''
+
   const raw: string = _defaultFence
     ? _defaultFence(tokens, idx, o, env, self)
     : self.renderToken(tokens, idx, o)
-  return raw.replace(
+
+  // 加行号（≥4行）
+  const withLineNumbers = raw.replace(
     /(<code[^>]*>)([\s\S]*?)(<\/code>)/,
     (_m: string, open: string, body: string, close: string) => {
       const lines = body.split('\n')
@@ -60,6 +65,22 @@ md.renderer.rules.fence = (tokens: any[], idx: number, o: any, env: any, self: a
       return open + wrapped + '\n' + close
     }
   )
+
+  // 注入 data-lang 到 <pre> 标签
+  if (lang) {
+    return withLineNumbers.replace('<pre', `<pre data-lang="${lang}"`)
+  }
+  return withLineNumbers
+}
+
+// 图片懒加载
+const _defaultImage = md.renderer.rules.image ||
+  ((tokens: any[], idx: number, o: any, env: any, self: any) => self.renderToken(tokens, idx, o))
+
+md.renderer.rules.image = (tokens: any[], idx: number, o: any, env: any, self: any) => {
+  tokens[idx].attrSet('loading', 'lazy')
+  tokens[idx].attrSet('decoding', 'async')
+  return _defaultImage(tokens, idx, o, env, self)
 }
 // ── End Singleton ────────────────────────────────────────────────────────────
 

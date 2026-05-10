@@ -168,6 +168,9 @@
 .prose {
   color: var(--color-text-primary);
   max-width: 72ch;
+  line-height: 1.85;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
 }
 .prose h1, .prose h2, .prose h3, .prose h4 {
   font-family: var(--font-mono);
@@ -176,7 +179,12 @@
   margin-top: 2.5rem;
   margin-bottom: 1rem;
 }
-.prose p { margin-bottom: 1.25rem; }
+.prose p {
+  margin-bottom: 1.25rem;
+  text-align: justify;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 .prose img {
   border-radius: 0.75rem;
   border: 1px solid var(--color-void-border);
@@ -318,6 +326,25 @@ body::after {
   top: 0.9rem;
   left: 1rem;   /* 移到左边，和语言标签同一侧 */
   opacity: 0.7;
+}
+
+/* 语言 badge — data-lang 属性驱动 */
+.prose pre[data-lang]::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: rgba(0, 212, 255, 0.55);
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 4px;
+  padding: 2px 7px;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ── prose 标题颜色分级 ── */

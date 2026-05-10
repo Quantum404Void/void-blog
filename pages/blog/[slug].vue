@@ -36,7 +36,7 @@
             <span class="text-[var(--color-void-border)]">|</span>
             <span class="flex items-center gap-1">
               <span class="text-[var(--color-neon-purple)]">⏱</span>
-              约 {{ readingTime }} 分钟
+              {{ formatCount(wordCount) }} 字 · 约 {{ readingTime }} 分钟
             </span>
           </div>
         </header>
@@ -139,9 +139,9 @@
             </div>
           </div>
 
-          <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2">
-            <span>←</span> 返回首页
-          </NuxtLink>
+          <button @click="$router.back()" class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2">
+            <span>←</span> 返回
+          </button>
 
           <!-- 评论 -->
           <div class="pt-8 border-t border-[var(--color-void-border)]">
@@ -222,6 +222,7 @@ if (error.value || !post.value) {
 }
 
 const { siteUrl, siteName, authorName, authorGithub, authorInitial } = useSiteConfig()
+useCanonical(`/blog/${slug}`)
 useSeoMeta({
   title: `${post.value.title} | ${siteName}`,
   description: post.value.description || `${post.value.title} — ${siteName}`,
@@ -229,13 +230,13 @@ useSeoMeta({
   ogDescription: post.value.description || `${post.value.title} — ${siteName}`,
   ogType: 'article',
   ogUrl: `${siteUrl}/blog/${slug}`,
-  ogImage: `${siteUrl}/og-default.png`,
+  ogImage: `${siteUrl}/og/${slug}`,
   articlePublishedTime: post.value.pub_date,
   articleTag: post.value.tags,
   twitterCard: 'summary_large_image',
   twitterTitle: `${post.value.title} | ${siteName}`,
   twitterDescription: post.value.description,
-  twitterImage: `${siteUrl}/og-default.png`,
+  twitterImage: `${siteUrl}/og/${slug}`,
 })
 
 // JSON-LD 结构化数据
@@ -258,8 +259,6 @@ useHead({
   }]
 })
 
-
-
 const { md } = useMarkdown()
 const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
 
@@ -276,10 +275,11 @@ const tocHeadings = computed<Heading[]>(() => {
   }))
 })
 
-const { calcReadingTime } = useReadingTime()
+const { calcReadingTime, calcWordCount, formatCount } = useReadingTime()
 const { formatDateLong } = useFormatDate()
 
 const readingTime = computed(() => post.value ? calcReadingTime(post.value.content) : 0)
+const wordCount = computed(() => post.value ? calcWordCount(post.value.content) : 0)
 
 // Get all posts for prev/next/related
 const { data: allPostsData } = await useFetch('/api/posts', { default: () => [] as any[] })
@@ -307,6 +307,14 @@ const related = computed(() => {
 const curIdx = computed(() => allPosts.value.findIndex((p: any) => p.slug === slug))
 const prevPost = computed(() => curIdx.value < allPosts.value.length - 1 ? allPosts.value[curIdx.value + 1] : null)
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
+
+// prev/next prefetch
+useHead(computed(() => ({
+  link: [
+    ...(prevPost.value ? [{ rel: 'prefetch', href: `/blog/${prevPost.value.slug}` }] : []),
+    ...(nextPost.value ? [{ rel: 'prefetch', href: `/blog/${nextPost.value.slug}` }] : []),
+  ]
+})))
 
 // 浏览量 + 点赞
 const postViews = ref(0)
