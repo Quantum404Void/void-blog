@@ -1,6 +1,6 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-2">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-2">
       <!-- Logo -->
       <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest shrink-0 cursor-blink">
         {{ siteName }}
@@ -11,10 +11,10 @@
         <template v-for="(crumb, i) in crumbs" :key="i">
           <span class="text-[var(--color-void-muted)] font-mono text-xs">/</span>
           <NuxtLink v-if="crumb.href" :href="crumb.href"
-            class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors truncate max-w-[200px]">
+            class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors truncate max-w-[160px]">
             {{ crumb.label }}
           </NuxtLink>
-          <span v-else class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-[200px]">
+          <span v-else class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-[160px]">
             {{ crumb.label }}
           </span>
         </template>
@@ -22,9 +22,6 @@
 
       <!-- 右侧固定导航 -->
       <div class="ml-auto flex items-center gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
-        <span class="hidden md:block font-mono text-[10px] text-[var(--color-text-muted)] opacity-40 select-none tracking-widest border-r border-[var(--color-void-border)] pr-4 mr-1">
-          {{ route.path }}
-        </span>
         <NuxtLink v-for="link in navLinks" :key="link.href" :href="link.href"
           class="hidden sm:block transition-colors relative pb-0.5"
           :class="isActive(link.href)

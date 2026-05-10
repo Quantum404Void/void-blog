@@ -10,7 +10,7 @@
       <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
-      <div class="relative max-w-5xl mx-auto px-6">
+      <div class="relative max-w-6xl mx-auto px-6">
         <div class="flex items-start gap-4 mb-8">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
@@ -64,7 +64,7 @@
     </section>
 
     <!-- Content grid -->
-    <div class="max-w-5xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12">
+    <div class="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12">
       <!-- Posts list -->
       <section>
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
@@ -155,7 +155,7 @@
       </aside>
     </div>
 
-    <AppFooter maxW="max-w-5xl" backHref="">
+    <AppFooter maxW="max-w-6xl" backHref="">
       <span class="font-mono text-[10px] opacity-30 select-none">░▒▓ void.dev ▓▒░</span>
       <span>
         构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 3</span> ·

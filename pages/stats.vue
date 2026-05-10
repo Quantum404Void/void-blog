@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'stats' }]" />
 
-    <div class="max-w-5xl mx-auto px-6 py-16">
+    <div class="max-w-6xl mx-auto px-6 py-16">
       <div class="mb-12">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-3">analytics</p>
         <h1 class="font-mono text-3xl font-bold text-[var(--color-text-primary)] mb-2">
@@ -96,7 +96,7 @@
       </div>
     </div>
 
-    <AppFooter maxW="max-w-5xl" />
+    <AppFooter maxW="max-w-6xl" />
   </div>
 </template>
 
