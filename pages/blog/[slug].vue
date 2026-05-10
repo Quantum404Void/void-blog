@@ -224,9 +224,9 @@ if (error.value || !post.value) {
 const { siteUrl, siteName, authorName, authorGithub, authorInitial } = useSiteConfig()
 useSeoMeta({
   title: `${post.value.title} | ${siteName}`,
-  description: post.value.description,
+  description: post.value.description || `${post.value.title} — ${siteName}`,
   ogTitle: `${post.value.title} | ${siteName}`,
-  ogDescription: post.value.description,
+  ogDescription: post.value.description || `${post.value.title} — ${siteName}`,
   ogType: 'article',
   ogUrl: `${siteUrl}/blog/${slug}`,
   ogImage: `${siteUrl}/og-default.png`,
@@ -364,6 +364,13 @@ function jumpToSaved() {
 
 const { attachCopyButtons } = useCodeCopy()
 
+// 当文章内容渲染后重新注入复制按钮（SPA 跳转时 renderedContent 会更新）
+watch(renderedContent, async () => {
+  await nextTick()
+  const articleEl = document.querySelector('.prose') as HTMLElement | null
+  attachCopyButtons(articleEl)
+}, { flush: 'post' })
+
 onMounted(() => {
   // Continue reading: check saved progress
   const saved = localStorage.getItem(PROGRESS_KEY.value)
@@ -383,9 +390,6 @@ onMounted(() => {
   loadStats()
   // 延迟 1s 再记录阅读，避免预览模式刻处
   setTimeout(recordView, 1000)
-  // 代码块：注入复制按钮（使用 composable，幂等）
-  const articleEl = document.querySelector('.prose') as HTMLElement | null
-  attachCopyButtons(articleEl)
 })
 
 onUnmounted(() => {
