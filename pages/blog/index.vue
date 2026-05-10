@@ -59,7 +59,7 @@
                   :style="`background: var(--color-${getTagColor(post.tags[0] ?? 'x')})`"></span>
             <time :datetime="post.pub_date"
                   class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-16 tabular-nums text-right">
-              {{ new Date(post.pub_date).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) }}
+              {{ formatMonthDay(post.pub_date) }}
             </time>
             <div class="flex-1 min-w-0">
               <span class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors block truncate leading-snug">
@@ -87,11 +87,7 @@
       </div>
     </main>
 
-    <footer class="border-t border-[var(--color-void-border)] py-8">
-      <div class="max-w-3xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)]">
-        <NuxtLink href="/" class="hover:text-[var(--color-neon-green)] transition-colors">← 返回首页</NuxtLink>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
 </template>
 
@@ -118,11 +114,8 @@ const filtered = computed(() =>
   activeTag.value ? posts.value.filter((p: any) => p.tags.includes(activeTag.value)) : posts.value
 )
 
-const tagColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
-function getTagColor(tag: string) {
-  const idx = Math.abs(tag.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length
-  return tagColors[idx]
-}
+const { getTagColor } = useTagColor()
+const { formatMonthDay } = useFormatDate()
 
 const byYear = computed(() => {
   const acc: Record<string, any[]> = {}

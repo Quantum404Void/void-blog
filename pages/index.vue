@@ -155,22 +155,15 @@
       </aside>
     </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-[var(--color-void-border)] py-10">
-      <div class="max-w-5xl mx-auto px-6">
-        <div class="font-mono text-[10px] text-[var(--color-text-muted)] text-center mb-4 opacity-30 select-none leading-relaxed">
-          ░▒▓ void.dev ▓▒░
-        </div>
-        <div class="flex items-center justify-between flex-wrap gap-4 font-mono text-xs text-[var(--color-text-muted)]">
-          <span>
-            构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 3</span> ·
-            <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
-            <span class="text-[var(--color-neon-green)]">Vue 3</span>
-          </span>
-          <span>© {{ startYear }}–{{ currentYear }} {{ authorName }}</span>
-        </div>
-      </div>
-    </footer>
+    <AppFooter maxW="max-w-5xl" backHref="">
+      <span class="font-mono text-[10px] opacity-30 select-none">░▒▓ void.dev ▓▒░</span>
+      <span>
+        构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 3</span> ·
+        <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
+        <span class="text-[var(--color-neon-green)]">Vue 3</span>
+      </span>
+      <span>© {{ startYear }}–{{ currentYear }} {{ authorName }}</span>
+    </AppFooter>
   </div>
 </template>
 
@@ -224,15 +217,8 @@ const topTags = computed(() =>
   Object.entries(tagCounts.value || {}).sort((a, b) => b[1] - a[1]).slice(0, 10)
 )
 
-const tagColors = ['neon-green', 'neon-cyan', 'neon-purple', 'neon-pink']
-function getTagColor(tag: string) {
-  const idx = Math.abs(tag.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length
-  return tagColors[idx]
-}
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-}
+const { getTagColor } = useTagColor()
+const { formatDate } = useFormatDate()
 
 onMounted(() => {
   const lines = [

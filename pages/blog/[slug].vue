@@ -31,7 +31,7 @@
 
           <div class="flex items-center gap-4 text-sm text-[var(--color-text-muted)] font-mono border-t border-[var(--color-void-border)] pt-4">
             <time :datetime="post.pub_date">
-              <span class="text-[var(--color-neon-green)]">$</span> {{ formatDate(post.pub_date) }}
+              <span class="text-[var(--color-neon-green)]">$</span> {{ formatDateLong(post.pub_date) }}
             </time>
             <span class="text-[var(--color-void-border)]">|</span>
             <span class="flex items-center gap-1">
@@ -276,17 +276,10 @@ const tocHeadings = computed<Heading[]>(() => {
   }))
 })
 
-const readingTime = computed(() => {
-  if (!post.value) return 0
-  const content = post.value.content
-  const cjkChars = (content.match(/[\u4e00-\u9fa5]/g) || []).length
-  const otherChars = content.length - cjkChars
-  return Math.max(1, Math.round(cjkChars / 500 + otherChars / 1000))
-})
+const { calcReadingTime } = useReadingTime()
+const { formatDateLong } = useFormatDate()
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-}
+const readingTime = computed(() => post.value ? calcReadingTime(post.value.content) : 0)
 
 // Get all posts for prev/next/related
 const { data: allPostsData } = await useFetch('/api/posts', { default: () => [] as any[] })
@@ -369,6 +362,8 @@ function jumpToSaved() {
   continueBar.show = false
 }
 
+const { attachCopyButtons } = useCodeCopy()
+
 onMounted(() => {
   // Continue reading: check saved progress
   const saved = localStorage.getItem(PROGRESS_KEY.value)
@@ -388,63 +383,9 @@ onMounted(() => {
   loadStats()
   // 延迟 1s 再记录阅读，避免预览模式刻处
   setTimeout(recordView, 1000)
-  // 代码块：语言标签 + 复制按钮（heading id 已在 markdown-it renderer 注入，无需重复）
-  document.querySelectorAll('.prose pre').forEach(pre => {
-    const code = pre.querySelector('code')
-    const lang = [...(code?.classList || [])].find(c => c.startsWith('language-'))?.replace('language-', '') || ''
-
-    // 语言标签
-    const label = document.createElement('span')
-    label.textContent = lang || 'code'
-    label.style.cssText = [
-      'position:absolute', 'top:0.75rem', 'left:4.5rem',  // 跳过左边红绿黄点(54px+1rem)
-      'font-family:var(--font-mono)', 'font-size:10px',
-      'color:rgba(136,136,170,0.55)', 'text-transform:uppercase', 'letter-spacing:0.08em',
-      'user-select:none', 'pointer-events:none',
-    ].join(';')
-    pre.appendChild(label)
-
-    // 复制按钮
-    const btn = document.createElement('button')
-    btn.textContent = '复制'
-    btn.style.cssText = [
-      'position:absolute', 'top:0.625rem', 'right:0.75rem',
-      'font-family:var(--font-mono)', 'font-size:10px',
-      'padding:3px 10px', 'border-radius:4px',
-      'background:rgba(0,212,255,0.06)', 'border:1px solid rgba(0,212,255,0.18)',
-      'color:rgba(0,212,255,0.65)', 'cursor:pointer',
-      'transition:all 0.15s', 'z-index:10',
-    ].join(';')
-    btn.addEventListener('mouseenter', () => {
-      btn.style.background = 'rgba(0,212,255,0.12)'
-      btn.style.borderColor = 'rgba(0,212,255,0.35)'
-      btn.style.color = 'rgba(0,212,255,0.9)'
-    })
-    btn.addEventListener('mouseleave', () => {
-      if (btn.textContent === '复制') {
-        btn.style.background = 'rgba(0,212,255,0.06)'
-        btn.style.borderColor = 'rgba(0,212,255,0.18)'
-        btn.style.color = 'rgba(0,212,255,0.65)'
-      }
-    })
-    btn.addEventListener('click', async () => {
-      const text = code?.textContent || ''
-      try {
-        await navigator.clipboard.writeText(text)
-        btn.textContent = '✓ 已复制'
-        btn.style.color = 'rgba(0,255,136,0.9)'
-        btn.style.borderColor = 'rgba(0,255,136,0.4)'
-        btn.style.background = 'rgba(0,255,136,0.08)'
-        setTimeout(() => {
-          btn.textContent = '复制'
-          btn.style.color = 'rgba(0,212,255,0.65)'
-          btn.style.borderColor = 'rgba(0,212,255,0.18)'
-          btn.style.background = 'rgba(0,212,255,0.06)'
-        }, 2000)
-      } catch {}
-    })
-    pre.appendChild(btn)
-  })
+  // 代码块：注入复制按钮（使用 composable，幂等）
+  const articleEl = document.querySelector('.prose') as HTMLElement | null
+  attachCopyButtons(articleEl)
 })
 
 onUnmounted(() => {

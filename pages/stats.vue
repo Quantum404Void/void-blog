@@ -96,11 +96,7 @@
       </div>
     </div>
 
-    <footer class="border-t border-[var(--color-void-border)] py-8 mt-8">
-      <div class="max-w-5xl mx-auto px-6 font-mono text-xs text-[var(--color-text-muted)] text-center">
-        <NuxtLink href="/" class="hover:text-[var(--color-neon-cyan)] transition-colors">← 返回首页</NuxtLink>
-      </div>
-    </footer>
+    <AppFooter maxW="max-w-5xl" />
   </div>
 </template>
 
