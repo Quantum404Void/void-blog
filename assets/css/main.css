@@ -92,13 +92,13 @@
   pre {
     border-radius: 0.75rem;
     border: 1px solid var(--color-void-border);
-    padding: 1.5rem;
-    padding-top: 2.75rem;
+    padding: 1.25rem 1.5rem;
     font-family: var(--font-mono);
     font-size: 0.875rem;
     overflow-x: auto;
     position: relative;
     background: var(--color-void-card);
+    tab-size: 2;
   }
 
   :not(pre) > code {
@@ -258,8 +258,8 @@
 }
 .timeline-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-neon-purple); }
 
-/* ── highlight.js – github-dark-dimmed ── */
-pre code.hljs{display:block;overflow-x:auto;padding:0}code.hljs{padding:3px 5px}
+/* highlight.js — github-dark-dimmed，覆盖默认 padding 让 prose pre 统一控制 */
+pre code.hljs{display:block;overflow-x:auto;padding:0!important}code.hljs{padding:0}
 .hljs{color:#adbac7;background:transparent}.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_{color:#f47067}.hljs-title,.hljs-title.class_,.hljs-title.class_.inherited__,.hljs-title.function_{color:#dcbdfb}.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-variable{color:#6cb6ff}.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#96d0ff}.hljs-built_in,.hljs-symbol{color:#f69d50}.hljs-code,.hljs-comment,.hljs-formula{color:#768390}.hljs-name,.hljs-quote,.hljs-selector-pseudo,.hljs-selector-tag{color:#8ddb8c}.hljs-subst{color:#adbac7}.hljs-section{color:#316dca;font-weight:700}.hljs-bullet{color:#eac55f}.hljs-emphasis{color:#adbac7;font-style:italic}.hljs-strong{color:#adbac7;font-weight:700}.hljs-addition{color:#b4f1b4;background-color:#1b4721}.hljs-deletion{color:#ffd8d3;background-color:#78191b}
 
 /* ── Callout 提示框 ── */
@@ -308,11 +308,17 @@ body::after {
 /* ── 代码块终端风格头部 ── */
 .prose pre {
   position: relative;
-  border-left: 3px solid rgba(0,212,255,0.4);
+  border-left: 3px solid rgba(0, 212, 255, 0.35);
+  padding-top: 2.5rem;   /* 给三圆点 + badge 留空 */
+  margin: 1.75rem 0;
 }
+
+/* 三圆点装饰 */
 .prose pre::before {
   content: '';
-  display: block;
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
   width: 54px;
   height: 12px;
   background-image:
@@ -322,27 +328,26 @@ body::after {
   background-size: 18px 12px;
   background-position: 0 0, 18px 0, 36px 0;
   background-repeat: no-repeat;
-  position: absolute;
-  top: 0.9rem;
-  left: 1rem;   /* 移到左边，和语言标签同一侧 */
   opacity: 0.7;
+  pointer-events: none;
 }
 
-/* 语言 badge — data-lang 属性驱动，右侧留出复制按钮空间 */
+/* 语言 badge — 三圆点右侧，复制按钮左侧 */
 .prose pre[data-lang]::after {
   content: attr(data-lang);
   position: absolute;
-  top: 0.65rem;
-  right: 2.75rem;  /* 避开复制按钮（约 36px） */
+  top: 0.6rem;
+  right: 2.75rem;
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.05em;
-  color: rgba(0, 212, 255, 0.55);
-  background: rgba(0, 212, 255, 0.06);
-  border: 1px solid rgba(0, 212, 255, 0.15);
-  border-radius: 4px;
-  padding: 2px 7px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: rgba(0, 212, 255, 0.5);
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  border-radius: 4px;
+  padding: 1px 7px;
   pointer-events: none;
   user-select: none;
 }
