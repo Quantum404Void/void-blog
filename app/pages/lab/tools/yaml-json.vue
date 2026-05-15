@@ -49,6 +49,9 @@
 
 <script setup lang="ts">
 import * as yaml from 'js-yaml'
+import { useClipboard } from '@vueuse/core'
+
+const { copy: copyToClipboard, copied } = useClipboard()
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `YAML ↔ JSON | ${siteName}` })
@@ -58,13 +61,12 @@ const inputVal = ref('')
 const indent = ref(2)
 const hasError = ref(false)
 const errorMsg = ref('')
-const copied = ref(false)
 
 const inputPlaceholder = computed(() =>
   direction.value === 'yaml2json' ? 'key: value\nlist:\n  - item' : '{"key": "value"}'
 )
 
-`name: void-blog\nversion: "1.0.0"\nfeatures:\n  - dark-mode\n  - neon-theme\ndatabase:\n  host: localhost\n  port: 5432\n  ssl: true`
+const EXAMPLE_YAML = `name: void-blog\nversion: "1.0.0"\nfeatures:\n  - dark-mode\n  - neon-theme\ndatabase:\n  host: localhost\n  port: 5432\n  ssl: true`
 
 const outputVal = computed(() => {
   if (!inputVal.value.trim()) return ''
@@ -93,8 +95,6 @@ function loadExample() {
 }
 
 async function copy() {
-  await navigator.clipboard.writeText(outputVal.value)
-  copied.value = true
-  setTimeout(() => copied.value = false, 2000)
+  await copyToClipboard(outputVal.value)
 }
 </script>

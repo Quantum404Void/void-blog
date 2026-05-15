@@ -27,6 +27,8 @@
 </template>
 
 <script setup lang="ts">
+import { useMediaQuery, useEventListener, useWindowSize } from '@vueuse/core'
+
 const hintRef = ref<HTMLElement | null>(null)
 const cursorRef = ref<HTMLElement | null>(null)
 const particleCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -59,9 +61,10 @@ onMounted(() => {
     }
   })
 
-  // Cursor glow
+  // Cursor glow（只在有精确指针设备时启用）
+  const hasPointer = window.matchMedia('(pointer: fine)').matches
   const cursor = cursorRef.value
-  if (cursor && window.matchMedia('(pointer: fine)').matches) {
+  if (cursor && hasPointer) {
     cursor.style.cssText = `
       position: fixed;
       width: 300px;
@@ -126,7 +129,7 @@ onMounted(() => {
   if (ctx && pCanvas) {
     const resize = () => { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight }
     resize()
-    window.addEventListener('resize', resize)
+    useEventListener(window, 'resize', resize)
     document.addEventListener('click', (e) => spawnParticles(e.clientX, e.clientY))
     animateParticles()
   }

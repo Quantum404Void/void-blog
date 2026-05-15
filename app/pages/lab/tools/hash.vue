@@ -27,9 +27,11 @@
   </div>
 </template>
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard, copied } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Hash 工具 | ${siteName}` })
-const input = ref(''), result = ref(''), active = ref(''), copied = ref(false)
+const input = ref(''), result = ref(''), active = ref('')
 const mode = ref<'text'|'file'>('text')
 const fileName = ref('')
 const fileBuffer = ref<ArrayBuffer|null>(null)
@@ -62,6 +64,6 @@ function onFile(e: Event){
   reader.readAsArrayBuffer(f)
 }
 
-async function copy(){navigator.clipboard.writeText(result.value);copied.value=true;setTimeout(()=>copied.value=false,2000)}
+async function copy(){await copyToClipboard(result.value)}
 watch(input,()=>{if(active.value && mode.value==='text')compute(active.value)})
 </script>

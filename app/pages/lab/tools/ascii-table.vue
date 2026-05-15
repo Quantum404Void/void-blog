@@ -67,6 +67,8 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `ASCII 码表 | ${siteName}` })
 
@@ -132,7 +134,7 @@ function selectCode(code: number) {
 }
 
 async function copyText(text: string) {
-  await navigator.clipboard.writeText(text)
+  await copyToClipboard(text)
 }
 </script>
 

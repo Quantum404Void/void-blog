@@ -95,6 +95,8 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard, copied: copiedSingle } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `密码生成器 | ${siteName}` })
 
@@ -172,13 +174,13 @@ const strengthColor = computed(() => {
 const strengthPct = computed(() => Math.min(100, Math.round(entropy.value / 128 * 100)))
 
 async function copySingle(i: number) {
-  await navigator.clipboard.writeText(passwords.value[i])
+  await copyToClipboard(passwords.value[i])
   copiedIdx.value = i
   setTimeout(() => copiedIdx.value = null, 2000)
 }
 
 async function copyAll() {
-  await navigator.clipboard.writeText(passwords.value.join('\n'))
+  await copyToClipboard(passwords.value.join('\n'))
   copiedAll.value = true
   setTimeout(() => copiedAll.value = false, 2000)
 }

@@ -55,6 +55,8 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard, copied } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lorem Ipsum 生成器 | ${siteName}` })
 
@@ -63,7 +65,6 @@ const unit = ref('paragraphs')
 const count = ref(3)
 const format = ref('plain')
 const output = ref('')
-const copied = ref(false)
 
 const loremWords = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ')
 
@@ -121,9 +122,7 @@ const wordCount = computed(() => output.value.length)
 const charCount = computed(() => output.value.split(/\s+/).filter(Boolean).length)
 
 async function copyOutput() {
-  await navigator.clipboard.writeText(output.value)
-  copied.value = true
-  setTimeout(() => copied.value = false, 2000)
+  await copyToClipboard(output.value)
 }
 
 generate()

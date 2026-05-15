@@ -51,11 +51,12 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard, copied: copiedAll } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `UUID 生成器 | ${siteName}` })
 
 const uuids = ref<string[]>([])
-const copiedAll = ref(false)
 const copiedIdx = ref<number | null>(null)
 
 function uuidv4(): string {
@@ -72,13 +73,11 @@ function generate(n: number) {
 }
 
 async function copyAll() {
-  await navigator.clipboard.writeText(uuids.value.join('\n'))
-  copiedAll.value = true
-  setTimeout(() => (copiedAll.value = false), 2000)
+  await copyToClipboard(uuids.value.join('\n'))
 }
 
 async function copySingle(uuid: string, idx: number) {
-  await navigator.clipboard.writeText(uuid)
+  await copyToClipboard(uuid)
   copiedIdx.value = idx
   setTimeout(() => (copiedIdx.value = null), 1500)
 }

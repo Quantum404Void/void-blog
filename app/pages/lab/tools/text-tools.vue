@@ -125,6 +125,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useClipboard } from '@vueuse/core'
+
+const { copy: copyToClipboard } = useClipboard()
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `文本工具集 | ${siteName}` })
@@ -269,7 +272,7 @@ function applyFindReplace() {
 // ---- Clipboard ----
 
 async function copyOutput() {
-  await navigator.clipboard.writeText(output.value)
+  await copyToClipboard(output.value)
   toast.value = '已复制'
   setTimeout(() => toast.value = '', 2000)
 }

@@ -24,12 +24,14 @@
   </div>
 </template>
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard, copied } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Base64 工具 | ${siteName}` })
-const input=ref(''),output=ref<string|null>(null),error=ref(false),copied=ref(false)
+const input=ref(''),output=ref<string|null>(null),error=ref(false)
 function encode(){try{output.value=btoa(unescape(encodeURIComponent(input.value)));error.value=false}catch(e){output.value='编码失败';error.value=true}}
 function decode(){try{output.value=decodeURIComponent(escape(atob(input.value)));error.value=false}catch(e){output.value='非有效 Base64';error.value=true}}
 function swap(){const t=input.value;input.value=output.value??'';output.value=t}
 function clear(){input.value='';output.value=null;error.value=false}
-async function copyOut(){if(output.value)await navigator.clipboard.writeText(output.value);copied.value=true;setTimeout(()=>copied.value=false,2000)}
+async function copyOut(){if(output.value)await copyToClipboard(output.value)}
 </script>

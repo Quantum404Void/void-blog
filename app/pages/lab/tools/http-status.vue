@@ -75,6 +75,8 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+const { copy: copyToClipboard } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `HTTP 状态码 | ${siteName}` })
 
@@ -168,7 +170,7 @@ function randomStatus() {
 }
 
 async function copyText(text: string) {
-  await navigator.clipboard.writeText(text)
+  await copyToClipboard(text)
 }
 </script>
 

@@ -43,7 +43,11 @@
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Markdown 预览 | ${siteName}` })
 
-const { md } = useMarkdown({ containers: true, lineNumbers: false })
+const { buildMd } = useMarkdown()
+const mdInst = shallowRef<any>(null)
+onMounted(async () => { mdInst.value = await buildMd() })
+
+const rendered = computed(() => source.value && mdInst.value ? mdInst.value.render(source.value) : source.value)
 
 const source = ref(`# Hello, Markdown!
 
@@ -74,7 +78,6 @@ console.log(greet('void'))
 | A   | B   | C   |
 `)
 
-const rendered = computed(() => md.render(source.value))
 const charCount = computed(() => source.value.length)
 
 function clear() {

@@ -128,8 +128,11 @@ import { colord, extend } from 'colord'
 import harmoniesPlugin from 'colord/plugins/harmonies'
 import a11yPlugin from 'colord/plugins/a11y'
 import mixPlugin from 'colord/plugins/mix'
+import { useClipboard } from '@vueuse/core'
 
 extend([harmoniesPlugin, a11yPlugin, mixPlugin])
+
+const { copy: copyToClipboard } = useClipboard()
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `颜色工具 | ${siteName}` })
@@ -226,7 +229,7 @@ const exportCss = computed(() => {
 })
 
 async function copyColor(val: string) {
-  await navigator.clipboard.writeText(val)
+  await copyToClipboard(val)
   toast.value = '已复制！'
   setTimeout(() => toast.value = '', 1500)
 }

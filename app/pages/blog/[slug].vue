@@ -146,7 +146,7 @@
             </div>
           </div>
 
-          <button @click="$router.back()" class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2">
+          <button @click="router.back()" class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2">
             <span>←</span> 返回
           </button>
 
@@ -219,8 +219,9 @@
 </template>
 
 <script setup lang="ts">
-import { useClipboard } from '@vueuse/core'
+import { useClipboard, useLocalStorage } from '@vueuse/core'
 const route = useRoute()
+const router = useRouter()
 const slug = route.params.slug as string
 
 const { data: post, error } = await useFetch(`/api/posts/${slug}`)
@@ -338,7 +339,9 @@ useHead(computed(() => ({
 // 浏览量 + 点赞
 const postViews = ref(0)
 const postLikes = ref(0)
-const liked = ref(false)
+// 使用 useLocalStorage 持久化点赞状态（避免刷新后重复点赞）
+const likedPosts = useLocalStorage<string[]>('void-liked-posts', [])
+const liked = computed(() => likedPosts.value.includes(slug))
 
 async function loadStats() {
   try {
@@ -360,13 +363,13 @@ async function recordView() {
 
 async function handleLike() {
   if (liked.value) return
-  liked.value = true
+  likedPosts.value = [...likedPosts.value, slug]
   try {
     const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`, {
       method: 'POST', body: { action: 'like' }
     })
     postLikes.value = data.likes
-  } catch { liked.value = false }
+  } catch { likedPosts.value = likedPosts.value.filter(s => s !== slug) }
 }
 
 // Mobile TOC
@@ -381,7 +384,7 @@ function saveReadingProgress() {
   const docHeight = document.documentElement.scrollHeight - window.innerHeight
   if (docHeight <= 0) return
   const pct = Math.round((scrollTop / docHeight) * 100)
-  if (pct > 5) localStorage.setItem(PROGRESS_KEY.value, JSON.stringify({ pct, y: scrollTop }))
+  if (pct > 5) { const k = PROGRESS_KEY.value; try { localStorage.setItem(k, JSON.stringify({ pct, y: scrollTop })) } catch {} }
 }
 
 function jumpToSaved() {
