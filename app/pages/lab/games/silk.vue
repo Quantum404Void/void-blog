@@ -2,10 +2,7 @@
   <div class="min-h-screen bg-black relative overflow-hidden">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'silk' }]" />
 
-    <!-- 底层：永久画布 -->
     <canvas ref="baseCanvas" class="absolute inset-0 w-full h-full" style="touch-action:none;" />
-    <!-- 顶层：fade 层，每帧半透明黑色覆盖 -->
-    <canvas ref="fadeCanvas" class="absolute inset-0 w-full h-full pointer-events-none" />
 
     <!-- Control Panel -->
     <div class="absolute top-14 right-4 z-10 font-mono text-xs select-none">
@@ -43,13 +40,11 @@
             >fixed</button>
           </div>
 
-          <!-- Rainbow: hue speed -->
           <div v-if="colorMode==='rainbow'">
             <label class="text-white/30 text-[9px] block mb-1">hue speed</label>
             <input v-model.number="hueSpeed" type="range" min="0" max="4" step="0.1" class="w-full h-1 accent-white" />
           </div>
 
-          <!-- Fixed: presets + picker -->
           <div v-else class="flex flex-col gap-1.5">
             <div class="flex gap-1 flex-wrap">
               <button v-for="c in presets" :key="c" @click="fixedHex=c"
@@ -63,8 +58,8 @@
 
         <!-- Brush size -->
         <div>
-          <label class="text-white/30 text-[9px] block mb-1">brush <span class="text-white/50">{{brushMax}}</span></label>
-          <input v-model.number="brushMax" type="range" min="2" max="30" step="1" class="w-full h-1 accent-white" />
+          <label class="text-white/30 text-[9px] block mb-1">brush <span class="text-white/50">{{brushSize}}</span></label>
+          <input v-model.number="brushSize" type="range" min="1" max="5" step="0.5" class="w-full h-1 accent-white" />
         </div>
 
         <!-- Clear + Save -->
@@ -81,7 +76,7 @@
 
     <!-- Hint -->
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/20 pointer-events-none whitespace-nowrap">
-      press & drag to paint · {{symmetry}}-axis symmetry
+      press &amp; drag to paint · {{symmetry}}-axis symmetry
     </div>
     <AppFooter />
   </div>
@@ -93,202 +88,304 @@ useSeoMeta({ title: `Silk | ${siteName}` })
 
 // ---- refs ----
 const baseCanvas = ref<HTMLCanvasElement | null>(null)
-const fadeCanvas  = ref<HTMLCanvasElement | null>(null)
 
 // ---- settings ----
 const symmetry   = ref(6)
-const fadeAmount = ref(8)        // 每帧 fade 强度（0=不消散，40=快速消散）
+const fadeAmount = ref(8)
 const hueSpeed   = ref(0.5)
-const brushMax   = ref(12)       // 最大笔刷半径
+const brushSize  = ref(2)
 const colorMode  = ref<'rainbow'|'fixed'>('rainbow')
 const fixedHex   = ref('#00d4ff')
 const presets    = ['#00d4ff','#ff00aa','#ff6b35','#39ff14','#b400ff','#ffffff']
 
-// ---- state ----
-let baseCtx: CanvasRenderingContext2D | null = null
-let fadeCtx:  CanvasRenderingContext2D | null = null
-let hue      = 0
-let rafId    = 0
+// ---- Perlin Noise ----
+const perm = new Uint8Array(512)
 
-// 鼠标轨迹：最近N个点，用于 tapered 笔触
-const TRAIL  = 8
-let trail: { x:number; y:number }[] = []
-let mouseX   = -9999
-let mouseY   = -9999
-let prevX    = -9999
-let prevY    = -9999
-let moving   = false   // 鼠标在移动
-let isPressed = false  // 鼠标/触摸按下才画（weavesilk 风格）
+function initNoise() {
+  for (let i = 0; i < 256; i++) perm[i] = i
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = perm[i]!
+    perm[i] = perm[j]!
+    perm[j] = tmp
+  }
+  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i]!
+}
 
-// ---- 颜色 ----
+function fade(t: number) { return t * t * t * (t * (t * 6 - 15) + 10) }
+function lerp(a: number, b: number, t: number) { return a + t * (b - a) }
+
+function grad(hash: number, x: number, y: number): number {
+  const h = hash & 3
+  return (h < 2 ? x : -x) + (h & 1 ? y : -y)
+}
+
+function noise2d(x: number, y: number): number {
+  const xi = Math.floor(x) & 255
+  const yi = Math.floor(y) & 255
+  const xf = x - Math.floor(x)
+  const yf = y - Math.floor(y)
+  const u = fade(xf)
+  const v = fade(yf)
+  const a = perm[xi]! + yi
+  const b = perm[xi + 1]! + yi
+  return lerp(
+    lerp(grad(perm[a]!, xf, yf), grad(perm[b]!, xf - 1, yf), u),
+    lerp(grad(perm[a + 1]!, xf, yf - 1), grad(perm[b + 1]!, xf - 1, yf - 1), u),
+    v
+  ) * 0.5 + 0.5
+}
+
+// ---- Particle System ----
+interface Particle {
+  x: number; y: number
+  px: number; py: number
+  inputVx: number; inputVy: number
+  life: number
+  hue: number
+}
+
+let particles: Particle[] = []
+
+function addPoint(x: number, y: number, vx: number, vy: number) {
+  particles.push({
+    x, y,
+    px: x - vx,
+    py: y - vy,
+    inputVx: vx,
+    inputVy: vy,
+    life: 150,
+    hue: currentHue,
+  })
+}
+
+function stepParticles(time: number) {
+  const canvas = baseCanvas.value
+  if (!canvas) return
+
+  for (let i = 0; i < particles.length; i++) {
+    const pt = particles[i]!
+
+    const noiseVal = noise2d(
+      pt.x * 0.02 + time * 0.005,
+      pt.y * 0.02 + time * 0.005
+    )
+    const noiseAngle = noiseVal * Math.PI * 5
+
+    let accx = Math.cos(noiseAngle) * 1.0
+    let accy = Math.sin(noiseAngle) * 1.0
+
+    accx += pt.inputVx * 0.3
+    accy += pt.inputVy * 0.3
+    pt.inputVx *= 0.98
+    pt.inputVy *= 0.98
+
+    const newX = pt.x + (pt.x - pt.px) * 0.975 + accx
+    const newY = pt.y + (pt.y - pt.py) * 0.975 + accy
+    pt.px = pt.x
+    pt.py = pt.y
+    pt.x = newX
+    pt.y = newY
+    pt.life--
+  }
+
+  particles = particles.filter(pt => pt.life > 0)
+}
+
+// ---- Drawing ----
 function hexToRgb(hex: string) {
   return {
-    r: parseInt(hex.slice(1,3),16),
-    g: parseInt(hex.slice(3,5),16),
-    b: parseInt(hex.slice(5,7),16),
+    r: parseInt(hex.slice(1, 3), 16),
+    g: parseInt(hex.slice(3, 5), 16),
+    b: parseInt(hex.slice(5, 7), 16),
   }
 }
 
-function getStrokeColor(alpha: number): string {
+function getStrokeColor(h: number, alpha: number): string {
   if (colorMode.value === 'fixed') {
-    const {r,g,b} = hexToRgb(fixedHex.value)
+    const { r, g, b } = hexToRgb(fixedHex.value)
     return `rgba(${r},${g},${b},${alpha})`
   }
-  // rainbow：用当前 hue，饱和度100%，亮度70%（比纯hsla更亮）
-  return `hsla(${hue},100%,70%,${alpha})`
+  return `hsla(${h},100%,65%,${alpha})`
 }
 
-// ---- 核心绘制：均匀笔触（weavesilk 风格）----
-// 速度决定线宽，三层叠加产生发光感，单条 path 保证均匀
-function drawSilkLine(
+function drawCurve(
   ctx: CanvasRenderingContext2D,
-  x1: number, y1: number,
-  x2: number, y2: number,
-  speed: number
+  pts: Particle[],
+  cx: number,
+  cy: number,
+  flipY: boolean
 ) {
-  const dist = Math.hypot(x2-x1, y2-y1)
-  if (dist < 0.3) return
+  if (pts.length < 2) return
 
-  // 速度越快线越细，停止时最粗；用平滑映射避免突变
-  const t = Math.min(1, speed / 20)
-  const w = Math.max(0.5, brushMax.value * (1 - t * 0.75))
+  const sy = flipY ? -1 : 1
 
-  ctx.globalCompositeOperation = 'lighter'
+  // Draw 3 layers for glow effect
+  const layers = [
+    { lw: brushSize.value * 1.5, alpha: 0.05 },
+    { lw: brushSize.value * 1.0, alpha: 0.09 },
+    { lw: brushSize.value * 0.5, alpha: 0.09 },
+  ]
+
+  for (const layer of layers) {
+    ctx.beginPath()
+    ctx.moveTo(pts[0]!.x - cx, (pts[0]!.y - cy) * sy)
+    for (let i = 1; i < pts.length - 1; i++) {
+      const p1 = pts[i]!
+      const p2 = pts[i + 1]!
+      const mx = (p1.x + p2.x) / 2 - cx
+      const my = ((p1.y + p2.y) / 2 - cy) * sy
+      ctx.quadraticCurveTo(p1.x - cx, (p1.y - cy) * sy, mx, my)
+    }
+    const last = pts[pts.length - 1]!
+    ctx.lineTo(last.x - cx, (last.y - cy) * sy)
+
+    // Use hue from the most recent particle
+    const h = pts[pts.length - 1]!.hue
+    ctx.strokeStyle = getStrokeColor(h, layer.alpha)
+    ctx.lineWidth = layer.lw
+    ctx.globalCompositeOperation = 'lighter'
+    ctx.globalAlpha = 1
+    ctx.stroke()
+  }
+}
+
+function drawSymmetric(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
+  if (particles.length < 2) return
+
+  const n = symmetry.value
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
 
-  // 外层光晕
-  ctx.beginPath()
-  ctx.moveTo(x1, y1)
-  ctx.lineTo(x2, y2)
-  ctx.lineWidth = w * 2.5
-  ctx.strokeStyle = getStrokeColor(0.03)
-  ctx.stroke()
-
-  // 中层
-  ctx.beginPath()
-  ctx.moveTo(x1, y1)
-  ctx.lineTo(x2, y2)
-  ctx.lineWidth = w * 1.2
-  ctx.strokeStyle = getStrokeColor(0.10)
-  ctx.stroke()
-
-  // 核心亮线
-  ctx.beginPath()
-  ctx.moveTo(x1, y1)
-  ctx.lineTo(x2, y2)
-  ctx.lineWidth = Math.max(0.4, w * 0.45)
-  ctx.strokeStyle = getStrokeColor(0.55)
-  ctx.stroke()
-}
-
-// ---- 对称绘制 ----
-function drawSymmetric(mx: number, my: number, px: number, py: number) {
-  const ctx = baseCtx
-  if (!ctx || !baseCanvas.value) return
-  const canvas = baseCanvas.value
-  const cx = canvas.width / 2
-  const cy = canvas.height / 2
-  const n  = symmetry.value
-  const speed = Math.hypot(mx-px, my-py)
-
   for (let i = 0; i < n; i++) {
     const angle = (Math.PI * 2 / n) * i
+
+    // Normal
     ctx.save()
     ctx.translate(cx, cy)
     ctx.rotate(angle)
+    drawCurve(ctx, particles, cx, cy, false)
+    ctx.restore()
 
-    // 正向
-    drawSilkLine(ctx, px-cx, py-cy, mx-cx, my-cy, speed)
-
-    // 镜像
+    // Mirrored
+    ctx.save()
+    ctx.translate(cx, cy)
+    ctx.rotate(angle)
     ctx.scale(1, -1)
-    drawSilkLine(ctx, px-cx, -(py-cy), mx-cx, -(my-cy), speed)
-
+    drawCurve(ctx, particles, cx, cy, false)
     ctx.restore()
   }
 }
 
-// ---- Fade（顶层每帧淡化）----
-function applyFade() {
-  const ctx = fadeCtx
-  const canvas = fadeCanvas.value
-  if (!ctx || !canvas) return
-  const alpha = fadeAmount.value / 255
-  if (alpha < 0.001) return
-  ctx.globalCompositeOperation = 'source-over'
-  ctx.fillStyle = `rgba(0,0,0,${alpha})`
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-}
+// ---- State ----
+let baseCtx: CanvasRenderingContext2D | null = null
+let currentHue = 0
+let time = 0
+let rafId = 0
+let isPressed = false
+let mouseX = -9999
+let mouseY = -9999
+let prevX = -9999
+let prevY = -9999
 
-// ---- 主循环 ----
+// ---- Main Loop ----
 function loop() {
-  hue = (hue + hueSpeed.value) % 360
-
-  if (moving && isPressed && prevX > -9000) {
-    drawSymmetric(mouseX, mouseY, prevX, prevY)
+  const canvas = baseCanvas.value
+  const ctx = baseCtx
+  if (!canvas || !ctx) {
+    rafId = requestAnimationFrame(loop)
+    return
   }
 
-  // fade 作用于 base canvas 上（直接在 baseCtx 叠一层半透明黑）
-  if (fadeAmount.value > 0 && baseCtx && baseCanvas.value) {
-    const c = baseCanvas.value
-    baseCtx.globalCompositeOperation = 'source-over'
-    baseCtx.fillStyle = `rgba(0,0,0,${fadeAmount.value/2000})`
-    baseCtx.fillRect(0, 0, c.width, c.height)
+  const cx = canvas.width / 2
+  const cy = canvas.height / 2
+
+  currentHue = (currentHue + hueSpeed.value) % 360
+  time++
+
+  // Add particle at current mouse position if pressed
+  if (isPressed && prevX > -9000) {
+    const vx = mouseX - prevX
+    const vy = mouseY - prevY
+    if (Math.hypot(vx, vy) > 0.5) {
+      addPoint(mouseX, mouseY, vx, vy)
+    }
   }
 
-  prevX = mouseX
-  prevY = mouseY
-  moving = false
+  // Step physics
+  stepParticles(time)
+
+  // Fade (directly on base canvas)
+  if (fadeAmount.value > 0) {
+    ctx.globalCompositeOperation = 'source-over'
+    ctx.globalAlpha = 1
+    ctx.fillStyle = `rgba(0,0,0,${fadeAmount.value / 2000})`
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }
+
+  // Draw
+  drawSymmetric(ctx, cx, cy)
+
+  // Update prev position
+  if (isPressed) {
+    prevX = mouseX
+    prevY = mouseY
+  }
 
   rafId = requestAnimationFrame(loop)
 }
 
-// ---- 事件处理 ----
+// ---- Event Handlers ----
 function getPos(e: MouseEvent | Touch) {
   const canvas = baseCanvas.value!
   const rect = canvas.getBoundingClientRect()
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+  const scaleX = canvas.width / rect.width
+  const scaleY = canvas.height / rect.height
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY,
+  }
 }
 
-function onMouseMove(e: MouseEvent) {
-  const pos = getPos(e)
-  mouseX = pos.x; mouseY = pos.y; moving = true
-}
 function onMouseDown(e: MouseEvent) {
   const pos = getPos(e)
   isPressed = true
   mouseX = pos.x; mouseY = pos.y
-  prevX = pos.x; prevY = pos.y; moving = false
+  prevX = pos.x; prevY = pos.y
+}
+function onMouseMove(e: MouseEvent) {
+  const pos = getPos(e)
+  mouseX = pos.x; mouseY = pos.y
 }
 function onMouseUp() {
-  isPressed = false; moving = false
+  isPressed = false
   prevX = -9999; prevY = -9999
-}
-function onTouchMove(e: TouchEvent) {
-  e.preventDefault()
-  const pos = getPos(e.touches[0]!)
-  mouseX = pos.x; mouseY = pos.y; moving = true
 }
 function onTouchStart(e: TouchEvent) {
   e.preventDefault()
   const pos = getPos(e.touches[0]!)
   isPressed = true
-  mouseX = pos.x; mouseY = pos.y; prevX = pos.x; prevY = pos.y; moving = false
+  mouseX = pos.x; mouseY = pos.y
+  prevX = pos.x; prevY = pos.y
+}
+function onTouchMove(e: TouchEvent) {
+  e.preventDefault()
+  const pos = getPos(e.touches[0]!)
+  mouseX = pos.x; mouseY = pos.y
 }
 function onTouchEnd() {
-  isPressed = false; moving = false
+  isPressed = false
   prevX = -9999; prevY = -9999
 }
 
-// ---- 工具 ----
+// ---- Utils ----
 function clearAll() {
   if (!baseCtx || !baseCanvas.value) return
+  particles = []
   baseCtx.globalCompositeOperation = 'source-over'
+  baseCtx.globalAlpha = 1
   baseCtx.fillStyle = '#000'
   baseCtx.fillRect(0, 0, baseCanvas.value.width, baseCanvas.value.height)
-  trail = []
-  prevX = -9999; prevY = -9999
 }
 
 function saveImage() {
@@ -300,64 +397,55 @@ function saveImage() {
   a.click()
 }
 
-function resizeCanvases() {
-  const base = baseCanvas.value
-  const fade = fadeCanvas.value
-  if (!base || !fade || !baseCtx) return
-
-  // 保留内容
+function resizeCanvas() {
+  const canvas = baseCanvas.value
+  if (!canvas || !baseCtx) return
   const tmp = document.createElement('canvas')
-  tmp.width = base.width; tmp.height = base.height
-  tmp.getContext('2d')!.drawImage(base, 0, 0)
-
-  const w = window.innerWidth, h = window.innerHeight
-  base.width = w; base.height = h
-  fade.width = w; fade.height = h
-
+  tmp.width = canvas.width; tmp.height = canvas.height
+  tmp.getContext('2d')!.drawImage(canvas, 0, 0)
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
   baseCtx.globalCompositeOperation = 'source-over'
   baseCtx.fillStyle = '#000'
-  baseCtx.fillRect(0, 0, w, h)
+  baseCtx.fillRect(0, 0, canvas.width, canvas.height)
   baseCtx.drawImage(tmp, 0, 0)
 }
 
-// ---- 生命周期 ----
+// ---- Lifecycle ----
 onMounted(() => {
-  const base = baseCanvas.value!
-  const fade = fadeCanvas.value!
-  baseCtx = base.getContext('2d')!
-  fadeCtx  = fade.getContext('2d')!
+  initNoise()
 
-  const w = window.innerWidth, h = window.innerHeight
-  base.width = w; base.height = h
-  fade.width = w; fade.height = h
-
+  const canvas = baseCanvas.value!
+  baseCtx = canvas.getContext('2d')!
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
   baseCtx.fillStyle = '#000'
-  baseCtx.fillRect(0, 0, w, h)
+  baseCtx.fillRect(0, 0, canvas.width, canvas.height)
 
-  base.addEventListener('mousemove',  onMouseMove)
-  base.addEventListener('mousedown',  onMouseDown)
-  base.addEventListener('mouseup',    onMouseUp)
-  window.addEventListener('mouseup',  onMouseUp)  // 鼠标拖出画布外也能正确释放
-  base.addEventListener('touchstart', onTouchStart, { passive: false })
-  base.addEventListener('touchmove',  onTouchMove,  { passive: false })
-  base.addEventListener('touchend',   onTouchEnd)
-  window.addEventListener('resize', resizeCanvases)
+  canvas.addEventListener('mousedown',  onMouseDown)
+  canvas.addEventListener('mousemove',  onMouseMove)
+  canvas.addEventListener('mouseup',    onMouseUp)
+  window.addEventListener('mouseup',    onMouseUp)
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false })
+  canvas.addEventListener('touchmove',  onTouchMove,  { passive: false })
+  canvas.addEventListener('touchend',   onTouchEnd)
+  window.addEventListener('resize', resizeCanvas)
 
   rafId = requestAnimationFrame(loop)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(rafId)
-  const base = baseCanvas.value
-  if (base) {
-    base.removeEventListener('mousemove',  onMouseMove)
-    base.removeEventListener('mousedown',  onMouseDown)
-    base.removeEventListener('mouseup',    onMouseUp)
-    base.removeEventListener('touchstart', onTouchStart)
-    base.removeEventListener('touchmove',  onTouchMove)
-    base.removeEventListener('touchend',   onTouchEnd)
+  const canvas = baseCanvas.value
+  if (canvas) {
+    canvas.removeEventListener('mousedown',  onMouseDown)
+    canvas.removeEventListener('mousemove',  onMouseMove)
+    canvas.removeEventListener('mouseup',    onMouseUp)
+    canvas.removeEventListener('touchstart', onTouchStart)
+    canvas.removeEventListener('touchmove',  onTouchMove)
+    canvas.removeEventListener('touchend',   onTouchEnd)
   }
   window.removeEventListener('mouseup',  onMouseUp)
-  window.removeEventListener('resize', resizeCanvases)
+  window.removeEventListener('resize', resizeCanvas)
 })
 </script>
