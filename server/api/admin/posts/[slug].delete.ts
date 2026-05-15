@@ -1,5 +1,5 @@
 // server/api/admin/posts/[slug].delete.ts — 删除文章
-import { ftsDelete } from '~/server/utils/fts'
+import { ftsDelete } from '../../../utils/fts'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')

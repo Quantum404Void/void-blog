@@ -1,5 +1,5 @@
 // server/api/admin/posts/index.post.ts — 新建文章
-import { ftsInsert } from '~/server/utils/fts'
+import { ftsInsert } from '../../../utils/fts'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

@@ -1,5 +1,5 @@
 // server/api/admin/posts/[slug].put.ts — 更新文章
-import { ftsUpdate } from '~/server/utils/fts'
+import { ftsUpdate } from '../../../utils/fts'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')

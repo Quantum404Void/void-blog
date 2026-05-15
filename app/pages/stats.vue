@@ -31,7 +31,7 @@
             <span class="text-[var(--color-neon-green)]">▶</span> 年度文章分布
           </h2>
           <ClientOnly>
-            <Chart type="bar" :data="yearChartData" :options="yearChartOptions" :height="220" />
+            <Chart type="bar" :data="yearPlotData" :height="220" />
           </ClientOnly>
         </div>
 
@@ -40,7 +40,7 @@
             <span class="text-[var(--color-neon-cyan)]">▶</span> 热门标签 Top 12
           </h2>
           <ClientOnly>
-            <Chart type="bar" :data="tagChartData" :options="tagChartOptions" :height="280" />
+            <Chart type="barh" :data="tagPlotData" :height="280" />
           </ClientOnly>
         </div>
       </div>
@@ -179,60 +179,24 @@ const overviewCards = computed(() => {
   ]
 })
 
-const yearChartData = computed(() => {
+const yearPlotData = computed(() => {
   const s = statsData.value as any
   const byYear = s?.byYear ?? {}
-  const yearLabels = Object.keys(byYear).sort()
-  const yearCounts = yearLabels.map((k: string) => byYear[k])
-  const colors = ['rgba(0,212,255,0.7)', 'rgba(57,255,20,0.7)', 'rgba(180,0,255,0.7)', 'rgba(255,0,170,0.7)', 'rgba(255,165,0,0.7)']
-  const borderColors = ['rgba(0,212,255,1)', 'rgba(57,255,20,1)', 'rgba(180,0,255,1)', 'rgba(255,0,170,1)', 'rgba(255,165,0,1)']
-  return {
-    labels: yearLabels,
-    datasets: [{
-      label: '文章数',
-      data: yearCounts,
-      backgroundColor: yearLabels.map((_: string, i: number) => colors[i % colors.length]),
-      borderColor: yearLabels.map((_: string, i: number) => borderColors[i % borderColors.length]),
-      borderWidth: 1,
-      borderRadius: 6,
-    }]
-  }
+  const neon = ['#00d4ff', '#39ff14', '#b44cff', '#ff2d78', '#ffa500']
+  return Object.keys(byYear).sort().map((y, i) => ({
+    label: y,
+    value: byYear[y],
+    color: neon[i % neon.length],
+  }))
 })
 
-const yearChartOptions = {
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { ticks: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 11 } }, grid: { display: false }, border: { display: false } },
-    y: { ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 }, grid: { color: 'rgba(30,30,48,0.8)' }, border: { display: false } }
-  }
-}
-
-const tagChartData = computed(() => {
+const tagPlotData = computed(() => {
   const s = statsData.value as any
   const tagCounts = s?.tagCounts ?? {}
-  const top12 = Object.entries(tagCounts).sort((a: any, b: any) => b[1] - a[1]).slice(0, 12)
-  return {
-    labels: top12.map(([t]: any) => `#${t}`),
-    datasets: [{
-      label: '文章数',
-      data: top12.map(([, c]: any) => c),
-      backgroundColor: 'rgba(0,212,255,0.18)',
-      borderColor: 'rgba(0,212,255,0.8)',
-      borderWidth: 2,
-      pointBackgroundColor: 'rgba(0,212,255,1)',
-      pointRadius: 3,
-      fill: true,
-      tension: 0.3,
-    }]
-  }
+  return Object.entries(tagCounts)
+    .sort((a: any, b: any) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([t, c]: any) => ({ label: `#${t}`, value: c }))
 })
 
-const tagChartOptions = {
-  indexAxis: 'y' as const,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 }, grid: { color: 'rgba(30,30,48,0.8)' }, border: { display: false } },
-    y: { ticks: { color: '#c8c8d8', font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false }, border: { display: false } }
-  }
-}
 </script>

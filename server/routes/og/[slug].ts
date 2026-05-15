@@ -1,5 +1,5 @@
 // server/routes/og/[slug].ts
-import { queryD1 } from '~/server/utils/d1'
+import { queryD1 } from '../../utils/d1'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')!

@@ -254,9 +254,7 @@
 }
 .timeline-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-neon-purple); }
 
-/* highlight.js 已移除 —— 改用 Shiki */
-
-/* ── Shiki 代码块样式 ── */
+/* Shiki 代码块样式 ── */
 /* Shiki 输出: .shiki > code > span.line */
 .prose .shiki {
   position: relative;

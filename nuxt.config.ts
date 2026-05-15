@@ -1,7 +1,12 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
+  compatibilityDate: '2025-05-01',
+
+  future: {
+    compatibilityVersion: 4,  // Nuxt 4 目录结构 + 行为变更
+  },
+
   devtools: { enabled: true },
 
   modules: ['@vite-pwa/nuxt'],

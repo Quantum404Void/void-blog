@@ -1,6 +1,6 @@
 // server/routes/rss.xml.ts — 使用 feed 包生成 RSS 2.0
 import { Feed } from 'feed'
-import { queryD1 } from '~/server/utils/d1'
+import { queryD1 } from '../utils/d1'
 
 export default defineEventHandler(async (event) => {
   const rows = await queryD1<{
