@@ -7,20 +7,30 @@
         <span class="text-[var(--color-neon-green)]">$</span> grep -r
       </h1>
 
-      <form @submit.prevent="doSearch" class="mb-10">
+      <form @submit.prevent="doSearch" class="mb-8">
         <div class="relative flex flex-col gap-3 sm:flex-row">
-          <input
-            v-model="q"
-            type="text"
-            placeholder="搜索文章、标签..."
-            autofocus
-            class="flex-1 bg-[#0f0f1a] border border-[var(--color-void-border)] rounded-lg px-4 py-2.5 pr-10 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
-          />
-          <!-- loading spinner -->
-          <div v-if="pending" class="absolute right-4 top-[1.3rem] -translate-y-1/2 sm:right-[80px] sm:top-1/2">
-            <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="2">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-            </svg>
+          <div class="relative flex-1">
+            <input
+              v-model="q"
+              type="text"
+              placeholder="搜索文章、标签..."
+              autofocus
+              class="w-full bg-[#0f0f1a] border border-[var(--color-void-border)] rounded-lg px-4 py-2.5 pr-10 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
+            />
+            <!-- loading spinner -->
+            <div v-if="pending" class="absolute right-3 top-1/2 -translate-y-1/2">
+              <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </div>
+            <!-- clear button -->
+            <button
+              v-else-if="q"
+              type="button"
+              @click="q = ''; results = []"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+              aria-label="清空"
+            >✕</button>
           </div>
           <button
             type="submit"
@@ -29,11 +39,22 @@
         </div>
       </form>
 
-      <p v-if="q && !pending" class="font-mono text-xs text-[var(--color-text-muted)] mb-6">
-        "{{ q }}" — <span class="text-[var(--color-text-secondary)]">{{ results.length }}</span> 篇结果
+      <!-- 结果数量 -->
+      <p v-if="searched && !pending" class="font-mono text-xs text-[var(--color-text-muted)] mb-6">
+        <span class="text-[var(--color-neon-cyan)]">"{{ lastQ }}"</span>
+        — 找到 <span class="text-[var(--color-text-secondary)] font-bold">{{ results.length }}</span> 篇
       </p>
 
-      <!-- Empty state: hot tags -->
+      <!-- 空结果 -->
+      <div v-if="searched && !pending && results.length === 0" class="py-10 text-center">
+        <div class="font-mono text-[var(--color-text-muted)] text-sm space-y-2">
+          <p class="text-2xl mb-4">∅</p>
+          <p>没有匹配 <span class="text-[var(--color-neon-cyan)]">"{{ lastQ }}"</span> 的文章</p>
+          <p class="text-xs opacity-60">试试更短的关键词，或浏览 <NuxtLink href="/tags" class="text-[var(--color-neon-purple)] hover:underline">标签</NuxtLink></p>
+        </div>
+      </div>
+
+      <!-- Hot tags (空状态) -->
       <div v-if="!q" class="py-6">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-4">
           <span class="text-[var(--color-neon-purple)]">▶</span> 热门标签
@@ -48,8 +69,32 @@
         </div>
       </div>
 
+      <!-- 结果列表（带高亮） -->
       <div class="space-y-2">
-        <PostCard v-for="post in results" :key="post.slug" :post="post" />
+        <NuxtLink
+          v-for="post in results"
+          :key="post.slug"
+          :href="`/blog/${post.slug}`"
+          class="group block p-4 sm:p-5 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all"
+        >
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            <span v-for="tag in post.tags.slice(0,3)" :key="tag"
+              class="font-mono text-[10px] px-2 py-0.5 rounded-full border"
+              :class="lastQ && tag.includes(lastQ)
+                ? 'border-[rgba(0,212,255,0.5)] text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.08)]'
+                : 'border-[var(--color-void-border)] text-[var(--color-text-muted)]'"
+            >#{{ tag }}</span>
+          </div>
+          <h2 class="font-mono text-sm sm:text-base font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors mb-1.5 line-clamp-2"
+            v-html="highlight(post.title)"
+          />
+          <p v-if="post.description" class="text-xs sm:text-sm text-[var(--color-text-muted)] line-clamp-2 leading-relaxed"
+            v-html="highlight(post.description)"
+          />
+          <div class="flex items-center gap-3 mt-3 font-mono text-[10px] text-[var(--color-text-muted)]">
+            <time>{{ post.pub_date }}</time>
+          </div>
+        </NuxtLink>
       </div>
     </main>
 
@@ -61,9 +106,9 @@
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/search')
 useSeoMeta({
-  description: `搜索 ${siteName} 所有技术文章，支持标题、正文内容全文检索`,
+  description: `搜索 ${siteName} 所有技术文章，支持 FTS5 全文检索`,
   ogTitle: `搜索 | ${siteName}`,
-  ogDescription: `搜索 ${siteName} 所有技术文章，支持标题、正文内容全文检索`,
+  ogDescription: `搜索 ${siteName} 所有技术文章，支持全文检索`,
   ogUrl: `${siteUrl}/search`,
 })
 
@@ -72,33 +117,53 @@ const router = useRouter()
 const q = ref((route.query.q as string) || '')
 const results = ref<any[]>([])
 const pending = ref(false)
+const searched = ref(false)
+const lastQ = ref('')
 
 const { data: tagsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 const hotTags = computed(() =>
   Object.entries(tagsData.value || {}).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([t]) => t)
 )
 
+// 高亮匹配关键词
+function highlight(text: string): string {
+  if (!lastQ.value || !text) return text
+  const escaped = lastQ.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`(${escaped})`, 'gi')
+  return text.replace(re, '<mark class="search-highlight">$1</mark>')
+}
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 watch(q, (val) => {
   if (debounceTimer) clearTimeout(debounceTimer)
-  if (!val.trim()) { results.value = []; return }
-  debounceTimer = setTimeout(() => doSearch(), 300)
+  if (!val.trim()) { results.value = []; searched.value = false; return }
+  debounceTimer = setTimeout(() => doSearch(), 280)
 })
 
 async function doSearch() {
-  if (!q.value.trim()) { results.value = []; return }
+  if (!q.value.trim()) { results.value = []; searched.value = false; return }
   pending.value = true
+  lastQ.value = q.value.trim()
   await router.replace({ query: { q: q.value } })
   try {
     results.value = await $fetch(`/api/search?q=${encodeURIComponent(q.value)}`) as any[]
+    searched.value = true
   } finally {
     pending.value = false
   }
 }
 
-// Auto-search if q from URL — 在客户端执行，避免 SSR 副作用
 onMounted(() => {
   if (q.value) doSearch()
 })
-
 </script>
+
+<style scoped>
+:deep(.search-highlight) {
+  background: rgba(0, 212, 255, 0.2);
+  color: var(--color-neon-cyan);
+  border-radius: 2px;
+  padding: 0 1px;
+  font-style: normal;
+}
+</style>

@@ -1,4 +1,6 @@
 // server/api/admin/posts/index.post.ts — 新建文章
+import { ftsInsert } from '~/server/utils/fts'
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { slug, title, description, content, pub_date, tags, draft } = body
@@ -14,5 +16,7 @@ export default defineEventHandler(async (event) => {
      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
     [slug, title, description || '', content, date, tagsJson, isDraft]
   )
+  // 非草稿时同步 FTS
+  if (!isDraft) await ftsInsert(event, slug, title, description || '', content)
   return { ok: true, slug }
 })

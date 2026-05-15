@@ -37,8 +37,10 @@ export default defineNuxtConfig({
         { rel: 'canonical', href: 'https://void.redx.space' },
         // RSS 自动发现
         { rel: 'alternate', type: 'application/rss+xml', title: 'void.dev RSS', href: '/rss.xml' },
-        // JetBrains Mono 系统字体栈，无需 preconnect，只做 dns-prefetch
-        { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' },
+        // JetBrains Mono 来自 Google Fonts
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap' },
       ],
       meta: [
         { name: 'robots', content: 'index, follow' },

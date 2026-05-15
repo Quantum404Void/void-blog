@@ -15,13 +15,16 @@ function toSlug(text: string) {
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
   .use(markdownItHljs, { hljs, auto: true, code: true })
 
-// heading id 注入
+// heading id 注入（h2 + h3）
 const _defaultHeadingOpen = md.renderer.rules.heading_open ||
   ((tokens: any[], idx: number, o: any, env: any, self: any) => self.renderToken(tokens, idx, o))
 md.renderer.rules.heading_open = (tokens: any[], idx: number, o: any, env: any, self: any) => {
-  const inline = tokens[idx + 1]
-  const text = inline?.children?.map((t: any) => t.content).join('') ?? ''
-  tokens[idx].attrSet('id', toSlug(text))
+  const tag = tokens[idx].tag  // 'h1','h2','h3'…
+  if (tag === 'h2' || tag === 'h3') {
+    const inline = tokens[idx + 1]
+    const text = inline?.children?.map((t: any) => t.content).join('') ?? ''
+    tokens[idx].attrSet('id', toSlug(text))
+  }
   return _defaultHeadingOpen(tokens, idx, o, env, self)
 }
 

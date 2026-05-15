@@ -270,15 +270,15 @@ const { md } = useMarkdown()
 const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
 
 // Extract headings from RENDERED HTML — 避免代码块里的 # 注释被误识别
-// 只取 h2（跳过文章 h1 大标题和过细的 h3），保证 TOC 简洁且锚点真实存在
+// h2 为一级，h3 为二级（缩进显示）
 interface Heading { depth: number; slug: string; text: string }
 const tocHeadings = computed<Heading[]>(() => {
   if (!renderedContent.value) return []
-  const matches = [...renderedContent.value.matchAll(/<h2[^>]*id="([^"]+)"[^>]*>(.*?)<\/h2>/gs)]
+  const matches = [...renderedContent.value.matchAll(/<(h[23])[^>]*id="([^"]+)"[^>]*>(.*?)<\/h[23]>/gs)]
   return matches.map(m => ({
-    depth: 2,
-    slug: m[1],
-    text: m[2].replace(/<[^>]+>/g, '')
+    depth: m[1] === 'h2' ? 2 : 3,
+    slug: m[2],
+    text: m[3].replace(/<[^>]+>/g, '')
       .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&apos;/g, "'")
       .replace(/&#39;/g, "'").replace(/&#x27;/g, "'").trim(),

@@ -1,4 +1,6 @@
 // server/api/admin/posts/[slug].put.ts — 更新文章
+import { ftsUpdate } from '~/server/utils/fts'
+
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   if (!slug) throw createError({ statusCode: 400, message: 'Missing slug' })
@@ -20,5 +22,12 @@ export default defineEventHandler(async (event) => {
   params.push(slug)
 
   await queryD1(event, `UPDATE posts SET ${fields.join(',')} WHERE slug=?`, params)
+
+  // 同步 FTS
+  await ftsUpdate(event, slug, {
+    title: body.title,
+    description: body.description,
+    content: body.content,
+  })
   return { ok: true }
 })

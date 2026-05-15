@@ -1,13 +1,16 @@
 <template>
-  <nav v-if="headings.length > 0" class="toc toc-glass">
-    <p class="toc-title"><span style="color:var(--color-neon-green)">▶</span> 目录</p>
+  <nav v-if="headings.length > 0" class="toc">
+    <p class="toc-title"><span style="color:var(--color-neon-green)">&#9658;</span> 目录</p>
     <ul>
       <li
         v-for="h in headings"
         :key="h.slug"
         :class="['toc-item', `toc-h${h.depth}`, { active: activeSlug === h.slug }]"
       >
-        <a :href="`#${h.slug}`" @click.prevent="scrollTo(h.slug)">{{ h.text }}</a>
+        <a :href="`#${h.slug}`" @click.prevent="scrollTo(h.slug)">
+          <span v-if="h.depth === 3" class="toc-h3-dot">·</span>
+          {{ h.text }}
+        </a>
       </li>
     </ul>
   </nav>
@@ -62,8 +65,10 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   padding: 1rem;
   border: 1px solid var(--color-void-border);
   border-radius: 0.75rem;
-  background: rgba(19,19,31,0.6);  /* toc-glass class 已在主 nav-glass 中定义 */
+  background: rgba(19,19,31,0.6);
   backdrop-filter: blur(8px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,212,255,0.2) transparent;
 }
 .toc-title {
   font-size: 0.625rem;
@@ -76,16 +81,21 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   gap: 0.4rem;
 }
 .toc ul { list-style: none; padding: 0; margin: 0; }
-.toc-item { margin: 0.15rem 0; }
+.toc-item { margin: 0.1rem 0; }
 .toc-item a {
   color: var(--color-text-muted);
   text-decoration: none;
-  line-height: 1.6;
-  display: block;
+  line-height: 1.55;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
   transition: color 0.15s, padding-left 0.15s;
   border-left: 2px solid transparent;
   padding-left: 0.6rem;
   font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .toc-item.active a {
   color: var(--color-neon-cyan);
@@ -97,6 +107,26 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   color: var(--color-text-secondary);
   padding-left: 0.9rem;
 }
-.toc-h3 { padding-left: 0.75rem; }
-.toc-h4 { padding-left: 1.5rem; }
+/* h3 内嵌级 */
+.toc-h3 { }
+.toc-h3 a {
+  padding-left: 1.25rem;
+  font-size: 0.65rem;
+  opacity: 0.75;
+}
+.toc-h3.active a {
+  padding-left: 1.5rem;
+  opacity: 1;
+  border-left-color: rgba(0,212,255,0.6);
+  color: rgba(0,212,255,0.8);
+}
+.toc-h3 a:hover {
+  padding-left: 1.5rem;
+  opacity: 1;
+}
+.toc-h3-dot {
+  color: var(--color-void-muted);
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
 </style>
