@@ -1,13 +1,16 @@
 <template>
-  <div class="chart-wrapper">
-    <div ref="containerRef" :style="{ height: props.height + 'px', position: 'relative' }">
-      <canvas ref="canvasRef" />
-    </div>
-  </div>
+  <!-- vue-chartjs 声明式封装，统一主题配置 -->
+  <component
+    :is="chartComponent"
+    :data="data"
+    :options="mergedOptions"
+    :style="{ height: `${height}px` }"
+    :plugins="[]"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, toRaw } from 'vue'
+import { Bar, Line, Doughnut, Pie, Radar } from 'vue-chartjs'
 import {
   Chart,
   CategoryScale, LinearScale, RadialLinearScale, LogarithmicScale,
@@ -16,6 +19,7 @@ import {
   Title, Tooltip, Legend, Filler,
 } from 'chart.js'
 
+// 全局注册一次
 Chart.register(
   CategoryScale, LinearScale, RadialLinearScale, LogarithmicScale,
   BarElement, LineElement, PointElement, ArcElement,
@@ -34,19 +38,30 @@ const props = withDefaults(defineProps<{
   height: 300,
 })
 
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-let chartInstance: Chart | null = null
+const chartComponent = computed(() => ({
+  bar: Bar, line: Line, doughnut: Doughnut, pie: Pie, radar: Radar,
+}[props.type] ?? Bar))
 
-function buildOptions() {
-  const base: any = {
+// 全站统一暗色主题
+const baseOptions = computed(() => {
+  const hasBoth = props.type === 'bar' || props.type === 'line'
+  const scales = hasBoth ? {
+    x: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono, monospace', size: 11 } },
+      grid: { color: 'rgba(30,30,48,0.8)' }, border: { display: false },
+    },
+    y: {
+      ticks: { color: '#8888aa', font: { family: 'JetBrains Mono, monospace', size: 11 } },
+      grid: { color: 'rgba(30,30,48,0.8)' }, border: { display: false },
+    },
+  } : {}
+
+  return {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        labels: {
-          color: '#8888aa',
-          font: { family: 'JetBrains Mono, monospace', size: 12 },
-        },
+        labels: { color: '#8888aa', font: { family: 'JetBrains Mono, monospace', size: 12 } },
       },
       tooltip: {
         backgroundColor: '#13131f',
@@ -58,28 +73,14 @@ function buildOptions() {
         bodyFont: { family: 'JetBrains Mono' },
       },
     },
+    ...(hasBoth ? { scales } : {}),
   }
-
-  if (props.type === 'bar' || props.type === 'line') {
-    base.scales = {
-      x: {
-        ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 11 } },
-        grid: { color: 'rgba(30,30,48,0.8)' },
-      },
-      y: {
-        ticks: { color: '#8888aa', font: { family: 'JetBrains Mono', size: 11 } },
-        grid: { color: 'rgba(30,30,48,0.8)' },
-      },
-    }
-  }
-
-  return deepMerge(base, props.options ?? {})
-}
+})
 
 function deepMerge(target: any, source: any): any {
   const out = { ...target }
   for (const key of Object.keys(source ?? {})) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) && typeof source[key] !== 'function') {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       out[key] = deepMerge(target[key] ?? {}, source[key])
     } else {
       out[key] = source[key]
@@ -88,49 +89,5 @@ function deepMerge(target: any, source: any): any {
   return out
 }
 
-function createChart() {
-  if (!canvasRef.value) return
-  destroyChart()
-  chartInstance = new Chart(canvasRef.value, {
-    type: props.type as any,
-    data: toRaw(props.data),
-    options: buildOptions(),
-  })
-}
-
-function destroyChart() {
-  if (chartInstance) {
-    chartInstance.destroy()
-    chartInstance = null
-  }
-}
-
-onMounted(() => {
-  createChart()
-})
-
-onUnmounted(() => {
-  destroyChart()
-})
-
-watch(() => props.data, () => {
-  createChart()
-}, { deep: true })
-
-watch(() => props.options, () => {
-  createChart()
-}, { deep: true })
+const mergedOptions = computed(() => deepMerge(baseOptions.value, props.options ?? {}))
 </script>
-
-<style scoped>
-.chart-wrapper {
-  background: var(--color-void-card);
-  border: 1px solid var(--color-void-border);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-}
-canvas {
-  display: block;
-}
-</style>

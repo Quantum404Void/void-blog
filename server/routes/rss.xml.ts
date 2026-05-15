@@ -1,3 +1,7 @@
+// server/routes/rss.xml.ts — 使用 feed 包生成 RSS 2.0
+import { Feed } from 'feed'
+import { queryD1 } from '~/server/utils/d1'
+
 export default defineEventHandler(async (event) => {
   const rows = await queryD1<{
     slug: string; title: string; description: string; content: string; pub_date: string
@@ -7,29 +11,43 @@ export default defineEventHandler(async (event) => {
   const base = config.public.siteUrl as string
   const siteName = config.public.siteName as string
   const siteDescription = config.public.siteDescription as string
+  const authorName = config.public.authorName as string
+  const authorEmail = config.public.authorEmail as string
 
-  const items = rows.map(r => `
-    <item>
-      <title><![CDATA[${r.title}]]></title>
-      <link>${base}/blog/${r.slug}</link>
-      <guid>${base}/blog/${r.slug}</guid>
-      <pubDate>${new Date(r.pub_date).toUTCString()}</pubDate>
-      <description><![CDATA[${r.description}]]></description>
-      <content:encoded><![CDATA[${r.content}]]></content:encoded>
-    </item>`).join('')
+  const feed = new Feed({
+    title: siteName,
+    description: siteDescription,
+    id: base,
+    link: base,
+    language: 'zh-CN',
+    image: `${base}/og-default.png`,
+    favicon: `${base}/favicon.ico`,
+    copyright: `© ${new Date().getFullYear()} ${authorName}`,
+    updated: rows[0] ? new Date(rows[0].pub_date) : new Date(),
+    feedLinks: {
+      rss: `${base}/rss.xml`,
+      atom: `${base}/atom.xml`,
+    },
+    author: {
+      name: authorName,
+      email: authorEmail,
+      link: base,
+    },
+  })
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>${siteName}</title>
-    <link>${base}</link>
-    <description>${siteDescription}</description>
-    <language>zh-CN</language>
-    <atom:link href="${base}/rss.xml" rel="self" type="application/rss+xml"/>
-    ${items}
-  </channel>
-</rss>`
+  for (const r of rows) {
+    feed.addItem({
+      title: r.title,
+      id: `${base}/blog/${r.slug}`,
+      link: `${base}/blog/${r.slug}`,
+      description: r.description,
+      content: r.content,
+      date: new Date(r.pub_date),
+      image: `${base}/og/${r.slug}`,
+    })
+  }
 
   setHeader(event, 'Content-Type', 'application/rss+xml; charset=utf-8')
-  return xml
+  setHeader(event, 'Cache-Control', 's-maxage=3600, stale-while-revalidate')
+  return feed.rss2()
 })
