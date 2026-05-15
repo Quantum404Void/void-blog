@@ -57,6 +57,10 @@ function render() {
     } as any,
   }
 
+  // bar/barh 明确声明 band scale 避免字符串数字警告
+  const xBand = props.type === 'bar' ? { ...baseOpts.x, type: 'band' } : baseOpts.x
+  const yBand = props.type === 'barh' ? { ...baseOpts.y, type: 'band' } : baseOpts.y
+
   if (props.type === 'barh') {
     marks = [
       Plot.barX(props.data, {
@@ -116,7 +120,7 @@ function render() {
     ]
   }
 
-  const plot = Plot.plot({ ...baseOpts, marks })
+  const plot = Plot.plot({ ...baseOpts, x: xBand, y: yBand, marks })
 
   // 注入暗色主题样式到 SVG
   const svg = plot.querySelector('svg')
