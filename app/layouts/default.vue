@@ -100,7 +100,7 @@ onMounted(() => {
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         life: 1,
-        color: neonColors[Math.floor(Math.random() * neonColors.length)],
+        color: neonColors[Math.floor(Math.random() * neonColors.length)]!,
         size: 2 + Math.random() * 3
       })
     }
@@ -110,7 +110,7 @@ onMounted(() => {
     if (!ctx || !pCanvas) return
     ctx.clearRect(0, 0, pCanvas.width, pCanvas.height)
     for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i]
+      const p = particles[i]!
       p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.03
       if (p.life <= 0) { particles.splice(i, 1); continue }
       ctx.save()

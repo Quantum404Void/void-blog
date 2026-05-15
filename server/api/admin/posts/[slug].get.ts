@@ -9,6 +9,6 @@ export default defineEventHandler(async (event) => {
   }>(event, 'SELECT * FROM posts WHERE slug=?', [slug])
 
   if (!rows.length) throw createError({ statusCode: 404, message: 'Not found' })
-  const r = rows[0]
+  const r = rows[0]!
   return { ...r, tags: JSON.parse(r.tags || '[]'), draft: r.draft === 1 }
 })

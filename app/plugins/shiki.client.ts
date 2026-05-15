@@ -52,7 +52,7 @@ async function buildMd() {
 
   _md = new MarkdownIt({ html: true, linkify: true, typographer: true })
 
-  _md.use(fromHighlighter(hl, {
+  _md.use(fromHighlighter(hl as any, {
     theme: 'github-dark-dimmed',
     transformers: [
       {
