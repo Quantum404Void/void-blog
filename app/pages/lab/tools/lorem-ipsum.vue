@@ -51,6 +51,7 @@
         <pre class="p-4 font-mono text-xs text-[var(--color-text-primary)] whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">{{ output }}</pre>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

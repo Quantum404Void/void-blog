@@ -19,6 +19,7 @@
         <div v-if="msg" class="font-mono text-xs px-4 py-2 rounded-lg" :style="msgOk?'background:rgba(57,255,20,0.1);color:#39ff14;border:1px solid rgba(57,255,20,0.2)':'background:rgba(255,0,170,0.1);color:#ff00aa;border:1px solid rgba(255,0,170,0.2)'">{{ msg }}</div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">

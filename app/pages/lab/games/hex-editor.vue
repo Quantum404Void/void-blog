@@ -102,6 +102,7 @@
         <span v-else class="italic opacity-60">点击字节查看详情</span>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

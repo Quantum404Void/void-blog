@@ -15,6 +15,7 @@
         <div class="font-mono text-sm text-[var(--color-neon-cyan)] whitespace-pre-wrap">{{ output||'（无输出）' }}</div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">

@@ -71,6 +71,7 @@
         <div v-if="filteredStatuses.length === 0" class="font-mono text-xs text-[var(--color-text-muted)] text-center py-10">无匹配结果</div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

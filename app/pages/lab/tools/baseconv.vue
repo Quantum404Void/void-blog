@@ -10,6 +10,7 @@
           :style="`border-color:${base.color}44;color:${base.color}`">
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">

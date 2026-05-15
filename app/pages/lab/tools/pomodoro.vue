@@ -89,6 +89,7 @@
       </div>
       <p class="text-xs mt-2 font-mono" style="color:#333">{{ 4 - (pomodoroCount % 4 || 4) + (pomodoroCount % 4 === 0 ? 0 : 0) }} until long break</p>
     </div>
+    <AppFooter />
   </div>
 </template>
 

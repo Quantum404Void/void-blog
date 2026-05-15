@@ -245,6 +245,7 @@
         </div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

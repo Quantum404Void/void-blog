@@ -77,6 +77,7 @@
         <button v-if="currentLevel < levels.length-1" @click="selectLevel(currentLevel+1)" class="mt-3 font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(180,0,255,0.4)] text-[rgba(180,0,255,0.9)] hover:bg-[rgba(180,0,255,0.1)] transition-all">下一关 →</button>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

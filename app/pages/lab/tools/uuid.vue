@@ -47,6 +47,7 @@
         点击上方按钮生成 UUID
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

@@ -59,6 +59,7 @@
         两段文本相同 ✓
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

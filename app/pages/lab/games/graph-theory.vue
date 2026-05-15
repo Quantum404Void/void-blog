@@ -58,6 +58,7 @@
         <span v-if="algoResult" class="text-yellow-400 ml-4">{{ algoResult }}</span>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

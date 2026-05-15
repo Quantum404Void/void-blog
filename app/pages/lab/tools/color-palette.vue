@@ -120,6 +120,7 @@
 
       <div v-if="toast" class="fixed bottom-6 right-6 font-mono text-xs px-4 py-2 rounded-lg bg-[#1a1a2e] border border-cyan-800 text-cyan-400 shadow-xl">{{ toast }}</div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

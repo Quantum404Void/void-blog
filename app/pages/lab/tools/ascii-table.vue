@@ -63,6 +63,7 @@
         <div v-if="showExtended" class="flex items-center gap-2"><span class="w-3 h-3 rounded inline-block" style="background:rgba(57,255,20,0.08)"></span>Latin-1 (128-255)</div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

@@ -16,6 +16,7 @@
       </div>
       <button @click="toggleFullscreen" style="padding:4px 10px;border:1px solid rgba(180,0,255,0.3);border-radius:6px;background:transparent;color:rgba(180,0,255,0.8);cursor:pointer">⛶</button>
     </div>
+    <AppFooter />
   </div>
 </template>
 

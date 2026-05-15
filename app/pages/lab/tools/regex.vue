@@ -22,6 +22,7 @@
       <div v-else-if="pattern&&testStr" class="font-mono text-xs text-[var(--color-text-muted)] px-4 py-2 rounded-lg bg-[var(--color-void-card)] border border-[var(--color-void-border)]">无匹配</div>
       <div v-if="highlighted" class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] font-mono text-sm leading-relaxed" v-html="highlighted"></div>
     </div>
+    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">

@@ -66,6 +66,7 @@
         Type <kbd class="px-1 py-0.5 rounded border border-[var(--color-void-border)] text-[var(--color-neon-cyan)]">help</kbd> to see available commands
       </p>
     </div>
+    <AppFooter />
   </div>
 </template>
 

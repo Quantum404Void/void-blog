@@ -37,6 +37,7 @@
 
       <canvas ref="canvasEl" class="bst-canvas" />
     </div>
+    <AppFooter />
   </div>
 </template>
 

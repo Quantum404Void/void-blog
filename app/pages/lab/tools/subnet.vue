@@ -98,6 +98,7 @@
         <p class="text-xs mt-2" style="color:#333;font-family:monospace">↑ click any row to load example</p>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

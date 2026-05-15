@@ -45,6 +45,7 @@
 <span class="c">// click canvas to cool down local area</span>
       </pre>
     </main>
+    <AppFooter />
   </div>
 </template>
 

@@ -73,6 +73,7 @@
 
       <div v-if="error" class="mt-4 font-mono text-xs text-red-400 bg-red-900/20 rounded-lg p-3 border border-red-800">{{ error }}</div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

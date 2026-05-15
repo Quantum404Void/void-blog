@@ -83,6 +83,7 @@
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/20 pointer-events-none whitespace-nowrap">
       move mouse to paint · {{symmetry}}-axis symmetry
     </div>
+    <AppFooter />
   </div>
 </template>
 
