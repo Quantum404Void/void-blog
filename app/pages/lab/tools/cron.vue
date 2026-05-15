@@ -28,6 +28,11 @@
   </div>
 </template>
 <script setup lang="ts">
+// @ts-ignore
+import cronstrue from 'cronstrue/i18n'
+// @ts-ignore
+import cronParser from 'cron-parser'
+
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Cron 工具 | ${siteName}` })
 const expr=ref('* * * * *')
@@ -39,37 +44,29 @@ const examples=[
 const LABELS=['分钟','小时','日','月','星期']
 const COLORS=['#39ff14','#00d4ff','#b400ff','#ff00aa','#ffa500']
 const fields=computed(()=>{const parts=expr.value.trim().split(/\s+/);return LABELS.map((l,i)=>({label:l,value:parts[i]||'*',color:COLORS[i]}))})
+
 const desc=computed(()=>{
   const p=expr.value.trim().split(/\s+/)
   if(p.length!==5) return '⚠ cron 表达式需要 5 个字段'
-  const [min,hour,day,mon,dow]=p
-  const parts=[]
-  if(dow!=='*')parts.push(`周${dow}`)
-  if(mon!=='*')parts.push(`${mon}月`)
-  if(day!=='*')parts.push(`${day}日`)
-  const timeStr=hour==='*'&&min==='*'?'每分钟':hour==='*'?`每小时第 ${min} 分`:`${hour}:${min.padStart(2,'0')}`
-  return parts.length?`${parts.join(' ')} ${timeStr} 执行`:timeStr+' 执行'
+  try {
+    return cronstrue.toString(expr.value, { locale: 'zh_CN' })
+  } catch {
+    return '⚠ 无效的 cron 表达式'
+  }
 })
-function matchField(field: string, val: number): boolean {
-  if (field === '*') return true
-  if (field.startsWith('*/')) return val % parseInt(field.slice(2)) === 0
-  if (field.includes('-')) { const [a,b]=field.split('-').map(Number); return val>=a&&val<=b }
-  if (field.includes(',')) return field.split(',').map(Number).includes(val)
-  return parseInt(field) === val
-}
 
 const nextRuns = computed(()=>{
   const p=expr.value.trim().split(/\s+/)
   if(p.length!==5) return []
-  const [minF,hourF,dayF,monF,dowF]=p
-  const results: Date[]=[]
-  const d=new Date(); d.setSeconds(0,0); d.setMinutes(d.getMinutes()+1)
-  let count=0
-  while(results.length<5&&count<525600){
-    if(matchField(minF,d.getMinutes())&&matchField(hourF,d.getHours())&&matchField(dayF,d.getDate())&&matchField(monF,d.getMonth()+1)&&matchField(dowF,d.getDay()))
-      results.push(new Date(d))
-    d.setMinutes(d.getMinutes()+1); count++
+  try {
+    const interval = cronParser.parseExpression(expr.value)
+    const results: Date[] = []
+    for (let i = 0; i < 5; i++) {
+      results.push(interval.next().toDate())
+    }
+    return results
+  } catch {
+    return []
   }
-  return results
 })
 </script>

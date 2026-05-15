@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'snake' }]" />
 
-    <div class="pt-20 w-full max-w-lg">
-      <div class="text-center mb-6">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+      <div class="mb-6">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: snake.exe</p>
         <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-green)] mb-1" style="text-shadow:0 0 20px rgba(57,255,20,0.5)">SNAKE</h1>
         <p class="font-mono text-xs text-[var(--color-text-muted)]">WASD / 方向键 移动 · Space 暂停 · R 重新开始</p>
@@ -41,6 +41,7 @@
         <button class="dpad-btn" data-dir="DOWN">▼</button>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

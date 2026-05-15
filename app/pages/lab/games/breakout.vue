@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'breakout' }]" />
 
-    <div class="pt-20 w-full max-w-5xl">
-      <div class="text-center mb-4">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+      <div class="mb-4">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-1">process: breakout.exe</p>
         <h1 class="font-mono text-2xl font-bold mb-1" style="color:#00d4ff;text-shadow:0 0 20px rgba(0,212,255,0.5)">BREAKOUT</h1>
         <p class="font-mono text-xs text-[var(--color-text-muted)]">鼠标移动 / ← → 键控制挡板</p>
@@ -25,6 +25,7 @@
         <div class="border border-[var(--color-void-border)] rounded-lg p-2 bg-[var(--color-void-card)]"><div class="text-[var(--color-neon-purple)] mb-1">重置</div><div>R</div></div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

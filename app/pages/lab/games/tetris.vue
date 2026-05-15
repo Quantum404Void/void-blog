@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'tetris' }]" />
-    <div class="pt-20 w-full max-w-2xl">
-      <div class="text-center mb-6">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+      <div class="mb-6">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: tetris.exe</p>
         <h1 class="font-mono text-2xl font-bold mb-1" style="color:#b400ff;text-shadow:0 0 20px rgba(180,0,255,0.5)">TETRIS</h1>
         <p class="font-mono text-xs text-[var(--color-text-muted)]">← → 移动 · ↑/Z 旋转 · ↓ 加速 · Space 硬降 · P 暂停</p>
@@ -29,6 +29,7 @@
         </div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

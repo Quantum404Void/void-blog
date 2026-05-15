@@ -1,15 +1,19 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col items-center justify-center p-4">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'flappy-void' }]" />
-    <div class="pt-20 flex flex-col items-center gap-4">
-      <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)]" style="text-shadow:0 0 20px rgba(0,212,255,0.5)">Flappy Void</h1>
-      <p class="font-mono text-xs text-[var(--color-text-muted)]">Space / Click / Tap 跳跃</p>
-      <canvas ref="canvasEl" width="380" height="540" class="border border-[var(--color-void-border)] rounded-xl" style="background:#06060e;cursor:pointer"></canvas>
-      <div class="flex gap-6 font-mono text-xs text-[var(--color-text-muted)]">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+      <div class="mb-6">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: flappy.exe</p>
+        <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-cyan)] mb-1" style="text-shadow:0 0 20px rgba(0,212,255,0.5)">FLAPPY VOID</h1>
+        <p class="font-mono text-xs text-[var(--color-text-muted)]">Space / Click / Tap 跳跃</p>
+      </div>
+      <canvas ref="canvasEl" width="380" height="540" class="border border-[var(--color-void-border)] rounded-xl w-full" style="background:#06060e;cursor:pointer"></canvas>
+      <div class="flex gap-6 font-mono text-xs text-[var(--color-text-muted)] mt-4">
         <span>SCORE: <span class="text-[var(--color-neon-cyan)] font-bold">{{ score }}</span></span>
         <span>BEST: <span class="text-[var(--color-neon-green)] font-bold">{{ best }}</span></span>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 
