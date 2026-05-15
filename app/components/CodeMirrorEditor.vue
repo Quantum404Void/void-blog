@@ -13,7 +13,10 @@ import { cpp } from '@codemirror/lang-cpp'
 import { sql } from '@codemirror/lang-sql'
 import { html } from '@codemirror/lang-html'
 import { css } from '@codemirror/lang-css'
-import { languages } from '@codemirror/language-data'
+// 仅保留博客常用语言，避免 language-data 把 700+ 语言全部打包
+const COMMON_LANGS = ['C', 'C++', 'JavaScript', 'TypeScript', 'Python', 'Rust', 'Go', 'Java', 'CSS', 'HTML', 'JSON', 'YAML', 'SQL', 'Markdown', 'Shell', 'Dockerfile']
+import { languages as allLanguages } from '@codemirror/language-data'
+const filteredLanguages = allLanguages.filter(l => COMMON_LANGS.includes(l.name))
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
 import { highlightSelectionMatches } from '@codemirror/search'
@@ -50,7 +53,7 @@ function getLangExtension(lang: string) {
     case 'html': return html()
     case 'css': return css()
     case 'markdown': case 'md':
-      return markdown({ base: markdownLanguage, codeLanguages: languages })
+      return markdown({ base: markdownLanguage, codeLanguages: filteredLanguages })
     default: return []
   }
 }

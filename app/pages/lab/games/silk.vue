@@ -137,52 +137,48 @@ function getStrokeColor(alpha: number): string {
   return `hsla(${hue},100%,70%,${alpha})`
 }
 
-// ---- 核心绘制：tapered stroke ----
-// 模拟 weavesilk 的笔触：从起点到终点，线宽从细到粗再到细
-function drawTaperedLine(
+// ---- 核心绘制：均匀笔触（weavesilk 风格）----
+// 速度决定线宽，三层叠加产生发光感，单条 path 保证均匀
+function drawSilkLine(
   ctx: CanvasRenderingContext2D,
   x1: number, y1: number,
   x2: number, y2: number,
   speed: number
 ) {
   const dist = Math.hypot(x2-x1, y2-y1)
-  if (dist < 0.5) return
+  if (dist < 0.3) return
 
-  // 速度越快线越细，停止时最粗
-  const maxW = Math.max(1, brushMax.value - speed * 0.3)
-  const segments = Math.max(2, Math.ceil(dist / 2))
+  // 速度越快线越细，停止时最粗；用平滑映射避免突变
+  const t = Math.min(1, speed / 20)
+  const w = Math.max(0.5, brushMax.value * (1 - t * 0.75))
 
   ctx.globalCompositeOperation = 'lighter'
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
 
-  for (let i = 0; i < segments; i++) {
-    const t0 = i / segments
-    const t1 = (i+1) / segments
-    const tx0 = x1 + (x2-x1)*t0
-    const ty0 = y1 + (y2-y1)*t0
-    const tx1 = x1 + (x2-x1)*t1
-    const ty1 = y1 + (y2-y1)*t1
+  // 外层光晕
+  ctx.beginPath()
+  ctx.moveTo(x1, y1)
+  ctx.lineTo(x2, y2)
+  ctx.lineWidth = w * 2.5
+  ctx.strokeStyle = getStrokeColor(0.03)
+  ctx.stroke()
 
-    // tapered：两端细，中间粗（bell curve）
-    const taper = Math.sin(Math.PI * ((t0+t1)/2))
-    const w = Math.max(0.3, maxW * taper)
+  // 中层
+  ctx.beginPath()
+  ctx.moveTo(x1, y1)
+  ctx.lineTo(x2, y2)
+  ctx.lineWidth = w * 1.2
+  ctx.strokeStyle = getStrokeColor(0.10)
+  ctx.stroke()
 
-    // 外层光晕（更大更透明）
-    ctx.lineWidth  = w * 3
-    ctx.strokeStyle = getStrokeColor(0.04)
-    ctx.beginPath(); ctx.moveTo(tx0,ty0); ctx.lineTo(tx1,ty1); ctx.stroke()
-
-    // 中层
-    ctx.lineWidth  = w * 1.5
-    ctx.strokeStyle = getStrokeColor(0.12)
-    ctx.beginPath(); ctx.moveTo(tx0,ty0); ctx.lineTo(tx1,ty1); ctx.stroke()
-
-    // 核心线
-    ctx.lineWidth  = Math.max(0.3, w * 0.5)
-    ctx.strokeStyle = getStrokeColor(0.5)
-    ctx.beginPath(); ctx.moveTo(tx0,ty0); ctx.lineTo(tx1,ty1); ctx.stroke()
-  }
+  // 核心亮线
+  ctx.beginPath()
+  ctx.moveTo(x1, y1)
+  ctx.lineTo(x2, y2)
+  ctx.lineWidth = Math.max(0.4, w * 0.45)
+  ctx.strokeStyle = getStrokeColor(0.55)
+  ctx.stroke()
 }
 
 // ---- 对称绘制 ----
@@ -202,11 +198,11 @@ function drawSymmetric(mx: number, my: number, px: number, py: number) {
     ctx.rotate(angle)
 
     // 正向
-    drawTaperedLine(ctx, px-cx, py-cy, mx-cx, my-cy, speed)
+    drawSilkLine(ctx, px-cx, py-cy, mx-cx, my-cy, speed)
 
-    // 镜像（weavesilk 在每个轴上同时画镜像）
+    // 镜像
     ctx.scale(1, -1)
-    drawTaperedLine(ctx, px-cx, -(py-cy), mx-cx, -(my-cy), speed)
+    drawSilkLine(ctx, px-cx, -(py-cy), mx-cx, -(my-cy), speed)
 
     ctx.restore()
   }
