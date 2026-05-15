@@ -154,7 +154,7 @@ function addPoint(x: number, y: number, vx: number, vy: number) {
     py: y - vy,
     inputVx: vx,
     inputVy: vy,
-    life: 150,
+    life: 80,
     hue: currentHue,
   })
 }
@@ -350,6 +350,7 @@ function getPos(e: MouseEvent | Touch) {
 function onMouseDown(e: MouseEvent) {
   const pos = getPos(e)
   isPressed = true
+  particles = []  // 新笔画开始，旧轨迹已画到 canvas上
   mouseX = pos.x; mouseY = pos.y
   prevX = pos.x; prevY = pos.y
 }
@@ -365,6 +366,7 @@ function onTouchStart(e: TouchEvent) {
   e.preventDefault()
   const pos = getPos(e.touches[0]!)
   isPressed = true
+  particles = []  // 新笔画开始
   mouseX = pos.x; mouseY = pos.y
   prevX = pos.x; prevY = pos.y
 }
