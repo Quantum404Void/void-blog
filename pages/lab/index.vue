@@ -2,21 +2,21 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab' }]" />
 
-    <div class="max-w-5xl mx-auto px-6 py-14">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-14">
       <div class="mb-12">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-3">interactive_lab</p>
-        <h1 class="font-mono text-4xl font-bold text-[var(--color-text-primary)] mb-2" style="text-shadow:0 0 30px rgba(180,0,255,0.2)">
+        <h1 class="font-mono text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-2" style="text-shadow:0 0 30px rgba(180,0,255,0.2)">
           <span style="color:rgba(180,0,255,0.9)">~/</span>lab
         </h1>
         <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
-        <div class="flex gap-6 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
+        <div class="flex flex-wrap gap-x-6 gap-y-2 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
           <span><span style="color:rgba(180,0,255,0.9)">{{ games.length }}</span> 游戏</span>
           <span><span style="color:rgba(0,212,255,0.9)">{{ tools.length }}</span> 工具</span>
           <span><span style="color:rgba(57,255,20,0.9)">∞</span> 折腾</span>
         </div>
 
         <!-- 搜索过滤 -->
-        <div class="mt-6 relative max-w-sm">
+        <div class="mt-6 relative w-full max-w-sm">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-mono text-xs pointer-events-none">~/</span>
           <input
             v-model="searchQuery"
@@ -38,11 +38,11 @@
             v-for="game in filteredGames"
             :key="game.href"
             :href="game.href"
-            class="group block border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
+            class="group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
             @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = game.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + game.color + '25' }"
             @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
           >
-            <div class="flex items-start justify-between mb-3">
+            <div class="flex items-start justify-between gap-3 mb-3">
               <span class="text-2xl transition-transform duration-200 group-hover:scale-110">{{ game.icon }}</span>
               <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border tracking-wider" :style="`border-color:${game.color}44;color:${game.color}cc;background:${game.color}0d`">{{ game.tag }}</span>
             </div>
@@ -63,11 +63,11 @@
             v-for="tool in filteredTools"
             :key="tool.href"
             :href="tool.href"
-            class="group block border border-[var(--color-void-border)] rounded-xl p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
+            class="group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
             @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = tool.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
             @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
           >
-            <div class="flex items-start justify-between mb-3">
+            <div class="flex items-start justify-between gap-3 mb-3">
               <span class="text-xl font-mono font-bold transition-transform duration-200 group-hover:scale-110 inline-block" :style="`color:${tool.color}`">{{ tool.icon }}</span>
               <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border tracking-wider" :style="`border-color:${tool.color}44;color:${tool.color}cc;background:${tool.color}0d`">{{ tool.tag }}</span>
             </div>

@@ -6,7 +6,7 @@
     <AppNav :crumbs="[{ label: 'blog', href: '/blog' }, { label: post?.title ?? slug }]" />
 
     <!-- Layout: article + TOC -->
-    <div class="max-w-6xl mx-auto px-6 py-16 flex gap-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex gap-8 xl:gap-12">
       <!-- Article -->
       <main class="flex-1 min-w-0 max-w-3xl">
         <header class="mb-12">
@@ -25,23 +25,23 @@
             {{ post.title }}
           </h1>
 
-          <p v-if="post.description" class="text-lg text-[var(--color-text-secondary)] mb-6 leading-relaxed">
+          <p v-if="post.description" class="text-base sm:text-lg text-[var(--color-text-secondary)] mb-6 leading-relaxed">
             {{ post.description }}
           </p>
 
-          <div class="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-[var(--color-text-muted)] border-t border-[var(--color-void-border)] pt-4 mt-6">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs text-[var(--color-text-muted)] border-t border-[var(--color-void-border)] pt-4 mt-6">
             <span class="flex items-center gap-1.5">
               <span class="text-[var(--color-neon-green)]">$</span>
               <time :datetime="post.pub_date" class="text-[var(--color-text-secondary)]">{{ formatDateLong(post.pub_date) }}</time>
             </span>
-            <span class="text-[var(--color-void-muted)]">·</span>
+            <span class="hidden sm:inline text-[var(--color-void-muted)]">·</span>
             <span class="flex items-center gap-1.5">
               <span class="text-[var(--color-neon-purple)]">⏱</span>
               <span>{{ formatCount(wordCount) }} 字</span>
               <span class="text-[var(--color-void-muted)]">/</span>
               <span>约 {{ readingTime }} min</span>
             </span>
-            <span class="text-[var(--color-void-muted)]">·</span>
+            <span class="hidden sm:inline text-[var(--color-void-muted)]">·</span>
             <span class="flex items-center gap-1.5">
               <span class="text-[var(--color-neon-cyan)]">👁</span>
               <span>{{ postViews || '—' }} views</span>
@@ -55,7 +55,7 @@
         <!-- Footer -->
         <footer class="mt-16 pt-8 border-t border-[var(--color-void-border)] space-y-10">
           <!-- Views + Likes -->
-          <div class="flex items-center justify-center gap-8">
+          <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
             <div class="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
               <span class="text-base">👁</span>
               <span>{{ postViews }} 次阅读</span>
@@ -74,7 +74,7 @@
           </div>
 
           <!-- Prev/Next -->
-          <div class="grid grid-cols-2 gap-4 font-mono text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
             <NuxtLink
               v-if="prevPost"
               :href="`/blog/${prevPost.slug}`"
@@ -83,16 +83,15 @@
               <span class="text-[var(--color-text-muted)] text-[10px] uppercase tracking-widest">← 上一篇</span>
               <span class="text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors line-clamp-2 leading-snug">{{ prevPost.title }}</span>
             </NuxtLink>
-            <div v-else />
             <NuxtLink
               v-if="nextPost"
               :href="`/blog/${nextPost.slug}`"
-              class="next-post-link group flex flex-col gap-1 p-4 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all text-right"
+              class="next-post-link group flex flex-col gap-1 p-4 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all text-left sm:text-right"
+              :class="!prevPost ? 'sm:col-start-2' : ''"
             >
               <span class="text-[var(--color-text-muted)] text-[10px] uppercase tracking-widest">下一篇 →</span>
               <span class="text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors line-clamp-2 leading-snug">{{ nextPost.title }}</span>
             </NuxtLink>
-            <div v-else />
           </div>
 
           <!-- Related -->
@@ -123,7 +122,7 @@
           </div>
 
           <!-- Author strip + Share -->
-          <div class="flex items-center justify-between flex-wrap gap-4 py-4 border-t border-[var(--color-void-border)]">
+          <div class="flex flex-col items-start gap-4 py-4 border-t border-[var(--color-void-border)] sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
               <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">{{ authorInitial }}</div>
               <div>
@@ -131,12 +130,12 @@
                 <div style="font-size:10px;color:rgba(136,136,170,0.8)">C++ / Python / AI Agent / 桌面应用</div>
               </div>
             </div>
-            <div class="flex gap-3 font-mono text-[10px] text-[var(--color-text-muted)] items-center">
+            <div class="flex flex-wrap gap-3 font-mono text-[10px] text-[var(--color-text-muted)] items-center">
               <a :href="authorGithub" target="_blank" rel="noopener" class="hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
               <NuxtLink href="/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS</NuxtLink>
               <button
                 @click="copyLink"
-                class="flex items-center gap-1 px-2.5 py-1 rounded border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:text-[var(--color-neon-cyan)] transition-all"
+                class="flex items-center gap-1 whitespace-nowrap px-2.5 py-1 rounded border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:text-[var(--color-neon-cyan)] transition-all"
                 :class="copied ? 'text-[var(--color-neon-green)] border-[rgba(0,255,136,0.35)]' : ''"
               >
                 <svg v-if="!copied" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -176,7 +175,7 @@
   <!-- Mobile TOC drawer -->
   <Transition name="slide-up">
     <div v-if="tocOpen" class="xl:hidden fixed inset-0 z-40 flex flex-col justify-end" @click.self="tocOpen = false">
-      <div class="bg-[var(--color-void-card)] border-t border-[var(--color-void-border)] rounded-t-2xl p-6 max-h-[60vh] overflow-y-auto shadow-2xl">
+      <div class="bg-[var(--color-void-card)] border-t border-[var(--color-void-border)] rounded-t-2xl p-4 sm:p-6 max-h-[60vh] overflow-y-auto shadow-2xl">
         <div class="flex items-center justify-between mb-4">
           <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▶</span> 目录
@@ -191,7 +190,7 @@
   <button
     v-if="tocHeadings.length > 1"
     @click="tocOpen = !tocOpen"
-    class="xl:hidden fixed bottom-20 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
+    class="xl:hidden fixed bottom-[4.5rem] right-4 sm:bottom-20 sm:right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
     style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--color-neon-cyan);backdrop-filter:blur(8px);"
     title="目录"
   >
@@ -204,7 +203,7 @@
   <Transition name="slide-down">
     <div
       v-if="continueBar.show"
-      class="fixed top-0 left-0 right-0 z-[110] flex items-center justify-between px-4 py-2.5 font-mono text-xs"
+      class="fixed top-0 left-0 right-0 z-[110] flex flex-col items-start gap-2 px-4 py-2.5 font-mono text-xs sm:flex-row sm:items-center sm:justify-between"
       style="background:rgba(19,19,31,0.95);border-bottom:1px solid rgba(0,212,255,0.25);backdrop-filter:blur(8px);"
     >
       <span style="color:var(--color-text-muted)">上次读到 <span style="color:var(--color-neon-cyan)">{{ continueBar.pct }}%</span></span>

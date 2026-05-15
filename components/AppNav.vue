@@ -1,15 +1,15 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center gap-2">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
       <!-- Logo -->
       <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest shrink-0 cursor-blink">
         {{ siteName }}
       </NuxtLink>
 
       <!-- 面包屑 -->
-      <template v-if="crumbs.length">
+      <div v-if="crumbs.length" class="hidden sm:flex items-center gap-2 min-w-0">
         <template v-for="(crumb, i) in crumbs" :key="i">
-          <span class="text-[var(--color-void-muted)] font-mono text-xs">/</span>
+          <span class="text-[var(--color-void-muted)] font-mono text-xs shrink-0">/</span>
           <NuxtLink v-if="crumb.href" :href="crumb.href"
             class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors truncate max-w-[160px]">
             {{ crumb.label }}
@@ -18,10 +18,10 @@
             {{ crumb.label }}
           </span>
         </template>
-      </template>
+      </div>
 
       <!-- 右侧固定导航 -->
-      <div class="ml-auto flex items-center gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
+      <div class="ml-auto flex items-center gap-4 sm:gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
         <NuxtLink v-for="link in navLinks" :key="link.href" :href="link.href"
           class="hidden sm:block transition-colors relative pb-0.5"
           :class="isActive(link.href)
@@ -38,7 +38,7 @@
         <span class="hidden lg:block font-mono text-[9px] text-[var(--color-void-muted)] select-none">v1.0</span>
         <!-- 移动端 hamburger -->
         <button
-          class="sm:hidden flex flex-col gap-1 p-1"
+          class="sm:hidden flex flex-col gap-1 -mr-1 p-2 rounded-md border border-transparent hover:border-[var(--color-void-border)] transition-colors"
           @click="mobileOpen = !mobileOpen"
           aria-label="Toggle menu"
         >
@@ -58,7 +58,7 @@
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-2"
     >
-      <div v-if="mobileOpen" class="sm:hidden border-t border-[var(--color-void-border)] px-6 py-3 flex flex-col gap-2" style="background:rgba(5,5,12,0.95)">
+      <div v-if="mobileOpen" class="sm:hidden border-t border-[var(--color-void-border)] px-4 py-3 flex flex-col gap-2" style="background:rgba(5,5,12,0.95)">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.href"
@@ -83,6 +83,10 @@ const { siteName } = useSiteConfig()
 const route = useRoute()
 
 const mobileOpen = ref(false)
+
+watch(() => route.path, () => {
+  mobileOpen.value = false
+})
 
 const props = withDefaults(defineProps<{
   crumbs?: { label: string; href?: string }[]

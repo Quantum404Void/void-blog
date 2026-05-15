@@ -3,7 +3,7 @@
     :href="`/blog/${post.slug}`"
     class="group relative block p-4 rounded-xl border border-transparent hover:border-[var(--color-void-border)] hover:bg-[var(--color-void-card)] transition-all"
   >
-    <div class="flex items-start justify-between gap-4 mb-1">
+    <div class="mb-1 flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
       <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
         {{ post.title }}
       </h3>
@@ -21,7 +21,7 @@
         class="font-mono text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]"
       >#{{ t }}</span>
     </div>
-    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-cyan)] group-hover:translate-x-1 transition-all duration-150 text-sm font-mono opacity-0 group-hover:opacity-100">→</span>
+    <span class="absolute right-4 top-1/2 hidden -translate-y-1/2 text-[var(--color-text-muted)] group-hover:text-[var(--color-neon-cyan)] group-hover:translate-x-1 transition-all duration-150 text-sm font-mono opacity-0 group-hover:opacity-100 sm:block">→</span>
   </NuxtLink>
 </template>
 

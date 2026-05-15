@@ -3,15 +3,15 @@
     <AppNav />
 
     <!-- Hero -->
-    <section class="relative py-24 border-b border-[var(--color-void-border)] overflow-hidden">
+    <section class="relative py-20 sm:py-24 border-b border-[var(--color-void-border)] overflow-hidden">
       <div class="absolute inset-0 opacity-[0.06]"
            style="background-image: linear-gradient(var(--color-neon-green) 1px, transparent 1px), linear-gradient(90deg, var(--color-neon-green) 1px, transparent 1px); background-size: 40px 40px;"></div>
       <div class="absolute top-0 right-0 rounded-full" style="width:600px;height:600px;background:radial-gradient(circle, rgba(180,76,255,0.12), transparent 70%);transform:translate(30%,-30%);pointer-events:none"></div>
       <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
-      <div class="relative max-w-6xl mx-auto px-6">
-        <div class="flex items-start gap-4 mb-8">
+      <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex items-start gap-3 sm:gap-4 mb-8">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
             <p class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2">
@@ -19,7 +19,7 @@
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
-            <h1 class="text-5xl sm:text-7xl font-bold font-mono leading-none mb-6">
+            <h1 class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6">
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
             <div class="font-mono text-sm space-y-2.5 max-w-xl">
@@ -43,7 +43,7 @@
         </div>
 
         <!-- Stats bar -->
-        <div class="flex gap-8 font-mono text-xs text-[var(--color-text-muted)] animate-fade-up" style="animation-delay:0.4s">
+        <div class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)] animate-fade-up" style="animation-delay:0.4s">
           <div class="flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▸</span>
             <span style="color:#e8e8f0;font-weight:bold">{{ allPosts.length }}</span>
@@ -64,7 +64,7 @@
     </section>
 
     <!-- Content grid -->
-    <div class="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 sm:gap-12">
       <!-- Posts list -->
       <section>
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
@@ -74,7 +74,7 @@
         </h2>
 
         <!-- Timeline -->
-        <div class="relative pl-5">
+        <div class="relative pl-4 sm:pl-5">
           <!-- vertical line -->
           <div class="absolute left-1.5 top-2 bottom-2 w-px" style="background:linear-gradient(to bottom,rgba(0,212,255,0.3),rgba(180,76,255,0.2),transparent)"></div>
           <div class="space-y-0">
@@ -90,7 +90,7 @@
                 class="absolute -left-[1.15rem] top-5 w-2.5 h-2.5 rounded-full border-2 border-[var(--color-void)] shrink-0 z-10 transition-transform group-hover:scale-125"
                 :style="`background: var(--color-${getTagColor(post.tags[0] ?? '')}); box-shadow: 0 0 6px var(--color-${getTagColor(post.tags[0] ?? '')})`"
               ></div>
-              <div class="flex items-start justify-between gap-4">
+              <div class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
                   {{ post.title }}
                 </h3>
@@ -98,7 +98,7 @@
                   {{ formatDate(post.pub_date) }}
                 </time>
               </div>
-              <p v-if="post.description" class="text-xs mt-1 line-clamp-1 leading-relaxed" style="color:#9999bb">
+              <p v-if="post.description" class="text-xs mt-1 line-clamp-2 sm:line-clamp-1 leading-relaxed" style="color:#9999bb">
                 {{ post.description }}
               </p>
               <div class="flex flex-wrap gap-1.5 mt-2">
@@ -223,9 +223,9 @@ const { formatDate } = useFormatDate()
 
 onMounted(() => {
   const lines = [
-    { el: heroLine0, text: 'interest = ["C++", "Python", "AI Agent", "桌面应用"]', delay: 200 },
-    { el: heroLine1, text: 'stack    = ["C++", "TypeScript", "Vue", "Nuxt"]', delay: 600 },
-    { el: heroLine2, text: 'status   = 在线 ●', delay: 1000 },
+    { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', delay: 200 },
+    { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]', delay: 600 },
+    { el: heroLine2, text: '在线 ●', delay: 1000 },
   ]
   lines.forEach(({ el, text, delay }) => {
     const node = el.value

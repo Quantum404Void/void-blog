@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'tags', href: '/tags' }, { label: `#${tag}` }]" />
-    <main class="max-w-3xl mx-auto px-6 py-16">
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <div class="mb-10">
         <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-2">
           <span class="text-[var(--color-neon-cyan)]">#</span>{{ tag }}

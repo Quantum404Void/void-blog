@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'stats' }]" />
 
-    <div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <div class="mb-12">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.2em] uppercase mb-3">analytics</p>
         <h1 class="font-mono text-3xl font-bold text-[var(--color-text-primary)] mb-2">
@@ -13,20 +13,20 @@
 
       <!-- 概览卡片 -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
-        <div v-for="card in overviewCards" :key="card.label" class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-5">
+        <div v-for="card in overviewCards" :key="card.label" class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-4 sm:p-5">
           <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2 flex items-center gap-1">
             <span :style="`color:var(--color-${card.color})`">▸</span>
             {{ card.label }}
           </div>
           <div class="flex items-end gap-2">
-            <div class="font-mono text-2xl font-bold" :style="`color:var(--color-${card.color})`">{{ card.value }}</div>
+            <div class="font-mono text-xl sm:text-2xl font-bold" :style="`color:var(--color-${card.color})`">{{ card.value }}</div>
           </div>
         </div>
       </div>
 
       <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+        <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-4 sm:p-6">
           <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▶</span> 年度文章分布
           </h2>
@@ -35,7 +35,7 @@
           </ClientOnly>
         </div>
 
-        <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+        <div class="border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-4 sm:p-6">
           <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
             <span class="text-[var(--color-neon-cyan)]">▶</span> 热门标签 Top 12
           </h2>
@@ -46,10 +46,10 @@
       </div>
 
       <!-- 月度贡献热力图 (GitHub contributions 风格) -->
-      <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
-        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+      <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-4 sm:p-6">
+        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex flex-wrap items-center gap-2">
           <span class="text-[var(--color-neon-green)]">&#9654;</span> 写作热力图
-          <span class="ml-auto text-[9px] normal-case tracking-normal">{{ heatmapRange }}</span>
+          <span class="w-full sm:w-auto sm:ml-auto text-[9px] normal-case tracking-normal">{{ heatmapRange }}</span>
         </h2>
         <div class="overflow-x-auto pb-2">
           <div class="flex gap-[3px]" style="min-width: max-content">
@@ -71,7 +71,7 @@
       </div>
 
       <!-- Timeline -->
-      <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-6">
+      <div class="mt-8 border border-[var(--color-void-border)] bg-[var(--color-void-card)] rounded-xl p-4 sm:p-6">
         <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
           <span class="text-[var(--color-neon-purple)]">▶</span> 文章时间线
         </h2>
@@ -80,9 +80,9 @@
             v-for="p in timelinePosts"
             :key="p.slug"
             :href="`/blog/${p.slug}`"
-            class="group flex items-center gap-4 py-2 px-2 rounded-lg hover:bg-[var(--color-void-muted)] transition-colors"
+            class="group flex flex-col items-start gap-1.5 px-2 py-2 sm:flex-row sm:items-center sm:gap-4 rounded-lg hover:bg-[var(--color-void-muted)] transition-colors"
           >
-            <time class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-24">
+            <time class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 w-auto sm:w-24">
               {{ new Date(p.pub_date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }) }}
             </time>
             <span class="font-mono text-xs text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors line-clamp-1 flex-1">

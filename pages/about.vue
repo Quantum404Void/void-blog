@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'about' }]" />
 
-    <main class="max-w-3xl mx-auto px-6 py-16">
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <!-- 终端头部 -->
       <div class="font-mono mb-12">
         <div class="text-xs space-y-1 mb-6">
@@ -32,24 +32,24 @@
 
       <div class="space-y-6 font-mono text-sm">
         <!-- whoami 信息 -->
-        <div class="border border-[var(--color-void-border)] rounded-xl p-6 bg-[var(--color-void-card)]">
+        <div class="border border-[var(--color-void-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-void-card)]">
           <div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▸</span> cat ./whoami
           </div>
-          <div class="space-y-1.5 text-[var(--color-text-secondary)] text-xs">
-            <div class="flex gap-3">
+          <div class="space-y-2 text-[var(--color-text-secondary)] text-xs">
+            <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] w-16 shrink-0">name</span>
               <span class="text-[var(--color-text-primary)]">{{ authorName }}</span>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] w-16 shrink-0">role</span>
               <span class="text-[var(--color-text-primary)]">C++ / Python / AI Agent / 桌面应用工程师</span>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] w-16 shrink-0">since</span>
               <span class="text-[var(--color-text-primary)]">2022.08</span>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] w-16 shrink-0">motto</span>
               <span class="text-[var(--color-text-muted)] italic">{{ authorMotto }}</span>
             </div>
@@ -57,7 +57,7 @@
         </div>
 
         <!-- 这里写什么 -->
-        <div class="border border-[var(--color-void-border)] rounded-xl p-6 bg-[var(--color-void-card)]">
+        <div class="border border-[var(--color-void-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-void-card)]">
           <div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
             <span class="text-[var(--color-neon-cyan)]">▸</span> cat ./topics
             <span class="text-[var(--color-text-muted)] normal-case tracking-normal ml-1">没有固定方向，碰到值得记的就写</span>
@@ -77,7 +77,7 @@
         </div>
 
         <!-- 技术栈 -->
-        <div class="border border-[var(--color-void-border)] rounded-xl p-6 bg-[var(--color-void-card)]">
+        <div class="border border-[var(--color-void-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-void-card)]">
           <div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
             <span class="text-[var(--color-neon-purple)]">▸</span> cat ./package.json | jq '.stack[]'
           </div>
@@ -95,64 +95,64 @@
         </div>
 
         <!-- 联系 -->
-        <div class="border border-[var(--color-void-border)] rounded-xl p-6 bg-[var(--color-void-card)]">
+        <div class="border border-[var(--color-void-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-void-card)]">
           <div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
             <span class="text-[var(--color-neon-pink)]">▸</span> cat ./contact
           </div>
-          <div class="space-y-2 text-xs">
+          <div class="space-y-3 text-xs">
             <a :href="authorGithub" target="_blank" rel="noopener"
-              class="flex items-center gap-3 group">
+              class="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3 group">
               <span class="text-[var(--color-text-muted)] w-16 shrink-0 group-hover:text-[var(--color-neon-green)] transition-colors">GitHub</span>
-              <span class="text-[var(--color-text-muted)]">→</span>
-              <span class="text-[var(--color-neon-green)] group-hover:underline">{{ authorGithub.replace('https://','') }}</span>
+              <span class="hidden sm:inline text-[var(--color-text-muted)]">→</span>
+              <span class="break-all text-[var(--color-neon-green)] group-hover:underline">{{ authorGithub.replace('https://','') }}</span>
             </a>
             <a :href="`mailto:${authorEmail}`"
-              class="flex items-center gap-3 group">
+              class="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3 group">
               <span class="text-[var(--color-text-muted)] w-16 shrink-0 group-hover:text-[var(--color-neon-cyan)] transition-colors">Email</span>
-              <span class="text-[var(--color-text-muted)]">→</span>
-              <span class="text-[var(--color-neon-cyan)] group-hover:underline">{{ authorEmail }}</span>
+              <span class="hidden sm:inline text-[var(--color-text-muted)]">→</span>
+              <span class="break-all text-[var(--color-neon-cyan)] group-hover:underline">{{ authorEmail }}</span>
             </a>
             <NuxtLink href="/rss.xml"
-              class="flex items-center gap-3 group">
+              class="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3 group">
               <span class="text-[var(--color-text-muted)] w-16 shrink-0 group-hover:text-[var(--color-neon-purple)] transition-colors">RSS</span>
-              <span class="text-[var(--color-text-muted)]">→</span>
-              <span class="text-[var(--color-neon-purple)] group-hover:underline">{{ siteUrl }}/rss.xml</span>
+              <span class="hidden sm:inline text-[var(--color-text-muted)]">→</span>
+              <span class="break-all text-[var(--color-neon-purple)] group-hover:underline">{{ siteUrl }}/rss.xml</span>
             </NuxtLink>
           </div>
         </div>
 
         <!-- 本站 -->
-        <div class="border border-[var(--color-void-border)] rounded-xl p-6 bg-[var(--color-void-card)]">
+        <div class="border border-[var(--color-void-border)] rounded-xl p-4 sm:p-6 bg-[var(--color-void-card)]">
           <div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▸</span> cat ./package.json | jq '.dependencies | keys[]'
           </div>
-          <div class="text-xs space-y-1.5 text-[var(--color-text-muted)]">
-            <div class="flex gap-3 items-baseline">
+          <div class="text-xs space-y-2 text-[var(--color-text-muted)]">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] shrink-0 w-28">"nuxt"</span>
-              <span class="opacity-40">#</span>
+              <span class="hidden sm:inline opacity-40">#</span>
               <span>v3 — Vue 全栈框架</span>
             </div>
-            <div class="flex gap-3 items-baseline">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] shrink-0 w-28">"tailwindcss"</span>
-              <span class="opacity-40">#</span>
+              <span class="hidden sm:inline opacity-40">#</span>
               <span>v4 — CSS-first 配置</span>
             </div>
-            <div class="flex gap-3 items-baseline">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] shrink-0 w-28">"cloudflare-d1"</span>
-              <span class="opacity-40">#</span>
+              <span class="hidden sm:inline opacity-40">#</span>
               <span>SQLite at the edge，无服务器</span>
             </div>
-            <div class="flex gap-3 items-baseline">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
               <span class="text-[var(--color-neon-cyan)] shrink-0 w-28">"source"</span>
-              <span class="opacity-40">#</span>
+              <span class="hidden sm:inline opacity-40">#</span>
               <a :href="authorGithub + '/void-blog'" target="_blank"
-                class="text-[var(--color-neon-green)] hover:underline">
+                class="break-all text-[var(--color-neon-green)] hover:underline">
                 GitHub (MIT) — 随便用
               </a>
             </div>
           </div>
           <!-- curl 提示 -->
-          <div class="mt-4 pt-4 border-t border-[var(--color-void-border)] text-[10px] text-[var(--color-text-muted)]">
+          <div class="mt-4 break-all pt-4 border-t border-[var(--color-void-border)] text-[10px] text-[var(--color-text-muted)]">
             <span class="text-[var(--color-neon-green)]">$</span>
             curl {{ siteUrl }}/about
             <span class="ml-2 text-[var(--color-text-muted)] opacity-50"># terminal 用户专属彩蛋</span>

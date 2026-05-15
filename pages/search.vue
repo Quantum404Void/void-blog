@@ -2,13 +2,13 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'search' }]" />
 
-    <main class="max-w-3xl mx-auto px-6 py-16">
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-8 flex items-center gap-3">
         <span class="text-[var(--color-neon-green)]">$</span> grep -r
       </h1>
 
       <form @submit.prevent="doSearch" class="mb-10">
-        <div class="relative flex gap-3">
+        <div class="relative flex flex-col gap-3 sm:flex-row">
           <input
             v-model="q"
             type="text"
@@ -17,14 +17,14 @@
             class="flex-1 bg-[#0f0f1a] border border-[var(--color-void-border)] rounded-lg px-4 py-2.5 pr-10 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
           />
           <!-- loading spinner -->
-          <div v-if="pending" class="absolute right-[80px] top-1/2 -translate-y-1/2">
+          <div v-if="pending" class="absolute right-4 top-[1.3rem] -translate-y-1/2 sm:right-[80px] sm:top-1/2">
             <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="2">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
             </svg>
           </div>
           <button
             type="submit"
-            class="px-5 py-2.5 bg-[rgba(0,212,255,0.1)] border border-[rgba(0,212,255,0.35)] rounded-lg font-mono text-sm text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.2)] transition-colors"
+            class="w-full sm:w-auto px-5 py-2.5 bg-[rgba(0,212,255,0.1)] border border-[rgba(0,212,255,0.35)] rounded-lg font-mono text-sm text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.2)] transition-colors"
           >搜索</button>
         </div>
       </form>

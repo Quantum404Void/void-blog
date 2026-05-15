@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'tags', href: '/tags' }]" />
 
-    <main class="max-w-4xl mx-auto px-6 py-12">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <div class="mb-10">
         <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-1">
           <span class="text-[var(--color-neon-green)]">$</span> ls ~/tags
@@ -11,12 +11,12 @@
       </div>
 
       <!-- 标签热力云 -->
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-2 sm:gap-2.5">
         <NuxtLink
           v-for="[tag, count] in tags"
           :key="tag"
           :href="`/tags/${tag}`"
-          class="font-mono rounded-lg border transition-all hover:scale-105 hover:brightness-125"
+          class="inline-flex items-center font-mono rounded-lg border transition-all hover:scale-105 hover:brightness-125"
           :style="tagStyle(count)"
         >
           <span class="opacity-40 mr-0.5">#</span>{{ tag
@@ -51,12 +51,12 @@ const PALETTE = [
 
 function tagStyle(count: number) {
   const ratio = count / maxCount.value
-  const size = 10 + ratio * 7
+  const size = 9 + ratio * 6
   const idx = Math.floor(ratio * (PALETTE.length - 1))
   const p = PALETTE[idx]
   return {
     fontSize: `${size}px`,
-    padding: `${3 + ratio * 3}px ${8 + ratio * 5}px`,
+    padding: `${3 + ratio * 2.5}px ${8 + ratio * 4}px`,
     color: p.var,
     borderColor: `rgba(${p.color}, ${0.15 + ratio * 0.25})`,
     background: `rgba(${p.color}, ${0.03 + ratio * 0.05})`,
