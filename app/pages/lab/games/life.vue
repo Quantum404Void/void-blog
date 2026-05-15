@@ -22,6 +22,10 @@
     <AppFooter />
   </div>
 </template>
+
+<script setup lang="ts">
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Conway's Life | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const gen = ref(0), liveCount = ref(0), running = ref(false), speed = ref(60)
 const CELL=12, COLS=70, ROWS=50

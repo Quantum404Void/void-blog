@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'sort-visualizer' }]" />
-    <div class="max-w-7xl mx-auto px-4 py-4 flex-1 flex flex-col gap-3 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex flex-col gap-3">
       <div class="flex flex-wrap gap-2">
         <button v-for="([algo, label, tc, color]) in algos" :key="algo"
           @click="selectAlgo(algo, color)"
@@ -47,6 +47,7 @@
         </div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

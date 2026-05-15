@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'wordle' }]" />
-    <div class="flex-1 flex flex-col items-center py-8 px-4">
+    <div class="max-w-xl mx-auto px-4 sm:px-6 py-10 flex flex-col items-center">
       <div v-if="message" class="font-mono text-sm px-4 py-2 rounded-lg mb-4" :style="msgStyle">{{ message }}</div>
       <!-- Grid -->
       <div class="grid gap-2 mb-6" style="grid-template-rows: repeat(6,1fr)">
@@ -26,6 +26,7 @@
         </div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 

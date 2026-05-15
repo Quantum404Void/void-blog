@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'code-typing' }]" />
-    <div class="max-w-4xl mx-auto px-6 py-12 flex-1 flex flex-col">
-      <div class="mb-8 text-center">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-10 flex flex-col">
+      <div class="mb-6">
         <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-pink)] mb-2" style="text-shadow:0 0 20px rgba(255,0,170,0.5)">Code Typing</h1>
         <p class="font-mono text-xs text-[var(--color-text-muted)]">打完一段代码，测你的 WPM</p>
       </div>
@@ -34,6 +34,7 @@
         </div>
       </div>
     </div>
+    <AppFooter />
   </div>
 </template>
 
