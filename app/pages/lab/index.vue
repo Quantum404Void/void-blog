@@ -91,6 +91,20 @@
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lab | ${siteName}` })
 
+// 将滚动位置写入 sessionStorage，以便返回时恢复
+const SCROLL_KEY = 'lab-index-scroll'
+onMounted(() => {
+  const saved = sessionStorage.getItem(SCROLL_KEY)
+  if (saved) {
+    const y = parseInt(saved)
+    nextTick(() => window.scrollTo({ top: y, behavior: 'instant' }))
+    sessionStorage.removeItem(SCROLL_KEY)
+  }
+})
+onBeforeUnmount(() => {
+  sessionStorage.setItem(SCROLL_KEY, String(window.scrollY))
+})
+
 const searchQuery = ref('')
 
 const filteredGames = computed(() => {

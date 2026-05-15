@@ -81,7 +81,7 @@
 
     <!-- Hint -->
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/20 pointer-events-none whitespace-nowrap">
-      move mouse to paint · {{symmetry}}-axis symmetry
+      press & drag to paint · {{symmetry}}-axis symmetry
     </div>
     <AppFooter />
   </div>
@@ -117,7 +117,8 @@ let mouseX   = -9999
 let mouseY   = -9999
 let prevX    = -9999
 let prevY    = -9999
-let moving   = false   // 鼠标是否在移动（用于判断是否绘制）
+let moving   = false   // 鼠标在移动
+let isPressed = false  // 鼠标/触摸按下才画（weavesilk 风格）
 
 // ---- 颜色 ----
 function hexToRgb(hex: string) {
@@ -224,7 +225,7 @@ function applyFade() {
 function loop() {
   hue = (hue + hueSpeed.value) % 360
 
-  if (moving && prevX > -9000) {
+  if (moving && isPressed && prevX > -9000) {
     drawSymmetric(mouseX, mouseY, prevX, prevY)
   }
 
@@ -254,15 +255,30 @@ function onMouseMove(e: MouseEvent) {
   const pos = getPos(e)
   mouseX = pos.x; mouseY = pos.y; moving = true
 }
+function onMouseDown(e: MouseEvent) {
+  const pos = getPos(e)
+  isPressed = true
+  mouseX = pos.x; mouseY = pos.y
+  prevX = pos.x; prevY = pos.y; moving = false
+}
+function onMouseUp() {
+  isPressed = false; moving = false
+  prevX = -9999; prevY = -9999
+}
 function onTouchMove(e: TouchEvent) {
   e.preventDefault()
-  const pos = getPos(e.touches[0])
+  const pos = getPos(e.touches[0]!)
   mouseX = pos.x; mouseY = pos.y; moving = true
 }
 function onTouchStart(e: TouchEvent) {
   e.preventDefault()
-  const pos = getPos(e.touches[0])
+  const pos = getPos(e.touches[0]!)
+  isPressed = true
   mouseX = pos.x; mouseY = pos.y; prevX = pos.x; prevY = pos.y; moving = false
+}
+function onTouchEnd() {
+  isPressed = false; moving = false
+  prevX = -9999; prevY = -9999
 }
 
 // ---- 工具 ----
@@ -319,8 +335,12 @@ onMounted(() => {
   baseCtx.fillRect(0, 0, w, h)
 
   base.addEventListener('mousemove',  onMouseMove)
+  base.addEventListener('mousedown',  onMouseDown)
+  base.addEventListener('mouseup',    onMouseUp)
+  window.addEventListener('mouseup',  onMouseUp)  // 鼠标拖出画布外也能正确释放
   base.addEventListener('touchstart', onTouchStart, { passive: false })
   base.addEventListener('touchmove',  onTouchMove,  { passive: false })
+  base.addEventListener('touchend',   onTouchEnd)
   window.addEventListener('resize', resizeCanvases)
 
   rafId = requestAnimationFrame(loop)
@@ -331,9 +351,13 @@ onUnmounted(() => {
   const base = baseCanvas.value
   if (base) {
     base.removeEventListener('mousemove',  onMouseMove)
+    base.removeEventListener('mousedown',  onMouseDown)
+    base.removeEventListener('mouseup',    onMouseUp)
     base.removeEventListener('touchstart', onTouchStart)
     base.removeEventListener('touchmove',  onTouchMove)
+    base.removeEventListener('touchend',   onTouchEnd)
   }
+  window.removeEventListener('mouseup',  onMouseUp)
   window.removeEventListener('resize', resizeCanvases)
 })
 </script>
