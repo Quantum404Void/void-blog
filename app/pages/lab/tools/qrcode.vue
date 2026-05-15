@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen" style="background:#0a0a0f;color:#e0e0e0">
+  <div class="min-h-screen" style="background:var(--color-void);color:#e0e0e0">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'QR Code' }]" />
     <div class="max-w-2xl mx-auto px-4 py-12">
       <h1 class="text-3xl font-bold mb-2" style="color:#39ff14;font-family:monospace">
@@ -15,14 +15,14 @@
             type="text"
             placeholder="https://example.com"
             class="w-full px-3 py-2 rounded text-sm"
-            style="background:#111;border:1px solid #333;color:#e0e0e0;font-family:monospace;outline:none"
+            style="background:var(--color-void-card);border:1px solid #333;color:#e0e0e0;font-family:monospace;outline:none"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs mb-1" style="color:#888;font-family:monospace">ECC LEVEL</label>
-            <select v-model="eccLevel" class="w-full px-3 py-2 rounded text-sm" style="background:#111;border:1px solid #333;color:#e0e0e0;font-family:monospace">
+            <select v-model="eccLevel" class="w-full px-3 py-2 rounded text-sm" style="background:var(--color-void-card);border:1px solid #333;color:#e0e0e0;font-family:monospace">
               <option value="low">L — Low (7%)</option>
               <option value="medium">M — Medium (15%)</option>
               <option value="quartile">Q — Quartile (25%)</option>
@@ -56,11 +56,11 @@
 
       <div class="flex flex-col items-center gap-4">
         <ClientOnly>
-          <div class="rounded-lg p-4" style="background:#111;border:1px solid #222">
+          <div class="rounded-lg p-4" style="background:var(--color-void-card);border:1px solid #222">
             <canvas ref="canvasRef" :width="size" :height="size" />
           </div>
           <template #fallback>
-            <div class="rounded-lg p-4 flex items-center justify-center" :style="`background:#111;border:1px solid #222;width:${size}px;height:${size}px`">
+            <div class="rounded-lg p-4 flex items-center justify-center" :style="`background:var(--color-void-card);border:1px solid #222;width:${size}px;height:${size}px`">
               <span style="color:#444;font-family:monospace">loading...</span>
             </div>
           </template>

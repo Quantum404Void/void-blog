@@ -37,6 +37,7 @@
         </div>
       </div>
 
+      <div ref="listParent">
       <section v-for="year in years" :key="year" class="mb-14 relative">
         <div class="flex items-center gap-4 mb-5">
           <span class="font-mono text-sm font-bold text-[var(--color-neon-cyan)] glow-cyan border border-[rgba(0,212,255,0.4)] px-4 py-1.5 rounded-full bg-[rgba(0,212,255,0.08)] tracking-widest">
@@ -80,10 +81,11 @@
         </div>
       </section>
 
-      <!-- Empty state -->
+            <!-- Empty state -->
       <div v-if="filtered.length === 0" class="py-16 text-center">
         <p class="font-mono text-[var(--color-text-muted)] mb-3">没有找到 #{{ activeTag }} 的文章</p>
         <button @click="activeTag = ''" class="font-mono text-xs text-[var(--color-neon-cyan)] hover:underline"> 清除过滤</button>
+      </div>
       </div>
     </main>
 
@@ -92,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+import { useAutoAnimate } from '@formkit/auto-animate/vue'
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/blog')
 useSeoMeta({
@@ -118,13 +121,15 @@ const { getTagColor } = useTagColor()
 const { formatMonthDay } = useFormatDate()
 
 const byYear = computed(() => {
-  const acc: Record<string, any[]> = {}
+  const map: Record<string, any[]> = {}
   for (const p of filtered.value) {
     const y = p.pub_date.slice(0, 4)
-    if (!acc[y]) acc[y] = []
-    acc[y].push(p)
+    ;(map[y] = map[y] || []).push(p)
   }
-  return acc
+  return map
 })
 const years = computed(() => Object.keys(byYear.value).sort((a, b) => Number(b) - Number(a)))
-</script>
+
+// auto-animate list 容器
+const [listParent] = useAutoAnimate({ duration: 200 })
+  </script>

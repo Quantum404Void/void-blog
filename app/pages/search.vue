@@ -103,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+import { useDebounceFn } from '@vueuse/core'
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/search')
 useSeoMeta({
@@ -133,12 +134,7 @@ function highlight(text: string): string {
   return text.replace(re, '<mark class="search-highlight">$1</mark>')
 }
 
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
-watch(q, (val) => {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  if (!val.trim()) { results.value = []; searched.value = false; return }
-  debounceTimer = setTimeout(() => doSearch(), 280)
-})
+import { useDebounceFn } from '@vueuse/core'
 
 async function doSearch() {
   if (!q.value.trim()) { results.value = []; searched.value = false; return }

@@ -219,6 +219,7 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
 const route = useRoute()
 const slug = route.params.slug as string
 
@@ -427,14 +428,8 @@ onUnmounted(() => {
 })
 
 const shareUrl = computed(() => `${siteUrl}/blog/${slug}`)
-const copied = ref(false)
-async function copyLink() {
-  try {
-    await navigator.clipboard.writeText(shareUrl.value)
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
-  } catch {}
-}
+const { copy: copyToClipboard, copied } = useClipboard({ source: shareUrl })
+const copyLink = () => copyToClipboard(shareUrl.value)
 </script>
 
 <style scoped>

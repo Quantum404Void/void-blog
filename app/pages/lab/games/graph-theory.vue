@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0a0a0f]">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'graph-theory' }]" />
 
     <div class="max-w-5xl mx-auto px-6 py-10">

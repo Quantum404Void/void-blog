@@ -159,10 +159,12 @@ const savedSnapshot = ref('')
 const isDirty = computed(() => JSON.stringify({ ...form, tags: parsedTags.value }) !== savedSnapshot.value)
 onMounted(() => { savedSnapshot.value = JSON.stringify({ ...form, tags: parsedTags.value }) })
 
-// Markdown 预览
-const { md } = useMarkdown({ containers: false, lineNumbers: false })
+// Markdown 预览（异步 buildMd）
+const { buildMd } = useMarkdown()
+const mdInst = shallowRef<any>(null)
+onMounted(async () => { mdInst.value = await buildMd() })
 const previewMode = ref(false)
-const renderedPreview = computed(() => form.content ? md.render(form.content) : '')
+const renderedPreview = computed(() => form.content && mdInst.value ? mdInst.value.render(form.content) : '')
 
 const toolbar = [
   { label: 'H2', before: '\n## ', after: '' }, { label: 'H3', before: '\n### ', after: '' },

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen" style="background:#0a0a0f;color:#e0e0e0">
+  <div class="min-h-screen" style="background:var(--color-void);color:#e0e0e0">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'Subnet Calc' }]" />
     <div class="max-w-3xl mx-auto px-4 py-12">
       <h1 class="text-3xl font-bold mb-2" style="color:#39ff14;font-family:monospace">
@@ -15,7 +15,7 @@
           type="text"
           placeholder="192.168.1.0/24"
           class="w-full px-4 py-3 rounded text-sm"
-          style="background:#111;border:1px solid #333;color:#e0e0e0;font-family:monospace;font-size:1.1rem;outline:none"
+          style="background:var(--color-void-card);border:1px solid #333;color:#e0e0e0;font-family:monospace;font-size:1.1rem;outline:none"
           @focus="($event.target as HTMLInputElement).style.borderColor='#39ff14'"
           @blur="($event.target as HTMLInputElement).style.borderColor=inputError?'#ff3333':'#333'"
           spellcheck="false"
