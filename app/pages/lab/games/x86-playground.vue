@@ -33,23 +33,22 @@
             </select>
           </div>
 
-          <!-- Editor -->
-          <div class="relative">
-            <div class="absolute left-0 top-0 bottom-0 w-10 bg-[#0d0d1a] border-r border-[var(--color-void-border)] rounded-l-lg overflow-hidden pointer-events-none z-10">
-              <div v-for="(_, i) in codeLines" :key="i"
-                :class="['font-mono text-xs text-right pr-2 leading-6', i === pc ? 'text-[var(--color-neon-cyan)]' : 'text-[var(--color-text-muted)]']"
-                style="padding-top: 2px;">
-                {{ i + 1 }}
-              </div>
-            </div>
-            <textarea
+          <!-- Editor — CodeMirror 6 (x86 asm highlighting) -->
+          <ClientOnly>
+            <CodeMirrorEditor
               v-model="code"
-              @input="onCodeChange"
-              spellcheck="false"
-              class="font-mono text-sm w-full bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-primary)] rounded-lg pl-12 pr-4 py-2 resize-none outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
-              style="min-height: 360px; line-height: 1.5rem; tab-size: 4;"
-            ></textarea>
-          </div>
+              lang="x86asm"
+              :show-line-numbers="true"
+              placeholder-text="; 输入 x86 汇编代码..."
+              min-height="360px"
+              @update:model-value="onCodeChange"
+            />
+            <template #fallback>
+              <textarea v-model="code" @input="onCodeChange" spellcheck="false"
+                class="font-mono text-sm w-full bg-[var(--color-void-card)] border border-[var(--color-void-border)] text-[var(--color-text-primary)] rounded-lg px-4 py-3 resize-none outline-none"
+                style="min-height: 360px;" />
+            </template>
+          </ClientOnly>
 
           <!-- Error -->
           <div v-if="errorMsg" class="font-mono text-xs text-red-400 bg-red-950 border border-red-800 rounded p-3">
