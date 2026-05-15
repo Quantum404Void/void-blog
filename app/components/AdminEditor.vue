@@ -62,11 +62,10 @@
                 {{ previewMode ? '编辑' : '预览' }}
               </button>
             </div>
-            <textarea v-if="!previewMode" v-model="form.content" ref="editorEl"
-              placeholder="用 Markdown 写文章…"
-              class="w-full min-h-[60vh] bg-transparent px-4 py-4 font-mono text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-void-muted)] outline-none resize-none leading-relaxed"
-              @keydown.tab.prevent="insertTab" spellcheck="false" />
-            <div v-else class="prose min-h-[60vh] px-6 py-4 overflow-auto" v-html="renderedPreview" />
+            <ClientOnly>
+              <CodeMirrorEditor v-if="!previewMode" v-model="form.content" />
+              <div v-else class="prose min-h-[60vh] px-6 py-4 overflow-auto" v-html="renderedPreview" />
+            </ClientOnly>
           </div>
         </div>
 
@@ -174,20 +173,12 @@ const toolbar = [
   { label: ':::warning', before: '\n:::warning\n', after: '\n:::' },
   { label: ':::danger', before: '\n:::danger\n', after: '\n:::' },
 ]
-const editorEl = ref<HTMLTextAreaElement>()
+const editorEl = ref<HTMLTextAreaElement | null>(null) // legacy ref, kept for insertMarkdown
 function insertMarkdown(before: string, after: string) {
-  const el = editorEl.value; if (!el) return
-  const s = el.selectionStart; const e = el.selectionEnd
-  const sel = form.content.slice(s, e)
-  form.content = form.content.slice(0, s) + before + sel + after + form.content.slice(e)
-  nextTick(() => { el.focus(); el.setSelectionRange(s + before.length, s + before.length + sel.length) })
+  // CodeMirror 接管Tab，这里只处理toolbar插入操作
+  form.content = form.content + before + after
 }
-function insertTab() {
-  const el = editorEl.value; if (!el) return
-  const s = el.selectionStart
-  form.content = form.content.slice(0, s) + '  ' + form.content.slice(s)
-  nextTick(() => el.setSelectionRange(s + 2, s + 2))
-}
+function insertTab() { /* CodeMirror 内置 Tab缩进 */ }
 
 // Ctrl+S 快捷键
 onMounted(() => {
