@@ -375,16 +375,22 @@ async function handleLike() {
 // Mobile TOC
 const tocOpen = ref(false)
 
-// Continue reading bar
-const continueBar = reactive({ show: false, pct: 0, savedY: 0 })
-const PROGRESS_KEY = computed(() => `reading-progress-${slug}`)
+// Continue reading bar — 使用 useLocalStorage 持久化进度
+const savedProgress = useLocalStorage<{ pct: number; y: number } | null>(
+  `reading-progress-${slug}`, null
+)
+const continueBar = reactive({
+  show: savedProgress.value ? (savedProgress.value.pct > 5 && savedProgress.value.pct < 95) : false,
+  pct: savedProgress.value?.pct ?? 0,
+  savedY: savedProgress.value?.y ?? 0,
+})
 
 function saveReadingProgress() {
   const scrollTop = window.scrollY
   const docHeight = document.documentElement.scrollHeight - window.innerHeight
   if (docHeight <= 0) return
   const pct = Math.round((scrollTop / docHeight) * 100)
-  if (pct > 5) { const k = PROGRESS_KEY.value; try { localStorage.setItem(k, JSON.stringify({ pct, y: scrollTop })) } catch {} }
+  if (pct > 5) savedProgress.value = { pct, y: scrollTop }
 }
 
 function jumpToSaved() {
@@ -406,18 +412,6 @@ onMounted(async () => {
   await nextTick()
   attachCopyButtons(document.querySelector('.prose') as HTMLElement | null)
 
-  // Continue reading: check saved progress
-  const saved = localStorage.getItem(PROGRESS_KEY.value)
-  if (saved) {
-    try {
-      const { pct, y } = JSON.parse(saved)
-      if (pct > 5 && pct < 95) {
-        continueBar.pct = pct
-        continueBar.savedY = y
-        continueBar.show = true
-      }
-    } catch {}
-  }
   // Save progress on scroll
   window.addEventListener('scroll', saveReadingProgress, { passive: true })
 
