@@ -278,7 +278,10 @@ const tocHeadings = computed<Heading[]>(() => {
   return matches.map(m => ({
     depth: 2,
     slug: m[1],
-    text: m[2].replace(/<[^>]+>/g, '').trim(),
+    text: m[2].replace(/<[^>]+>/g, '')
+      .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&apos;/g, "'")
+      .replace(/&#39;/g, "'").replace(/&#x27;/g, "'").trim(),
   }))
 })
 

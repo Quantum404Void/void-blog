@@ -7,7 +7,7 @@
       </NuxtLink>
 
       <!-- 面包屑 -->
-      <div v-if="crumbs.length" class="hidden sm:flex items-center gap-2 min-w-0">
+      <div v-if="crumbs.length" class="hidden lg:flex items-center gap-2 min-w-0">
         <template v-for="(crumb, i) in crumbs" :key="i">
           <span class="text-[var(--color-void-muted)] font-mono text-xs shrink-0">/</span>
           <NuxtLink v-if="crumb.href" :href="crumb.href"
