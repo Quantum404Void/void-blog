@@ -156,13 +156,12 @@
     </div>
 
     <AppFooter maxW="max-w-6xl" backHref="">
-      <span class="font-mono text-[10px] opacity-30 select-none">░▒▓ void.dev ▓▒░</span>
-      <span>
+      <span class="font-mono text-xs">
         构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 3</span> ·
         <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
         <span class="text-[var(--color-neon-green)]">Vue 3</span>
+        · © {{ startYear }}–{{ currentYear }} {{ authorName }}
       </span>
-      <span>© {{ startYear }}–{{ currentYear }} {{ authorName }}</span>
     </AppFooter>
   </div>
 </template>

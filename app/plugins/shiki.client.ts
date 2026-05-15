@@ -61,6 +61,9 @@ async function buildMd() {
           if (lang && lang !== 'text' && lang !== 'plaintext') {
             node.properties['data-lang'] = lang
           }
+          // 伪行号：自动对所有代码块加 has-line-numbers
+          const cls = node.properties['class'] || ''
+          node.properties['class'] = cls ? cls + ' has-line-numbers' : 'has-line-numbers'
         }
       },
       transformerNotationDiff(),

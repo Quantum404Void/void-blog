@@ -377,11 +377,19 @@ body::after {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
+    rgba(0,0,0,0.035) 2px,
+    rgba(0,0,0,0.035) 4px
   );
   pointer-events: none;
   z-index: 9999;
+}
+
+/* ── 全局 neon 光晕选择框（terminal 风） ── */
+:focus-visible {
+  outline: 1px solid rgba(0,212,255,0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
 }
 
 /* ── prose 标题颜色分级（覆盖上面的一般定义）── */
@@ -642,3 +650,95 @@ body::after {
     padding-left: 1.35rem;
   }
 }
+
+/* ── 技术宅风格增强 ── */
+
+/* 发光 input 输入框 */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(0,212,255,0.4) !important;
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.08), 0 0 12px rgba(0,212,255,0.06);
+}
+
+/* 代码块：三圆点装饰增强 */
+.prose .shiki::before {
+  opacity: 0.8;
+}
+
+/* terminal 风格水平分割线 */
+.term-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin: 1.5rem 0;
+}
+.term-divider::before,
+.term-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-void-border);
+}
+
+/* neon badge — 通用 */
+.neon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid;
+  user-select: none;
+}
+.neon-badge-green { border-color: rgba(0,255,136,0.35); color: rgba(0,255,136,0.85); background: rgba(0,255,136,0.07); }
+.neon-badge-cyan  { border-color: rgba(0,212,255,0.35); color: rgba(0,212,255,0.85); background: rgba(0,212,255,0.07); }
+.neon-badge-purple{ border-color: rgba(180,76,255,0.35); color: rgba(180,76,255,0.85); background: rgba(180,76,255,0.07); }
+.neon-badge-pink  { border-color: rgba(255,45,120,0.35); color: rgba(255,45,120,0.85); background: rgba(255,45,120,0.07); }
+
+/* CRT 角落暗角 vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* lab 卡片 hover neon 发光 */
+.lab-card-hover {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.lab-card-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* 代码块 .line hover 微高亮（在文章里） */
+.prose .shiki .line:hover {
+  background: rgba(255,255,255,0.025);
+}
+
+/* prose 代码块左侧边条更亮 */
+.prose .shiki {
+  border-left-width: 3px;
+  border-left-color: rgba(0,212,255,0.4);
+}
+
+/* 滚动条美化增强 */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,212,255,0.2);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.5); }

@@ -53,6 +53,7 @@ const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Snake | ${siteName}` })
 
 let _loopTimer: ReturnType<typeof setTimeout> | null = null
+let _snakeKeydown: ((e: KeyboardEvent) => void) | null = null
 
 onMounted(() => {
   const COLS = 20, ROWS = 20
@@ -182,7 +183,7 @@ onMounted(() => {
   const dirMap: Record<string,DirType> = {ArrowUp:'UP',ArrowDown:'DOWN',ArrowLeft:'LEFT',ArrowRight:'RIGHT',w:'UP',s:'DOWN',a:'LEFT',d:'RIGHT',W:'UP',S:'DOWN',A:'LEFT',D:'RIGHT'}
   const opposite: Record<DirType,DirType> = {UP:'DOWN',DOWN:'UP',LEFT:'RIGHT',RIGHT:'LEFT'}
 
-  document.addEventListener('keydown',(e)=>{
+  _snakeKeydown = (e: KeyboardEvent) => {
     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault()
     if(e.key===' '||e.key==='Enter'){
       if(gameState==='idle'||gameState==='dead')startGame()
@@ -193,7 +194,8 @@ onMounted(() => {
     if(e.key==='r'||e.key==='R'){startGame();return}
     const d=dirMap[e.key]
     if(d&&d!==opposite[dir])nextDir=d
-  })
+  }
+  document.addEventListener('keydown', _snakeKeydown)
 
   startBtn.addEventListener('click',()=>{if(gameState==='idle'||gameState==='dead')startGame()})
 
@@ -222,6 +224,7 @@ onMounted(() => {
 
 onUnmounted(()=>{
   if(_loopTimer) clearTimeout(_loopTimer)
+  if(_snakeKeydown) document.removeEventListener('keydown', _snakeKeydown)
 })
 </script>
 

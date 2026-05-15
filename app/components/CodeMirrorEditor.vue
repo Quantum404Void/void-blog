@@ -15,7 +15,6 @@ import { html } from '@codemirror/lang-html'
 import { css } from '@codemirror/lang-css'
 import { languages } from '@codemirror/language-data'
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
-import { vscodeDark } from '@uiw/codemirror-theme-vscode'
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
 import { highlightSelectionMatches } from '@codemirror/search'
 
@@ -63,8 +62,56 @@ onMounted(() => {
     if (u.docChanged) emit('update:modelValue', u.state.doc.toString())
   })
 
+  // void.dev 全局风格主题（与 main.css 保持一致）
+  const voidTheme = EditorView.theme({
+    '&': {
+      background: 'var(--color-void-card)',
+      color: 'var(--color-text-primary)',
+    },
+    '.cm-content': {
+      caretColor: '#00d4ff',
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: '#00d4ff',
+      borderLeftWidth: '2px',
+    },
+    '.cm-activeLine': { background: 'rgba(0,212,255,0.035)' },
+    '.cm-activeLineGutter': { background: 'rgba(0,212,255,0.05)' },
+    '.cm-selectionBackground, ::selection': { background: 'rgba(0,212,255,0.18) !important' },
+    '&.cm-focused .cm-selectionBackground': { background: 'rgba(0,212,255,0.22) !important' },
+    '.cm-matchingBracket': { color: '#00ff88 !important', background: 'rgba(0,255,136,0.1)', borderRadius: '2px' },
+    '.cm-nonmatchingBracket': { color: '#ff2d78 !important' },
+    '.cm-placeholder': { color: 'rgba(104,104,160,0.45)', fontStyle: 'italic' },
+    '.cm-scroller': { overflow: 'auto', lineHeight: '1.65' },
+    '.cm-line': { padding: '0' },
+    '.cm-gutters': {
+      background: 'rgba(8,8,18,0.6)',
+      borderRight: '1px solid var(--color-void-border)',
+      color: 'rgba(104,104,160,0.5)',
+      minWidth: '2.5rem',
+    },
+    '.cm-lineNumbers .cm-gutterElement': { padding: '0 10px 0 4px' },
+    // 语法着色（与赛博朋克色盘对齐）
+    '.tok-keyword':   { color: '#b44cff' },
+    '.tok-comment':   { color: '#5a5a88', fontStyle: 'italic' },
+    '.tok-string':    { color: '#00ff88' },
+    '.tok-number':    { color: '#00d4ff' },
+    '.tok-typeName':  { color: '#00d4ff' },
+    '.tok-className': { color: '#00d4ff' },
+    '.tok-variableName': { color: '#e8e8f0' },
+    '.tok-function(.tok-variableName)': { color: '#00d4ff' },
+    '.tok-propertyName': { color: '#a8a8c8' },
+    '.tok-operator':  { color: '#ff2d78' },
+    '.tok-punctuation': { color: '#6868a0' },
+    '.tok-tagName':   { color: '#b44cff' },
+    '.tok-attributeName': { color: '#00d4ff' },
+    '.tok-attributeValue': { color: '#00ff88' },
+    '.tok-meta':      { color: '#6868a0' },
+    '.tok-invalid':   { color: '#ff2d78' },
+  }, { dark: true })
+
   const extensions: any[] = [
-    vscodeDark,
+    voidTheme,
     getLangExtension(props.lang),
     highlightActiveLine(),
     highlightSelectionMatches(),
@@ -79,31 +126,14 @@ onMounted(() => {
       indentWithTab,
     ]),
     EditorView.lineWrapping,
+    // layout 层（大小/字体/padding）——不在 voidTheme 里重复
     EditorView.theme({
-      '&': {
-        height: '100%',
-        background: 'var(--color-void-card)',
-        fontSize: '13.5px',
-        borderRadius: '0.75rem',
-      },
+      '&': { height: '100%', fontSize: '13.5px', borderRadius: '0.75rem' },
       '.cm-content': {
         fontFamily: 'JetBrains Mono, Fira Code, monospace',
         padding: props.showLineNumbers ? '16px 20px 16px 8px' : '16px 20px',
-        caretColor: '#00d4ff',
         minHeight: props.minHeight,
       },
-      '.cm-focused .cm-cursor': { borderLeftColor: '#00d4ff', borderLeftWidth: '2px' },
-      '.cm-activeLine': { background: 'rgba(0,212,255,0.03)' },
-      '.cm-selectionBackground': { background: 'rgba(0,212,255,0.15) !important' },
-      '&.cm-focused .cm-selectionBackground': { background: 'rgba(0,212,255,0.2) !important' },
-      '.cm-matchingBracket': { color: '#00ff88 !important', background: 'rgba(0,255,136,0.1)' },
-      '.cm-placeholder': { color: 'rgba(104,104,160,0.5)', fontStyle: 'italic' },
-      '.cm-scroller': { overflow: 'auto', lineHeight: '1.7' },
-      '.cm-line': { padding: '0' },
-      // 行号样式
-      '.cm-gutters': { background: 'rgba(10,10,20,0.5)', borderRight: '1px solid rgba(30,30,48,0.8)', color: 'rgba(100,100,140,0.5)', minWidth: '2.5rem' },
-      '.cm-activeLineGutter': { background: 'rgba(0,212,255,0.05)' },
-      '.cm-lineNumbers .cm-gutterElement': { padding: '0 8px 0 4px' },
     }),
     updateListener,
   ]
