@@ -3,6 +3,8 @@
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'text-tools' }]" />
 
     <div class="max-w-4xl mx-auto px-6 py-10">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/text-tools</p>
+
       <h1 class="font-mono text-2xl font-bold mb-2" style="color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,0.5)">文本工具集</h1>
       <p class="font-mono text-xs text-gray-500 mb-8">Text Tools — 统计 / 转换 / 去重 / 排序 / 转义 / 查找替换</p>
 

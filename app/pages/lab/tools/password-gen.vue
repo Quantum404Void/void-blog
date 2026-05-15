@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'password-gen' }]" />
     <div class="max-w-2xl mx-auto px-6 py-10">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/password-gen</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-green)] mb-1">🔐 密码生成器</h1>
       <p class="font-mono text-xs text-[var(--color-text-muted)] mb-6">高熵密码生成，安全可靠</p>
 

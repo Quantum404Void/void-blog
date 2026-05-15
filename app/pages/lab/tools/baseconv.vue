@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'baseconv' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/baseconv</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-green)] mb-6">进制转换</h1>
       <div v-for="base in bases" :key="base.n" class="flex items-center gap-4">
         <label class="font-mono text-xs text-[var(--color-text-muted)] w-16 shrink-0">{{ base.label }}</label>

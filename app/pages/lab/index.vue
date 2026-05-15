@@ -63,9 +63,10 @@
             v-for="tool in filteredTools"
             :key="tool.href"
             :href="tool.href"
-            class="group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
-            @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = tool.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
-            @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
+            class="group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px] border-l-2"
+            :style="`border-left-color:${tool.color}44`"
+            @mouseover="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color + '55'; el.style.borderLeftColor = tool.color + 'cc'; el.style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
+            @mouseout="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = ''; el.style.borderLeftColor = tool.color + '44'; el.style.boxShadow = '' }"
           >
             <div class="flex items-start justify-between gap-3 mb-3">
               <span class="text-xl font-mono font-bold transition-transform duration-200 group-hover:scale-110 inline-block" :style="`color:${tool.color}`">{{ tool.icon }}</span>

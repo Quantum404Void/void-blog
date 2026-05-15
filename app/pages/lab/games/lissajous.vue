@@ -246,13 +246,15 @@ onMounted(() => {
     const el = mainCanvas.value
     if (el) { const ctx = el.getContext('2d')!; ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0,0,el.width,el.height) }
     loop()
-    window.addEventListener('resize', () => { resizeCanvas(); resetTrail() })
+    window.addEventListener('resize', _resizeHandler)
   })
 })
 
+function _resizeHandler() { resizeCanvas(); resetTrail() }
+
 onUnmounted(() => {
   cancelAnimationFrame(rafId)
-  window.removeEventListener('resize', () => {})
+  window.removeEventListener('resize', _resizeHandler)
 })
 </script>
 

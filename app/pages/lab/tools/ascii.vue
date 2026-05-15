@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'ascii' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/ascii</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">ASCII 工具</h1>
       <div class="flex gap-2">
         <input v-model="input" placeholder="输入字符或 ASCII 码..." class="flex-1 font-mono text-sm rounded-xl border border-[var(--color-void-border)] px-4 py-2 bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none">

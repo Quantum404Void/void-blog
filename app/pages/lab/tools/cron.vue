@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'cron' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/cron</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-purple)] mb-6">Cron 表达式</h1>
       <input v-model="expr" placeholder="* * * * *" class="w-full font-mono text-lg rounded-xl border border-[var(--color-void-border)] px-4 py-3 bg-[var(--color-void-card)] text-[var(--color-neon-cyan)] outline-none">
       <div v-if="desc" class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)]">

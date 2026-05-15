@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'json' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/json</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-green)] mb-6">JSON 工具</h1>
       <div class="grid gap-4">
         <textarea v-model="input" placeholder='{ "key": "value" }' class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:200px"></textarea>

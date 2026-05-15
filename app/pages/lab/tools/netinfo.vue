@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'netinfo' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10 space-y-6">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/netinfo</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">网络信息</h1>
       <div class="grid grid-cols-1 gap-3">
         <div v-for="item in items" :key="item.label" class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] flex justify-between items-center">

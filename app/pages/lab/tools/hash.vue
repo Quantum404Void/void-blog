@@ -2,6 +2,8 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'hash' }]" />
     <div class="max-w-3xl mx-auto px-6 py-10">
+      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/hash</p>
+
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-purple)] mb-6">Hash 工具</h1>
       <div class="flex gap-2 mb-4">
         <button @click="mode='text'" class="font-mono text-xs px-4 py-2 rounded-lg border transition-all" :style="mode==='text'?'border-color:rgba(180,0,255,0.5);color:#b400ff;background:rgba(180,0,255,0.1)':'border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)'">文本</button>

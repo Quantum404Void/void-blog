@@ -4,6 +4,8 @@
 
     <div class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6">
       <div class="flex items-center justify-between mb-4">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/markdown</p>
+
         <h1 class="font-mono text-xl font-bold" style="color:#b400ff">MD Markdown 预览</h1>
         <button @click="clear" class="font-mono text-[10px] px-3 py-1.5 rounded-lg border transition-all" style="border-color:rgba(255,0,170,0.3);color:rgba(255,0,170,0.7)">清空</button>
       </div>
