@@ -190,7 +190,7 @@
   <button
     v-if="tocHeadings.length > 1"
     @click="tocOpen = !tocOpen"
-    class="xl:hidden fixed bottom-[4.5rem] right-4 sm:bottom-20 sm:right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
+    class="xl:hidden fixed bottom-4 right-[3.5rem] sm:bottom-6 sm:right-[4rem] z-50 w-9 h-9 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
     style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--color-neon-cyan);backdrop-filter:blur(8px);"
     title="目录"
   >
@@ -266,8 +266,16 @@ useHead({
   }]
 })
 
-const { md } = useMarkdown()
-const renderedContent = computed(() => post.value ? md.render(post.value.content) : '')
+const renderedContent = ref('')
+if (process.client) {
+  // Shiki 只在客户端初媋化，SSR 不运行（避免 Worker bundle 载入 WASM）
+  const { buildMd } = useMarkdown()
+  watch(() => post.value?.content, async (content) => {
+    if (!content) { renderedContent.value = ''; return }
+    const md = await buildMd()
+    renderedContent.value = md.render(content)
+  }, { immediate: true })
+}
 
 // Extract headings from RENDERED HTML — 避免代码块里的 # 注释被误识别
 // h2 为一级，h3 为二级（缩进显示）
