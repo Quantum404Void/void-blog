@@ -103,16 +103,18 @@
 
 <script setup lang="ts">
 import { ref, computed, defineComponent, h } from 'vue'
+// @ts-ignore
+import ipaddr from 'ipaddr.js'
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: 'Subnet Calculator — void.lab' })
 
 const input = ref('192.168.1.0/24')
 
-// ─── Subnet calculation ──────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function ipToNum(ip: string): number {
-  return ip.split('.').reduce((acc, o) => (acc << 8) | parseInt(o), 0) >>> 0
+  return ip.split('.').reduce((acc: number, o: string) => (acc << 8) | parseInt(o), 0) >>> 0
 }
 
 function numToIp(n: number): string {
@@ -120,11 +122,7 @@ function numToIp(n: number): string {
 }
 
 function ipToBinaryOctets(ip: string): string[] {
-  return ip.split('.').map(o => parseInt(o).toString(2).padStart(8,'0'))
-}
-
-function maskFromPrefix(p: number): number {
-  return p === 0 ? 0 : (0xffffffff << (32 - p)) >>> 0
+  return ip.split('.').map((o: string) => parseInt(o).toString(2).padStart(8,'0'))
 }
 
 function numToHex(n: number): string {
@@ -133,22 +131,8 @@ function numToHex(n: number): string {
 
 function getIPClass(ip: string, isPrivate: boolean): string {
   const first = parseInt(ip.split('.')[0])
-  let cls = first < 128 ? 'A' : first < 192 ? 'B' : first < 224 ? 'C' : first < 240 ? 'D (Multicast)' : 'E (Reserved)'
+  const cls = first < 128 ? 'A' : first < 192 ? 'B' : first < 224 ? 'C' : first < 240 ? 'D (Multicast)' : 'E (Reserved)'
   return `${cls} / ${isPrivate ? 'Private' : 'Public'}`
-}
-
-function isPrivateIP(n: number): boolean {
-  return (
-    (n >>> 24) === 10 ||
-    ((n >>> 16) === ((172 << 8) | 16) >> 0 && ((n >>> 20) & 0xf) >= 0 && ((n >>> 20) & 0xf) <= 15 && (n >>> 24) === 172 && ((n >>> 16) & 0xff) >= 16 && ((n >>> 16) & 0xff) <= 31) ||
-    ((n >>> 24) === 192 && ((n >>> 16) & 0xff) === 168) ||
-    ((n >>> 24) === 127)
-  )
-}
-
-function isPrivateIPSimple(ip: string): boolean {
-  const [a,b] = ip.split('.').map(Number)
-  return a===10 || (a===172&&b>=16&&b<=31) || (a===192&&b===168) || a===127
 }
 
 const inputError = ref('')
@@ -157,46 +141,51 @@ const result = computed(() => {
   const raw = input.value.trim()
   if (!raw) { inputError.value = ''; return null }
 
-  const match = raw.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:\/(\d{1,2}))?$/)
-  if (!match) { inputError.value = 'Invalid format. Use IP/CIDR e.g. 192.168.1.0/24'; return null }
+  try {
+    // Parse CIDR with ipaddr.js
+    const cidr = raw.includes('/') ? raw : raw + '/32'
+    // @ts-ignore
+    const [addr, prefix] = ipaddr.parseCIDR(cidr)
+    const ipStr = addr.toString()
 
-  const [, ipStr, prefixStr] = match
-  const octets = ipStr.split('.').map(Number)
-  if (octets.some(o => o > 255)) { inputError.value = 'Octet value out of range (0-255)'; return null }
+    // Calculate network info
+    const ipNum = ipToNum(ipStr)
+    const mask = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0
+    const networkNum = (ipNum & mask) >>> 0
+    const broadcastNum = (networkNum | (~mask >>> 0)) >>> 0
+    const firstHost = prefix < 31 ? networkNum + 1 : networkNum
+    const lastHost = prefix < 31 ? broadcastNum - 1 : broadcastNum
+    const hosts = prefix >= 31 ? Math.pow(2, 32 - prefix) : Math.max(0, Math.pow(2, 32 - prefix) - 2)
+    const maskDec = numToIp(mask)
+    const maskHex = numToHex(mask)
+    const networkStr = numToIp(networkNum)
+    const broadcastStr = numToIp(broadcastNum)
+    const spacePercent = (networkNum / 0xffffffff) * 100
 
-  const prefix = prefixStr !== undefined ? parseInt(prefixStr) : 32
-  if (prefix < 0 || prefix > 32) { inputError.value = 'Prefix must be 0-32'; return null }
+    // Determine if private using ipaddr.js range
+    // @ts-ignore
+    const range = addr.range()
+    const isPrivate = ['private', 'loopback', 'linkLocal'].includes(range)
 
-  inputError.value = ''
-
-  const ipNum = ipToNum(ipStr)
-  const mask = maskFromPrefix(prefix)
-  const networkNum = (ipNum & mask) >>> 0
-  const broadcastNum = (networkNum | (~mask >>> 0)) >>> 0
-  const firstHost = prefix < 31 ? networkNum + 1 : networkNum
-  const lastHost = prefix < 31 ? broadcastNum - 1 : broadcastNum
-  const hosts = prefix >= 31 ? Math.pow(2, 32 - prefix) : Math.max(0, Math.pow(2, 32 - prefix) - 2)
-  const maskDec = numToIp(mask)
-  const maskHex = numToHex(mask)
-  const networkStr = numToIp(networkNum)
-  const broadcastStr = numToIp(broadcastNum)
-
-  const spacePercent = (networkNum / 0xffffffff) * 100
-
-  return {
-    network: networkStr,
-    broadcast: broadcastStr,
-    firstHost: numToIp(firstHost),
-    lastHost: numToIp(lastHost),
-    hosts,
-    prefix,
-    maskDec,
-    maskHex,
-    ipOctets: ipToBinaryOctets(ipStr),
-    maskOctets: ipToBinaryOctets(maskDec),
-    networkOctets: ipToBinaryOctets(networkStr),
-    ipClass: getIPClass(ipStr, isPrivateIPSimple(ipStr)),
-    spacePercent,
+    inputError.value = ''
+    return {
+      network: networkStr,
+      broadcast: broadcastStr,
+      firstHost: numToIp(firstHost),
+      lastHost: numToIp(lastHost),
+      hosts,
+      prefix,
+      maskDec,
+      maskHex,
+      ipOctets: ipToBinaryOctets(ipStr),
+      maskOctets: ipToBinaryOctets(maskDec),
+      networkOctets: ipToBinaryOctets(networkStr),
+      ipClass: getIPClass(ipStr, isPrivate),
+      spacePercent,
+    }
+  } catch {
+    inputError.value = 'Invalid format. Use IP/CIDR e.g. 192.168.1.0/24'
+    return null
   }
 })
 

@@ -1,7 +1,12 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'conways-life' }]" />
-    <div class="flex-1 flex flex-col items-center p-4">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+      <div class="mb-6">
+        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">process: life.exe</p>
+        <h1 class="font-mono text-2xl font-bold text-[var(--color-neon-green)] mb-1" style="text-shadow:0 0 20px rgba(57,255,20,0.5)">CONWAY'S LIFE</h1>
+        <p class="font-mono text-xs text-[var(--color-text-muted)]">点击画细胞 · 选择图案 · 运行演化</p>
+      </div>
       <div class="flex flex-wrap gap-2 mb-4 font-mono text-xs">
         <button v-for="p in patterns" :key="p" @click="placePattern(p)" class="px-3 py-1.5 rounded-lg border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all">{{ p }}</button>
         <button @click="randomFill" class="px-3 py-1.5 rounded-lg border border-[rgba(57,255,20,0.3)] text-[rgba(57,255,20,0.8)] hover:bg-[rgba(57,255,20,0.1)] transition-all">随机</button>
@@ -14,12 +19,9 @@
       </div>
       <canvas ref="canvasEl" class="border border-[var(--color-void-border)] rounded-xl" style="background:#04040c;cursor:crosshair;max-width:100%"></canvas>
     </div>
+    <AppFooter />
   </div>
 </template>
-
-<script setup lang="ts">
-const { siteName } = useSiteConfig()
-useSeoMeta({ title: `Conway's Life | ${siteName}` })
 const canvasEl = ref<HTMLCanvasElement>()
 const gen = ref(0), liveCount = ref(0), running = ref(false), speed = ref(60)
 const CELL=12, COLS=70, ROWS=50

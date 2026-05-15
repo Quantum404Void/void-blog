@@ -1,9 +1,10 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
+  <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: '2048' }]" />
-    <div class="flex-1 flex items-center justify-center p-4">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
       <Game2048 />
     </div>
+    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">

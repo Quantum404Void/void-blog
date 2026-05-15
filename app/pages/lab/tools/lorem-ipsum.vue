@@ -56,6 +56,9 @@
 
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
+// @ts-ignore
+import { LoremIpsum } from 'lorem-ipsum'
+
 const { copy: copyToClipboard, copied } = useClipboard()
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lorem Ipsum 生成器 | ${siteName}` })
@@ -66,8 +69,6 @@ const count = ref(3)
 const format = ref('plain')
 const output = ref('')
 
-const loremWords = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ')
-
 const zhWords = '的一了是我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情己面最女但现前些所同日手又行意动方期它头经长儿回位分爱老因很给名法间斯知世什两次使身者被高已亲其进此话常与活正感见明问力理尔点文几定本公特做外孩相西果走将月十实向声车全信重三机工物气每并别真打太新比才便夫再书部水像眼等体却加电主界们'.split('')
 
 const codeWords = ['const','let','var','function','async','await','return','export','import','default','class','interface','type','enum','extends','implements','new','this','super','if','else','for','while','do','switch','case','break','continue','throw','try','catch','finally','null','undefined','true','false','void','never','any','string','number','boolean','array','object','promise','resolve','reject','callback','handler','service','controller','module','component','props','state','effect','ref','computed','watch','emit','inject','provide','router','store','dispatch','commit','getters','actions','mutations']
@@ -76,14 +77,21 @@ const cyberWords = ['neural','matrix','cipher','ghost','neon','grid','void','flu
 
 function rnd<T>(arr: T[]) { return arr[Math.floor(Math.random() * arr.length)] }
 
+// lorem-ipsum instance for classic Latin
+const loremGen = new LoremIpsum({
+  sentencesPerParagraph: { max: 8, min: 4 },
+  wordsPerSentence: { max: 16, min: 4 },
+})
+
 function makeWords(n: number): string {
-  if (mode.value === 'lorem') return Array.from({length: n}, () => rnd(loremWords)).join(' ')
+  if (mode.value === 'lorem') return loremGen.generateWords(n)
   if (mode.value === 'zh') return Array.from({length: n}, () => rnd(zhWords)).join('')
   if (mode.value === 'code') return Array.from({length: n}, () => rnd(codeWords)).join(' ')
   return Array.from({length: n}, () => rnd(cyberWords)).join(' ')
 }
 
 function makeSentence(): string {
+  if (mode.value === 'lorem') return loremGen.generateSentences(1)
   const len = 8 + Math.floor(Math.random() * 10)
   const words = makeWords(len)
   const isZh = mode.value === 'zh'
@@ -91,12 +99,12 @@ function makeSentence(): string {
 }
 
 function makeParagraph(first: boolean): string {
+  if (mode.value === 'lorem') {
+    const p = loremGen.generateParagraphs(1)
+    return first ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' + p : p
+  }
   const sentences = 4 + Math.floor(Math.random() * 4)
-  const parts = Array.from({length: sentences}, (_, i) => {
-    if (i === 0 && first && mode.value === 'lorem') return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-    return makeSentence()
-  })
-  return parts.join(' ')
+  return Array.from({length: sentences}, () => makeSentence()).join(' ')
 }
 
 function generate() {
