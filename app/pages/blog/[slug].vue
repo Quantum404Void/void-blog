@@ -59,7 +59,7 @@
         </header>
 
         <!-- Content -->
-        <!-- 骨架屏：markdown 渲染完成前显示 -->
+        <!-- 骨架屏：仅在完全无内容时显示（有 content_html 时跳过）-->
         <div v-if="!renderedContent" class="prose space-y-4 animate-pulse">
           <div class="h-4 bg-[var(--color-void-muted)] rounded w-3/4"></div>
           <div class="h-4 bg-[var(--color-void-muted)] rounded w-full"></div>
@@ -287,16 +287,28 @@ useHead({
   }]
 })
 
-const renderedContent = ref('')
+// 立刻用服务端预渲染的基础 HTML 展示（无 Shiki 高亮，但结构完整）
+// Shiki 就绪后静默增量替换，用户无感知
+const renderedContent = ref<string>(
+  post.value?.content_html ?? ''
+)
 
-// Shiki 只在客户端运行（.client.ts 不进 SSR bundle）
-// onMounted 保证 hydration 完成后再渲染 markdown
 onMounted(() => {
+  // 如果服务端没有 content_html，用纯文本临时显示（兜底）
+  if (!renderedContent.value && post.value?.content) {
+    renderedContent.value = `<pre>${post.value.content}</pre>`
+  }
+
+  // Shiki 增量替换：就绪后重新渲染，用户看到代码高亮"亮起"的效果
   const { buildMd } = useMarkdown()
   watch(() => post.value?.content, async (content) => {
-    if (!content) { renderedContent.value = ''; return }
+    if (!content) return
     const md = await buildMd()
-    renderedContent.value = md.render(content)
+    const highlighted = md.render(content)
+    // 只在内容有变化时替换（避免闪烁）
+    if (highlighted !== renderedContent.value) {
+      renderedContent.value = highlighted
+    }
   }, { immediate: true })
 })
 

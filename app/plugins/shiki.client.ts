@@ -136,7 +136,11 @@ function buildMd(): Promise<MarkdownIt> {
   return _mdPromise
 }
 
-export default defineNuxtPlugin((_nuxtApp) => {
+export default defineNuxtPlugin((nuxtApp) => {
+  // 插件加载时立刻开始预热（后台默默 import），用户还在浏览首页时 Shiki 已经准备好
+  nuxtApp.hook('app:created', () => {
+    buildMd().catch(() => {})  // 预热，忘记错误
+  })
   return {
     provide: {
       buildMd,

@@ -15,4 +15,6 @@ export interface PostSummary {
 
 export interface Post extends PostSummary {
   content: string
+  /** 服务端预渲染的基础 HTML（无 Shiki 高亮），客户端立刻展示 */
+  content_html?: string
 }
