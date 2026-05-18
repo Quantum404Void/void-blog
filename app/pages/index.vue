@@ -83,8 +83,7 @@
               :key="post.slug"
               :href="`/blog/${post.slug}`"
               class="post-item post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 relative"
-              style="opacity:0;transform:translateY(20px)"
-            >
+              >
               <!-- timeline dot -->
               <div
                 class="absolute -left-[1.15rem] top-5 w-2.5 h-2.5 rounded-full border-2 border-[var(--color-void)] shrink-0 z-10 transition-transform group-hover:scale-125"
@@ -267,18 +266,21 @@ onMounted(async () => {
   if (postListRef.value && gsapBundle2) {
     const { gsap: g2, ScrollTrigger } = gsapBundle2
     const items = postListRef.value.querySelectorAll<HTMLElement>('.post-item')
-    g2.to(items, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: 'power2.out',
-      stagger: 0.08,
-      scrollTrigger: {
-        trigger: postListRef.value,
-        start: 'top 88%',
-        once: true,
-      },
-    })
+    g2.fromTo(items,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: postListRef.value,
+          start: 'top bottom',
+          once: true,
+        },
+      }
+    )
   }
 })
 </script>

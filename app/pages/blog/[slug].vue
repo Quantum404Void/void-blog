@@ -279,15 +279,17 @@ useHead({
 })
 
 const renderedContent = ref('')
-if (process.client) {
-  // Shiki 只在客户端初媋化，SSR 不运行（避免 Worker bundle 载入 WASM）
+
+// Shiki 只在客户端运行（.client.ts 不进 SSR bundle）
+// onMounted 保证 hydration 完成后再渲染 markdown
+onMounted(() => {
   const { buildMd } = useMarkdown()
   watch(() => post.value?.content, async (content) => {
     if (!content) { renderedContent.value = ''; return }
     const md = await buildMd()
     renderedContent.value = md.render(content)
   }, { immediate: true })
-}
+})
 
 // Extract headings from RENDERED HTML — 避免代码块里的 # 注释被误识别
 // h2 为一级，h3 为二级（缩进显示）
