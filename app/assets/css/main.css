@@ -40,8 +40,8 @@
   --color-text-muted: #6868a0;
 
   /* Typography */
-  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", "Fira Code", "Source Code Pro", Consolas, "Courier New", monospace;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 
   /* Z-index 层级表 */
   --z-progress:  100;   /* 阅读进度条 */
@@ -262,16 +262,9 @@
   96% { opacity: 0.6; }
   97% { opacity: 1; }
 }
-@keyframes matrix-fall {
-  0% { transform: translateY(-100%); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(100%); opacity: 0; }
-}
-@keyframes data-stream {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100px; }
-}
+
+/* 十六进制闪烁（背景装饰） */
+/* @keyframes hex-flash 已移除（未被任何元素使用） */
 
 /* ── 终端加载条 ── */
 @keyframes load-bar {
@@ -286,12 +279,6 @@
   background: linear-gradient(to right, var(--color-neon-green), var(--color-neon-cyan));
   animation: load-bar 1.2s ease-out forwards;
   box-shadow: 0 0 8px var(--color-neon-green);
-}
-
-/* 十六进制闪烁（背景装饰） */
-@keyframes hex-flash {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.8; }
 }
 
 /* Glitch 标题效果（hover 触发） */

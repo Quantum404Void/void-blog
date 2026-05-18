@@ -59,16 +59,8 @@
         </header>
 
         <!-- Content -->
-        <!-- 骨架屏：仅在完全无内容时显示（有 content_html 时跳过）-->
-        <div v-if="!renderedContent" class="prose space-y-4 animate-pulse">
-          <div class="h-4 bg-[var(--color-void-muted)] rounded w-3/4"></div>
-          <div class="h-4 bg-[var(--color-void-muted)] rounded w-full"></div>
-          <div class="h-4 bg-[var(--color-void-muted)] rounded w-5/6"></div>
-          <div class="h-32 bg-[var(--color-void-muted)] rounded mt-6"></div>
-          <div class="h-4 bg-[var(--color-void-muted)] rounded w-2/3"></div>
-          <div class="h-4 bg-[var(--color-void-muted)] rounded w-full"></div>
-        </div>
-        <article v-else class="prose" v-html="renderedContent" />
+        <!-- SSR: content_html 立刻渲染，Shiki 就绪后 renderedContent 静默替换 -->
+        <article class="prose" v-html="displayContent" />
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 border-t border-[var(--color-void-border)] space-y-10">
@@ -287,19 +279,15 @@ useHead({
   }]
 })
 
-// 立刻用服务端预渲染的基础 HTML 展示（无 Shiki 高亮，但结构完整）
-// Shiki 就绪后静默增量替换，用户无感知
-const renderedContent = ref<string>(
-  post.value?.content_html ?? ''
+// displayContent: SSR 用 content_html，Shiki 就绪后用 renderedContent（含高亮）
+const renderedContent = ref<string>('')
+// computed: 优先用 Shiki 渲染结果，否则 fallback 到服务端 HTML（无高亮但立刻可见）
+const displayContent = computed<string>(() =>
+  renderedContent.value || post.value?.content_html || ''
 )
 
 onMounted(() => {
-  // 如果服务端没有 content_html，用纯文本临时显示（兜底）
-  if (!renderedContent.value && post.value?.content) {
-    renderedContent.value = `<pre>${post.value.content}</pre>`
-  }
-
-  // Shiki 增量替换：就绪后重新渲染，用户看到代码高亮"亮起"的效果
+  // Shiki 增量替换：就绪后重新渲染，代码块"亮起"高亮效果
   const { buildMd } = useMarkdown()
   watch(() => post.value?.content, async (content) => {
     if (!content) return

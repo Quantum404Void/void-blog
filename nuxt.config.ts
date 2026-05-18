@@ -78,10 +78,7 @@ export default defineNuxtConfig({
         { rel: 'canonical', href: 'https://void.redx.space' },
         // RSS 自动发现
         { rel: 'alternate', type: 'application/rss+xml', title: 'void.dev RSS', href: '/rss.xml' },
-        // JetBrains Mono 来自 Google Fonts
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap' },
+        // 字体：使用系统字体栈，无外部请求（消除 Google Fonts 阻塞渲染）
       ],
       meta: [
         { name: 'robots', content: 'index, follow' },
@@ -134,7 +131,14 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: false },
+    // 页面级 ISR 缓存（CF Pages 支持）
+    '/': { isr: 300 },
+    '/blog': { isr: 300 },
+    '/blog/**': { isr: 600 },
+    '/tags': { isr: 600 },
+    '/tags/**': { isr: 600 },
+    '/about': { isr: 3600 },
+    '/stats': { isr: 300 },
     // 只读数据：CF Edge 缓存 60s，D1 写入后自动过期（浏览器不缓存，只缓存在 CF edge）
     '/api/posts': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
     '/api/posts/**': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
