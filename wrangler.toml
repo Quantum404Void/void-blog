@@ -7,3 +7,6 @@ pages_build_output_dir = "dist"
 binding = "void_blog_posts"
 database_name = "void-blog-posts"
 database_id = "c97bc822-cd27-46eb-8cdb-1f0b49447f04"
+
+[ai]
+binding = "AI"

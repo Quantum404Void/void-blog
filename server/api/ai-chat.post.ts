@@ -1,39 +1,42 @@
+// server/api/ai-chat.post.ts — AI 助手（Cloudflare Workers AI, @cf/qwen/qwq-32b）
+// 免费，无需额外 API key，直接通过 env.AI binding 调用
 import type { ChatMessage, AiChatResponse } from '~/types/ai'
 
-const GITHUB_COPILOT_API = 'https://api.githubcopilot.com/chat/completions'
-const MODEL = 'gpt-5-mini'
-const NO_KEY_REPLY = 'AI 助手暂未配置，请设置 NUXT_OPENAI_KEY'
+interface CfAiMessage { role: string; content: string }
+interface CfAiResponse { response?: string; result?: { response?: string } }
+
+const SYSTEM_PROMPT = `你是 void.dev 博客的 AI 助手，名叫「小助」。
+博客作者是一名 C++/TypeScript 开发者，专注于 Linux 内核、系统编程、AI Agent 等技术。
+请用简洁、技术范儿的中文回答问题。遇到代码问题直接给出可运行的代码片段。
+如果问题与博客内容相关，优先结合博客上下文回答。`
 
 export default defineEventHandler(async (event): Promise<AiChatResponse> => {
-  const config = useRuntimeConfig()
-  const apiKey = config.openaiKey as string
+  const body = await readBody<{ messages: ChatMessage[] }>(event)
+  const messages: ChatMessage[] = body?.messages ?? []
 
-  if (!apiKey) {
-    return { reply: NO_KEY_REPLY }
+  // 获取 CF AI binding
+  const ai = (event.context.cloudflare?.env as any)?.AI
+  if (!ai) {
+    // 本地开发 fallback（CF AI 只在 Pages/Workers 生产环境有效）
+    return { reply: '🔌 本地开发模式，AI 助手在 Cloudflare Pages 生产环境才能使用。' }
   }
 
-  const body = await readBody<{ messages: ChatMessage[] }>(event)
-  const messages = body?.messages ?? []
+  // 构建消息，注入 system prompt
+  const cfMessages: CfAiMessage[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...messages.slice(-12).map(m => ({ role: m.role, content: m.content })),
+  ]
 
   try {
-    const res = await $fetch<{ choices: { message: { content: string } }[] }>(
-      GITHUB_COPILOT_API,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Editor-Version': 'vscode/1.90.0',
-          'Copilot-Integration-Id': 'vscode-chat',
-        },
-        body: { model: MODEL, messages, max_tokens: 1024 },
-      }
-    )
-    const reply = res?.choices?.[0]?.message?.content?.trim() ?? '（无回复）'
-    return { reply }
-  } catch (err: unknown) {
-    const errData = (err as { data?: { error?: { message?: string } } })?.data
-    const msg = errData?.error?.message ?? (err instanceof Error ? err.message : 'unknown error')
-    return { reply: `AI 请求失败：${msg}` }
+    const resp = await ai.run('@cf/qwen/qwq-32b', {
+      messages: cfMessages,
+      max_tokens: 800,
+    }) as CfAiResponse
+
+    const text = resp?.response ?? resp?.result?.response ?? ''
+    return { reply: text || '（无响应，请稍后再试）' }
+  } catch (err: any) {
+    console.error('[ai-chat] CF AI error:', err)
+    return { reply: `AI 服务暂时不可用：${err?.message ?? '未知错误'}` }
   }
 })

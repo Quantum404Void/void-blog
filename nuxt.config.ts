@@ -35,6 +35,20 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          // 把 shiki 语言包单独分离成 chunk，不污染主 bundle
+          manualChunks(id: string) {
+            if (id.includes('shiki/langs/') || id.includes('shiki/themes/')) {
+              return 'shiki-langs'
+            }
+            if (id.includes('gsap')) return 'gsap'
+            if (id.includes('animejs') || id.includes('anime.esm')) return 'anime'
+          },
+        },
+      },
+    },
   },
 
   runtimeConfig: {
