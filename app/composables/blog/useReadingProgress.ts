@@ -3,6 +3,9 @@
  * 监听 scroll，保存进度到 localStorage，提供"继续阅读"跳转。
  */
 
+import { useLocalStorage } from '@vueuse/core'
+
+
 export interface ReadingProgress {
   /** 百分比 0-100 */
   pct: number
