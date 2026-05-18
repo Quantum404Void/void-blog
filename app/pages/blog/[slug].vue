@@ -59,7 +59,16 @@
         </header>
 
         <!-- Content -->
-        <article class="prose" v-html="renderedContent" />
+        <!-- 骨架屏：markdown 渲染完成前显示 -->
+        <div v-if="!renderedContent" class="prose space-y-4 animate-pulse">
+          <div class="h-4 bg-[var(--color-void-muted)] rounded w-3/4"></div>
+          <div class="h-4 bg-[var(--color-void-muted)] rounded w-full"></div>
+          <div class="h-4 bg-[var(--color-void-muted)] rounded w-5/6"></div>
+          <div class="h-32 bg-[var(--color-void-muted)] rounded mt-6"></div>
+          <div class="h-4 bg-[var(--color-void-muted)] rounded w-2/3"></div>
+          <div class="h-4 bg-[var(--color-void-muted)] rounded w-full"></div>
+        </div>
+        <article v-else class="prose" v-html="renderedContent" />
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 border-t border-[var(--color-void-border)] space-y-10">
