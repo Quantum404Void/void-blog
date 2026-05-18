@@ -1,0 +1,113 @@
+/* Shiki 代码块样式 ── */
+/* Shiki 输出: .shiki > code > span.line */
+.prose .shiki {
+  position: relative;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-void-border);
+  border-left: 3px solid rgba(0, 212, 255, 0.35);
+  padding: 2.5rem 1.5rem 1.25rem;
+  margin: 1.75rem 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  tab-size: 2;
+  background: var(--color-void-card) !important; /* 覆盖 Shiki 自带背景 */
+  -webkit-overflow-scrolling: touch;
+}
+.prose .shiki code {
+  background: transparent !important;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  border: none;
+  color: inherit;
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+.prose .shiki .line {
+  display: block;
+  min-height: 1.2em;
+}
+/* 三圆点装饰 */
+.prose .shiki::before {
+  content: '';
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
+  width: 54px;
+  height: 12px;
+  background-image:
+    radial-gradient(circle, #ff5f57 4px, transparent 4px),
+    radial-gradient(circle, #ffbd2e 4px, transparent 4px),
+    radial-gradient(circle, #28c840 4px, transparent 4px);
+  background-size: 18px 12px;
+  background-position: 0 0, 18px 0, 36px 0;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+  pointer-events: none;
+}
+/* 语言 badge */
+.prose .shiki[data-lang]::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.55rem;
+  left: 4.5rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(0, 212, 255, 0.5);
+  pointer-events: none;
+  user-select: none;
+}
+/* Shiki 行号（通过 CSS counter 实现） */
+.prose .shiki.has-line-numbers code {
+  counter-reset: line;
+}
+.prose .shiki.has-line-numbers .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: rgba(255,255,255,0.2);
+  user-select: none;
+  flex-shrink: 0;
+}
+/* Shiki transformers 内置样式 */
+.prose .shiki .line.diff.add  { background: rgba(0,255,136,0.12); }
+.prose .shiki .line.diff.remove { background: rgba(255,45,120,0.12); }
+.prose .shiki .line.highlighted { background: rgba(0,212,255,0.1); }
+.prose .shiki .line.focused     { opacity: 1; filter: none; }
+.prose .shiki.has-focused .line:not(.focused) { opacity: 0.4; filter: blur(0.5px); transition: all 0.2s; }
+.prose .shiki.has-focused:hover .line:not(.focused) { opacity: 1; filter: none; }
+
+/* ── Callout 提示框 ── */
+.callout {
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid;
+}
+.callout-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem !important;
+  font-family: var(--font-mono);
+}
+.callout p:last-child { margin-bottom: 0 !important; }
+
+.callout-tip    { background: rgba(0,255,136,0.06); border-color: var(--color-neon-green); }
+.callout-tip .callout-title { color: var(--color-neon-green); }
+
+.callout-warning { background: rgba(255,200,0,0.07); border-color: #ffc800; }
+.callout-warning .callout-title { color: #ffc800; }
+
+.callout-danger  { background: rgba(255,45,120,0.07); border-color: var(--color-neon-pink); }
+.callout-danger .callout-title { color: var(--color-neon-pink); }
+
+.callout-info    { background: rgba(0,212,255,0.06); border-color: var(--color-neon-cyan); }
+.callout-info .callout-title { color: var(--color-neon-cyan); }

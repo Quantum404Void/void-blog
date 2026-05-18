@@ -1,0 +1,100 @@
+/* ── 扫描线 scanline 效果（赛博朋克标志性） ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.035) 2px,
+    rgba(0,0,0,0.035) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── 全局 neon 光晕选择框（terminal 风） ── */
+:focus-visible {
+  outline: 1px solid rgba(0,212,255,0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
+}
+
+/* ── prose 标题颜色分级（覆盖上面的一般定义）── */
+.prose h1 { color: var(--color-text-primary); }
+
+/* ── prose blockquote 赛博风 ── */
+.prose blockquote {
+  border-left: 3px solid var(--color-neon-purple);
+  background: rgba(180,76,255,0.05);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  font-style: normal;
+  color: var(--color-text-secondary);
+}
+.prose blockquote p { margin: 0 !important; }
+.prose blockquote::before {
+  content: '//';
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-neon-purple);
+  opacity: 0.6;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* ── prose 表格 ── */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  margin: 1.5rem 0;
+}
+.prose thead tr {
+  background: rgba(0,212,255,0.08);
+  border-bottom: 1px solid rgba(0,212,255,0.3);
+}
+.prose thead th {
+  padding: 0.6rem 1rem;
+  color: var(--color-neon-cyan);
+  font-weight: 600;
+  text-align: left;
+}
+.prose tbody tr {
+  border-bottom: 1px solid var(--color-void-border);
+  transition: background 0.15s;
+}
+.prose tbody tr:hover { background: rgba(255,255,255,0.03); }
+.prose tbody td {
+  padding: 0.6rem 1rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── prose ul/ol 自定义 bullet ── */
+.prose ul { list-style: none; padding-left: 1.25rem; }
+.prose ul li::before {
+  content: '▸';
+  color: var(--color-neon-green);
+  font-size: 0.75rem;
+  margin-left: -1.25rem;
+  margin-right: 0.5rem;
+}
+.prose ol { padding-left: 1.5rem; }
+.prose ol li::marker { color: var(--color-neon-cyan); font-family: var(--font-mono); }
+
+/* ── prose a 链接样式 ── */
+.prose a {
+  color: var(--color-neon-cyan);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,212,255,0.3);
+  transition: border-color 0.15s, color 0.15s;
+}
+.prose a:hover {
+  color: var(--color-neon-green);
+  border-bottom-color: var(--color-neon-green);
+}
+
