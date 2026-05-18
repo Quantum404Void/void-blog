@@ -27,10 +27,6 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
-    css: {
-      // 避免 Tailwind v4 Vite plugin 在 dev 模式重复注入源文件
-      devSourcemap: false,
-    },
   },
 
   runtimeConfig: {

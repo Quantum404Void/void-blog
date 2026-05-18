@@ -4,6 +4,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'Chart' })
+
 import * as Plot from '@observablehq/plot'
 
 interface ChartDataPoint {

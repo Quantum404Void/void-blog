@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'GiscusComments' })
+
 const props = defineProps<{ slug: string }>()
 const container = ref<HTMLDivElement>()
 const { authorGithub, siteName } = useSiteConfig()

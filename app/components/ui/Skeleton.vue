@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'Skeleton' })
+
 withDefaults(defineProps<{
   width?: string
   height?: string

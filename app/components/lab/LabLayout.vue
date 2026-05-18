@@ -15,6 +15,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'LabLayout' })
+
 const props = withDefaults(defineProps<{
   title: string
   desc?: string

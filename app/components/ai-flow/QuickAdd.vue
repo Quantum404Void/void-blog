@@ -39,6 +39,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AiFlowQuickAdd' })
+
 import type { NodeSpec } from '~/types/ai-flow'
 
 defineProps<{

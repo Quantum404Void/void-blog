@@ -44,6 +44,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'GlobalActions' })
+
 // 回到顶部
 const showTop = ref(false)
 function onScroll() { showTop.value = window.scrollY > 400 }

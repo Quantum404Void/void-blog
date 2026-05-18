@@ -18,6 +18,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AppFooter' })
+
 withDefaults(defineProps<{
   backHref?: string
   backLabel?: string

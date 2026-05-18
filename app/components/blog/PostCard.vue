@@ -39,6 +39,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'PostCard' })
+
 import type { PostSummary } from '~/types/post'
 defineProps<{ post: PostSummary }>()
 const { formatDate } = useFormatDate()

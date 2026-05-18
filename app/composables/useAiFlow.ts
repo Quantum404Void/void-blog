@@ -321,8 +321,8 @@ export function useAiFlow() {
       lastRunSummary.value = 'JSON 导入成功'
       fitViewFn()
       doRunGraph()
-    } catch (error: any) {
-      globalError.value = `导入失败：${error?.message || '未知错误'}`
+    } catch (error: unknown) {
+      globalError.value = `导入失败：${error instanceof Error ? error.message : '未知错误'}`
     }
   }
 

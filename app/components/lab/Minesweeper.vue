@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: 'Minesweeper' })
+
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // ── difficulty presets ────────────────────────────────────────

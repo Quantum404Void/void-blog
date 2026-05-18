@@ -90,6 +90,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AiFlowLogPanel' })
+
 defineProps<{
   nodeCount: number
   wireCount: number

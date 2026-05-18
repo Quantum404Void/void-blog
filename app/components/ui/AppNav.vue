@@ -79,6 +79,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AppNav' })
+
 const { siteName } = useSiteConfig()
 const route = useRoute()
 

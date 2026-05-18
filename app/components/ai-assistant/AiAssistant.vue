@@ -2,31 +2,38 @@
   <div>
     <!-- 触发按钮 -->
     <button
-      class="ai-trigger-btn"
+      class="fixed bottom-20 right-4 sm:right-6 z-[var(--z-ai)] w-12 h-12 rounded-full flex items-center justify-center text-xl
+             border-2 border-[rgba(180,76,255,0.6)] bg-[var(--color-void-card)] cursor-pointer
+             transition-[border-color,box-shadow] duration-200
+             hover:border-[rgba(180,76,255,1)] hover:shadow-[0_0_16px_rgba(180,76,255,0.5)]"
       aria-label="AI 助手"
       @click="open = !open"
-    >
-      🤖
-    </button>
+    >🤖</button>
 
     <!-- 浮窗 -->
     <Transition name="ai-slide">
-      <div v-if="open" class="ai-panel">
+      <div
+        v-if="open"
+        class="fixed bottom-36 right-4 sm:right-6 z-[var(--z-ai)] flex flex-col
+               w-[min(360px,90vw)] h-[480px] rounded-xl
+               border border-[rgba(180,76,255,0.4)] bg-[var(--color-void-card)]
+               shadow-[0_0_32px_rgba(180,76,255,0.2)]"
+      >
         <!-- Header -->
-        <div class="ai-panel-header">
-          <span class="font-mono text-xs text-neon-purple flex items-center gap-2">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[rgba(180,76,255,0.3)]">
+          <span class="font-mono text-xs text-[var(--color-neon-purple)] flex items-center gap-2">
             <span>🤖</span> AI 助手
           </span>
           <button
-            class="text-muted hover:text-primary transition-colors text-sm"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors text-sm"
             @click="open = false"
           >✕</button>
         </div>
 
         <!-- Messages -->
-        <div ref="msgListRef" class="ai-msg-list">
-          <div v-if="history.length === 0" class="ai-empty-hint">
-            <p class="font-mono text-xs text-muted text-center leading-relaxed">
+        <div ref="msgListRef" class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 scroll-smooth">
+          <div v-if="history.length === 0" class="flex items-center justify-center h-full">
+            <p class="font-mono text-xs text-[var(--color-text-muted)] text-center leading-relaxed">
               你好！我是 void.redx.space 的 AI 助手 🤖<br />
               <span class="opacity-60">有什么技术问题可以问我~</span>
             </p>
@@ -39,7 +46,9 @@
           >
             <div
               class="max-w-[80%] rounded-lg px-3 py-2 font-mono text-xs leading-relaxed"
-              :class="m.role === 'user' ? 'msg-user' : 'msg-assistant'"
+              :class="m.role === 'user'
+                ? 'bg-[rgba(0,212,255,0.12)] text-[var(--color-neon-cyan)] border border-[rgba(0,212,255,0.25)]'
+                : 'bg-[rgba(180,76,255,0.08)] text-[var(--color-text-secondary)] border border-[rgba(180,76,255,0.2)]'"
             >
               <span v-if="m.loading" class="animate-pulse">···</span>
               <span v-else>{{ m.content }}</span>
@@ -48,18 +57,26 @@
         </div>
 
         <!-- Input -->
-        <div class="ai-panel-footer">
+        <div class="flex gap-2 p-3 border-t border-[rgba(180,76,255,0.3)]">
           <input
             v-model="inputText"
             type="text"
             placeholder="输入问题..."
             :disabled="isLoading"
-            class="ai-input"
+            class="flex-1 bg-transparent border border-[var(--color-void-border)] rounded-lg
+                   px-3 py-2 font-mono text-xs text-[var(--color-text-primary)]
+                   placeholder:text-[var(--color-text-muted)] outline-none
+                   transition-[border-color] duration-200
+                   focus:border-[rgba(180,76,255,0.5)] disabled:opacity-50"
             @keydown.enter.prevent="sendMessage"
           />
           <button
             :disabled="isLoading || !inputText.trim()"
-            class="ai-send-btn"
+            class="px-3 py-2 rounded-lg font-mono text-xs
+                   border border-[rgba(180,76,255,0.4)] text-[var(--color-neon-purple)]
+                   transition-colors duration-200 cursor-pointer bg-transparent
+                   hover:not-disabled:bg-[rgba(180,76,255,0.1)]
+                   disabled:opacity-40 disabled:cursor-not-allowed"
             @click="sendMessage"
           >发送</button>
         </div>
@@ -69,12 +86,16 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AiAssistant' })
+
 import type { UiMessage, ChatMessage, AiChatResponse } from '~/types/ai'
 
+// ── 常量 ──────────────────────────────────────────────────
 const SYSTEM_PROMPT = '你是 void.redx.space 博客的 AI 助手，帮助读者理解技术文章。回答简洁，中文，带一点极客风格。'
 const MAX_HISTORY_TURNS = 20
 const API_ENDPOINT = '/api/ai-chat'
 
+// ── Chat session composable（局部）────────────────────────
 function useChatSession() {
   const history = ref<UiMessage[]>([])
   const isLoading = ref(false)
@@ -125,134 +146,15 @@ function useChatSession() {
     }
   }
 
-  return { history, isLoading, inputText, msgListRef, sendMessage, scrollToBottom }
+  return { history, isLoading, inputText, msgListRef, sendMessage }
 }
 
+// ── 状态 ──────────────────────────────────────────────────
 const open = ref(false)
-const { history, isLoading, inputText, msgListRef, sendMessage, scrollToBottom } = useChatSession()
+const { history, isLoading, inputText, msgListRef, sendMessage } = useChatSession()
 </script>
 
 <style scoped>
-.ai-trigger-btn {
-  position: fixed;
-  bottom: 5rem;
-  right: 1rem;
-  z-index: 60;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  border: 2px solid rgba(180, 76, 255, 0.6);
-  background: var(--color-void-card);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-.ai-trigger-btn:hover {
-  border-color: rgba(180, 76, 255, 1);
-  box-shadow: 0 0 16px rgba(180, 76, 255, 0.5);
-}
-@media (min-width: 640px) {
-  .ai-trigger-btn { right: 1.5rem; }
-}
-
-.ai-panel {
-  position: fixed;
-  bottom: 9rem;
-  right: 1rem;
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  width: min(360px, 90vw);
-  height: 480px;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(180, 76, 255, 0.4);
-  background: var(--color-void-card);
-  box-shadow: 0 0 32px rgba(180, 76, 255, 0.2);
-}
-@media (min-width: 640px) {
-  .ai-panel { right: 1.5rem; }
-}
-
-.ai-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(180, 76, 255, 0.3);
-}
-
-.ai-msg-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  scroll-behavior: smooth;
-}
-
-.ai-empty-hint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-.msg-user {
-  background: rgba(0, 212, 255, 0.12);
-  color: var(--color-neon-cyan);
-  border: 1px solid rgba(0, 212, 255, 0.25);
-}
-.msg-assistant {
-  background: rgba(180, 76, 255, 0.08);
-  color: var(--color-text-secondary);
-  border: 1px solid rgba(180, 76, 255, 0.2);
-}
-
-.ai-panel-footer {
-  padding: 0.75rem;
-  border-top: 1px solid rgba(180, 76, 255, 0.3);
-  display: flex;
-  gap: 0.5rem;
-}
-
-.ai-input {
-  flex: 1;
-  background: transparent;
-  border: 1px solid var(--color-void-border);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-text-primary);
-  outline: none;
-  transition: border-color 0.2s;
-}
-.ai-input::placeholder { color: var(--color-text-muted); }
-.ai-input:focus { border-color: rgba(180, 76, 255, 0.5); }
-.ai-input:disabled { opacity: 0.5; }
-
-.ai-send-btn {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  border: 1px solid rgba(180, 76, 255, 0.4);
-  color: var(--color-neon-purple);
-  transition: background 0.2s;
-  cursor: pointer;
-  background: transparent;
-}
-.ai-send-btn:hover:not(:disabled) { background: rgba(180, 76, 255, 0.1); }
-.ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.text-neon-purple { color: var(--color-neon-purple); }
-.text-muted { color: var(--color-text-muted); }
-.text-primary { color: var(--color-text-primary); }
-
 .ai-slide-enter-active,
 .ai-slide-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;

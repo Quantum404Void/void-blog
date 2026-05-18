@@ -11,6 +11,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'ReadingProgress' })
+
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const progress = ref(0)

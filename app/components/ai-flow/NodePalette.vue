@@ -50,6 +50,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AiFlowNodePalette' })
+
 import type { NodeSpec, Preset } from '~/types/ai-flow'
 
 defineProps<{

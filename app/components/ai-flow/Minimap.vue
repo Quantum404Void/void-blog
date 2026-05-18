@@ -34,6 +34,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AiFlowMinimap' })
+
 import type { FlowNode } from '~/types/ai-flow'
 
 const MINIMAP_W = 220

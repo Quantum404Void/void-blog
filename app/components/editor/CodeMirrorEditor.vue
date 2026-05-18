@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'CodeMirrorEditor' })
+
 import { EditorView, keymap, highlightActiveLine, drawSelection, placeholder as cmPlaceholder, lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import type { Extension } from '@codemirror/state'

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: 'Game2048' })
+
 import { ref, onMounted, onUnmounted } from 'vue'
 
 type Dir = 'left' | 'right' | 'up' | 'down'

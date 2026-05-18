@@ -17,6 +17,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'TableOfContents' })
+
 import { ref, onMounted, onUnmounted } from 'vue'
 
 interface Heading { depth: number; slug: string; text: string }

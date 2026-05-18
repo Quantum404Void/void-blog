@@ -122,6 +122,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AdminEditor' })
+
 import type { Post } from '~/types/post'
 
 interface AdminPost extends Post {

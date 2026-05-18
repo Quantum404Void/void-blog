@@ -115,6 +115,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AiFlowToolbar' })
+
 defineProps<{
   hasSelection: boolean
   canUndo: boolean
