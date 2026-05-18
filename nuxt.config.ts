@@ -135,7 +135,17 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: false },
-    '/api/**': { headers: { 'Cache-Control': 'no-store' } },
+    // 只读数据：CF Edge 缓存 60s，D1 写入后自动过期（浏览器不缓存，只缓存在 CF edge）
+    '/api/posts': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
+    '/api/posts/**': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
+    '/api/tags': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
+    '/api/search': { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' } },
+    '/api/stats': { headers: { 'Cache-Control': 's-maxage=30' } },
+    // 动态数据（统计、管理）：不缓存
+    '/api/posts/*/stats': { headers: { 'Cache-Control': 'no-store' } },
+    '/api/admin/**': { headers: { 'Cache-Control': 'no-store' } },
+    '/api/auth/**': { headers: { 'Cache-Control': 'no-store' } },
+    '/api/ai-chat': { headers: { 'Cache-Control': 'no-store' } },
     '/rss.xml': { isr: 3600 },
     '/sitemap.xml': { isr: 3600 },
   },

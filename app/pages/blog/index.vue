@@ -167,5 +167,7 @@ onMounted(async () => {
       }
     )
   })
+  // SPA 导航后 ScrollTrigger 重新计算位置
+  setTimeout(() => ScrollTrigger?.refresh?.(), 100)
 })
   </script>

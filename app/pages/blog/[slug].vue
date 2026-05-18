@@ -322,8 +322,8 @@ const { formatDateLong } = useFormatDate()
 const readingTime = computed(() => post.value ? calcReadingTime(post.value.content) : 0)
 const wordCount = computed(() => post.value ? calcWordCount(post.value.content) : 0)
 
-// Get all posts for prev/next/related
-const { data: allPostsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
+// Get all posts for prev/next/related（lazy：不阻塞文章内容渲染）
+const { data: allPostsData } = useLazyFetch('/api/posts', { default: () => [] as PostSummary[] })
 const allPosts = computed(() => (allPostsData.value || []).filter((p: PostSummary) => p.slug !== slug && p.slug !== 'about'))
 
 const postTags = computed(() => new Set(post.value?.tags ?? []))
