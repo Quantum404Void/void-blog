@@ -12,14 +12,14 @@
 
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
-          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
+          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot neon-flicker" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
             <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style="opacity:0;transform:translateY(12px)">
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)] hero-online-dot"></span>
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
-            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6" style="opacity:0;transform:translateY(16px)">
+            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6 glitch-text" data-text="void.dev" style="opacity:0;transform:translateY(16px)">
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
             <div class="font-mono text-sm space-y-2.5 max-w-xl">
@@ -238,6 +238,9 @@ onMounted(async () => {
   // 入场序列
   tl.to(heroPrompt.value, { opacity: 1, y: 0, duration: 0.4 })
     .to(heroTitle.value, { opacity: 1, y: 0, duration: 0.5 }, '-=0.1')
+    .to(heroTitle.value, { skewX: -2, duration: 0.05 }, '+=0.2')
+    .to(heroTitle.value, { skewX: 1, duration: 0.05 })
+    .to(heroTitle.value, { skewX: 0, duration: 0.1 })
     .to(heroLine0Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.1')
     .to(heroLine1Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.2')
     .to(heroLine2Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.2')

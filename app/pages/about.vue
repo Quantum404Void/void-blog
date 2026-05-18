@@ -190,6 +190,24 @@ onMounted(async () => {
     })
   }
 
+  // 终端命令行打字机效果（TextPlugin）
+  const cmdSpans = document.querySelectorAll('.text-xs.space-y-1 > div .text-[var(--color-text-secondary)]')
+  const cmdTexts = [
+    'whoami',
+    'cat /proc/self/status | grep -i name',
+    'history | grep -c "折腾"',
+  ]
+  cmdSpans.forEach((span, i) => {
+    const originalText = cmdTexts[i] ?? span.textContent ?? ''
+    span.textContent = ''
+    gsap.to(span, {
+      duration: originalText.length * 0.04,
+      text: { value: originalText, delimiter: '' },
+      ease: 'none',
+      delay: 0.3 + i * 0.5,
+    })
+  })
+
   // 底部 info 卡片 ScrollTrigger
   const cards = document.querySelectorAll('.border.rounded-xl')
   cards.forEach((card) => {
