@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { EditorView, keymap, highlightActiveLine, drawSelection, placeholder as cmPlaceholder, lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
+import type { Extension } from '@codemirror/state'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { javascript } from '@codemirror/lang-javascript'
 import { json as langJson } from '@codemirror/lang-json'
@@ -113,7 +114,7 @@ onMounted(() => {
     '.tok-invalid':   { color: '#ff2d78' },
   }, { dark: true })
 
-  const extensions: any[] = [
+  const extensions: Extension[] = [
     voidTheme,
     getLangExtension(props.lang),
     highlightActiveLine(),

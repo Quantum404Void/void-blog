@@ -5,9 +5,9 @@ import { ref, computed, watch } from 'vue'
 import { NODE_SPECS, NO_FLOW, makeId, makeNode, formatLogValue,
   NODE_W, HEADER_H, DESC_H, RESULT_H, PORT_R, STAGE_W, STAGE_H, MINIMAP_W, MINIMAP_H,
   clamp, specFor, nodeHeight, inputPortY, outputPortY, inputLabel, outputLabel, bezierPath,
-} from '~/utils/ai-flow'
-import { PRESETS, buildPreset } from '~/utils/ai-flow-presets'
-import { runGraph as execGraph } from '~/utils/ai-flow-runner'
+} from '~/utils/ai-flow/nodes'
+import { PRESETS, buildPreset } from '~/utils/ai-flow/presets'
+import { runGraph as execGraph } from '~/utils/ai-flow/runner'
 import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
 
 const STORAGE_KEY = 'void-blog:ai-flow:v2'

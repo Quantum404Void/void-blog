@@ -122,6 +122,12 @@
 </template>
 
 <script setup lang="ts">
+import type { Post } from '~/types/post'
+
+interface AdminPost extends Post {
+  updated_at?: string
+}
+
 const props = defineProps<{ isNew: boolean; initialSlug?: string }>()
 const router = useRouter()
 
@@ -140,7 +146,7 @@ const parsedTags = computed(() => tagsInput.value.split(',').map(t => t.trim()).
 if (!props.isNew && props.initialSlug) {
   const { data } = await useFetch(`/api/admin/posts/${props.initialSlug}`)
   if (data.value) {
-    const p = data.value as any
+    const p = data.value as AdminPost
     Object.assign(form, { slug: p.slug, title: p.title, description: p.description,
       content: p.content, pub_date: p.pub_date, draft: p.draft })
     tagsInput.value = (p.tags || []).join(', ')
@@ -212,7 +218,7 @@ async function save() {
       savedSnapshot.value = JSON.stringify(body)
       showToast('已更新 ✓')
     }
-  } catch (e: any) { showToast(e?.data?.message || '保存失败', 'err') }
+  } catch (e: unknown) { showToast(e instanceof Error ? e.message : (e as { data?: { message?: string } })?.data?.message ?? '保存失败', 'err') }
   finally { saving.value = false }
 }
 </script>

@@ -75,55 +75,61 @@ const SYSTEM_PROMPT = '你是 void.redx.space 博客的 AI 助手，帮助读者
 const MAX_HISTORY_TURNS = 20
 const API_ENDPOINT = '/api/ai-chat'
 
-const open = ref(false)
-const inputText = ref('')
-const isLoading = ref(false)
-const msgListRef = ref<HTMLElement | null>(null)
-const history = ref<UiMessage[]>([])
+function useChatSession() {
+  const history = ref<UiMessage[]>([])
+  const isLoading = ref(false)
+  const inputText = ref('')
+  const msgListRef = ref<HTMLElement | null>(null)
 
-function scrollToBottom() {
-  nextTick(() => {
-    if (msgListRef.value) msgListRef.value.scrollTop = msgListRef.value.scrollHeight
-  })
-}
-
-async function sendMessage() {
-  const text = inputText.value.trim()
-  if (!text || isLoading.value) return
-
-  inputText.value = ''
-  history.value.push({ role: 'user', content: text })
-  scrollToBottom()
-
-  isLoading.value = true
-  const placeholder: UiMessage = { role: 'assistant', content: '', loading: true }
-  history.value.push(placeholder)
-  scrollToBottom()
-
-  const recentMsgs = history.value
-    .filter(m => !m.loading)
-    .slice(-MAX_HISTORY_TURNS)
-
-  const payload: ChatMessage[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
-    ...recentMsgs.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-  ]
-
-  try {
-    const res = await $fetch<AiChatResponse>(API_ENDPOINT, {
-      method: 'POST',
-      body: { messages: payload },
+  function scrollToBottom() {
+    nextTick(() => {
+      if (msgListRef.value) msgListRef.value.scrollTop = msgListRef.value.scrollHeight
     })
-    placeholder.loading = false
-    placeholder.content = res.reply
-  } catch {
-    placeholder.loading = false
-    placeholder.content = 'AI 助手暂时离线，请稍后再试'
-  } finally {
-    isLoading.value = false
-    scrollToBottom()
   }
+
+  async function sendMessage() {
+    const text = inputText.value.trim()
+    if (!text || isLoading.value) return
+
+    inputText.value = ''
+    history.value.push({ role: 'user', content: text })
+    scrollToBottom()
+
+    isLoading.value = true
+    const placeholder: UiMessage = { role: 'assistant', content: '', loading: true }
+    history.value.push(placeholder)
+    scrollToBottom()
+
+    const recentMsgs = history.value
+      .filter(m => !m.loading)
+      .slice(-MAX_HISTORY_TURNS)
+
+    const payload: ChatMessage[] = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...recentMsgs.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+    ]
+
+    try {
+      const res = await $fetch<AiChatResponse>(API_ENDPOINT, {
+        method: 'POST',
+        body: { messages: payload },
+      })
+      placeholder.loading = false
+      placeholder.content = res.reply
+    } catch {
+      placeholder.loading = false
+      placeholder.content = 'AI 助手暂时离线，请稍后再试'
+    } finally {
+      isLoading.value = false
+      scrollToBottom()
+    }
+  }
+
+  return { history, isLoading, inputText, msgListRef, sendMessage, scrollToBottom }
 }
+
+const open = ref(false)
+const { history, isLoading, inputText, msgListRef, sendMessage, scrollToBottom } = useChatSession()
 </script>
 
 <style scoped>

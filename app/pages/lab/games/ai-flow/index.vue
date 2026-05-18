@@ -3,8 +3,8 @@ import { NODE_SPECS, makeId, makeNode, formatValue,
   clamp, specFor, nodeHeight, inputPortY, outputPortY,
   inputLabel, outputLabel, bezierPath,
   NODE_W, PORT_R, STAGE_W, STAGE_H, MINIMAP_W, MINIMAP_H,
-} from '~/utils/ai-flow'
-import { PRESETS } from '~/utils/ai-flow-presets'
+} from '~/utils/ai-flow/nodes'
+import { PRESETS } from '~/utils/ai-flow/presets'
 import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
 import { useAiFlow } from '~/composables/useAiFlow'
 

@@ -31,8 +31,9 @@ export default defineEventHandler(async (event): Promise<AiChatResponse> => {
     )
     const reply = res?.choices?.[0]?.message?.content?.trim() ?? '（无回复）'
     return { reply }
-  } catch (err: any) {
-    const msg = err?.data?.error?.message ?? err?.message ?? 'unknown error'
+  } catch (err: unknown) {
+    const errData = (err as { data?: { error?: { message?: string } } })?.data
+    const msg = errData?.error?.message ?? (err instanceof Error ? err.message : 'unknown error')
     return { reply: `AI 请求失败：${msg}` }
   }
 })

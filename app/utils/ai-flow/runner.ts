@@ -1,12 +1,12 @@
 // utils/ai-flow-runner.ts
 // 纯函数运行器：接收 nodes/wires，返回执行结果，无副作用
 
-import { NO_FLOW, normalizeRunResult, formatLogValue, NODE_SPECS } from '~/utils/ai-flow'
-import type { FlowNode, Wire } from '~/types/ai-flow'
+import { NO_FLOW, normalizeRunResult, formatLogValue, NODE_SPECS } from './nodes'
+import type { FlowNode, FlowValue, Wire } from '~/types/ai-flow'
 
 export interface NodeExecutionResult {
-  result: unknown
-  outputsData: unknown[]
+  result: FlowValue
+  outputsData: FlowValue[]
   error: string
 }
 
@@ -66,13 +66,13 @@ export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
     const node = nodeMap.get(nodeId)!
     const spec = NODE_SPECS[node.type]
     const inWires = [...(incoming.get(node.id) ?? [])].sort((a, b) => a.toPort - b.toPort)
-    const inputs: unknown[] = Array.from({ length: spec.inputs }, () => undefined)
+    const inputs: FlowValue[] = Array.from({ length: spec.inputs }, () => undefined)
     const linkedPorts = new Set(inWires.map(w => w.toPort))
     const res = nodeResults.get(nodeId)!
 
     if (spec.inputs > 0 && Array.from({ length: spec.inputs }, (_, i) => i).some(i => !linkedPorts.has(i))) {
       res.error = '输入未连完整'
-      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
+      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW as unknown as FlowValue)
       log.push(`✗ ${spec.title}: 输入未连完整`)
       continue
     }
@@ -83,16 +83,16 @@ export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
       inputs[wire.toPort] = (srcValue === undefined || srcValue === null) ? srcResult?.result : srcValue
     }
 
-    if (inputs.includes(NO_FLOW)) {
+    if (inputs.includes(NO_FLOW as unknown as FlowValue)) {
       res.result = '⏭ skipped'
-      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
+      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW as unknown as FlowValue)
       log.push(`↷ ${spec.title}: skipped (no flow)`)
       continue
     }
 
     if (spec.inputs > 0 && inputs.some(v => v === undefined)) {
       res.error = '上游结果缺失'
-      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
+      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW as unknown as FlowValue)
       log.push(`✗ ${spec.title}: 上游结果缺失`)
       continue
     }
@@ -104,7 +104,7 @@ export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
       log.push(`✓ ${spec.title}: ${formatLogValue(normalized.result)}`)
     } catch (error: unknown) {
       res.error = error instanceof Error ? error.message : '运行失败'
-      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
+      res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW as unknown as FlowValue)
       log.push(`✗ ${spec.title}: ${res.error}`)
     }
   }

@@ -2,20 +2,20 @@
 // NO_FLOW symbol、helper 函数、NODE_SPECS、工具函数
 
 import { NO_FLOW } from '~/types/ai-flow'
-import type { NodeSpec, NodeRunResult, FlowNode } from '~/types/ai-flow'
+import type { FlowValue, NodeRunContext, NodeRunResult, NodeSpec, FlowNode } from '~/types/ai-flow'
 
 // Re-export so consumers can import from here directly
 export { NO_FLOW }
 
 // ── Helper 函数 ────────────────────────────────────────────
 
-export function parseArrayInput(raw: string): any[] {
+export function parseArrayInput(raw: string): FlowValue[] {
   const text = String(raw ?? '').trim()
   if (!text) return []
   if (text.startsWith('[')) {
     const parsed = JSON.parse(text)
     if (!Array.isArray(parsed)) throw new Error('不是合法 JSON 数组')
-    return parsed
+    return parsed as FlowValue[]
   }
   return text
     .split(/[\n,]+/)
@@ -27,36 +27,36 @@ export function parseArrayInput(raw: string): any[] {
     })
 }
 
-export function requireArray(value: any, label = '输入'): any[] {
+export function requireArray(value: FlowValue, label = '输入'): FlowValue[] {
   if (!Array.isArray(value)) throw new Error(`${label} 需要数组`)
   return value
 }
 
-export function requireString(value: any, label = '输入'): string {
+export function requireString(value: FlowValue, label = '输入'): string {
   if (typeof value !== 'string') throw new Error(`${label} 需要字符串`)
   return value
 }
 
-export function requireNumber(value: any, label = '输入'): number {
+export function requireNumber(value: FlowValue, label = '输入'): number {
   const num = Number(value)
   if (!Number.isFinite(num)) throw new Error(`${label} 需要 number`)
   return num
 }
 
-export function requireBoolean(value: any, label = '输入'): boolean {
+export function requireBoolean(value: FlowValue, label = '输入'): boolean {
   if (typeof value === 'boolean') return value
   if (value === 'true') return true
   if (value === 'false') return false
   throw new Error(`${label} 需要 boolean`)
 }
 
-export function requireNumberArray(value: any, label = '输入'): number[] {
+export function requireNumberArray(value: FlowValue, label = '输入'): number[] {
   const arr = requireArray(value, label)
   if (!arr.every(v => typeof v === 'number' && Number.isFinite(v))) throw new Error(`${label} 需要 number[]`)
   return arr as number[]
 }
 
-export function mapValue(value: any, mode: string): any {
+export function mapValue(value: FlowValue, mode: string): FlowValue {
   switch (mode) {
     case 'double': return Number(value) * 2
     case 'square': return Number(value) ** 2
@@ -70,23 +70,25 @@ export function mapValue(value: any, mode: string): any {
   }
 }
 
-export function normalizeRunResult(raw: any, outputCount: number): { result: any; outputs: any[] } {
-  if (raw && typeof raw === 'object' && Array.isArray(raw.outputs)) {
-    const result = Object.prototype.hasOwnProperty.call(raw, 'result') ? raw.result : raw.outputs[0]
+export function normalizeRunResult(raw: FlowValue | NodeRunResult, outputCount: number): { result: FlowValue; outputs: FlowValue[] } {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw) && Array.isArray((raw as NodeRunResult).outputs)) {
+    const nr = raw as NodeRunResult
+    const result = Object.prototype.hasOwnProperty.call(nr, 'result') ? nr.result : nr.outputs![0]
     return {
       result,
-      outputs: Array.from({ length: outputCount }, (_, idx) => raw.outputs[idx] ?? NO_FLOW),
+      outputs: Array.from({ length: outputCount }, (_, idx) => nr.outputs![idx] ?? NO_FLOW) as FlowValue[],
     }
   }
+  const r = raw as FlowValue
   return {
-    result: raw,
+    result: r,
     outputs: outputCount > 0
-      ? Array.from({ length: outputCount }, (_, idx) => idx === 0 ? raw : NO_FLOW)
+      ? Array.from({ length: outputCount }, (_, idx) => idx === 0 ? r : NO_FLOW) as FlowValue[]
       : [],
   }
 }
 
-export function safeCompare(left: any, right: any, mode: string): boolean {
+export function safeCompare(left: FlowValue, right: FlowValue, mode: string): boolean {
   switch (mode) {
     case 'eq': return left === right
     case 'neq': return left !== right
@@ -117,9 +119,9 @@ export function makeNode(type: string, x: number, y: number): FlowNode {
   }
 }
 
-export function formatValue(value: any): string {
+export function formatValue(value: FlowValue): string {
   if (value === undefined) return '—'
-  if (value === NO_FLOW) return '⏭ no flow'
+  if ((value as unknown) === NO_FLOW) return '⏭ no flow'
   if (typeof value === 'string') return value.length > 220 ? `${value.slice(0, 220)}…` : value
   try {
     const json = JSON.stringify(value, null, 2)
@@ -129,8 +131,8 @@ export function formatValue(value: any): string {
   }
 }
 
-export function formatLogValue(value: any): string {
-  if (value === NO_FLOW) return 'no-flow'
+export function formatLogValue(value: FlowValue): string {
+  if ((value as unknown) === NO_FLOW) return 'no-flow'
   if (typeof value === 'string') return value.length > 80 ? `${value.slice(0, 80)}…` : value
   try {
     const json = JSON.stringify(value)
@@ -208,7 +210,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'value', label: 'value', kind: 'number', step: 1 },
     ],
     createParams: () => ({ value: 42 }),
-    run: ({ params }) => Number(params.value ?? 0),
+    run: ({ params }: NodeRunContext) => Number(params.value ?? 0),
   },
   'source-boolean': {
     title: 'Boolean',
@@ -227,7 +229,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       },
     ],
     createParams: () => ({ value: true }),
-    run: ({ params }) => Boolean(params.value),
+    run: ({ params }: NodeRunContext) => Boolean(params.value),
   },
   'source-text': {
     title: 'Text',
@@ -241,7 +243,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'text', label: 'text', kind: 'textarea', placeholder: 'hello world' },
     ],
     createParams: () => ({ text: 'hello void, hello flow' }),
-    run: ({ params }) => String(params.text ?? ''),
+    run: ({ params }: NodeRunContext) => String(params.text ?? ''),
   },
   'source-array': {
     title: 'Array',
@@ -255,7 +257,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'items', label: 'items', kind: 'textarea', placeholder: '1, 2, 3' },
     ],
     createParams: () => ({ items: '1, 2, 3, 5, 8, 13' }),
-    run: ({ params }) => parseArrayInput(params.items),
+    run: ({ params }: NodeRunContext) => parseArrayInput(String(params.items ?? '')),
   },
   'source-range': {
     title: 'Range',
@@ -271,7 +273,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'step', label: 'step', kind: 'number', step: 1 },
     ],
     createParams: () => ({ start: 1, end: 10, step: 1 }),
-    run: ({ params }) => {
+    run: ({ params }: NodeRunContext) => {
       const start = Number(params.start ?? 0)
       const end = Number(params.end ?? 0)
       const step = Number(params.step ?? 1)
@@ -309,7 +311,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       },
     ],
     createParams: () => ({ mode: 'square' }),
-    run: ({ inputs, params }) => requireArray(inputs[0]).map(item => mapValue(item, String(params.mode))),
+    run: ({ inputs, params }: NodeRunContext) => requireArray(inputs[0]).map(item => mapValue(item, String(params.mode))),
   },
   filter: {
     title: 'Filter',
@@ -333,7 +335,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'text', label: 'text', kind: 'text', placeholder: 'hello' },
     ],
     createParams: () => ({ mode: 'gte', threshold: 10, text: 'void' }),
-    run: ({ inputs, params }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const arr = requireArray(inputs[0])
       const mode = String(params.mode)
       const threshold = Number(params.threshold ?? 0)
@@ -371,7 +373,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'separator', label: 'separator', kind: 'text', placeholder: ', ' },
     ],
     createParams: () => ({ mode: 'sum', separator: ', ' }),
-    run: ({ inputs, params }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const arr = requireArray(inputs[0])
       switch (params.mode) {
         case 'sum': return requireNumberArray(arr).reduce((a, b) => a + b, 0)
@@ -402,7 +404,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       },
     ],
     createParams: () => ({ mode: 'num-asc' }),
-    run: ({ inputs, params }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const arr = [...requireArray(inputs[0])]
       switch (params.mode) {
         case 'num-asc': return arr.sort((a, b) => Number(a) - Number(b))
@@ -422,7 +424,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const arr = requireArray(inputs[0])
       const seen = new Set<string>()
       return arr.filter((item) => {
@@ -445,7 +447,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'count', label: 'count', kind: 'number', step: 1 },
     ],
     createParams: () => ({ count: 5 }),
-    run: ({ inputs, params }) => requireArray(inputs[0]).slice(0, Number(params.count ?? 0)),
+    run: ({ inputs, params }: NodeRunContext) => requireArray(inputs[0]).slice(0, Number(params.count ?? 0)),
   },
 
   add: {
@@ -459,7 +461,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     inputLabels: ['a', 'b'],
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => requireNumber(inputs[0], 'a') + requireNumber(inputs[1], 'b'),
+    run: ({ inputs }: NodeRunContext) => requireNumber(inputs[0], 'a') + requireNumber(inputs[1], 'b'),
   },
   multiply: {
     title: 'Multiply',
@@ -472,7 +474,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     inputLabels: ['a', 'b'],
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => requireNumber(inputs[0], 'a') * requireNumber(inputs[1], 'b'),
+    run: ({ inputs }: NodeRunContext) => requireNumber(inputs[0], 'a') * requireNumber(inputs[1], 'b'),
   },
   compare: {
     title: 'Compare',
@@ -497,7 +499,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       },
     ],
     createParams: () => ({ mode: 'gt' }),
-    run: ({ inputs, params }) => safeCompare(inputs[0], inputs[1], String(params.mode)),
+    run: ({ inputs, params }: NodeRunContext) => safeCompare(inputs[0], inputs[1], String(params.mode)),
   },
 
   merge: {
@@ -511,11 +513,11 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     inputLabels: ['left', 'right'],
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const [left, right] = inputs
       if (Array.isArray(left) && Array.isArray(right)) return [...left, ...right]
       if (typeof left === 'string' || typeof right === 'string') return `${String(left)}${String(right)}`
-      if (left && right && typeof left === 'object' && typeof right === 'object') return { ...left, ...right }
+      if (left && right && typeof left === 'object' && typeof right === 'object') return { ...(left as Record<string, FlowValue>), ...(right as Record<string, FlowValue>) }
       return [left, right]
     },
   },
@@ -531,12 +533,12 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputLabels: ['true', 'false'],
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => {
+    run: ({ inputs }: NodeRunContext): NodeRunResult => {
       const cond = requireBoolean(inputs[0], 'cond')
       const payload = inputs[1]
       return {
-        result: { routed: cond ? 'true' : 'false', payload },
-        outputs: cond ? [payload, NO_FLOW] : [NO_FLOW, payload],
+        result: { routed: cond ? 'true' : 'false', payload } as unknown as FlowValue,
+        outputs: cond ? [payload, NO_FLOW as unknown as FlowValue] : [NO_FLOW as unknown as FlowValue, payload],
       }
     },
   },
@@ -553,7 +555,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'separator', label: 'separator', kind: 'text', placeholder: ' ' },
     ],
     createParams: () => ({ separator: ' ' }),
-    run: ({ inputs, params }) => requireString(inputs[0]).split(String(params.separator ?? ' ')).filter(Boolean),
+    run: ({ inputs, params }: NodeRunContext) => requireString(inputs[0]).split(String(params.separator ?? ' ')).filter(Boolean),
   },
   join: {
     title: 'Join',
@@ -567,7 +569,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'separator', label: 'separator', kind: 'text', placeholder: ', ' },
     ],
     createParams: () => ({ separator: ', ' }),
-    run: ({ inputs, params }) => requireArray(inputs[0]).map(v => String(v)).join(String(params.separator ?? ', ')),
+    run: ({ inputs, params }: NodeRunContext) => requireArray(inputs[0]).map(v => String(v)).join(String(params.separator ?? ', ')),
   },
   uppercase: {
     title: 'Uppercase',
@@ -579,7 +581,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => requireString(inputs[0]).toUpperCase(),
+    run: ({ inputs }: NodeRunContext) => requireString(inputs[0]).toUpperCase(),
   },
   lowercase: {
     title: 'Lowercase',
@@ -591,7 +593,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => requireString(inputs[0]).toLowerCase(),
+    run: ({ inputs }: NodeRunContext) => requireString(inputs[0]).toLowerCase(),
   },
 
   length: {
@@ -604,7 +606,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const value = inputs[0]
       if (Array.isArray(value) || typeof value === 'string') return value.length
       if (value && typeof value === 'object') return Object.keys(value).length
@@ -621,7 +623,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const arr = requireNumberArray(inputs[0])
       const count = arr.length
       const sum = arr.reduce((a, b) => a + b, 0)
@@ -631,7 +633,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
         max: count ? Math.max(...arr) : null,
         avg: count ? Number((sum / count).toFixed(4)) : null,
         sum,
-      }
+      } as unknown as FlowValue
     },
   },
   'json-parse': {
@@ -644,7 +646,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => JSON.parse(requireString(inputs[0])),
+    run: ({ inputs }: NodeRunContext) => JSON.parse(requireString(inputs[0])) as FlowValue,
   },
   'json-stringify': {
     title: 'JSON.stringify',
@@ -658,7 +660,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'pretty', label: 'pretty', kind: 'boolean' },
     ],
     createParams: () => ({ pretty: true }),
-    run: ({ inputs, params }) => JSON.stringify(inputs[0], null, params.pretty ? 2 : 0),
+    run: ({ inputs, params }: NodeRunContext) => JSON.stringify(inputs[0], null, params.pretty ? 2 : 0),
   },
 
   preview: {
@@ -671,7 +673,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 0,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }) => inputs[0],
+    run: ({ inputs }: NodeRunContext) => inputs[0],
   },
 
   // ---- Math ----
@@ -694,7 +696,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'decimals', label: 'decimals', kind: 'number' as const, step: 1, min: 0, max: 10 },
     ],
     createParams: () => ({ mode: 'round', decimals: 0 }),
-    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const n = requireNumber(inputs[0])
       const d = Number(params.decimals ?? 0)
       const factor = 10 ** d
@@ -717,7 +719,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }: { inputs: any[] }) => requireArray(inputs[0]).flat(),
+    run: ({ inputs }: NodeRunContext) => requireArray(inputs[0]).flat() as FlowValue[],
   },
   'chunk': {
     title: 'Chunk',
@@ -731,10 +733,10 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'size', label: 'size', kind: 'number' as const, step: 1, min: 1 },
     ],
     createParams: () => ({ size: 2 }),
-    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const arr = requireArray(inputs[0])
       const size = Math.max(1, Number(params.size ?? 2))
-      const chunks: any[][] = []
+      const chunks: FlowValue[][] = []
       for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size))
       return chunks
     },
@@ -750,11 +752,11 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     inputLabels: ['arr1', 'arr2'],
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }: { inputs: any[] }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const a = requireArray(inputs[0], 'arr1')
       const b = requireArray(inputs[1], 'arr2')
       const len = Math.min(a.length, b.length)
-      return Array.from({ length: len }, (_, i) => [a[i], b[i]])
+      return Array.from({ length: len }, (_, i) => [a[i], b[i]] as FlowValue[])
     },
   },
   'count': {
@@ -767,7 +769,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }: { inputs: any[] }) => requireArray(inputs[0]).length,
+    run: ({ inputs }: NodeRunContext) => requireArray(inputs[0]).length,
   },
   'reverse': {
     title: 'Reverse',
@@ -779,7 +781,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }: { inputs: any[] }) => [...requireArray(inputs[0])].reverse(),
+    run: ({ inputs }: NodeRunContext) => [...requireArray(inputs[0])].reverse(),
   },
 
   // ---- Object ----
@@ -793,7 +795,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }: { inputs: any[] }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const v = inputs[0]
       if (v && typeof v === 'object' && !Array.isArray(v)) return Object.keys(v)
       throw new Error('输入需要 object')
@@ -809,9 +811,9 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     outputs: 1,
     params: [],
     createParams: () => ({}),
-    run: ({ inputs }: { inputs: any[] }) => {
+    run: ({ inputs }: NodeRunContext) => {
       const v = inputs[0]
-      if (v && typeof v === 'object' && !Array.isArray(v)) return Object.values(v)
+      if (v && typeof v === 'object' && !Array.isArray(v)) return Object.values(v) as FlowValue[]
       throw new Error('输入需要 object')
     },
   },
@@ -827,11 +829,12 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'keys', label: 'keys', kind: 'text' as const, placeholder: 'name, age' },
     ],
     createParams: () => ({ keys: 'name, age' }),
-    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const v = inputs[0]
       if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('输入需要 object')
+      const obj = v as Record<string, FlowValue>
       const ks = String(params.keys ?? '').split(',').map((k: string) => k.trim()).filter(Boolean)
-      return Object.fromEntries(ks.filter((k: string) => k in v).map((k: string) => [k, (v as any)[k]]))
+      return Object.fromEntries(ks.filter((k: string) => k in obj).map((k: string) => [k, obj[k]])) as Record<string, FlowValue>
     },
   },
 
@@ -849,7 +852,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'flags',   label: 'flags',   kind: 'text' as const, placeholder: 'g' },
     ],
     createParams: () => ({ pattern: '\\d+', flags: 'g' }),
-    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const str = requireString(inputs[0])
       const re = new RegExp(String(params.pattern ?? ''), String(params.flags ?? ''))
       if (String(params.flags ?? '').includes('g')) {
@@ -873,7 +876,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'flags',       label: 'flags',       kind: 'text' as const, placeholder: 'g' },
     ],
     createParams: () => ({ pattern: '\\s+', replacement: '_', flags: 'g' }),
-    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const str = requireString(inputs[0])
       const re = new RegExp(String(params.pattern ?? ''), String(params.flags ?? ''))
       return str.replace(re, String(params.replacement ?? ''))
@@ -892,7 +895,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       { key: 'end',   label: 'end',   kind: 'number' as const, step: 1 },
     ],
     createParams: () => ({ start: 0, end: 10 }),
-    run: ({ inputs, params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ inputs, params }: NodeRunContext) => {
       const str = requireString(inputs[0])
       const s = Number(params.start ?? 0)
       const e = (params.end !== '' && params.end !== null && params.end !== undefined) ? Number(params.end) : undefined
@@ -921,7 +924,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
       },
     ],
     createParams: () => ({ count: 8, min: 1, max: 100, mode: 'int' }),
-    run: ({ params }: { inputs: any[]; params: Record<string, any> }) => {
+    run: ({ params }: NodeRunContext) => {
       const count = Math.min(1000, Math.max(1, Number(params.count ?? 8)))
       const min = Number(params.min ?? 0)
       const max = Number(params.max ?? 100)

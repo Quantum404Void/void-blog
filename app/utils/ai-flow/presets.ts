@@ -1,7 +1,7 @@
 // utils/ai-flow-presets.ts
 // 各 preset 的节点+连线工厂函数
 
-import { makeId, makeNode, NODE_SPECS } from '~/utils/ai-flow'
+import { makeId, makeNode, NODE_SPECS } from './nodes'
 import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
 
 export interface GraphSnapshot {

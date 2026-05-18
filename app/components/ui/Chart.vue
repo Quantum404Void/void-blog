@@ -6,9 +6,15 @@
 <script setup lang="ts">
 import * as Plot from '@observablehq/plot'
 
+interface ChartDataPoint {
+  label: string
+  value: number
+  color?: string
+}
+
 const props = withDefaults(defineProps<{
   type?: 'bar' | 'barh' | 'line' | 'area'
-  data: { label: string; value: number; color?: string }[]
+  data: ChartDataPoint[]
   height?: number
   title?: string
 }>(), {
@@ -33,7 +39,7 @@ function render() {
   const neon = ['#00d4ff', '#39ff14', '#b44cff', '#ff2d78', '#ffa500']
   const colors = props.data.map((d, i) => d.color ?? neon[i % neon.length])
 
-  let marks: any[]
+  let marks: Plot.Markish[]
   const baseOpts = {
     height: props.height,
     marginLeft: props.type === 'barh' ? 100 : 36,
@@ -47,14 +53,14 @@ function render() {
       labelColor: DARK.text,
       gridColor: DARK.grid,
       label: null,
-    } as any,
+    },
     y: {
       tickSize: 4,
       tickColor: DARK.tick,
       labelColor: DARK.text,
       gridColor: DARK.grid,
       label: null,
-    } as any,
+    },
   }
 
   // bar/barh 明确声明 band scale 避免字符串数字警告
@@ -67,7 +73,7 @@ function render() {
         x: 'value',
         y: 'label',
         sort: { y: '-x' },
-        fill: (d: any, i: number) => colors[i],
+        fill: (_d: ChartDataPoint, i: number) => colors[i],
         rx: 3,
         tip: true,
       }),
@@ -112,7 +118,7 @@ function render() {
       Plot.barY(props.data, {
         x: 'label',
         y: 'value',
-        fill: (d: any, i: number) => colors[i],
+        fill: (_d: ChartDataPoint, i: number) => colors[i],
         rx: 3,
         tip: true,
       }),
@@ -127,9 +133,9 @@ function render() {
   if (svg) {
     svg.style.overflow = 'visible'
     // 修正 tick/label 颜色
-    svg.querySelectorAll('text').forEach(t => { t.style.fill = DARK.text })
-    svg.querySelectorAll('line, path[class*="tick"]').forEach((el: any) => { el.style.stroke = DARK.tick })
-    svg.querySelectorAll('[class*="grid"] line').forEach((el: any) => { el.style.stroke = DARK.grid })
+    svg.querySelectorAll('text').forEach(t => { (t as HTMLElement).style.fill = DARK.text })
+    svg.querySelectorAll('line, path[class*="tick"]').forEach((el) => { (el as HTMLElement).style.stroke = DARK.tick })
+    svg.querySelectorAll('[class*="grid"] line').forEach((el) => { (el as HTMLElement).style.stroke = DARK.grid })
   }
 
   container.value.appendChild(plot)

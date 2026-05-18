@@ -22,9 +22,22 @@ export interface ParamSpec {
   options?: ParamOption[]
 }
 
+/**
+ * FlowValue — 流中流转的所有可能值类型。
+ * 使用 unknown 而非 any，强制调用方做类型守卫。
+ */
+export type FlowValue = string | number | boolean | FlowValue[] | Record<string, FlowValue> | null | undefined
+
+/** 节点运行上下文 */
+export interface NodeRunContext {
+  inputs: FlowValue[]
+  params: Record<string, FlowValue>
+}
+
+/** 节点运行结果（多输出时用 outputs，单输出直接 return） */
 export interface NodeRunResult {
-  result?: any
-  outputs?: any[]
+  result?: FlowValue
+  outputs?: FlowValue[]
 }
 
 export interface NodeSpec {
@@ -38,8 +51,8 @@ export interface NodeSpec {
   inputLabels?: string[]
   outputLabels?: string[]
   params: ParamSpec[]
-  createParams: () => Record<string, any>
-  run: (ctx: { inputs: any[]; params: Record<string, any> }) => any | NodeRunResult
+  createParams: () => Record<string, FlowValue>
+  run: (ctx: NodeRunContext) => FlowValue | NodeRunResult
 }
 
 export interface FlowNode {
@@ -47,9 +60,9 @@ export interface FlowNode {
   type: string
   x: number
   y: number
-  params: Record<string, any>
-  result?: any
-  outputsData?: any[]
+  params: Record<string, FlowValue>
+  result?: FlowValue
+  outputsData?: FlowValue[]
   error?: string
 }
 
