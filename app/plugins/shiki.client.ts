@@ -1,9 +1,5 @@
 // plugins/shiki.client.ts
 // Shiki 只在客户端初始化，完全不进入 SSR/Worker bundle
-// 性能优化：
-//   1. 使用 createJavaScriptRegexEngine（已是最小化引擎，无 WASM 依赖）
-//   2. langs 按需懒加载：先初始化常用语言，其余用 addLanguage 动态添加
-//   3. 单例缓存，全站只初始化一次
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -25,35 +21,6 @@ function toSlug(text: string) {
 }
 
 let _md: MarkdownIt | null = null
-// 记录已加载的语言，支持按需追加
-let _hl: any = null
-const _loadedLangs = new Set<string>()
-
-// 核心语言（最常用，首次加载就带上）
-const CORE_LANGS = ['cpp', 'typescript', 'python', 'bash', 'json'] as const
-
-// 扩展语言映射（用到时才 import，减少首屏 bundle）
-const LANG_MAP: Record<string, () => Promise<any>> = {
-  c:           () => import('shiki/langs/c.mjs'),
-  javascript:  () => import('shiki/langs/javascript.mjs'),
-  js:          () => import('shiki/langs/javascript.mjs'),
-  ts:          () => import('shiki/langs/typescript.mjs'),
-  shellscript: () => import('shiki/langs/shellscript.mjs'),
-  shell:       () => import('shiki/langs/shellscript.mjs'),
-  sh:          () => import('shiki/langs/shellscript.mjs'),
-  yaml:        () => import('shiki/langs/yaml.mjs'),
-  toml:        () => import('shiki/langs/toml.mjs'),
-  sql:         () => import('shiki/langs/sql.mjs'),
-  rust:        () => import('shiki/langs/rust.mjs'),
-  go:          () => import('shiki/langs/go.mjs'),
-  java:        () => import('shiki/langs/java.mjs'),
-  markdown:    () => import('shiki/langs/markdown.mjs'),
-  md:          () => import('shiki/langs/markdown.mjs'),
-  html:        () => import('shiki/langs/html.mjs'),
-  css:         () => import('shiki/langs/css.mjs'),
-  vue:         () => import('shiki/langs/vue.mjs'),
-  diff:        () => import('shiki/langs/diff.mjs'),
-}
 
 async function buildMd() {
   if (_md) return _md
@@ -62,43 +29,52 @@ async function buildMd() {
   const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript')
   const { fromHighlighter } = await import('@shikijs/markdown-it')
 
-  _hl = await createHighlighterCore({
+  // 所有语言一次性加载，避免 fromHighlighter 遇到未知语言时抛错导致整篇不渲染
+  _md = null // 防止并发重入
+  const hl = await createHighlighterCore({
     themes: [import('shiki/themes/github-dark-dimmed.mjs')],
     langs: [
-      // 只加载核心语言，其余按需动态添加
+      import('shiki/langs/c.mjs'),
       import('shiki/langs/cpp.mjs'),
-      import('shiki/langs/typescript.mjs'),
       import('shiki/langs/python.mjs'),
+      import('shiki/langs/typescript.mjs'),
+      import('shiki/langs/javascript.mjs'),
       import('shiki/langs/bash.mjs'),
+      import('shiki/langs/shellscript.mjs'),
       import('shiki/langs/json.mjs'),
+      import('shiki/langs/yaml.mjs'),
+      import('shiki/langs/toml.mjs'),
+      import('shiki/langs/sql.mjs'),
+      import('shiki/langs/rust.mjs'),
+      import('shiki/langs/go.mjs'),
+      import('shiki/langs/java.mjs'),
+      import('shiki/langs/markdown.mjs'),
+      import('shiki/langs/html.mjs'),
+      import('shiki/langs/css.mjs'),
+      import('shiki/langs/vue.mjs'),
+      import('shiki/langs/diff.mjs'),
+      import('shiki/langs/ini.mjs'),
+      import('shiki/langs/powershell.mjs'),
+      import('shiki/langs/dockerfile.mjs'),
+      import('shiki/langs/nginx.mjs'),
+      import('shiki/langs/xml.mjs'),
+      import('shiki/langs/csharp.mjs'),
+      import('shiki/langs/cmake.mjs'),
+      import('shiki/langs/astro.mjs'),
+      import('shiki/langs/http.mjs'),
+      import('shiki/langs/groovy.mjs'),
+      import('shiki/langs/bat.mjs'),   // cmd/bat
+      // cmake alias rc → fallback to plaintext (Shiki 无 rc 语言)
     ],
     engine: createJavaScriptRegexEngine(),
   })
 
-  for (const l of CORE_LANGS) _loadedLangs.add(l)
-
   _md = new MarkdownIt({ html: true, linkify: true, typographer: true })
 
-  // 自定义 fence（代码块）renderer，支持按需加载语言
-  const defaultFence = _md.renderer.rules.fence || ((tokens: MdToken[], idx: number, options: MdOptions, _e: unknown, self: MdRenderer) => self.renderToken(tokens, idx, options))
-
-  _md.renderer.rules.fence = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => {
-    // fence renderer is sync; language load happens lazily on next render
-    const lang = (tokens[idx] as any).info?.trim()?.split(/\s+/)[0] || ''
-    if (lang && !_loadedLangs.has(lang) && LANG_MAP[lang]) {
-      // 触发异步加载，下次 buildMd 调用时已就绪
-      LANG_MAP[lang]().then(mod => {
-        _hl.loadLanguage(mod.default ?? mod)
-        _loadedLangs.add(lang)
-        // 失效缓存，下次重新渲染
-        _md = null
-      }).catch(() => {})
-    }
-    return defaultFence(tokens, idx, options, env, self)
-  }
-
-  _md.use(fromHighlighter(_hl as Parameters<typeof fromHighlighter>[0], {
+  _md.use(fromHighlighter(hl as Parameters<typeof fromHighlighter>[0], {
     theme: 'github-dark-dimmed',
+    defaultLanguage: 'text',
+    fallbackLanguage: 'text',   // 未知语言 fallback 到纯文本，不抛错
     transformers: [
       {
         pre(node: { tagName?: string; properties?: Record<string, unknown> }) {
