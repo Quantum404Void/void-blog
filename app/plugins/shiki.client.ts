@@ -20,17 +20,17 @@ function toSlug(text: string) {
   return text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '')
 }
 
-let _md: MarkdownIt | null = null
+let _mdPromise: Promise<MarkdownIt> | null = null
 
-async function buildMd() {
-  if (_md) return _md
+function buildMd(): Promise<MarkdownIt> {
+  if (_mdPromise) return _mdPromise
 
+  _mdPromise = (async () => {
   const { createHighlighterCore } = await import('shiki/core')
   const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript')
   const { fromHighlighter } = await import('@shikijs/markdown-it')
 
   // 所有语言一次性加载，避免 fromHighlighter 遇到未知语言时抛错导致整篇不渲染
-  _md = null // 防止并发重入
   const hl = await createHighlighterCore({
     themes: [import('shiki/themes/github-dark-dimmed.mjs')],
     langs: [
@@ -132,6 +132,8 @@ async function buildMd() {
   }
 
   return _md
+  })()  // end async IIFE
+  return _mdPromise
 }
 
 export default defineNuxtPlugin((_nuxtApp) => {

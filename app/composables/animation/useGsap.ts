@@ -1,12 +1,6 @@
 /**
- * useGsap — SSR 安全的 GSAP 懒加载 composable
- *
- * GSAP + TextPlugin + ScrollTrigger 只在客户端按需注册。
- * 用法：
- *   const { gsap, ScrollTrigger } = await useGsap()
- *   if (!gsap) return   // SSR 环境直接返回 null
+ * useGsap — SSR 安全的 GSAP 懒加载 composable（模块级单例，只 import 一次）
  */
-
 import type { gsap as GsapType } from 'gsap'
 import type { ScrollTrigger as ScrollTriggerType } from 'gsap/ScrollTrigger'
 
@@ -15,16 +9,22 @@ export interface GsapBundle {
   ScrollTrigger: typeof ScrollTriggerType
 }
 
-export async function useGsap(): Promise<GsapBundle | null> {
-  if (import.meta.server) return null
+// 模块级缓存 Promise —— 整个应用生命周期只初始化一次
+let _gsapPromise: Promise<GsapBundle> | null = null
 
-  const [{ gsap }, { TextPlugin }, { ScrollTrigger }] = await Promise.all([
-    import('gsap'),
-    import('gsap/TextPlugin'),
-    import('gsap/ScrollTrigger'),
-  ])
+export function useGsap(): Promise<GsapBundle | null> {
+  if (import.meta.server) return Promise.resolve(null)
 
-  gsap.registerPlugin(TextPlugin, ScrollTrigger)
+  if (!_gsapPromise) {
+    _gsapPromise = Promise.all([
+      import('gsap'),
+      import('gsap/TextPlugin'),
+      import('gsap/ScrollTrigger'),
+    ]).then(([{ gsap }, { TextPlugin }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(TextPlugin, ScrollTrigger)
+      return { gsap, ScrollTrigger }
+    })
+  }
 
-  return { gsap, ScrollTrigger }
+  return _gsapPromise
 }
