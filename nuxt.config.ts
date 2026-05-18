@@ -9,12 +9,28 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  // 显式声明所有组件子目录，prefix:'' 保持原始组件名（AppNav 不变为 UiAppNav）
+  components: {
+    dirs: [
+      { path: '~/components/ui',           prefix: '' },
+      { path: '~/components/blog',         prefix: '' },
+      { path: '~/components/lab',          prefix: '' },
+      { path: '~/components/editor',       prefix: '' },
+      { path: '~/components/ai-assistant', prefix: '' },
+      { path: '~/components/ai-flow',      prefix: '' },
+    ],
+  },
+
   modules: ['@vite-pwa/nuxt'],
 
   css: ['~/assets/css/main.css'],
 
   vite: {
     plugins: [tailwindcss()],
+    css: {
+      // 避免 Tailwind v4 Vite plugin 在 dev 模式重复注入源文件
+      devSourcemap: false,
+    },
   },
 
   runtimeConfig: {

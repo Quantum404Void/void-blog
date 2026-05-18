@@ -1,23 +1,810 @@
 /**
- * main.css — 样式入口
+ * main.css — 博客全局样式
  *
- * 拆分结构：
- *   _theme.css          Tailwind import + CSS 变量 + @layer base reset
- *   _utilities.css      Neon glow utility classes
- *   _animations.css     @keyframes + animate-* classes
- *   _prose.css          文章正文基础排版
- *   _prose-extended.css prose 扩展：blockquote / 表格 / 列表 / 链接 / kbd / mark
- *   _shiki.css          代码高亮（Shiki）+ Callout 提示框
- *   _blog-ui.css        文章卡片 / 复制按钮 / TOC / 标签 glow
- *   _effects.css        scanline / 响应式 / hero / 技术宅增强
+ * 逻辑分区（按注释分隔）：
+ *   § _theme          CSS 变量 + @theme + .light + @layer base
+ *   § _utilities      Neon glow utilities
+ *   § _animations     @keyframes + animate-*
+ *   § _prose          文章正文基础排版
+ *   § _prose-extended prose 扩展样式
+ *   § _shiki          代码高亮（Shiki）+ Callout
+ *   § _blog-ui        文章卡片 / copy-btn / TOC
+ *   § _effects        scanline / responsive / lab
+ *
+ * 注：文件通过 Git 历史保留各分区的编辑记录。
+ * 子文件 _*.css 仍保留作为独立可读单元，production build 使用本文件。
  */
 
 @import "tailwindcss";
-@import "./_theme.css";
-@import "./_utilities.css";
-@import "./_animations.css";
-@import "./_prose.css";
-@import "./_prose-extended.css";
-@import "./_shiki.css";
-@import "./_blog-ui.css";
-@import "./_effects.css";
+
+
+/* ═══════════════════════════════════════════════════════
+   _theme.css — CSS 变量 + @theme + .light + @layer base
+   ═══════════════════════════════════════════════════════ */
+
+@theme {
+  /* Color palette — terminal dark + neon */
+  --color-void: #0a0a0f;
+  --color-void-surface: #0f0f1a;
+  --color-void-card: #13131f;
+  --color-void-border: #1e1e30;
+  --color-void-muted: #2a2a40;
+
+  --color-neon-green: #00ff88;
+  --color-neon-cyan: #00d4ff;
+  --color-neon-purple: #b44cff;
+  --color-neon-pink: #ff2d78;
+
+  --color-text-primary: #e8e8f0;
+  --color-text-secondary: #a8a8c8;
+  --color-text-muted: #6868a0;
+
+  /* Typography */
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Z-index 层级表 */
+  --z-progress:  100;   /* 阅读进度条 */
+  --z-nav:       200;   /* 顶部导航 */
+  --z-ai:        300;   /* AI 助手浮窗 */
+  --z-overlay:   999;   /* 弹层/彩蛋 */
+}
+
+/* 亮色模式覆盖变量 */
+.light {
+  --color-void: #f0f0f5;
+  --color-void-surface: #e8e8f0;
+  --color-void-card: #ffffff;
+  --color-void-border: #d0d0e0;
+  --color-void-muted: #c0c0d0;
+  --color-text-primary: #0a0a1a;
+  --color-text-secondary: #3a3a5a;
+  --color-text-muted: #6868a0;
+  --color-neon-green: #00aa55;
+  --color-neon-cyan: #0099cc;
+  --color-neon-purple: #8833cc;
+  --color-neon-pink: #cc1155;
+}
+
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;  /* 防止任何元素溢出导致页面水平拉宽 */
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: var(--color-void);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.06) 3px,
+      rgba(0,0,0,0.06) 4px
+    );
+  }
+
+  button, [role="button"], select, input[type="range"], input[type="checkbox"], input[type="radio"], label[for], a {
+    cursor: pointer;
+  }
+  input[type="text"], input[type="number"], input[type="email"], input[type="color"], textarea {
+    cursor: text;
+  }
+
+  ::selection {
+    background: rgba(0,212,255,0.25);
+    color: #e8e8f0;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a0f; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0,212,255,0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.6); }
+
+  :focus-visible {
+    outline: 2px solid rgba(0,212,255,0.5);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  pre {
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-void-border);
+    padding: 1.25rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    overflow-x: auto;
+    position: relative;
+    background: var(--color-void-card);
+    tab-size: 2;
+  }
+
+  :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--color-void-card);
+    border: 1px solid var(--color-void-border);
+    color: var(--color-neon-cyan);
+    padding: 0.125em 0.375em;
+    border-radius: 0.25rem;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   _utilities.css — Neon glow utilities
+   ═══════════════════════════════════════════════════════ */
+
+/* Neon glow utilities */
+@layer utilities {
+  .glow-green {
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.8),
+                 0 0 20px rgba(0, 255, 136, 0.4),
+                 0 0 40px rgba(0, 255, 136, 0.2);
+  }
+  .glow-cyan {
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.8),
+                 0 0 20px rgba(0, 212, 255, 0.4);
+  }
+  .glow-purple {
+    text-shadow: 0 0 10px rgba(180, 76, 255, 0.8),
+                 0 0 20px rgba(180, 76, 255, 0.4);
+  }
+  .box-glow-green {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15),
+                0 0 40px rgba(0, 255, 136, 0.05);
+  }
+  .box-glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15),
+                0 0 40px rgba(0, 212, 255, 0.05);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   _animations.css — @keyframes + animate-*
+   ═══════════════════════════════════════════════════════ */
+
+/* Animations */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* animate-fade-up — GSAP 已接管 index.vue Hero 和文章列表的入场动画
+   此 class 仅用于 GSAP 未覆盖的次要场景（如 about / lab 等页面）
+   主入场动画请用 useGsap() composable */
+.animate-fade-up   { animation: fadeInUp 0.5s ease both; }
+.animate-slide-in  { animation: slideIn 0.4s ease both; }
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+  color: var(--color-neon-green);
+  margin-left: 1px;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-neon-green), var(--color-neon-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-purple {
+  background: linear-gradient(135deg, var(--color-neon-purple), var(--color-neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Timeline scrollbar */
+.timeline-scroll::-webkit-scrollbar { width: 3px; }
+.timeline-scroll::-webkit-scrollbar-track { background: transparent; }
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-void-border);
+  border-radius: 2px;
+}
+.timeline-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-neon-purple); }
+
+
+/* ═══════════════════════════════════════════════════════
+   _prose.css — 文章正文基础排版
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Prose — 文章正文样式（唯一定义）── */
+.prose {
+  color: var(--color-text-primary);
+  max-width: 72ch;
+  line-height: 1.85;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+/* 标题锚点 hover 链接 */
+.prose h2[id], .prose h3[id] {
+  scroll-margin-top: 5rem;
+}
+.prose h2[id]::before, .prose h3[id]::before {
+  content: '#';
+  position: absolute;
+  left: -1.25em;
+  color: var(--color-neon-cyan);
+  opacity: 0;
+  font-size: 0.8em;
+  transition: opacity 0.15s;
+  font-weight: 400;
+}
+.prose h2[id]:hover::before, .prose h3[id]:hover::before {
+  opacity: 0.5;
+}
+.prose h2 { font-size: 1.25rem; color: var(--color-text-primary); border-bottom: 1px solid var(--color-void-border); padding-bottom: 0.5rem; }
+.prose h3 { font-size: 1.05rem; color: var(--color-text-secondary); }
+.prose h4 { font-size: 0.95rem; color: var(--color-text-muted); }
+.prose p {
+  margin-bottom: 1.25rem;
+  text-align: justify;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.prose img {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-void-border);
+  width: 100%;
+  margin: 1.5rem 0;
+}
+.prose hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-neon-green), transparent);
+  margin: 2.5rem 0;
+  opacity: 0.3;
+}
+.prose code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--color-neon-cyan);
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   _prose-extended.css — prose 扩展：blockquote/表格/列表/链接/kbd/mark
+   ═══════════════════════════════════════════════════════ */
+
+/* ── 扫描线 scanline 效果（赛博朋克标志性） ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.035) 2px,
+    rgba(0,0,0,0.035) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── 全局 neon 光晕选择框（terminal 风） ── */
+:focus-visible {
+  outline: 1px solid rgba(0,212,255,0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
+}
+
+/* ── prose 标题颜色分级（覆盖上面的一般定义）── */
+.prose h1 { color: var(--color-text-primary); }
+
+/* ── prose blockquote 赛博风 ── */
+.prose blockquote {
+  border-left: 3px solid var(--color-neon-purple);
+  background: rgba(180,76,255,0.05);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  font-style: normal;
+  color: var(--color-text-secondary);
+}
+.prose blockquote p { margin: 0 !important; }
+.prose blockquote::before {
+  content: '//';
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-neon-purple);
+  opacity: 0.6;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* ── prose 表格 ── */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  margin: 1.5rem 0;
+}
+.prose thead tr {
+  background: rgba(0,212,255,0.08);
+  border-bottom: 1px solid rgba(0,212,255,0.3);
+}
+.prose thead th {
+  padding: 0.6rem 1rem;
+  color: var(--color-neon-cyan);
+  font-weight: 600;
+  text-align: left;
+}
+.prose tbody tr {
+  border-bottom: 1px solid var(--color-void-border);
+  transition: background 0.15s;
+}
+.prose tbody tr:hover { background: rgba(255,255,255,0.03); }
+.prose tbody td {
+  padding: 0.6rem 1rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── prose ul/ol 自定义 bullet ── */
+.prose ul { list-style: none; padding-left: 1.25rem; }
+.prose ul li::before {
+  content: '▸';
+  color: var(--color-neon-green);
+  font-size: 0.75rem;
+  margin-left: -1.25rem;
+  margin-right: 0.5rem;
+}
+.prose ol { padding-left: 1.5rem; }
+.prose ol li::marker { color: var(--color-neon-cyan); font-family: var(--font-mono); }
+
+/* ── prose a 链接样式 ── */
+.prose a {
+  color: var(--color-neon-cyan);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,212,255,0.3);
+  transition: border-color 0.15s, color 0.15s;
+}
+.prose a:hover {
+  color: var(--color-neon-green);
+  border-bottom-color: var(--color-neon-green);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   _shiki.css — 代码高亮（Shiki）+ Callout 提示框
+   ═══════════════════════════════════════════════════════ */
+
+/* Shiki 代码块样式 ── */
+/* Shiki 输出: .shiki > code > span.line */
+.prose .shiki {
+  position: relative;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-void-border);
+  border-left: 3px solid rgba(0, 212, 255, 0.35);
+  padding: 2.5rem 1.5rem 1.25rem;
+  margin: 1.75rem 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  tab-size: 2;
+  background: var(--color-void-card) !important; /* 覆盖 Shiki 自带背景 */
+  -webkit-overflow-scrolling: touch;
+}
+.prose .shiki code {
+  background: transparent !important;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  border: none;
+  color: inherit;
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+.prose .shiki .line {
+  display: block;
+  min-height: 1.2em;
+}
+/* 三圆点装饰 */
+.prose .shiki::before {
+  content: '';
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
+  width: 54px;
+  height: 12px;
+  background-image:
+    radial-gradient(circle, #ff5f57 4px, transparent 4px),
+    radial-gradient(circle, #ffbd2e 4px, transparent 4px),
+    radial-gradient(circle, #28c840 4px, transparent 4px);
+  background-size: 18px 12px;
+  background-position: 0 0, 18px 0, 36px 0;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+  pointer-events: none;
+}
+/* 语言 badge */
+.prose .shiki[data-lang]::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.55rem;
+  left: 4.5rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(0, 212, 255, 0.5);
+  pointer-events: none;
+  user-select: none;
+}
+/* Shiki 行号（通过 CSS counter 实现） */
+.prose .shiki.has-line-numbers code {
+  counter-reset: line;
+}
+.prose .shiki.has-line-numbers .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: rgba(255,255,255,0.2);
+  user-select: none;
+  flex-shrink: 0;
+}
+/* Shiki transformers 内置样式 */
+.prose .shiki .line.diff.add  { background: rgba(0,255,136,0.12); }
+.prose .shiki .line.diff.remove { background: rgba(255,45,120,0.12); }
+.prose .shiki .line.highlighted { background: rgba(0,212,255,0.1); }
+.prose .shiki .line.focused     { opacity: 1; filter: none; }
+.prose .shiki.has-focused .line:not(.focused) { opacity: 0.4; filter: blur(0.5px); transition: all 0.2s; }
+.prose .shiki.has-focused:hover .line:not(.focused) { opacity: 1; filter: none; }
+
+/* ── Callout 提示框 ── */
+.callout {
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid;
+}
+.callout-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem !important;
+  font-family: var(--font-mono);
+}
+.callout p:last-child { margin-bottom: 0 !important; }
+
+.callout-tip    { background: rgba(0,255,136,0.06); border-color: var(--color-neon-green); }
+.callout-tip .callout-title { color: var(--color-neon-green); }
+
+.callout-warning { background: rgba(255,200,0,0.07); border-color: #ffc800; }
+.callout-warning .callout-title { color: #ffc800; }
+
+.callout-danger  { background: rgba(255,45,120,0.07); border-color: var(--color-neon-pink); }
+.callout-danger .callout-title { color: var(--color-neon-pink); }
+
+.callout-info    { background: rgba(0,212,255,0.06); border-color: var(--color-neon-cyan); }
+.callout-info .callout-title { color: var(--color-neon-cyan); }
+
+
+/* ═══════════════════════════════════════════════════════
+   _blog-ui.css — 文章卡片 / copy-btn / TOC / 标签 glow
+   ═══════════════════════════════════════════════════════ */
+
+/* ── 文章卡片 hover 发光 ── */
+.post-card-glow:hover {
+  box-shadow: 0 0 0 1px rgba(0,212,255,0.3), 0 4px 24px rgba(0,212,255,0.08);
+}
+
+/* ── 标题 glow 动效 ── */
+.glow-green  { text-shadow: 0 0 8px rgba(0,255,136,0.6); }
+.glow-cyan   { text-shadow: 0 0 8px rgba(0,212,255,0.6); }
+.glow-purple { text-shadow: 0 0 8px rgba(180,76,255,0.6); }
+
+/* ── 布局工具 class ── */
+.nav-glass {
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(16px);
+}
+.toc-glass {
+  background: rgba(19, 19, 31, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+/* ── 复制按钮 copy-btn 增强（配合 useCodeCopy） ── */
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  cursor: pointer;
+  color: rgba(168,168,200,0.6);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  user-select: none;
+  backdrop-filter: blur(4px);
+  transition: all 0.15s ease;
+}
+.copy-btn:focus-visible {
+  outline: 2px solid rgba(0,212,255,0.5);
+  outline-offset: 2px;
+}
+.copy-label { pointer-events: none; }
+
+/* ── 文章标签 hover glow 底线 ── */
+.prose-tag:hover {
+  text-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+
+/* ── TOC 激活项左侧指示线 ── */
+.toc-active {
+  color: var(--color-neon-cyan) !important;
+  border-left-color: var(--color-neon-cyan) !important;
+}
+
+/* ── 文章卡片时间线连接线渐变增强 ── */
+.timeline-dot-active {
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.15), 0 0 8px rgba(0,212,255,0.4);
+}
+
+/* ── 选择高亮赛博色 ── */
+::selection {
+  background: rgba(0,212,255,0.2);
+  color: #e8e8f0;
+}
+::-moz-selection {
+  background: rgba(0,212,255,0.2);
+  color: #e8e8f0;
+}
+
+/* ── prose 内 strong 加强颜色 ── */
+.prose strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+/* ── prose 内 kbd 键盘按键样式 ── */
+.prose kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  padding: 0.15em 0.45em;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  color: var(--color-text-secondary);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* ── prose 内 mark 高亮 ── */
+.prose mark {
+  background: rgba(255,200,0,0.18);
+  color: #ffd400;
+  border-radius: 2px;
+  padding: 0 0.2em;
+}
+
+/* ── 文章 footer 分割线 ── */
+.prose-footer-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0,212,255,0.2), transparent);
+  margin: 2rem 0;
+}
+
+/* ── 首页 Hero 脉冲增强 ── */
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); opacity: 1; }
+  50%       { box-shadow: 0 0 0 6px rgba(0,255,136,0); opacity: 0.6; }
+}
+.hero-online-dot {
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   _effects.css — scanline / responsive / hero / lab 增强
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .prose {
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  .prose p {
+    text-align: left;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    margin-top: 2rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .prose h2 {
+    font-size: 1.3rem;
+  }
+
+  .prose h3 {
+    font-size: 1.12rem;
+  }
+
+  .prose .shiki {
+    margin: 1.25rem 0;
+    padding: 2.25rem 1rem 1rem;
+    font-size: 0.8125rem;
+    border-radius: 0.875rem;
+  }
+  .prose .shiki::before {
+    left: 0.85rem;
+  }
+  .prose .shiki[data-lang]::after {
+    left: 4.15rem;
+    top: 0.6rem;
+    font-size: 9px;
+  }
+
+  .prose blockquote,
+  .callout {
+    padding: 0.875rem 1rem;
+  }
+
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.75rem;
+  }
+
+  .prose thead th,
+  .prose tbody td {
+    padding: 0.55rem 0.7rem;
+    white-space: nowrap;
+  }
+
+  .prose ul {
+    padding-left: 1.1rem;
+  }
+
+  .prose ol {
+    padding-left: 1.35rem;
+  }
+}
+
+/* ── 技术宅风格增强 ── */
+
+/* 发光 input 输入框 */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(0,212,255,0.4) !important;
+  box-shadow: 0 0 0 2px rgba(0,212,255,0.08), 0 0 12px rgba(0,212,255,0.06);
+}
+
+/* 代码块：三圆点装饰增强 */
+.prose .shiki::before {
+  opacity: 0.8;
+}
+
+/* terminal 风格水平分割线 */
+.term-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin: 1.5rem 0;
+}
+.term-divider::before,
+.term-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-void-border);
+}
+
+/* neon badge — 通用 */
+.neon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid;
+  user-select: none;
+}
+.neon-badge-green { border-color: rgba(0,255,136,0.35); color: rgba(0,255,136,0.85); background: rgba(0,255,136,0.07); }
+.neon-badge-cyan  { border-color: rgba(0,212,255,0.35); color: rgba(0,212,255,0.85); background: rgba(0,212,255,0.07); }
+.neon-badge-purple{ border-color: rgba(180,76,255,0.35); color: rgba(180,76,255,0.85); background: rgba(180,76,255,0.07); }
+.neon-badge-pink  { border-color: rgba(255,45,120,0.35); color: rgba(255,45,120,0.85); background: rgba(255,45,120,0.07); }
+
+/* CRT 角落暗角 vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* lab 卡片 hover neon 发光 */
+.lab-card-hover {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.lab-card-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* 代码块 .line hover 微高亮（在文章里） */
+.prose .shiki .line:hover {
+  background: rgba(255,255,255,0.025);
+}
+
+/* prose 代码块左侧边条更亮 */
+.prose .shiki {
+  border-left-width: 3px;
+  border-left-color: rgba(0,212,255,0.4);
+}
+
+/* 滚动条美化增强 */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,212,255,0.2);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.5); }
