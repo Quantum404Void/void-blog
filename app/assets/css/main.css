@@ -273,6 +273,27 @@
   100% { background-position: 0 100px; }
 }
 
+/* ── 终端加载条 ── */
+@keyframes load-bar {
+  0% { width: 0%; }
+  20% { width: 30%; }
+  50% { width: 60%; }
+  80% { width: 85%; }
+  100% { width: 100%; }
+}
+.load-bar {
+  height: 2px;
+  background: linear-gradient(to right, var(--color-neon-green), var(--color-neon-cyan));
+  animation: load-bar 1.2s ease-out forwards;
+  box-shadow: 0 0 8px var(--color-neon-green);
+}
+
+/* 十六进制闪烁（背景装饰） */
+@keyframes hex-flash {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
 /* Glitch 标题效果（hover 触发） */
 .glitch-text {
   position: relative;

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-black relative overflow-hidden">
+  <div class="min-h-screen bg-black relative">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'silk' }]" />
 
     <canvas ref="canvasEl" class="absolute inset-0 w-full h-full" style="touch-action:none;cursor:crosshair" />

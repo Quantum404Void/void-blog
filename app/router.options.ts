@@ -3,6 +3,10 @@ import type { RouterConfig } from '@nuxt/schema'
 export default <RouterConfig>{
   // 返回时恢复滚动位置，前进时滚到顶部
   scrollBehavior(to, from, savedPosition) {
+    // lab/index 有自己的 sessionStorage scroll 恢复，不用 router savedPosition
+    if (to.path === '/lab' && savedPosition) {
+      return false
+    }
     if (savedPosition) {
       // 浏览器返回：恢复之前的滚动位置
       return new Promise(resolve => {

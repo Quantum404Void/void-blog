@@ -229,32 +229,38 @@ const { getTagColor } = useTagColor()
 const { formatDate } = useFormatDate()
 
 onMounted(async () => {
-  const { gsap } = await useGsap()
-  if (!gsap) return
+  const bundle = await useGsap()
+  if (!bundle) return
+  const { gsap } = bundle
 
   const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
 
-  // 入场序列
-  tl.to(heroPrompt.value, { opacity: 1, y: 0, duration: 0.4 })
-    .to(heroTitle.value, { opacity: 1, y: 0, duration: 0.5 }, '-=0.1')
-    .to(heroTitle.value, { skewX: -2, duration: 0.05 }, '+=0.2')
-    .to(heroTitle.value, { skewX: 1, duration: 0.05 })
-    .to(heroTitle.value, { skewX: 0, duration: 0.1 })
-    .to(heroLine0Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.1')
-    .to(heroLine1Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.2')
-    .to(heroLine2Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.2')
-    .to(heroStats.value, { opacity: 1, y: 0, duration: 0.4 }, '-=0.1')
+  // 1. 提示行先出现
+  tl.to(heroPrompt.value, { opacity: 1, y: 0, duration: 0.3 })
+
+  // 2. 标题 glitch 式进场
+  tl.to(heroTitle.value, { opacity: 1, y: 0, duration: 0.15, ease: 'power4.out' }, '-=0.05')
+    .to(heroTitle.value, { skewX: -3, scaleX: 1.02, duration: 0.04 })
+    .to(heroTitle.value, { skewX: 2, scaleX: 0.99, duration: 0.04 })
+    .to(heroTitle.value, { skewX: -1, scaleX: 1.005, duration: 0.04 })
+    .to(heroTitle.value, { skewX: 0, scaleX: 1, duration: 0.08 })
+
+  // 3. 三行代码包裹层出现
+  tl.to(heroLine0Wrap.value, { opacity: 1, y: 0, duration: 0.2 }, '-=0.05')
+    .to(heroLine1Wrap.value, { opacity: 1, y: 0, duration: 0.2 }, '-=0.1')
+    .to(heroLine2Wrap.value, { opacity: 1, y: 0, duration: 0.2 }, '-=0.1')
+    .to(heroStats.value, { opacity: 1, y: 0, duration: 0.3 }, '+=0.2')
 
   // TextPlugin 打字机
   const typeLines = [
     { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', start: 0.3 },
     { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]', start: 0.7 },
-    { el: heroLine2, text: '在线 ●', start: 1.1 },
+    { el: heroLine2, text: '在线 ●', start: 1.0 },
   ]
   typeLines.forEach(({ el, text, start }) => {
     if (!el.value) return
     gsap.to(el.value, {
-      duration: text.length * 0.028,
+      duration: text.length * 0.025,
       text: { value: text, delimiter: '' },
       ease: 'none',
       delay: start,
