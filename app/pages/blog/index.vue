@@ -95,6 +95,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 import { useAutoAnimate } from '@formkit/auto-animate/vue'
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/blog')
@@ -105,7 +106,7 @@ useSeoMeta({
   ogUrl: `${siteUrl}/blog`,
 })
 
-const { data: postsData } = await useFetch('/api/posts', { default: () => [] as any[] })
+const { data: postsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
 const posts = computed(() => postsData.value || [])
 
 const { data: tagsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
@@ -115,14 +116,14 @@ const topTags = computed(() =>
 
 const activeTag = ref('')
 const filtered = computed(() =>
-  activeTag.value ? posts.value.filter((p: any) => p.tags.includes(activeTag.value)) : posts.value
+  activeTag.value ? posts.value.filter((p: PostSummary) => p.tags.includes(activeTag.value)) : posts.value
 )
 
 const { getTagColor } = useTagColor()
 const { formatMonthDay } = useFormatDate()
 
 const byYear = computed(() => {
-  const map: Record<string, any[]> = {}
+  const map: Record<string, PostSummary[]> = {}
   for (const p of filtered.value) {
     const y = p.pub_date.slice(0, 4)
     ;(map[y] = map[y] || []).push(p)

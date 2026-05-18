@@ -92,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/tags')
 useSeoMeta({
@@ -104,15 +105,15 @@ const { getTagColorVar } = useTagColor()
 const query = ref('')
 
 const { data: tagCountsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
-const { data: postsData } = await useFetch('/api/posts', { default: () => [] as any[] })
+const { data: postsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
 
 const tags = computed(() =>
   Object.entries(tagCountsData.value || {})
     .sort((a, b) => b[1] - a[1])
     .map(([tag, count]) => {
       const tagPosts = (postsData.value || [])
-        .filter((p: any) => p.tags?.includes(tag))
-        .sort((a: any, b: any) => b.pub_date?.localeCompare(a.pub_date ?? '') ?? 0)
+        .filter((p: PostSummary) => p.tags?.includes(tag))
+        .sort((a: PostSummary, b: PostSummary) => b.pub_date?.localeCompare(a.pub_date ?? '') ?? 0)
       return { tag, count, latestTitle: tagPosts[0]?.title ?? null }
     })
 )

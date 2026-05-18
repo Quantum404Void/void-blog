@@ -4,11 +4,19 @@
  * GSAP + TextPlugin + ScrollTrigger 只在客户端按需注册。
  * 用法：
  *   const { gsap, ScrollTrigger } = await useGsap()
+ *   if (!gsap) return   // SSR 环境直接返回 null
  */
-export async function useGsap() {
-  if (import.meta.server) {
-    return { gsap: null as any, ScrollTrigger: null as any }
-  }
+
+import type { gsap as GsapType } from 'gsap'
+import type { ScrollTrigger as ScrollTriggerType } from 'gsap/ScrollTrigger'
+
+export interface GsapBundle {
+  gsap: typeof GsapType
+  ScrollTrigger: typeof ScrollTriggerType
+}
+
+export async function useGsap(): Promise<GsapBundle | null> {
+  if (import.meta.server) return null
 
   const [{ gsap }, { TextPlugin }, { ScrollTrigger }] = await Promise.all([
     import('gsap'),

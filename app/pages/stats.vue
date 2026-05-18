@@ -101,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/stats')
 useSeoMeta({
@@ -143,9 +144,9 @@ onMounted(async () => {
 })
 
 const { data: statsData } = await useFetch('/api/stats')
-const { data: postsData } = await useFetch('/api/posts', { default: () => [] as any[] })
+const { data: postsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
 
-const allPosts = computed(() => (postsData.value || []).filter((p: any) => p.slug !== 'about'))
+const allPosts = computed(() => (postsData.value || []).filter((p: PostSummary) => p.slug !== 'about'))
 const timelinePosts = computed(() => [...allPosts.value].reverse())
 
 // 月度热力图
@@ -201,19 +202,25 @@ function heatColor(count: number): string {
   return 'rgba(0,255,136,0.9)'
 }
 
-const overviewCards = computed(() => {
-  const s = statsData.value as any
-  return [
-    { label: '总文章数', value: allPosts.value.length, color: 'neon-cyan' },
-    { label: '标签数量', value: s?.totalTags ?? 0, color: 'neon-green' },
-    { label: '写作年份', value: Object.keys(s?.byYear ?? {}).length, color: 'neon-purple' },
-    { label: '创作开始', value: allPosts.value.length ? allPosts.value[allPosts.value.length - 1].pub_date.slice(0, 4) : '-', color: 'neon-pink' },
-  ]
-})
+interface StatsData {
+  totalTags: number
+  byYear: Record<string, number>
+  byMonth: Record<string, number>
+  tagCounts: Record<string, number>
+  totalWords?: number
+}
+
+const stats = computed(() => (statsData.value ?? {}) as StatsData)
+
+const overviewCards = computed(() => [
+  { label: '总文章数', value: allPosts.value.length, color: 'neon-cyan' },
+  { label: '标签数量', value: stats.value.totalTags ?? 0, color: 'neon-green' },
+  { label: '写作年份', value: Object.keys(stats.value.byYear ?? {}).length, color: 'neon-purple' },
+  { label: '创作开始', value: allPosts.value.length ? allPosts.value[allPosts.value.length - 1].pub_date.slice(0, 4) : '-', color: 'neon-pink' },
+])
 
 const yearPlotData = computed(() => {
-  const s = statsData.value as any
-  const byYear = s?.byYear ?? {}
+  const byYear = stats.value.byYear ?? {}
   const neon = ['#00d4ff', '#39ff14', '#b44cff', '#ff2d78', '#ffa500']
   return Object.keys(byYear).sort().map((y, i) => ({
     label: y,
@@ -223,12 +230,11 @@ const yearPlotData = computed(() => {
 })
 
 const tagPlotData = computed(() => {
-  const s = statsData.value as any
-  const tagCounts = s?.tagCounts ?? {}
+  const tagCounts = stats.value.tagCounts ?? {}
   return Object.entries(tagCounts)
-    .sort((a: any, b: any) => b[1] - a[1])
+    .sort((a, b) => (b[1] as number) - (a[1] as number))
     .slice(0, 12)
-    .map(([t, c]: any) => ({ label: `#${t}`, value: c }))
+    .map(([t, c]) => ({ label: `#${t}`, value: c as number }))
 })
 
 </script>

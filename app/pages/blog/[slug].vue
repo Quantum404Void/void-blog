@@ -51,10 +51,9 @@
               v-if="ttsSupported"
               @click="toggleTts"
               class="flex items-center gap-1 font-mono text-xs transition-all"
-              :style="{ color: 'var(--color-neon-green)', textShadow: ttsState !== 'idle' ? '0 0 8px var(--color-neon-green)' : 'none' }"
+              :style="{ color: 'var(--color-neon-green)', textShadow: ttsLabel !== '▶ 朗读' ? '0 0 8px var(--color-neon-green)' : 'none' }"
             >
-              <span>{{ ttsState === 'playing' ? '⏸' : '▶' }}</span>
-              <span>{{ ttsState === 'playing' ? '暂停' : ttsState === 'paused' ? '继续' : '朗读' }}</span>
+              <span>{{ ttsLabel }}</span>
             </button>
           </div>
         </header>
@@ -230,6 +229,7 @@
 
 <script setup lang="ts">
 import { useClipboard, useLocalStorage } from '@vueuse/core'
+import type { PostSummary } from '~/types/post'
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
@@ -312,29 +312,29 @@ const readingTime = computed(() => post.value ? calcReadingTime(post.value.conte
 const wordCount = computed(() => post.value ? calcWordCount(post.value.content) : 0)
 
 // Get all posts for prev/next/related
-const { data: allPostsData } = await useFetch('/api/posts', { default: () => [] as any[] })
-const allPosts = computed(() => (allPostsData.value || []).filter((p: any) => p.slug !== slug && p.slug !== 'about'))
+const { data: allPostsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
+const allPosts = computed(() => (allPostsData.value || []).filter((p: PostSummary) => p.slug !== slug && p.slug !== 'about'))
 
 const postTags = computed(() => new Set(post.value?.tags ?? []))
 
 const related = computed(() => {
   const curYear = post.value?.pub_date?.slice(0, 4) ?? ''
   const scored = allPosts.value
-    .map((p: any) => {
+    .map((p: PostSummary) => {
       const tagOverlap = p.tags.filter((t: string) => postTags.value.has(t)).length
       const yearBonus = p.pub_date?.slice(0, 4) === curYear ? 1 : 0
       return { post: p, score: tagOverlap * 2 + yearBonus }
     })
-    .filter((x: any) => x.score > 0)
-    .sort((a: any, b: any) => b.score - a.score)
+    .filter((x: { post: PostSummary; score: number }) => x.score > 0)
+    .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
     .slice(0, 3)
-    .map((x: any) => x.post)
+    .map((x: { post: PostSummary; score: number }) => x.post)
   if (scored.length > 0) return scored
   // fallback: 2 latest
   return allPosts.value.slice(0, 2)
 })
 
-const curIdx = computed(() => allPosts.value.findIndex((p: any) => p.slug === slug))
+const curIdx = computed(() => allPosts.value.findIndex((p: PostSummary) => p.slug === slug))
 const prevPost = computed(() => curIdx.value < allPosts.value.length - 1 ? allPosts.value[curIdx.value + 1] : null)
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
 
@@ -385,28 +385,8 @@ async function handleLike() {
 // Mobile TOC
 const tocOpen = ref(false)
 
-// Continue reading bar — 使用 useLocalStorage 持久化进度
-const savedProgress = useLocalStorage<{ pct: number; y: number } | null>(
-  `reading-progress-${slug}`, null
-)
-const continueBar = reactive({
-  show: savedProgress.value ? (savedProgress.value.pct > 5 && savedProgress.value.pct < 95) : false,
-  pct: savedProgress.value?.pct ?? 0,
-  savedY: savedProgress.value?.y ?? 0,
-})
-
-function saveReadingProgress() {
-  const scrollTop = window.scrollY
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight
-  if (docHeight <= 0) return
-  const pct = Math.round((scrollTop / docHeight) * 100)
-  if (pct > 5) savedProgress.value = { pct, y: scrollTop }
-}
-
-function jumpToSaved() {
-  window.scrollTo({ top: continueBar.savedY, behavior: 'smooth' })
-  continueBar.show = false
-}
+// 阅读进度持久化
+const { bar: continueBar, jumpToSaved } = useReadingProgress(slug)
 
 const { attachCopyButtons } = useCodeCopy()
 
@@ -422,51 +402,19 @@ onMounted(async () => {
   await nextTick()
   attachCopyButtons(document.querySelector('.prose') as HTMLElement | null)
 
-  // Save progress on scroll
-  window.addEventListener('scroll', saveReadingProgress, { passive: true })
-
   loadStats()
-  // 延迟 1s 再记录阅读，避免预览模式刻处
+  // 延迟 1s 再记录阅读，避免预览模式误计
   setTimeout(recordView, 1000)
-
-  // TTS 支持检测
-  ttsSupported.value = 'speechSynthesis' in window
 })
 
-// TTS
-const TTS_LANG = 'zh-CN'
-const TTS_RATE = 0.95
-const ttsSupported = ref(false)
-const ttsState = ref<'idle' | 'playing' | 'paused'>('idle')
-let ttsUtterance: SpeechSynthesisUtterance | null = null
+// TTS — 使用 useTts composable 封装
+const { supported: ttsSupported, label: ttsLabel, speak: speakArticle } = useTts()
 
 function toggleTts() {
-  if (!ttsSupported.value) return
-  const synth = window.speechSynthesis
-
-  if (ttsState.value === 'idle') {
-    const plainText = (post.value?.title ?? '') + '\n' +
-      (renderedContent.value ?? '').replace(/<[^>]+>/g, '')
-    ttsUtterance = new SpeechSynthesisUtterance(plainText)
-    ttsUtterance.lang = TTS_LANG
-    ttsUtterance.rate = TTS_RATE
-    ttsUtterance.onend = () => { ttsState.value = 'idle' }
-    ttsUtterance.onerror = () => { ttsState.value = 'idle' }
-    synth.speak(ttsUtterance)
-    ttsState.value = 'playing'
-  } else if (ttsState.value === 'playing') {
-    synth.pause()
-    ttsState.value = 'paused'
-  } else {
-    synth.resume()
-    ttsState.value = 'playing'
-  }
+  const plainText = (post.value?.title ?? '') + '\n' +
+    (renderedContent.value ?? '').replace(/<[^>]+>/g, '')
+  speakArticle(plainText)
 }
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', saveReadingProgress)
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-})
 
 const shareUrl = computed(() => `${siteUrl}/blog/${slug}`)
 const { copy: copyToClipboard, copied } = useClipboard({ source: shareUrl })

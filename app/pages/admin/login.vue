@@ -77,7 +77,7 @@ async function handleLogin() {
   try {
     await $fetch('/api/auth/login', { method: 'POST', body: { password: password.value } })
     navigateTo('/admin')
-  } catch (e: any) {
+  } catch (e: unknown) {
     error.value = e?.data?.message || '密码错误'
   } finally {
     loading.value = false

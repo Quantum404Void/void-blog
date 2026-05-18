@@ -154,6 +154,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 definePageMeta({ layout: false })
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Admin | ${siteName}`, robots: 'noindex' })
@@ -165,9 +166,9 @@ if (authError.value) navigateTo('/admin/login')
 const { data: overviewData } = await useFetch<any>('/api/admin/overview')
 const overview = computed(() => overviewData.value)
 
-const { data, refresh } = await useFetch<any[]>('/api/admin/posts')
+const { data, refresh } = await useFetch<PostSummary[]>('/api/admin/posts')
 const posts = computed(() => data.value || [])
-const drafts = computed(() => posts.value.filter((p: any) => p.draft).length)
+const drafts = computed(() => posts.value.filter((p: PostSummary) => p.draft).length)
 
 const q = ref('')
 const sortBy = ref<'date' | 'views' | 'likes'>('date')
@@ -176,10 +177,10 @@ const filtered = computed(() => {
   let list = [...posts.value]
   if (q.value) {
     const s = q.value.toLowerCase()
-    list = list.filter((p: any) => p.title.toLowerCase().includes(s) || p.slug.includes(s))
+    list = list.filter((p: PostSummary) => p.title.toLowerCase().includes(s) || p.slug.includes(s))
   }
-  if (sortBy.value === 'views') list.sort((a: any, b: any) => (b.views ?? 0) - (a.views ?? 0))
-  else if (sortBy.value === 'likes') list.sort((a: any, b: any) => (b.likes ?? 0) - (a.likes ?? 0))
+  if (sortBy.value === 'views') list.sort((a: PostSummary, b: PostSummary) => (b.views ?? 0) - (a.views ?? 0))
+  else if (sortBy.value === 'likes') list.sort((a: PostSummary, b: PostSummary) => (b.likes ?? 0) - (a.likes ?? 0))
   return list
 })
 
@@ -199,7 +200,7 @@ async function logout() {
   navigateTo('/admin/login')
 }
 
-async function toggleDraft(post: any) {
+async function toggleDraft(post: PostSummary) {
   await $fetch(`/api/admin/posts/${post.slug}`, {
     method: 'PUT', body: { draft: !post.draft }
   })

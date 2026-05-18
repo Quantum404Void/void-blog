@@ -4,8 +4,14 @@
 import { NO_FLOW, normalizeRunResult, formatLogValue, NODE_SPECS } from '~/utils/ai-flow'
 import type { FlowNode, Wire } from '~/types/ai-flow'
 
+export interface NodeExecutionResult {
+  result: unknown
+  outputsData: unknown[]
+  error: string
+}
+
 export interface RunResult {
-  nodeResults: Map<string, { result: any; outputsData: any[]; error: string }>
+  nodeResults: Map<string, NodeExecutionResult>
   log: string[]
   summary: string
   globalError: string
@@ -14,7 +20,7 @@ export interface RunResult {
 export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
   const log: string[] = []
   let globalError = ''
-  const nodeResults = new Map<string, { result: any; outputsData: any[]; error: string }>()
+  const nodeResults = new Map<string, NodeExecutionResult>()
 
   // init
   for (const node of nodes) {
@@ -60,7 +66,7 @@ export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
     const node = nodeMap.get(nodeId)!
     const spec = NODE_SPECS[node.type]
     const inWires = [...(incoming.get(node.id) ?? [])].sort((a, b) => a.toPort - b.toPort)
-    const inputs: any[] = Array.from({ length: spec.inputs }, () => undefined)
+    const inputs: unknown[] = Array.from({ length: spec.inputs }, () => undefined)
     const linkedPorts = new Set(inWires.map(w => w.toPort))
     const res = nodeResults.get(nodeId)!
 
@@ -96,8 +102,8 @@ export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
       res.result = normalized.result
       res.outputsData = normalized.outputs
       log.push(`✓ ${spec.title}: ${formatLogValue(normalized.result)}`)
-    } catch (error: any) {
-      res.error = error?.message || '运行失败'
+    } catch (error: unknown) {
+      res.error = error instanceof Error ? error.message : '运行失败'
       res.outputsData = Array.from({ length: spec.outputs }, () => NO_FLOW)
       log.push(`✗ ${spec.title}: ${res.error}`)
     }

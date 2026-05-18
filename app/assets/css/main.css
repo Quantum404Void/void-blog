@@ -20,6 +20,12 @@
   /* Typography */
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Z-index 层级表 */
+  --z-progress:  100;   /* 阅读进度条 */
+  --z-nav:       200;   /* 顶部导航 */
+  --z-ai:        300;   /* AI 助手浮窗 */
+  --z-overlay:   999;   /* 弹层/彩蛋 */
 }
 
 /* 亮色模式覆盖变量 */

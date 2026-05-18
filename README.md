@@ -103,16 +103,18 @@ void-blog/
 │   │   ├── CodeMirrorEditor.vue # CM6 代码编辑器（lang-cpp + lang-sql）
 │   │   └── Chart.vue          # Chart.js 封装
 │   ├── composables/
-│   │   ├── useGsap.ts         # SSR 安全的 GSAP 懒加载（TextPlugin + ScrollTrigger）
-│   │   ├── useAnime.ts        # SSR 安全的 Anime.js 懒加载
-│   │   ├── useSiteConfig.ts   # 站点配置（runtimeConfig 统一读取）
+│   │   ├── useGsap.ts           # SSR 安全的 GSAP 懒加载，返回 GsapBundle | null
+│   │   ├── useAnime.ts          # SSR 安全的 Anime.js 懒加载，返回 anime | null
+│   │   ├── useTts.ts            # 文章朗读（SpeechSynthesis，zh-CN，SSR 安全）
+│   │   ├── useReadingProgress.ts # 阅读进度持久化（localStorage + 继续阅读）
+│   │   ├── useSiteConfig.ts     # 站点配置（runtimeConfig 统一读取）
 │   │   ├── useMarkdown.client.ts # markdown-it 单例（Shiki / callout / 懒加载图）
-│   │   ├── useFormatDate.ts   # 日期格式化
-│   │   ├── useTagColor.ts     # 标签颜色哈希（neon 四色）
-│   │   ├── useReadingTime.ts  # CJK 感知阅读时长 + 字数统计
-│   │   ├── useCodeCopy.ts     # 代码块复制按钮
-│   │   ├── useCanonical.ts    # Canonical URL 注入
-│   │   └── useAiFlow.ts       # AI Flow 核心状态 composable
+│   │   ├── useFormatDate.ts     # 日期格式化
+│   │   ├── useTagColor.ts       # 标签颜色哈希（neon 四色）
+│   │   ├── useReadingTime.ts    # CJK 感知阅读时长 + 字数统计
+│   │   ├── useCodeCopy.ts       # 代码块复制按钮
+│   │   ├── useCanonical.ts      # Canonical URL 注入
+│   │   └── useAiFlow.ts         # AI Flow 核心状态 composable
 │   ├── layouts/
 │   │   └── default.vue        # 全局布局（光标成价 + 粒子特效 + 键盘快捷键）
 │   ├── plugins/
@@ -122,7 +124,8 @@ void-blog/
 │   │   ├── ai-flow-presets.ts # 5 个内置 Preset 工厂
 │   │   └── ai-flow-runner.ts  # ★ 纯函数拓扑执行器（零副作用）
 │   ├── types/
-│   │   ├── post.ts            # PostSummary / Post
+│   │   ├── post.ts            # PostSummary（含 views/likes/word_count）/ Post
+│   │   ├── ai.ts              # ChatMessage / AiChatResponse / UiMessage
 │   │   ├── ai-flow.ts         # AI Flow 全量类型定义
 │   │   └── cloudflare.d.ts    # D1 全局声明
 │   └── assets/
@@ -135,6 +138,7 @@ void-blog/
 │   │   ├── search.get.ts      # 全文搜索（D1 FTS5）
 │   │   └── stats/             # 浏览量 / 点赞
 │   ├── routes/
+│   │   ├── ai-chat.post.ts    # AI 助手接口（→ GitHub Copilot gpt-5-mini）
 │   │   ├── og/[slug].ts       # ★ 动态 OG 图（SVG 边缘生成）
 │   │   ├── rss.xml.ts         # RSS Feed（ISR 1h）
 │   │   └── sitemap.xml.ts     # Sitemap（ISR 1h）

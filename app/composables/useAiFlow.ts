@@ -121,32 +121,36 @@ export function useAiFlow() {
   })
 
   // ── Restore ──
-  function restoreGraph(payload: any, viewRef?: { x: number; y: number; scale: number }) {
+  function restoreGraph(payload: unknown, viewRef?: { x: number; y: number; scale: number }) {
     if (!payload || typeof payload !== 'object') throw new Error('无效的 graph payload')
-    const validNodes = (payload.nodes || [])
-      .filter((n: any) => n?.id && n?.type && NODE_SPECS[n.type])
-      .map((n: any) => ({
-        id: n.id, type: n.type,
+    const p = payload as Record<string, unknown>
+    const rawNodes = Array.isArray(p.nodes) ? p.nodes : []
+    const validNodes = rawNodes
+      .filter((n: unknown): n is Record<string, unknown> => !!n && typeof n === 'object' && 'id' in (n as object) && 'type' in (n as object) && NODE_SPECS[(n as Record<string,unknown>).type as string])
+      .map((n: Record<string, unknown>) => ({
+        id: String(n.id), type: String(n.type),
         x: Number(n.x ?? 0), y: Number(n.y ?? 0),
-        params: { ...specFor(n.type).createParams(), ...(n.params || {}) },
-        result: undefined, outputsData: [] as any[], error: '',
+        params: { ...specFor(String(n.type)).createParams(), ...(n.params && typeof n.params === 'object' ? n.params : {}) },
+        result: undefined, outputsData: [] as unknown[], error: '',
       }))
-    const nodeIdSet = new Set(validNodes.map((n: any) => n.id))
-    const validWires = (payload.wires || [])
-      .filter((w: any) => w?.id && nodeIdSet.has(w.fromNode) && nodeIdSet.has(w.toNode))
-      .map((w: any) => ({
-        id: w.id, fromNode: w.fromNode,
+    const nodeIdSet = new Set(validNodes.map((n) => n.id))
+    const rawWires = Array.isArray(p.wires) ? p.wires : []
+    const validWires = rawWires
+      .filter((w: unknown): w is Record<string, unknown> => !!w && typeof w === 'object' && 'id' in (w as object) && nodeIdSet.has(String((w as Record<string,unknown>).fromNode)) && nodeIdSet.has(String((w as Record<string,unknown>).toNode)))
+      .map((w: Record<string, unknown>) => ({
+        id: String(w.id), fromNode: String(w.fromNode),
         fromPort: Number(w.fromPort ?? 0),
-        toNode: w.toNode,
+        toNode: String(w.toNode),
         toPort: Number(w.toPort ?? 0),
       }))
-    const validGroups = (payload.groups || [])
-      .filter((g: any) => g?.id)
-      .map((g: any) => ({
-        id: g.id, title: String(g.title || 'Group'), color: String(g.color || '#00d4ff'),
-        nodeIds: (g.nodeIds || []).filter((id: any) => nodeIdSet.has(String(id))).map(String),
+    const rawGroups = Array.isArray(p.groups) ? p.groups : []
+    const validGroups = rawGroups
+      .filter((g: unknown): g is Record<string, unknown> => !!g && typeof g === 'object' && 'id' in (g as object))
+      .map((g: Record<string, unknown>) => ({
+        id: String(g.id), title: String(g.title || 'Group'), color: String(g.color || '#00d4ff'),
+        nodeIds: (Array.isArray(g.nodeIds) ? g.nodeIds : []).filter((id: unknown) => nodeIdSet.has(String(id))).map(String),
       }))
-      .filter((g: any) => g.nodeIds.length > 0)
+      .filter((g) => g.nodeIds.length > 0)
     nodes.value = validNodes
     wires.value = validWires
     groups.value = validGroups

@@ -1,7 +1,7 @@
-import type { ChatMessage, AiChatResponse } from '~/app/types/ai'
+import type { ChatMessage, AiChatResponse } from '~/types/ai'
 
 const GITHUB_COPILOT_API = 'https://api.githubcopilot.com/chat/completions'
-const MODEL = 'gpt-4o-mini'
+const MODEL = 'gpt-5-mini'
 const NO_KEY_REPLY = 'AI 助手暂未配置，请设置 NUXT_OPENAI_KEY'
 
 export default defineEventHandler(async (event): Promise<AiChatResponse> => {

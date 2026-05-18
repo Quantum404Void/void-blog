@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 const { siteUrl, siteName } = useSiteConfig()
 const route = useRoute()
 const tag = route.params.tag as string
@@ -77,13 +78,13 @@ useSeoMeta({
 const { getTagColorVar } = useTagColor()
 const tagColor = computed(() => getTagColorVar(tag))
 
-const { data: postsData } = await useFetch(`/api/posts/tag/${tag}`, { default: () => [] as any[] })
+const { data: postsData } = await useFetch(`/api/posts/tag/${tag}`, { default: () => [] as PostSummary[] })
 const posts = computed(() => postsData.value || [])
 
 // Date range
 const dateRange = computed(() => {
   const dates = posts.value
-    .map((p: any) => p.date ? new Date(p.date) : null)
+    .map((p: PostSummary) => p.pub_date ? new Date(p.date) : null)
     .filter(Boolean)
     .sort((a: Date, b: Date) => a.getTime() - b.getTime())
   if (dates.length < 2) return null

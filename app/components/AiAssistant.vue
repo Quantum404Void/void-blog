@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import type { UiMessage, ChatMessage, AiChatResponse } from '~/app/types/ai'
+import type { UiMessage, ChatMessage, AiChatResponse } from '~/types/ai'
 
 const SYSTEM_PROMPT = '你是 void.redx.space 博客的 AI 助手，帮助读者理解技术文章。回答简洁，中文，带一点极客风格。'
 const MAX_HISTORY_TURNS = 20

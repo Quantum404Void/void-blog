@@ -1,8 +1,12 @@
 <template>
   <div
-    class="fixed top-0 left-0 h-[2px] z-[100] transition-none origin-left"
-    style="background: linear-gradient(to right, #00ff88, #00d4ff, #b44cff, #ff2d78); box-shadow: 0 0 8px rgba(0,212,255,0.6);"
-    :style="{ transform: `scaleX(${progress})` }"
+    class="fixed top-0 left-0 h-[2px] transition-none origin-left"
+    :style="{
+      zIndex: 'var(--z-progress)',
+      background: 'linear-gradient(to right, #00ff88, #00d4ff, #b44cff, #ff2d78)',
+      boxShadow: '0 0 8px rgba(0,212,255,0.6)',
+      transform: `scaleX(${progress})`
+    }"
   />
 </template>
 

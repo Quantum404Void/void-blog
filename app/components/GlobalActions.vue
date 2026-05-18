@@ -12,7 +12,7 @@
 
   <!-- Konami 彩蛋 -->
   <Transition name="konami">
-    <div v-if="konamiActive" class="fixed inset-0 z-[999] flex items-center justify-center px-4 pointer-events-none">
+    <div v-if="konamiActive" class="fixed inset-0 flex items-center justify-center px-4 pointer-events-none" style="z-index:var(--z-overlay)">
       <div class="font-mono text-center pointer-events-auto max-w-full"
         style="background:rgba(0,0,0,0.92);padding:1.5rem 1.25rem;border:1px solid rgba(0,255,136,0.4);border-radius:1rem;box-shadow:0 0 60px rgba(0,255,136,0.2)">
         <pre class="text-[var(--color-neon-green)] text-[10px] sm:text-[11px] leading-tight mb-4 select-none overflow-x-auto">{{ matrixArt }}</pre>
@@ -24,7 +24,7 @@
 
   <!-- DOOM 彩蛋 -->
   <Transition name="konami">
-    <div v-if="doomActive" class="fixed inset-0 z-[999] flex items-center justify-center px-4 pointer-events-none">
+    <div v-if="doomActive" class="fixed inset-0 flex items-center justify-center px-4 pointer-events-none" style="z-index:var(--z-overlay)">
       <div class="font-mono pointer-events-auto doom-terminal w-full max-w-[22rem]"
         style="background:#000;padding:1.25rem 1rem;border:1px solid #00ff00;border-radius:0.5rem;box-shadow:0 0 40px rgba(0,255,0,0.3)">
         <pre class="text-[#00ff00] text-xs sm:text-sm leading-relaxed select-none whitespace-pre-wrap break-words">{{ doomText }}</pre>
@@ -34,7 +34,7 @@
 
   <!-- sudo 彩蛋 -->
   <Transition name="konami">
-    <div v-if="sudoActive" class="fixed inset-0 z-[999] flex items-center justify-center px-4 pointer-events-none">
+    <div v-if="sudoActive" class="fixed inset-0 flex items-center justify-center px-4 pointer-events-none" style="z-index:var(--z-overlay)">
       <div class="font-mono pointer-events-auto w-full max-w-[24rem]"
         style="background:#0d0d0d;padding:1.25rem 1rem;border:1px solid #444;border-radius:0.5rem;box-shadow:0 0 30px rgba(0,0,0,0.8)">
         <div class="text-[#cccccc] text-xs sm:text-sm leading-relaxed select-none whitespace-pre-wrap break-words">{{ sudoText }}</div>

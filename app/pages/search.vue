@@ -103,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 import { useDebounceFn } from '@vueuse/core'
 const { siteUrl, siteName } = useSiteConfig()
 useCanonical('/search')
@@ -116,7 +117,7 @@ useSeoMeta({
 const route = useRoute()
 const router = useRouter()
 const q = ref((route.query.q as string) || '')
-const results = ref<any[]>([])
+const results = ref<PostSummary[]>([])
 const pending = ref(false)
 const searched = ref(false)
 const lastQ = ref('')
@@ -142,7 +143,7 @@ async function doSearch() {
   lastQ.value = q.value.trim()
   await router.replace({ query: { q: q.value } })
   try {
-    results.value = await $fetch(`/api/search?q=${encodeURIComponent(q.value)}`) as any[]
+    results.value = await $fetch<PostSummary[]>(`/api/search?q=${encodeURIComponent(q.value)}`)
     searched.value = true
   } finally {
     pending.value = false

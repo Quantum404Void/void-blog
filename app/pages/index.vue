@@ -167,6 +167,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PostSummary } from '~/types/post'
 const { siteUrl, siteName, siteDescription, authorName, authorGithub } = useSiteConfig()
 useCanonical('/')
 useSeoMeta({
@@ -213,7 +214,7 @@ const heroLine2 = ref<HTMLElement | null>(null)
 const heroStats = ref<HTMLElement | null>(null)
 const postListRef = ref<HTMLElement | null>(null)
 
-const { data: allPostsRaw } = await useFetch('/api/posts', { default: () => [] as any[] })
+const { data: allPostsRaw } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
 const allPosts = computed(() => allPostsRaw.value || [])
 const { data: tagCounts } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 
@@ -259,10 +260,11 @@ onMounted(async () => {
   })
 
   // 文章列表 ScrollTrigger stagger
-  const { ScrollTrigger } = await useGsap()
-  if (postListRef.value && ScrollTrigger) {
+  const gsapBundle2 = await useGsap()
+  if (postListRef.value && gsapBundle2) {
+    const { gsap: g2, ScrollTrigger } = gsapBundle2
     const items = postListRef.value.querySelectorAll<HTMLElement>('.post-item')
-    gsap.to(items, {
+    g2.to(items, {
       opacity: 1,
       y: 0,
       duration: 0.5,
