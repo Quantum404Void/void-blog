@@ -19,7 +19,7 @@
             {{ card.label }}
           </div>
           <div class="flex items-end gap-2">
-            <div class="font-mono text-xl sm:text-2xl font-bold" :style="`color:var(--color-${card.color})`">{{ card.value }}</div>
+            <div class="font-mono text-xl sm:text-2xl font-bold" :style="`color:var(--color-${card.color})`">{{ typeof card.value === 'number' && counterVals[overviewCards.indexOf(card)] ? counterVals[overviewCards.indexOf(card)] : card.value }}</div>
           </div>
         </div>
       </div>
@@ -108,6 +108,38 @@ useSeoMeta({
   ogTitle: `统计看板 | ${siteName}`,
   ogDescription: `${siteName} 博客内容统计：文章数、标签分布、每年产出可视化`,
   ogUrl: `${siteUrl}/stats`,
+})
+
+const counterVals = ref<number[]>([0, 0, 0, 0])
+
+onMounted(async () => {
+  const { gsap } = await useGsap()
+  if (!gsap) return
+
+  // 概览卡片 stagger 入场
+  const cardEls = document.querySelectorAll('.grid.grid-cols-2 > div')
+  if (cardEls.length) {
+    gsap.from(cardEls, { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, ease: 'power2.out' })
+  }
+
+  // 数字 counter 动画
+  const rawCards = overviewCards.value
+  rawCards.forEach((card, i) => {
+    const numVal = typeof card.value === 'number' ? card.value : parseInt(String(card.value)) || 0
+    if (!numVal) return
+    const obj = { val: 0 }
+    gsap.to(obj, {
+      val: numVal,
+      duration: 1.2,
+      ease: 'power2.out',
+      onUpdate() {
+        counterVals.value[i] = Math.round(obj.val)
+      },
+      onComplete() {
+        counterVals.value[i] = numVal
+      },
+    })
+  })
 })
 
 const { data: statsData } = await useFetch('/api/stats')

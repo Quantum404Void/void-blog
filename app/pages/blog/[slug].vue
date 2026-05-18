@@ -46,6 +46,16 @@
               <span class="text-[var(--color-neon-cyan)]">👁</span>
               <span>{{ postViews || '—' }} views</span>
             </span>
+            <span v-if="ttsSupported" class="hidden sm:inline text-[var(--color-void-muted)]">·</span>
+            <button
+              v-if="ttsSupported"
+              @click="toggleTts"
+              class="flex items-center gap-1 font-mono text-xs transition-all"
+              :style="{ color: 'var(--color-neon-green)', textShadow: ttsState !== 'idle' ? '0 0 8px var(--color-neon-green)' : 'none' }"
+            >
+              <span>{{ ttsState === 'playing' ? '⏸' : '▶' }}</span>
+              <span>{{ ttsState === 'playing' ? '暂停' : ttsState === 'paused' ? '继续' : '朗读' }}</span>
+            </button>
           </div>
         </header>
 
@@ -418,10 +428,44 @@ onMounted(async () => {
   loadStats()
   // 延迟 1s 再记录阅读，避免预览模式刻处
   setTimeout(recordView, 1000)
+
+  // TTS 支持检测
+  ttsSupported.value = 'speechSynthesis' in window
 })
+
+// TTS
+const TTS_LANG = 'zh-CN'
+const TTS_RATE = 0.95
+const ttsSupported = ref(false)
+const ttsState = ref<'idle' | 'playing' | 'paused'>('idle')
+let ttsUtterance: SpeechSynthesisUtterance | null = null
+
+function toggleTts() {
+  if (!ttsSupported.value) return
+  const synth = window.speechSynthesis
+
+  if (ttsState.value === 'idle') {
+    const plainText = (post.value?.title ?? '') + '\n' +
+      (renderedContent.value ?? '').replace(/<[^>]+>/g, '')
+    ttsUtterance = new SpeechSynthesisUtterance(plainText)
+    ttsUtterance.lang = TTS_LANG
+    ttsUtterance.rate = TTS_RATE
+    ttsUtterance.onend = () => { ttsState.value = 'idle' }
+    ttsUtterance.onerror = () => { ttsState.value = 'idle' }
+    synth.speak(ttsUtterance)
+    ttsState.value = 'playing'
+  } else if (ttsState.value === 'playing') {
+    synth.pause()
+    ttsState.value = 'paused'
+  } else {
+    synth.resume()
+    ttsState.value = 'playing'
+  }
+}
 
 onUnmounted(() => {
   window.removeEventListener('scroll', saveReadingProgress)
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel()
 })
 
 const shareUrl = computed(() => `${siteUrl}/blog/${slug}`)

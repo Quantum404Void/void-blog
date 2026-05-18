@@ -125,6 +125,20 @@ const filteredTags = computed(() => {
   const q = query.value.trim().toLowerCase()
   return q ? tags.value.filter(item => item.tag.toLowerCase().includes(q)) : tags.value
 })
+
+onMounted(async () => {
+  const anime = await useAnime()
+  if (!anime) return
+  await nextTick()
+  anime({
+    targets: '.tag-card',
+    opacity: [0, 1],
+    scale: [0.8, 1],
+    duration: 400,
+    delay: anime.stagger(20),
+    easing: 'easeOutQuad',
+  })
+})
 </script>
 
 <style scoped>

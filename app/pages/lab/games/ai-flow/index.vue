@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { NODE_SPECS, makeId, makeNode, formatValue } from '~/utils/ai-flow'
-import { PRESETS } from '~/utils/ai-flow-presets'
-import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
-import {
-  useAiFlow,
+import { NODE_SPECS, makeId, makeNode, formatValue,
   clamp, specFor, nodeHeight, inputPortY, outputPortY,
   inputLabel, outputLabel, bezierPath,
   NODE_W, PORT_R, STAGE_W, STAGE_H, MINIMAP_W, MINIMAP_H,
-} from '~/composables/useAiFlow'
+} from '~/utils/ai-flow'
+import { PRESETS } from '~/utils/ai-flow-presets'
+import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
+import { useAiFlow } from '~/composables/useAiFlow'
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `AI Flow | ${siteName}` })

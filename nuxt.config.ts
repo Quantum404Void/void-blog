@@ -21,6 +21,7 @@ export default defineNuxtConfig({
     // 服务端私有（不暴露给客户端）
     adminPassword: '',  // 生产由 CF Pages 环境变量 NUXT_ADMIN_PASSWORD 注入
     jwtSecret: '',      // 生产由 CF Pages 环境变量 NUXT_JWT_SECRET 注入
+    openaiKey: '',      // 生产由 CF Pages 环境变量 NUXT_OPENAI_KEY 注入
     public: {
       siteUrl: 'https://void.redx.space',
       siteName: 'void.dev',

@@ -75,7 +75,7 @@
           v-for="post in results"
           :key="post.slug"
           :href="`/blog/${post.slug}`"
-          class="group block p-4 sm:p-5 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all"
+          class="result-item group block p-4 sm:p-5 rounded-xl border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:bg-[var(--color-void-card)] transition-all"
         >
           <div class="flex flex-wrap gap-1.5 mb-2">
             <span v-for="tag in post.tags.slice(0,3)" :key="tag"
@@ -151,6 +151,20 @@ async function doSearch() {
 
 onMounted(() => {
   if (q.value) doSearch()
+})
+
+watch(results, async () => {
+  const anime = await useAnime()
+  if (!anime) return
+  await nextTick()
+  anime({
+    targets: '.result-item',
+    opacity: [0, 1],
+    translateY: [12, 0],
+    duration: 300,
+    delay: anime.stagger(50),
+    easing: 'easeOutQuad',
+  })
 })
 </script>
 

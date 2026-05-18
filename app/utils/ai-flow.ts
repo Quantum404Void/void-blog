@@ -140,6 +140,59 @@ export function formatLogValue(value: any): string {
   }
 }
 
+// ── Geometry constants and pure functions ────────────────────
+
+export const NODE_W = 260
+export const HEADER_H = 40
+export const DESC_H = 38
+export const RESULT_H = 78
+export const PORT_R = 6
+export const STAGE_W = 3200
+export const STAGE_H = 2000
+export const MINIMAP_W = 220
+export const MINIMAP_H = 140
+
+export function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n))
+}
+
+export function specFor(type: string) {
+  return NODE_SPECS[type]
+}
+
+export function nodeHeight(node: FlowNode): number {
+  const spec = specFor(node.type)
+  const paramsH = spec.params.reduce((sum, param) => sum + (param.kind === 'textarea' ? 88 : 42), 0)
+  return HEADER_H + DESC_H + paramsH + RESULT_H
+}
+
+export function inputPortY(node: FlowNode, index: number): number {
+  const spec = specFor(node.type)
+  const h = nodeHeight(node)
+  if (spec.inputs <= 1) return h / 2
+  return (index + 1) * (h / (spec.inputs + 1))
+}
+
+export function outputPortY(node: FlowNode, index: number): number {
+  const spec = specFor(node.type)
+  const h = nodeHeight(node)
+  if (spec.outputs <= 1) return h / 2
+  return (index + 1) * (h / (spec.outputs + 1))
+}
+
+export function inputLabel(spec: NodeSpec, index: number): string {
+  return spec.inputLabels?.[index] ?? `in${index + 1}`
+}
+
+export function outputLabel(spec: NodeSpec, index: number): string {
+  return spec.outputLabels?.[index] ?? `out${index + 1}`
+}
+
+export function bezierPath(fromX: number, fromY: number, toX: number, toY: number): string {
+  const cx = Math.max(60, Math.abs(toX - fromX) * 0.45)
+  return `M ${fromX} ${fromY} C ${fromX + cx} ${fromY}, ${toX - cx} ${toY}, ${toX} ${toY}`
+}
+
 // ── NODE_SPECS ─────────────────────────────────────────────
 
 export const NODE_SPECS: Record<string, NodeSpec> = {
@@ -620,16 +673,7 @@ export const NODE_SPECS: Record<string, NodeSpec> = {
     createParams: () => ({}),
     run: ({ inputs }) => inputs[0],
   },
-}
 
-// ──────────────────────────────────────────────────────────
-// New node types
-// ──────────────────────────────────────────────────────────
-
-// Append to NODE_SPECS is done via direct object mutation after the declaration
-// (workaround: we patch at module level below)
-
-Object.assign(NODE_SPECS, {
   // ---- Math ----
   'math-round': {
     title: 'Round',
@@ -887,4 +931,4 @@ Object.assign(NODE_SPECS, {
       })
     },
   },
-})
+}

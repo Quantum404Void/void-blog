@@ -23,6 +23,7 @@
     </ClientOnly>
 
     <slot />
+    <ClientOnly><AiAssistant /></ClientOnly>
   </div>
 </template>
 

@@ -174,6 +174,39 @@ useSeoMeta({
   ogUrl: `${siteUrl}/about`,
 })
 
+onMounted(async () => {
+  const { gsap, ScrollTrigger } = await useGsap()
+  if (!gsap) return
+
+  // 终端行逐行打字机效果
+  const termLines = document.querySelectorAll('.text-xs.space-y-1 > div')
+  if (termLines.length) {
+    gsap.from(termLines, {
+      opacity: 0,
+      y: 10,
+      duration: 0.3,
+      stagger: 0.15,
+      ease: 'power2.out',
+    })
+  }
+
+  // 底部 info 卡片 ScrollTrigger
+  const cards = document.querySelectorAll('.border.rounded-xl')
+  cards.forEach((card) => {
+    gsap.from(card, {
+      opacity: 0,
+      y: 20,
+      duration: 0.5,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: card,
+        start: 'top 88%',
+        toggleActions: 'play none none none',
+      },
+    })
+  })
+})
+
 const topics = [
   { icon: '⚙️', tag: 'cpp',      title: '系统与底层',  desc: 'C++、驱动、通信协议、性能调优' },
   { icon: '🐍', tag: 'python',   title: 'Python',       desc: '数据处理、自动化脚本、asyncio、类型注解' },
