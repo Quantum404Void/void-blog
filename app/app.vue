@@ -7,25 +7,25 @@
 </template>
 
 <script setup lang="ts">
-// 页面切换过渡：快速淡入（50ms），避免白屏闪烁
+// 页面切换过渡：新页进入时淡入，不等旧页离开（避免 out-in 的黑屏间隙）
 const pageTransition = {
   name: 'page',
-  mode: 'out-in',
+  mode: 'default',   // 并行，不用 out-in
   appear: true,
 }
 </script>
 
 <style>
-/* 页面切换过渡 */
 .page-enter-active {
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity 0.15s ease;
 }
 .page-leave-active {
-  transition: opacity 0.08s ease;
+  transition: opacity 0.1s ease;
+  position: absolute;   /* 脱离文档流，防止两页叠加时撑高页面 */
+  width: 100%;
 }
 .page-enter-from {
   opacity: 0;
-  transform: translateY(4px);
 }
 .page-leave-to {
   opacity: 0;

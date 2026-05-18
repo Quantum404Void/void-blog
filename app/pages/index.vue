@@ -11,32 +11,32 @@
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
       <!-- Boot status badge -->
-      <div class="hero-boot-status booting font-mono text-[9px] tracking-[0.15em] uppercase" style="position:absolute;top:12px;right:16px;color:var(--color-neon-green);opacity:0;">INIT...</div>
+      <div class="hero-boot-status booting font-mono text-[9px] tracking-[0.15em] uppercase">INIT...</div>
 
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot neon-flicker" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
-            <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style="visibility:hidden">
+            <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" >
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)] hero-online-dot"></span>
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
-            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6 glitch-text" data-text="void.dev" style="visibility:hidden">
+            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6 glitch-text" data-text="void.dev" >
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
             <div class="font-mono text-sm space-y-2.5 max-w-xl">
-              <p ref="heroLine0Wrap" style="visibility:hidden;color:#c8c8e0">
+              <p ref="heroLine0Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">interest</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine0" style="color:#00d4ff"></span>
               </p>
-              <p ref="heroLine1Wrap" style="visibility:hidden;color:#c8c8e0">
+              <p ref="heroLine1Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">stack</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine1" style="color:#39ff14"></span>
               </p>
-              <p ref="heroLine2Wrap" style="visibility:hidden;color:#c8c8e0">
+              <p ref="heroLine2Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">status</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine2" style="color:#39ff14"></span>
@@ -46,7 +46,7 @@
         </div>
 
         <!-- Stats bar -->
-        <div ref="heroStats" class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)]" style="visibility:hidden">
+        <div ref="heroStats" class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)]" >
           <div class="flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▸</span>
             <span style="color:#e8e8f0;font-weight:bold">{{ allPosts.length }}</span>
@@ -237,8 +237,6 @@ onMounted(async () => {
   const { gsap } = bundle
 
   // ── 启动序列 ──────────────────────────────────────────────────────
-  // 辅助：将 visibility:hidden 元素变为可见
-  const show = (el: HTMLElement | null) => { if (el) el.style.visibility = 'visible' }
 
   // Boot status badge
   const bootEl = document.querySelector<HTMLElement>('.hero-boot-status')
@@ -256,7 +254,6 @@ onMounted(async () => {
   }
 
   // t=0  heroPrompt 瞬间出现（无滑入，像终端光标跳出）
-  tl.add(() => show(heroPrompt.value), 0)
   tl.from(heroPrompt.value, { opacity: 0, duration: 0.1 }, 0)
 
   // 扫描线扫过 hero 区一次
@@ -272,7 +269,6 @@ onMounted(async () => {
   }
 
   // t=0.3  heroTitle: 全亮 → glitch 抖动 3 次 → 稳定
-  tl.add(() => show(heroTitle.value), 0.3)
   tl.from(heroTitle.value, { opacity: 0, duration: 0.05 }, 0.3)
   tl.to(heroTitle.value, { skewX: -4, scaleX: 1.03, opacity: 0.7, duration: 0.05 }, 0.35)
   tl.to(heroTitle.value, { skewX: 3, scaleX: 0.98, opacity: 1, duration: 0.05 }, 0.40)
@@ -284,7 +280,6 @@ onMounted(async () => {
   const lineWraps = [heroLine0Wrap.value, heroLine1Wrap.value, heroLine2Wrap.value]
   lineWraps.forEach((wrap, i) => {
     const t = 0.6 + i * 0.2
-    tl.add(() => show(wrap), t)
     tl.from(wrap, { opacity: 0, x: -4, duration: 0.15 }, t)
   })
 
@@ -305,7 +300,6 @@ onMounted(async () => {
   })
 
   // t=1.8  heroStats 从右侧滑入
-  tl.add(() => show(heroStats.value), 1.8)
   tl.from(heroStats.value, { opacity: 0, x: 24, duration: 0.4, ease: 'power3.out' }, 1.8)
 
   // ── 文章列表 ScrollTrigger stagger ────────────────────────────────
