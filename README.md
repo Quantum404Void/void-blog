@@ -11,12 +11,13 @@
 
 **[void.redx.space](https://void.redx.space)** — 不灸水，不追热点，不水文章
 
-![Nuxt](https://img.shields.io/badge/Nuxt-3-00DC82?style=flat-square&logo=nuxt.js&logoColor=white)
+![Nuxt](https://img.shields.io/badge/Nuxt-4-00DC82?style=flat-square&logo=nuxt.js&logoColor=white)
 ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vue.js&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white)
 ![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-F38020?style=flat-square&logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-enabled-5A0FC8?style=flat-square&logo=googlechrome&logoColor=white)
+![GSAP](https://img.shields.io/badge/GSAP-3-88CE02?style=flat-square&logo=greensock&logoColor=white)
 
 </div>
 
@@ -46,12 +47,13 @@
 
 | 层         | 技术                          | 备注                              |
 |------------|------------------------------|-----------------------------------|
-| 框架       | Nuxt 3 + Vue 3               | SSR + ISR，边缘渲染                |
+| 框架       | Nuxt 4 + Vue 3               | SSR + ISR，边缘渲染                |
 | 样式       | Tailwind CSS v4              | 原子化，终端暗色主题               |
+| 动画       | GSAP 3 + ScrollTrigger       | 入场动画 / 滚动揭示 / 复杂 timeline；hover 等简单状态保持 CSS |
 | 数据库     | Cloudflare D1                | SQLite at the edge，零冷启动       |
 | 部署       | Cloudflare Pages             | Git push 自动触发                  |
 | PWA        | `@vite-pwa/nuxt`             | autoUpdate SW，离线缓存            |
-| Markdown   | markdown-it + highlight.js   | 单例渲染，callout / 代码高亮       |
+| Markdown   | markdown-it + Shiki          | 客户端渲染，客制 voidTheme 赛博朋克色盘 |
 | 评论       | Giscus                       | GitHub Discussions 驱动            |
 
 ## 目录结构
@@ -230,6 +232,7 @@ npm run deploy
 - **内容优先**：D1 单一数据源，无外部 CMS
 - **边缘优先**：`cloudflare-pages` preset，用户最近节点响应
 - **组件化**：composable 抽象共享逻辑，类型全覆盖
+- **动画分层**：GSAP 负责入场 / 滚动 / 复杂时间轴；hover 状态等瞬态过渡保持 CSS `transition`，零 JS 开销
 - **性能**：GPU 动画、`v-memo` 节点优化、`transform` 代替 `width`
 
 ---
