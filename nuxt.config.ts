@@ -65,6 +65,7 @@ export default defineNuxtConfig({
       authorGithub: 'https://github.com/Quantum404Void',
       authorInitial: '王',
       authorMotto: '不灸水，不追热点，不水文章',
+      buildHash: (process.env.CF_PAGES_COMMIT_SHA ?? '').slice(0, 7) || 'local',
     },
   },
 

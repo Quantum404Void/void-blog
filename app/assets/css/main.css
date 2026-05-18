@@ -746,6 +746,20 @@ body::after {
   animation: pulse-green 2s ease-in-out infinite;
 }
 
+/* ── Hero 启动状态角标 ── */
+.hero-boot-status {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--color-neon-green);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
 
 /* ═══════════════════════════════════════════════════════
    _effects.css — scanline / responsive / hero / lab 增强
@@ -888,7 +902,57 @@ body::before {
   transform: translateY(-2px);
 }
 
-/* 代码块 .line hover 微高亮（在文章里） */
+/* ── Blog 列表扫描仪动画 ── */
+.post-scroll-item {
+  position: relative;
+}
+.post-scroll-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-neon-cyan);
+  transform: scaleY(0);
+  transform-origin: top;
+  box-shadow: 0 0 8px var(--color-neon-cyan);
+  transition: none;
+  z-index: 1;
+  opacity: 0;
+}
+.post-scroll-item.scan-animate::before {
+  animation: post-scan-line 0.35s ease-out forwards;
+}
+@keyframes post-scan-line {
+  0%   { transform: scaleY(0); opacity: 0.9; }
+  60%  { transform: scaleY(1); opacity: 0.9; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+/* ── Lab 卡片扫描线 hover ── */
+.lab-card {
+  position: relative;
+  overflow: hidden;
+}
+.lab-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-neon-cyan), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.lab-card:hover::after {
+  animation: card-scan 0.5s ease-out forwards;
+}
+@keyframes card-scan {
+  0%   { top: 0%;   opacity: 0.9; }
+  100% { top: 100%; opacity: 0;   }
+}
 .prose .shiki .line:hover {
   background: rgba(255,255,255,0.025);
 }

@@ -143,17 +143,26 @@ onMounted(async () => {
   sections.forEach((section) => {
     const items = section.querySelectorAll<HTMLElement>('.post-scroll-item')
     gsap.fromTo(items,
-      { opacity: 0, y: 16 },
+      { opacity: 0, x: -8 },
       {
         opacity: 1,
-        y: 0,
-        duration: 0.45,
+        x: 0,
+        duration: 0.35,
         ease: 'power2.out',
-        stagger: 0.06,
+        stagger: 0.05,
         scrollTrigger: {
           trigger: section,
-          start: 'top bottom',    // 只要进入视口就触发，不要求 90%
+          start: 'top bottom',
           once: true,
+        },
+        onStart() {
+          // 展开扫描线动画，每项逐次延迟
+          items.forEach((item, i) => {
+            setTimeout(() => {
+              item.classList.add('scan-animate')
+              setTimeout(() => item.classList.remove('scan-animate'), 500)
+            }, i * 50)
+          })
         },
       }
     )

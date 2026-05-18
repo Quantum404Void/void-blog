@@ -11,7 +11,7 @@
       <!-- bottom divider + sys info -->
       <div class="mt-4 pt-4 border-t border-[var(--color-void-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 font-mono text-[10px] text-[var(--color-text-muted)] opacity-40">
         <span class="select-none tracking-widest">░▒▓█ void.dev █▓▒░</span>
-        <span class="tabular-nums select-none">uptime: ∞ · kernel: nuxt@3 · shell: cf-pages</span>
+        <span class="tabular-nums select-none">[sys] uptime: ∞ · stack: nuxt4+cf-d1+workers-ai · build: {{ buildHash }}</span>
       </div>
     </div>
   </footer>
@@ -19,6 +19,8 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'AppFooter' })
+
+const { buildHash } = useRuntimeConfig().public as any
 
 withDefaults(defineProps<{
   backHref?: string

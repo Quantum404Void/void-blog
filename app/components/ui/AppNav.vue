@@ -36,6 +36,9 @@
           </span>
         </NuxtLink>
         <span class="hidden lg:block font-mono text-[9px] text-[var(--color-void-muted)] select-none">v1.0</span>
+        <ClientOnly>
+          <span class="font-mono text-[10px] text-[var(--color-text-muted)] tabular-nums hidden sm:block select-none">{{ currentTime }}</span>
+        </ClientOnly>
         <!-- 移动端 hamburger -->
         <button
           class="sm:hidden flex flex-col gap-1 -mr-1 p-2 rounded-md border border-transparent hover:border-[var(--color-void-border)] transition-colors"
@@ -106,4 +109,13 @@ const navLinks = [
 function isActive(href: string) {
   return route.path === href || route.path.startsWith(href + '/')
 }
+
+const currentTime = ref('')
+onMounted(() => {
+  const update = () => {
+    currentTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  }
+  update()
+  setInterval(update, 1000)
+})
 </script>

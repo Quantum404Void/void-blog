@@ -10,30 +10,33 @@
       <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
+      <!-- Boot status badge -->
+      <div class="hero-boot-status booting font-mono text-[9px] tracking-[0.15em] uppercase" style="position:absolute;top:12px;right:16px;color:var(--color-neon-green);opacity:0;">INIT...</div>
+
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot neon-flicker" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
-            <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style="opacity:0;transform:translateY(12px)">
+            <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style="visibility:hidden">
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)] hero-online-dot"></span>
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
-            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6 glitch-text" data-text="void.dev" style="opacity:0;transform:translateY(16px)">
+            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6 glitch-text" data-text="void.dev" style="visibility:hidden">
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
             <div class="font-mono text-sm space-y-2.5 max-w-xl">
-              <p ref="heroLine0Wrap" style="opacity:0;transform:translateY(10px);color:#c8c8e0">
+              <p ref="heroLine0Wrap" style="visibility:hidden;color:#c8c8e0">
                 <span style="color:#b400ff">interest</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine0" style="color:#00d4ff"></span>
               </p>
-              <p ref="heroLine1Wrap" style="opacity:0;transform:translateY(10px);color:#c8c8e0">
+              <p ref="heroLine1Wrap" style="visibility:hidden;color:#c8c8e0">
                 <span style="color:#b400ff">stack</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine1" style="color:#39ff14"></span>
               </p>
-              <p ref="heroLine2Wrap" style="opacity:0;transform:translateY(10px);color:#c8c8e0">
+              <p ref="heroLine2Wrap" style="visibility:hidden;color:#c8c8e0">
                 <span style="color:#b400ff">status</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine2" style="color:#39ff14"></span>
@@ -43,7 +46,7 @@
         </div>
 
         <!-- Stats bar -->
-        <div ref="heroStats" class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)]" style="opacity:0;transform:translateY(10px)">
+        <div ref="heroStats" class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)]" style="visibility:hidden">
           <div class="flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▸</span>
             <span style="color:#e8e8f0;font-weight:bold">{{ allPosts.length }}</span>
@@ -233,41 +236,79 @@ onMounted(async () => {
   if (!bundle) return
   const { gsap } = bundle
 
+  // ── 启动序列 ──────────────────────────────────────────────────────
+  // 辅助：将 visibility:hidden 元素变为可见
+  const show = (el: HTMLElement | null) => { if (el) el.style.visibility = 'visible' }
+
+  // Boot status badge
+  const bootEl = document.querySelector<HTMLElement>('.hero-boot-status')
+
   const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
 
-  // 1. 提示行先出现
-  tl.to(heroPrompt.value, { opacity: 1, y: 0, duration: 0.3 })
+  // t=0  Boot badge 出现
+  if (bootEl) {
+    tl.set(bootEl, { opacity: 1 })
+    tl.add(() => { bootEl.textContent = 'INIT...' }, 0)
+    tl.add(() => { bootEl.textContent = 'POST CHECK...' }, 0.4)
+    tl.add(() => { bootEl.textContent = 'LOADING KERNEL...' }, 0.9)
+    tl.add(() => { bootEl.textContent = 'SYSTEM READY ✓' }, 1.8)
+    tl.to(bootEl, { opacity: 0.5, duration: 0.5 }, 2.2)
+  }
 
-  // 2. 标题 glitch 式进场
-  tl.to(heroTitle.value, { opacity: 1, y: 0, duration: 0.15, ease: 'power4.out' }, '-=0.05')
-    .to(heroTitle.value, { skewX: -3, scaleX: 1.02, duration: 0.04 })
-    .to(heroTitle.value, { skewX: 2, scaleX: 0.99, duration: 0.04 })
-    .to(heroTitle.value, { skewX: -1, scaleX: 1.005, duration: 0.04 })
-    .to(heroTitle.value, { skewX: 0, scaleX: 1, duration: 0.08 })
+  // t=0  heroPrompt 瞬间出现（无滑入，像终端光标跳出）
+  tl.add(() => show(heroPrompt.value), 0)
+  tl.from(heroPrompt.value, { opacity: 0, duration: 0.1 }, 0)
 
-  // 3. 三行代码包裹层出现
-  tl.to(heroLine0Wrap.value, { opacity: 1, y: 0, duration: 0.2 }, '-=0.05')
-    .to(heroLine1Wrap.value, { opacity: 1, y: 0, duration: 0.2 }, '-=0.1')
-    .to(heroLine2Wrap.value, { opacity: 1, y: 0, duration: 0.2 }, '-=0.1')
-    .to(heroStats.value, { opacity: 1, y: 0, duration: 0.3 }, '+=0.2')
+  // 扫描线扫过 hero 区一次
+  const heroSection = heroPrompt.value?.closest('section')
+  if (heroSection) {
+    const scanLine = document.createElement('div')
+    scanLine.style.cssText = 'position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(to right,transparent,rgba(0,212,255,0.8),transparent);pointer-events:none;z-index:10;opacity:0'
+    heroSection.style.position = 'relative'
+    heroSection.appendChild(scanLine)
+    tl.to(scanLine, { opacity: 1, duration: 0.05 }, 0.05)
+    tl.to(scanLine, { top: '100%', duration: 0.4, ease: 'none' }, 0.05)
+    tl.to(scanLine, { opacity: 0, duration: 0.1 }, 0.45)
+  }
+
+  // t=0.3  heroTitle: 全亮 → glitch 抖动 3 次 → 稳定
+  tl.add(() => show(heroTitle.value), 0.3)
+  tl.from(heroTitle.value, { opacity: 0, duration: 0.05 }, 0.3)
+  tl.to(heroTitle.value, { skewX: -4, scaleX: 1.03, opacity: 0.7, duration: 0.05 }, 0.35)
+  tl.to(heroTitle.value, { skewX: 3, scaleX: 0.98, opacity: 1, duration: 0.05 }, 0.40)
+  tl.to(heroTitle.value, { skewX: -2, scaleX: 1.01, duration: 0.04 }, 0.45)
+  tl.to(heroTitle.value, { skewX: 1, scaleX: 0.995, duration: 0.04 }, 0.49)
+  tl.to(heroTitle.value, { skewX: 0, scaleX: 1, duration: 0.06 }, 0.53)
+
+  // t=0.6  三行代码像终端打字一样逐行出现
+  const lineWraps = [heroLine0Wrap.value, heroLine1Wrap.value, heroLine2Wrap.value]
+  lineWraps.forEach((wrap, i) => {
+    const t = 0.6 + i * 0.2
+    tl.add(() => show(wrap), t)
+    tl.from(wrap, { opacity: 0, x: -4, duration: 0.15 }, t)
+  })
 
   // TextPlugin 打字机
   const typeLines = [
-    { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', start: 0.3 },
-    { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]', start: 0.7 },
-    { el: heroLine2, text: '在线 ●', start: 1.0 },
+    { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', delay: 0.65 },
+    { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]',      delay: 0.85 },
+    { el: heroLine2, text: '在线 ●',                                     delay: 1.05 },
   ]
-  typeLines.forEach(({ el, text, start }) => {
+  typeLines.forEach(({ el, text, delay }) => {
     if (!el.value) return
     gsap.to(el.value, {
-      duration: text.length * 0.025,
+      duration: text.length * 0.022,
       text: { value: text, delimiter: '' },
       ease: 'none',
-      delay: start,
+      delay,
     })
   })
 
-  // 文章列表 ScrollTrigger stagger
+  // t=1.8  heroStats 从右侧滑入
+  tl.add(() => show(heroStats.value), 1.8)
+  tl.from(heroStats.value, { opacity: 0, x: 24, duration: 0.4, ease: 'power3.out' }, 1.8)
+
+  // ── 文章列表 ScrollTrigger stagger ────────────────────────────────
   const gsapBundle2 = await useGsap()
   if (postListRef.value && gsapBundle2) {
     const { gsap: g2, ScrollTrigger } = gsapBundle2
