@@ -11,29 +11,29 @@
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="flex items-start gap-3 sm:gap-4 mb-8">
+        <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
-            <p class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2">
+            <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" style="opacity:0;transform:translateY(12px)">
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)] hero-online-dot"></span>
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
-            <h1 class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6">
+            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6" style="opacity:0;transform:translateY(16px)">
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
             <div class="font-mono text-sm space-y-2.5 max-w-xl">
-              <p class="animate-fade-up" style="animation-delay:0.1s;color:#c8c8e0">
+              <p ref="heroLine0Wrap" style="opacity:0;transform:translateY(10px);color:#c8c8e0">
                 <span style="color:#b400ff">interest</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine0" style="color:#00d4ff"></span>
               </p>
-              <p class="animate-fade-up" style="animation-delay:0.2s;color:#c8c8e0">
+              <p ref="heroLine1Wrap" style="opacity:0;transform:translateY(10px);color:#c8c8e0">
                 <span style="color:#b400ff">stack</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine1" style="color:#39ff14"></span>
               </p>
-              <p class="animate-fade-up" style="animation-delay:0.3s;color:#c8c8e0">
+              <p ref="heroLine2Wrap" style="opacity:0;transform:translateY(10px);color:#c8c8e0">
                 <span style="color:#b400ff">status</span>
                 <span style="color:#6666aa"> = </span>
                 <span ref="heroLine2" style="color:#39ff14"></span>
@@ -43,7 +43,7 @@
         </div>
 
         <!-- Stats bar -->
-        <div class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)] animate-fade-up" style="animation-delay:0.4s">
+        <div ref="heroStats" class="flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs text-[var(--color-text-muted)]" style="opacity:0;transform:translateY(10px)">
           <div class="flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▸</span>
             <span style="color:#e8e8f0;font-weight:bold">{{ allPosts.length }}</span>
@@ -77,13 +77,13 @@
         <div class="relative pl-4 sm:pl-5">
           <!-- vertical line -->
           <div class="absolute left-1.5 top-2 bottom-2 w-px" style="background:linear-gradient(to bottom,rgba(0,212,255,0.3),rgba(180,76,255,0.2),transparent)"></div>
-          <div class="space-y-0">
+          <div class="space-y-0" ref="postListRef">
             <NuxtLink
               v-for="(post, i) in recentPosts"
               :key="post.slug"
               :href="`/blog/${post.slug}`"
-              class="post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 animate-fade-up relative"
-              :style="`animation-delay: ${i * 0.05}s`"
+              class="post-item post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 relative"
+              style="opacity:0;transform:translateY(20px)"
             >
               <!-- timeline dot -->
               <div
@@ -157,9 +157,9 @@
 
     <AppFooter maxW="max-w-6xl" backHref="">
       <span class="font-mono text-xs">
-        构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 3</span> ·
+        构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 4</span> ·
         <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·
-        <span class="text-[var(--color-neon-green)]">Vue 3</span>
+        <span class="text-[var(--color-neon-green)]">GSAP 3</span>
         · © {{ startYear }}–{{ currentYear }} {{ authorName }}
       </span>
     </AppFooter>
@@ -201,9 +201,17 @@ useHead({
   }]
 })
 
+const heroBlock = ref<HTMLElement | null>(null)
+const heroPrompt = ref<HTMLElement | null>(null)
+const heroTitle = ref<HTMLElement | null>(null)
+const heroLine0Wrap = ref<HTMLElement | null>(null)
+const heroLine1Wrap = ref<HTMLElement | null>(null)
+const heroLine2Wrap = ref<HTMLElement | null>(null)
 const heroLine0 = ref<HTMLElement | null>(null)
 const heroLine1 = ref<HTMLElement | null>(null)
 const heroLine2 = ref<HTMLElement | null>(null)
+const heroStats = ref<HTMLElement | null>(null)
+const postListRef = ref<HTMLElement | null>(null)
 
 const { data: allPostsRaw } = await useFetch('/api/posts', { default: () => [] as any[] })
 const allPosts = computed(() => allPostsRaw.value || [])
@@ -220,23 +228,52 @@ const topTags = computed(() =>
 const { getTagColor } = useTagColor()
 const { formatDate } = useFormatDate()
 
-onMounted(() => {
-  const lines = [
-    { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', delay: 200 },
-    { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]', delay: 600 },
-    { el: heroLine2, text: '在线 ●', delay: 1000 },
+onMounted(async () => {
+  const { gsap } = await useGsap()
+  if (!gsap) return
+
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
+
+  // 入场序列
+  tl.to(heroPrompt.value, { opacity: 1, y: 0, duration: 0.4 })
+    .to(heroTitle.value, { opacity: 1, y: 0, duration: 0.5 }, '-=0.1')
+    .to(heroLine0Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.1')
+    .to(heroLine1Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.2')
+    .to(heroLine2Wrap.value, { opacity: 1, y: 0, duration: 0.35 }, '-=0.2')
+    .to(heroStats.value, { opacity: 1, y: 0, duration: 0.4 }, '-=0.1')
+
+  // TextPlugin 打字机
+  const typeLines = [
+    { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', start: 0.3 },
+    { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]', start: 0.7 },
+    { el: heroLine2, text: '在线 ●', start: 1.1 },
   ]
-  lines.forEach(({ el, text, delay }) => {
-    const node = el.value
-    if (!node) return
-    node.textContent = ''
-    let i = 0
-    setTimeout(() => {
-      const timer = setInterval(() => {
-        node.textContent += text[i++]
-        if (i >= text.length) clearInterval(timer)
-      }, 18)
-    }, delay)
+  typeLines.forEach(({ el, text, start }) => {
+    if (!el.value) return
+    gsap.to(el.value, {
+      duration: text.length * 0.028,
+      text: { value: text, delimiter: '' },
+      ease: 'none',
+      delay: start,
+    })
   })
+
+  // 文章列表 ScrollTrigger stagger
+  const { ScrollTrigger } = await useGsap()
+  if (postListRef.value && ScrollTrigger) {
+    const items = postListRef.value.querySelectorAll<HTMLElement>('.post-item')
+    gsap.to(items, {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      ease: 'power2.out',
+      stagger: 0.08,
+      scrollTrigger: {
+        trigger: postListRef.value,
+        start: 'top 88%',
+        once: true,
+      },
+    })
+  }
 })
 </script>

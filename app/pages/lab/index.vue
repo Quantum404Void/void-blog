@@ -33,12 +33,13 @@
           <span style="color:rgba(180,0,255,0.8)">▶</span> 游戏
           <span class="flex-1 h-px bg-gradient-to-r from-[rgba(180,0,255,0.3)] to-transparent"></span>
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" ref="gamesGrid">
           <a
             v-for="game in filteredGames"
             :key="game.href"
             :href="game.href"
-            class="group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
+            class="lab-card group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
+            style="opacity:0;transform:translateY(20px)"
             @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = game.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + game.color + '25' }"
             @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
           >
@@ -58,13 +59,13 @@
           <span class="text-[var(--color-neon-cyan)]">▶</span> 在线工具
           <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.3)] to-transparent"></span>
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" ref="toolsGrid">
           <a
             v-for="tool in filteredTools"
             :key="tool.href"
             :href="tool.href"
-            class="group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px] border-l-2"
-            :style="`border-left-color:${tool.color}44`"
+            class="lab-card group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px] border-l-2"
+            :style="`border-left-color:${tool.color}44;opacity:0;transform:translateY(20px)`"
             @mouseover="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color + '55'; el.style.borderLeftColor = tool.color + 'cc'; el.style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
             @mouseout="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = ''; el.style.borderLeftColor = tool.color + '44'; el.style.boxShadow = '' }"
           >
@@ -91,15 +92,49 @@
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lab | ${siteName}` })
 
+const gamesGrid = ref<HTMLElement | null>(null)
+const toolsGrid = ref<HTMLElement | null>(null)
+
 // 将滚动位置写入 sessionStorage，以便返回时恢复
 const SCROLL_KEY = 'lab-index-scroll'
-onMounted(() => {
+onMounted(async () => {
   const saved = sessionStorage.getItem(SCROLL_KEY)
   if (saved) {
     const y = parseInt(saved)
     nextTick(() => window.scrollTo({ top: y, behavior: 'instant' }))
     sessionStorage.removeItem(SCROLL_KEY)
   }
+
+  // Anime.js 卡片入场 stagger
+  const anime = await useAnime()
+  if (!anime) return
+
+  const animateGrid = (grid: HTMLElement | null, delay = 0) => {
+    if (!grid) return
+    anime({
+      targets: grid.querySelectorAll('.lab-card'),
+      opacity: [0, 1],
+      translateY: [20, 0],
+      duration: 480,
+      easing: 'easeOutQuart',
+      delay: anime.stagger(50, { start: delay }),
+    })
+  }
+
+  // IntersectionObserver 触发，避免属屏外元素提前播放
+  const observe = (grid: HTMLElement | null, delay: number) => {
+    if (!grid) return
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        animateGrid(grid, delay)
+        io.disconnect()
+      }
+    }, { threshold: 0.05 })
+    io.observe(grid)
+  }
+
+  observe(gamesGrid.value, 0)
+  observe(toolsGrid.value, 0)
 })
 onBeforeUnmount(() => {
   sessionStorage.setItem(SCROLL_KEY, String(window.scrollY))

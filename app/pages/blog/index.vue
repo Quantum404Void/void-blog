@@ -47,12 +47,13 @@
           <span class="font-mono text-[10px] text-[var(--color-text-muted)]">{{ byYear[year].length }} 篇</span>
         </div>
 
-        <div class="space-y-1 pl-1">
+        <div class="space-y-1 pl-1 year-section-list">
           <NuxtLink
             v-for="post in byYear[year]"
             :key="post.slug"
             :href="`/blog/${post.slug}`"
-            class="post-card-glow group relative flex flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:gap-4 px-3 py-3 rounded-lg border border-transparent hover:border-[rgba(0,212,255,0.2)] hover:bg-[var(--color-void-card)] transition-all duration-150 overflow-hidden"
+            class="post-scroll-item post-card-glow group relative flex flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:gap-4 px-3 py-3 rounded-lg border border-transparent hover:border-[rgba(0,212,255,0.2)] hover:bg-[var(--color-void-card)] transition-all duration-150 overflow-hidden"
+            style="opacity:0;transform:translateY(16px)"
           >
             <span class="absolute left-0 top-0 bottom-0 w-0 group-hover:w-[3px] rounded-l-lg transition-all duration-200"
                   :style="`background: var(--color-${getTagColor(post.tags[0] ?? 'x')})`"></span>
@@ -132,4 +133,27 @@ const years = computed(() => Object.keys(byYear.value).sort((a, b) => Number(b) 
 
 // auto-animate list 容器
 const [listParent] = useAutoAnimate({ duration: 200 })
+
+onMounted(async () => {
+  const { gsap, ScrollTrigger } = await useGsap()
+  if (!gsap || !ScrollTrigger) return
+
+  // 每个年份块：滚动进入视口时依次揭示
+  const sections = document.querySelectorAll<HTMLElement>('.year-section-list')
+  sections.forEach((section) => {
+    const items = section.querySelectorAll<HTMLElement>('.post-scroll-item')
+    gsap.to(items, {
+      opacity: 1,
+      y: 0,
+      duration: 0.45,
+      ease: 'power2.out',
+      stagger: 0.06,
+      scrollTrigger: {
+        trigger: section,
+        start: 'top 90%',
+        once: true,
+      },
+    })
+  })
+})
   </script>

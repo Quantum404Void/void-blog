@@ -60,83 +60,97 @@
 
 ```
 void-blog/
-├── pages/
-│   ├── index.vue              # 首页：打字机 Hero + 文章流 + 侧边栏
-│   ├── blog/
-│   │   ├── index.vue          # 文章列表（按年归档 + 标签过滤）
-│   │   └── [slug].vue         # 文章详情（TOC / 评论 / 上下篇 / 浏览量）
-│   ├── tags/
-│   │   ├── index.vue          # 标签热力云
-│   │   └── [tag].vue          # 标签分类列表
-│   ├── search.vue             # 全文搜索（实时 debounce）
-│   ├── stats.vue              # 站点统计（GitHub 热力图风格 + Chart.js）
-│   ├── about.vue              # 关于页（终端风格）
-│   ├── lab/
-│   │   ├── index.vue          # Lab 入口（游戏 + 工具目录，动态计数）
-│   │   ├── games/             # 37 个技术宅游戏
-│   │   │   ├── ai-flow/       # ★ AI Flow 可执行流程图编辑器
-│   │   │   ├── chip8.vue      # CHIP-8 模拟器
-│   │   │   ├── x86-playground.vue  # x86 汇编沙盒
-│   │   │   ├── silk.vue       # Weavesilk 风格生成艺术
-│   │   │   └── ...            # snake / tetris / 2048 / flappy 等
-│   │   └── tools/             # 27 个在线工具
-│   │       ├── json.vue       # JSON 格式化
-│   │       ├── regex.vue      # 正则测试
-│   │       ├── hash.vue       # 哈希计算
-│   │       └── ...
-│   └── admin/                 # 管理后台（JWT 保护）
+├── app/                           # Nuxt 4 应用目录
+│   ├── pages/
+│   │   ├── index.vue              # 首页：GSAP Hero 入场 + 文章流 + 侧边栏
+│   │   ├── blog/
+│   │   │   ├── index.vue          # 文章列表（按年归档 + 标签过滤 + ScrollTrigger stagger）
+│   │   │   └── [slug].vue         # 文章详情（TOC / 评论 / 上下篇 / 浏览量）
+│   │   ├── tags/
+│   │   │   ├── index.vue          # 标签热力云
+│   │   │   └── [tag].vue          # 标签分类列表
+│   │   ├── search.vue             # 全文搜索（实时 debounce + D1 FTS5）
+│   │   ├── stats.vue              # 站点统计（GitHub 热力图风格 + Chart.js）
+│   │   ├── about.vue              # 关于页（终端风格）
+│   │   ├── lab/
+│   │   │   ├── index.vue          # Lab 入口（游戏 + 工具目录，Anime.js stagger）
+│   │   │   ├── games/             # 37 个技术宅游戏
+│   │   │   │   ├── ai-flow/       # ★ AI Flow 可执行流程图编辑器
+│   │   │   │   ├── chip8.vue      # CHIP-8 模拟器
+│   │   │   │   ├── x86-playground.vue  # x86 汇编沙盒
+│   │   │   │   ├── silk.vue       # Weavesilk 风格生成艺术
+│   │   │   │   └── ...            # snake / tetris / 2048 / flappy 等
+│   │   │   └── tools/             # 27 个在线工具
+│   │   │       ├── json.vue       # JSON 格式化
+│   │   │       ├── regex.vue      # 正则测试器
+│   │   │       ├── qrcode.vue     # QR 码生成器（纯前端手写 QR 算法）
+│   │   │       └── ...            # hash / url / diff / ascii 等
+│   │   └── admin/                 # 管理后台（JWT 保护）
+│   ├── components/
+│   │   ├── AiFlow/            # AI Flow 子组件
+│   │   │   ├── Toolbar.vue    # 工具栏（Snap-to-Grid / Run / Undo 等）
+│   │   │   ├── NodePalette.vue # 左侧节点面板 + Presets
+│   │   │   ├── LogPanel.vue   # 右侧运行日志 + JSON/Mermaid 导出
+│   │   │   ├── QuickAdd.vue   # Tab 快速搜索添加节点
+│   │   │   └── Minimap.vue    # 右下角缩略图
+│   │   ├── AppNav.vue         # 顶部导航（路径 + 面包屑 + 移动端菜单）
+│   │   ├── AppFooter.vue      # 统一页脚
+│   │   ├── PostCard.vue       # 文章卡片
+│   │   ├── TableOfContents.vue # 文章目录（IntersectionObserver 激活）
+│   │   ├── GiscusComments.vue # Giscus 评论
+│   │   ├── ReadingProgress.vue # 阅读进度条（transform: scaleX，GPU 加速）
+│   │   ├── GlobalActions.vue  # 回顶按钮 + 键盘彩蛋（Konami / DOOM / sudo）
+│   │   ├── CodeMirrorEditor.vue # CM6 代码编辑器（lang-cpp + lang-sql）
+│   │   └── Chart.vue          # Chart.js 封装
+│   ├── composables/
+│   │   ├── useGsap.ts         # SSR 安全的 GSAP 懒加载（TextPlugin + ScrollTrigger）
+│   │   ├── useAnime.ts        # SSR 安全的 Anime.js 懒加载
+│   │   ├── useSiteConfig.ts   # 站点配置（runtimeConfig 统一读取）
+│   │   ├── useMarkdown.client.ts # markdown-it 单例（Shiki / callout / 懒加载图）
+│   │   ├── useFormatDate.ts   # 日期格式化
+│   │   ├── useTagColor.ts     # 标签颜色哈希（neon 四色）
+│   │   ├── useReadingTime.ts  # CJK 感知阅读时长 + 字数统计
+│   │   ├── useCodeCopy.ts     # 代码块复制按钮
+│   │   ├── useCanonical.ts    # Canonical URL 注入
+│   │   └── useAiFlow.ts       # AI Flow 核心状态 composable
+│   ├── layouts/
+│   │   └── default.vue        # 全局布局（光标成价 + 粒子特效 + 键盘快捷键）
+│   ├── plugins/
+│   │   └── shiki.client.ts    # Shiki 客户端初始化
+│   ├── utils/
+│   │   ├── ai-flow.ts         # NODE_SPECS（36 节点）+ helper
+│   │   ├── ai-flow-presets.ts # 5 个内置 Preset 工厂
+│   │   └── ai-flow-runner.ts  # ★ 纯函数拓扑执行器（零副作用）
+│   ├── types/
+│   │   ├── post.ts            # PostSummary / Post
+│   │   ├── ai-flow.ts         # AI Flow 全量类型定义
+│   │   └── cloudflare.d.ts    # D1 全局声明
+│   └── assets/
+│       └── css/main.css       # 全局样式（Tailwind v4 + prose + 终端特效）
 ├── server/
 │   ├── api/
 │   │   ├── posts/             # 文章 CRUD（D1 binding）
+│   │   ├── auth/              # 登录 / 验证接口
 │   │   ├── tags/              # 标签统计
-│   │   ├── search.get.ts      # 全文搜索（D1 FTS）
+│   │   ├── search.get.ts      # 全文搜索（D1 FTS5）
 │   │   └── stats/             # 浏览量 / 点赞
 │   ├── routes/
+│   │   ├── og/[slug].ts       # ★ 动态 OG 图（SVG 边缘生成）
 │   │   ├── rss.xml.ts         # RSS Feed（ISR 1h）
-│   │   ├── sitemap.xml.ts     # Sitemap（ISR 1h）
-│   │   └── og/[slug].ts       # ★ 动态 OG 图（SVG，边缘生成）
-│   ├── middleware/             # JWT 鉴权
+│   │   └── sitemap.xml.ts     # Sitemap（ISR 1h）
+│   ├── middleware/
+│   │   ├── admin-auth.ts      # JWT 鉴权
+│   │   └── curl-about.ts      # curl 当 about 用
 │   └── utils/
 │       ├── d1.ts              # D1 binding helper
-│       └── auth.ts            # JWT 工具
-├── components/
-│   ├── AiFlow/                # AI Flow 编辑器子组件
-│   │   ├── Toolbar.vue        # 工具栏（Snap-to-Grid / Run / Undo 等）
-│   │   ├── NodePalette.vue    # 左侧节点面板 + Presets
-│   │   ├── LogPanel.vue       # 右侧运行日志 + JSON/Mermaid 导出
-│   │   ├── QuickAdd.vue       # Tab 快速搜索添加节点
-│   │   └── Minimap.vue        # 右下角缩略图
-│   ├── AppNav.vue             # 顶部导航（路径显示 + 面包屑 + 移动端菜单）
-│   ├── AppFooter.vue          # 统一页脚
-│   ├── PostCard.vue           # 文章卡片（hover 箭头动画）
-│   ├── TableOfContents.vue    # 文章目录（IntersectionObserver 激活）
-│   ├── GiscusComments.vue     # Giscus 评论
-│   ├── ReadingProgress.vue    # 阅读进度条（transform: scaleX，GPU 加速）
-│   ├── GlobalActions.vue      # 回顶按钮 + 键盘彩蛋（Konami / DOOM / sudo）
-│   └── Chart.vue              # Chart.js 封装
-├── composables/
-│   ├── useSiteConfig.ts       # 站点配置（runtimeConfig 统一读取）
-│   ├── useMarkdown.ts         # markdown-it 单例（hljs / callout / 懒加载图）
-│   ├── useFormatDate.ts       # 日期格式化
-│   ├── useTagColor.ts         # 标签颜色哈希（neon 四色）
-│   ├── useReadingTime.ts      # CJK 感知阅读时长 + 字数统计
-│   ├── useCodeCopy.ts         # 代码块复制按钮（copy → copied! 动画）
-│   ├── useCanonical.ts        # Canonical URL 注入
-│   └── useAiFlow.ts           # AI Flow 核心状态 composable
-├── utils/
-│   ├── ai-flow.ts             # NODE_SPECS（36 节点）+ helper
-│   ├── ai-flow-presets.ts     # 5 个内置 Preset 工厂
-│   └── ai-flow-runner.ts      # ★ 纯函数拓扑执行器（零副作用）
-├── types/
-│   ├── post.ts                # PostSummary / Post
-│   ├── ai-flow.ts             # AI Flow 全量类型定义
-│   └── cloudflare.d.ts        # D1 全局声明
-├── assets/css/main.css        # 全局样式（Tailwind v4 + prose + 终端特效）
-├── migrations/                # D1 Schema 迁移
+│       ├── auth.ts            # JWT 工具
+│       └── fts.ts             # FTS5 查询构建器
+├── migrations/                # D1 Schema 迁移（0001 初始化 / 0002 FTS + 统计）
 ├── scripts/                   # Obsidian 同步脚本
 ├── nuxt.config.ts             # PWA / runtimeConfig / routeRules / nitro
 └── wrangler.toml              # CF D1 绑定配置
 ```
+
 
 ## AI Flow 编辑器
 
