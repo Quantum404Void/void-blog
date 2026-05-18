@@ -10,6 +10,14 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   // 显式声明所有组件子目录，prefix:'' 保持原始组件名（AppNav 不变为 UiAppNav）
+  imports: {
+    dirs: [
+      'composables',
+      'composables/animation',
+      'composables/blog',
+    ],
+  },
+
   components: {
     dirs: [
       { path: '~/components/ui',           prefix: '' },
