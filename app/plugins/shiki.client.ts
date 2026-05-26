@@ -1,0 +1,150 @@
+// plugins/shiki.client.ts
+// Shiki 只在客户端初始化，完全不进入 SSR/Worker bundle
+import {
+  transformerNotationDiff,
+  transformerNotationHighlight,
+  transformerNotationFocus,
+  transformerNotationWordHighlight,
+  transformerMetaHighlight,
+} from '@shikijs/transformers'
+import MarkdownIt from 'markdown-it'
+// @ts-expect-error
+import markdownItContainer from 'markdown-it-container'
+
+type MdToken = { tag: string; nesting: number; info: string; attrSet: (k: string, v: string) => void; children?: Array<{ content: string }> }
+type MdOptions = Record<string, unknown>
+type MdRenderer = { renderToken: (tokens: MdToken[], idx: number, options: MdOptions) => string }
+type RenderRule = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => string
+
+function toSlug(text: string) {
+  return text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '')
+}
+
+let _mdPromise: Promise<MarkdownIt> | null = null
+
+function buildMd(): Promise<MarkdownIt> {
+  if (_mdPromise) return _mdPromise
+
+  _mdPromise = (async () => {
+  const { createHighlighterCore } = await import('shiki/core')
+  const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript')
+  const { fromHighlighter } = await import('@shikijs/markdown-it')
+
+  // 所有语言一次性加载，避免 fromHighlighter 遇到未知语言时抛错导致整篇不渲染
+  const hl = await createHighlighterCore({
+    themes: [import('shiki/themes/github-dark-dimmed.mjs')],
+    langs: [
+      import('shiki/langs/c.mjs'),
+      import('shiki/langs/cpp.mjs'),
+      import('shiki/langs/python.mjs'),
+      import('shiki/langs/typescript.mjs'),
+      import('shiki/langs/javascript.mjs'),
+      import('shiki/langs/bash.mjs'),
+      import('shiki/langs/shellscript.mjs'),
+      import('shiki/langs/json.mjs'),
+      import('shiki/langs/yaml.mjs'),
+      import('shiki/langs/toml.mjs'),
+      import('shiki/langs/sql.mjs'),
+      import('shiki/langs/rust.mjs'),
+      import('shiki/langs/go.mjs'),
+      import('shiki/langs/java.mjs'),
+      import('shiki/langs/markdown.mjs'),
+      import('shiki/langs/html.mjs'),
+      import('shiki/langs/css.mjs'),
+      import('shiki/langs/vue.mjs'),
+      import('shiki/langs/diff.mjs'),
+      import('shiki/langs/ini.mjs'),
+      import('shiki/langs/powershell.mjs'),
+      import('shiki/langs/dockerfile.mjs'),
+      import('shiki/langs/nginx.mjs'),
+      import('shiki/langs/xml.mjs'),
+      import('shiki/langs/csharp.mjs'),
+      import('shiki/langs/cmake.mjs'),
+      import('shiki/langs/astro.mjs'),
+      import('shiki/langs/http.mjs'),
+      import('shiki/langs/groovy.mjs'),
+      import('shiki/langs/bat.mjs'),   // cmd/bat
+      // cmake alias rc → fallback to plaintext (Shiki 无 rc 语言)
+    ],
+    engine: createJavaScriptRegexEngine(),
+  })
+
+  _md = new MarkdownIt({ html: true, linkify: true, typographer: true })
+
+  _md.use(fromHighlighter(hl as Parameters<typeof fromHighlighter>[0], {
+    theme: 'github-dark-dimmed',
+    defaultLanguage: 'text',
+    fallbackLanguage: 'text',   // 未知语言 fallback 到纯文本，不抛错
+    transformers: [
+      {
+        pre(node: { tagName?: string; properties?: Record<string, unknown> }) {
+          const ctx = this as unknown as { options?: { lang?: string } }
+          const lang = ctx.options?.lang ?? ''
+          if (lang && lang !== 'text' && lang !== 'plaintext') {
+            node.properties['data-lang'] = lang
+          }
+          const cls = node.properties['class'] || ''
+          node.properties['class'] = cls ? cls + ' has-line-numbers' : 'has-line-numbers'
+        }
+      },
+      transformerNotationDiff(),
+      transformerNotationHighlight(),
+      transformerNotationFocus(),
+      transformerNotationWordHighlight(),
+      transformerMetaHighlight(),
+    ],
+  }))
+
+  const _defHeading: RenderRule = _md.renderer.rules.heading_open ||
+    ((tokens: MdToken[], idx: number, options: MdOptions, _e: unknown, self: MdRenderer) => self.renderToken(tokens, idx, options))
+  _md.renderer.rules.heading_open = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => {
+    const tag = tokens[idx].tag
+    if (tag === 'h2' || tag === 'h3') {
+      const text = tokens[idx + 1]?.children?.map((x) => x.content).join('') ?? ''
+      tokens[idx].attrSet('id', toSlug(text))
+    }
+    return _defHeading(tokens, idx, options, env, self)
+  }
+
+  for (const { name, icon, label } of [
+    { name: 'tip', icon: '💡', label: '提示' },
+    { name: 'warning', icon: '⚠️', label: '注意' },
+    { name: 'danger', icon: '🚨', label: '危险' },
+    { name: 'info', icon: 'ℹ️', label: '说明' },
+  ]) {
+    _md.use(markdownItContainer, name, {
+      render(tokens: MdToken[], idx: number) {
+        if (tokens[idx].nesting === 1) {
+          const title = tokens[idx].info.trim().slice(name.length).trim() || label
+          return `<div class="callout callout-${name}"><p class="callout-title">${icon} ${title}</p>\n`
+        }
+        return '</div>\n'
+      }
+    })
+  }
+
+  const _defImg: RenderRule = _md.renderer.rules.image ||
+    ((tokens: MdToken[], idx: number, options: MdOptions, _e: unknown, self: MdRenderer) => self.renderToken(tokens, idx, options))
+  _md.renderer.rules.image = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => {
+    tokens[idx].attrSet('loading', 'lazy')
+    tokens[idx].attrSet('decoding', 'async')
+    return _defImg(tokens, idx, options, env, self)
+  }
+
+  return _md
+  })()  // end async IIFE
+  return _mdPromise
+}
+
+export default defineNuxtPlugin((nuxtApp) => {
+  // 插件加载时立刻开始预热（后台默默 import），用户还在浏览首页时 Shiki 已经准备好
+  nuxtApp.hook('app:created', () => {
+    buildMd().catch(() => {})  // 预热，忘记错误
+  })
+  return {
+    provide: {
+      buildMd,
+      toSlug,
+    },
+  }
+})

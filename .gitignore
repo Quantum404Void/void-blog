@@ -1,0 +1,10 @@
+dist/
+node_modules/
+.nuxt/
+.env
+.DS_Store
+.wrangler
+.env.production
+*.py
+/types/*.d.ts.bak
+screenshots/
