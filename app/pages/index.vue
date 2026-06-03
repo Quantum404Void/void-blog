@@ -200,15 +200,33 @@ onMounted(async () => {
   if (!bundle) return
   const { gsap, ScrollTrigger } = bundle
 
-  // Hero 简洁入场：prompt + title + lines stagger
+  // Hero 入场
   const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
   tl.from(heroPrompt.value, { opacity: 0, y: 8, duration: 0.3 }, 0)
   tl.from(heroTitle.value,  { opacity: 0, y: 12, duration: 0.4 }, 0.1)
   const lineWraps = [heroLine0Wrap.value, heroLine1Wrap.value, heroLine2Wrap.value]
   lineWraps.forEach((wrap, i) => {
-    tl.from(wrap, { opacity: 0, y: 6, duration: 0.3 }, 0.3 + i * 0.1)
+    tl.from(wrap, { opacity: 0, y: 6, duration: 0.25 }, 0.3 + i * 0.08)
   })
-  tl.from(heroStats.value, { opacity: 0, y: 8, duration: 0.3 }, 0.6)
+  tl.from(heroStats.value, { opacity: 0, y: 8, duration: 0.3 }, 0.55)
+
+  // 打字机动画（原生 JS，无需 TextPlugin）
+  const typeTargets = [
+    { el: heroLine0.value, text: '"C++ · 嵌入式 · AI Agent"', delay: 500 },
+    { el: heroLine1.value, text: '"Qt · Python · Nuxt · Electron"', delay: 800 },
+    { el: heroLine2.value, text: '"folding reality, one commit at a time"', delay: 1100 },
+  ]
+  typeTargets.forEach(({ el, text, delay }) => {
+    if (!el) return
+    el.textContent = ''
+    let i = 0
+    setTimeout(() => {
+      const timer = setInterval(() => {
+        el.textContent = text.slice(0, ++i)
+        if (i >= text.length) clearInterval(timer)
+      }, 28)
+    }, delay)
+  })
 
   // 文章列表 scroll reveal
   if (postListRef.value) {
