@@ -1,6 +1,6 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
+    <div class="w-full px-4 sm:px-6 xl:px-8 h-14 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
       <!-- Logo -->
       <NuxtLink href="/" class="flex items-center gap-1.5 shrink-0 group" aria-label="Home">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80 shrink-0">
