@@ -1,33 +1,33 @@
-<div align="center">
-<br />
-<br />
+# void.dev
 
-**void.dev**
+个人技术博客 — 不灸水，不追热点，只写真正踩过坑的东西
 
-不灸水，不追热点，只写真正踩过坑的东西
+[![Nuxt 4](https://img.shields.io/badge/Nuxt-4-00DC82?style=flat-square&logo=nuxt.js)](https://nuxt.com)
+[![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vue.js)](https://vuejs.org)
+[![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
+[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages+D1+AI-F38020?style=flat-square&logo=cloudflare)](https://pages.cloudflare.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
 
-<br />
+**[void.redx.space](https://void.redx.space)**
 
-[void.redx.space](https://void.redx.space)
+---
 
-<br />
-<br />
+## 技术栈
 
-<table>
-<tr><td align="center" width="560">
+| 层 | 技术 | 说明 |
+|---|---|---|
+| 框架 | Nuxt 4.4 + Vue 3 | `future.compatibilityVersion: 4`，`app/` 子目录结构 |
+| 样式 | Tailwind CSS v4 | CSS-native，`@theme` 自定义变量 |
+| 数据库 | Cloudflare D1 (SQLite) | FTS5 全文搜索，`post_stats` 访问/点赞统计 |
+| 部署 | Cloudflare Pages | Edge 渲染，CI/CD 自动部署 |
+| AI 助手 | CF Workers AI (DeepSeek R1) | 免费，无需 API key |
+| 代码高亮 | Shiki + markdown-it | 客户端懒加载 |
+| 动画 | GSAP 3 + Anime.js | 页面过渡 + Lab 卡片 |
+| PWA | @vite-pwa/nuxt | 离线缓存，可安装 |
 
-**Stack** — Nuxt 4 · Vue 3 · Tailwind v4 · Cloudflare Pages · D1 · Shiki · GSAP
+---
 
-</td></tr>
-</table>
-
-<br />
-
-</div>
-
-<div align="center"><table><tr><td width="560">
-
-## Get started
+## 快速开始
 
 ```bash
 git clone https://github.com/Quantum404Void/void-blog.git
@@ -36,21 +36,44 @@ npm install
 npm run dev
 ```
 
-First deploy — run D1 migrations:
+首次部署，执行 D1 migrations：
 
 ```bash
-npx wrangler d1 execute void-blog-posts --remote \
-  --file=migrations/0001_init.sql
-npx wrangler d1 execute void-blog-posts --remote \
-  --file=migrations/0002_fts_wordcount.sql
+npx wrangler d1 execute void-blog-posts --remote --file=migrations/0001_init.sql
+npx wrangler d1 execute void-blog-posts --remote --file=migrations/0002_fts_wordcount.sql
 ```
 
-CF Pages env vars: `NUXT_ADMIN_PASSWORD` · `NUXT_JWT_SECRET`
+CF Pages 环境变量：
 
-<br />
+| 变量 | 说明 |
+|---|---|
+| `NUXT_ADMIN_PASSWORD` | 后台管理员密码 |
+| `NUXT_JWT_SECRET` | JWT 签名密钥 |
 
 ---
 
-MIT © 2026 [Void](https://void.redx.space)
+## 目录结构
 
-</td></tr></table></div>
+```
+void-blog/
+├── app/
+│   ├── assets/css/main.css       # 全局样式（Tailwind v4 + 赛博朋克主题）
+│   ├── components/ui/            # AppNav, AppFooter
+│   ├── composables/animation/   # useGsap, useAnime
+│   ├── pages/
+│   │   ├── index.vue             # 首页
+│   │   ├── blog/[slug].vue       # 文章页（Shiki + TOC + TTS）
+│   │   ├── explore.vue           # 搜索 + 标签词云 + 统计
+│   │   ├── lab/                  # 20+ 游戏与工具
+│   │   └── admin/                # 后台（JWT 鉴权）
+│   └── plugins/shiki.client.ts  # Markdown 渲染
+├── server/api/                   # posts / search / stats / ai-chat
+├── migrations/                   # D1 SQL
+└── wrangler.toml                 # CF Pages 配置
+```
+
+---
+
+## License
+
+MIT © 2026 [Void](https://void.redx.space)

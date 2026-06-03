@@ -1,45 +1,40 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="w-full px-4 sm:px-6 xl:px-8 h-14 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
-      <!-- Logo -->
-      <NuxtLink href="/" class="flex items-center gap-1.5 shrink-0 group" aria-label="Home">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80 shrink-0">
-          <rect width="24" height="24" rx="5" fill="#0a0a0f"/>
-          <path d="M5 6 L12 18 L19 6" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-        <span class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">{{ siteName }}</span>
-      </NuxtLink>
+    <div class="w-full px-4 sm:px-6 xl:px-8 h-14 flex items-center justify-between gap-3 min-w-0">
 
-      <!-- 面包屑 -->
-      <div v-if="crumbs.length" class="hidden lg:flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-        <template v-for="(crumb, i) in crumbs" :key="i">
-          <span class="text-[var(--color-void-muted)] font-mono text-xs shrink-0">/</span>
+      <!-- 左侧：Logo + 面包屑 -->
+      <div class="flex items-center gap-2 min-w-0 overflow-hidden">
+        <NuxtLink href="/" class="flex items-center gap-1.5 shrink-0 group" aria-label="Home">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80 shrink-0">
+            <rect width="24" height="24" rx="5" fill="#0a0a0f"/>
+            <path d="M5 6 L12 18 L19 6" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <span class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">{{ siteName }}</span>
+        </NuxtLink>
+        <template v-if="crumbs.length" v-for="(crumb, i) in crumbs" :key="i">
+          <span class="text-[var(--color-void-muted)] font-mono text-xs shrink-0 hidden lg:inline">/</span>
           <NuxtLink v-if="crumb.href" :href="crumb.href"
-            class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors truncate max-w-[160px]">
+            class="hidden lg:inline font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors truncate max-w-[160px]">
             {{ crumb.label }}
           </NuxtLink>
-          <span v-else class="font-mono text-xs text-[var(--color-text-muted)] truncate max-w-[160px]">
+          <span v-else class="hidden lg:inline font-mono text-xs text-[var(--color-text-muted)] truncate max-w-[160px]">
             {{ crumb.label }}
           </span>
         </template>
       </div>
 
-      <!-- 右侧固定导航 -->
+      <!-- 右侧：导航链接 + 时钟 -->
       <div class="flex items-center gap-4 sm:gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
         <NuxtLink v-for="link in navLinks" :key="link.href" :href="link.href"
           class="hidden sm:block transition-colors relative pb-0.5"
-          :class="isActive(link.href)
-            ? link.activeClass
-            : 'hover:text-[var(--color-neon-cyan)]'"
+          :class="isActive(link.href) ? link.activeClass : 'hover:text-[var(--color-neon-cyan)]'"
           :style="link.style">
           {{ link.label }}
-          <!-- 活跃状态荧光下划线 -->
           <span v-if="isActive(link.href)"
             class="absolute bottom-[-3px] left-0 w-full h-[2px] rounded-full"
             :style="`background:${link.glowColor};box-shadow:0 0 6px ${link.glowColor}`">
           </span>
         </NuxtLink>
-        <span class="hidden lg:block font-mono text-[9px] text-[var(--color-void-muted)] select-none">v1.0</span>
         <ClientOnly>
           <span class="font-mono text-[10px] text-[var(--color-text-muted)] tabular-nums hidden sm:block select-none">{{ currentTime }}</span>
         </ClientOnly>
@@ -77,9 +72,6 @@
         >
           {{ link.label }}
         </NuxtLink>
-        <div class="pt-2 border-t border-[var(--color-void-border)] mt-1">
-          <span class="font-mono text-[9px] text-[var(--color-text-muted)] opacity-40">/ → search  ? → help</span>
-        </div>
       </div>
     </Transition>
   </nav>
