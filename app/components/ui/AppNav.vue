@@ -1,6 +1,6 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2 sm:gap-3 min-w-0">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
       <!-- Logo -->
       <NuxtLink href="/" class="flex items-center gap-1.5 shrink-0 group" aria-label="Home">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80 shrink-0">
@@ -11,7 +11,7 @@
       </NuxtLink>
 
       <!-- 面包屑 -->
-      <div v-if="crumbs.length" class="hidden lg:flex items-center gap-2 min-w-0 overflow-hidden">
+      <div v-if="crumbs.length" class="hidden lg:flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
         <template v-for="(crumb, i) in crumbs" :key="i">
           <span class="text-[var(--color-void-muted)] font-mono text-xs shrink-0">/</span>
           <NuxtLink v-if="crumb.href" :href="crumb.href"
@@ -25,7 +25,7 @@
       </div>
 
       <!-- 右侧固定导航 -->
-      <div class="ml-auto flex items-center gap-4 sm:gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
+      <div class="flex items-center gap-4 sm:gap-5 font-mono text-xs text-[var(--color-text-muted)] shrink-0">
         <NuxtLink v-for="link in navLinks" :key="link.href" :href="link.href"
           class="hidden sm:block transition-colors relative pb-0.5"
           :class="isActive(link.href)
