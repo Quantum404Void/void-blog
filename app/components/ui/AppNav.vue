@@ -106,16 +106,4 @@ function isActive(href: string) {
   return route.path === href || route.path.startsWith(href + '/')
 }
 
-const currentTime = ref('')
-let _clockTimer: ReturnType<typeof setInterval> | null = null
-onMounted(() => {
-  const update = () => {
-    currentTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
-  }
-  update()
-  _clockTimer = setInterval(update, 1000)
-})
-onUnmounted(() => {
-  if (_clockTimer) clearInterval(_clockTimer)
-})
 </script>

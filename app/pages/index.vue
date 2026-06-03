@@ -27,17 +27,17 @@
               <p ref="heroLine0Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">interest</span>
                 <span style="color:#6666aa"> = </span>
-                <span ref="heroLine0" style="color:#00d4ff">"C++ · 嵌入式 · AI Agent"</span>
+                <span ref="heroLine0" style="color:#00d4ff">["C++", "Python", "AI Agent", "桌面应用"]</span>
               </p>
               <p ref="heroLine1Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">stack</span>
                 <span style="color:#6666aa"> = </span>
-                <span ref="heroLine1" style="color:#39ff14">"Qt · Python · Nuxt · Electron"</span>
+                <span ref="heroLine1" style="color:#39ff14">["C++", "TypeScript", "Vue", "Nuxt"]</span>
               </p>
               <p ref="heroLine2Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">status</span>
                 <span style="color:#6666aa"> = </span>
-                <span ref="heroLine2" style="color:#39ff14">"folding reality, one commit at a time"</span>
+                <span ref="heroLine2" style="color:#39ff14">在线 ●</span>
               </p>
             </div>
           </div>
@@ -188,10 +188,6 @@ const recentPosts = computed(() => allPosts.value.slice(0, 5))
 const startYear = computed(() => allPosts.value.length ? allPosts.value[allPosts.value.length - 1].pub_date.slice(0, 4) : '2021')
 const currentYear = new Date().getFullYear()
 const allTags = computed(() => Object.keys(tagCounts.value || {}))
-const topTags = computed(() =>
-  Object.entries(tagCounts.value || {}).sort((a, b) => b[1] - a[1]).slice(0, 10)
-)
-
 const { getTagColor } = useTagColor()
 const { formatDate } = useFormatDate()
 
@@ -212,9 +208,9 @@ onMounted(async () => {
 
   // 打字机动画（原生 JS，无需 TextPlugin）
   const typeTargets = [
-    { el: heroLine0.value, text: '"C++ · 嵌入式 · AI Agent"', delay: 500 },
-    { el: heroLine1.value, text: '"Qt · Python · Nuxt · Electron"', delay: 800 },
-    { el: heroLine2.value, text: '"folding reality, one commit at a time"', delay: 1100 },
+    { el: heroLine0.value, text: '["C++", "Python", "AI Agent", "桌面应用"]', delay: 500 },
+    { el: heroLine1.value, text: '["C++", "TypeScript", "Vue", "Nuxt"]', delay: 800 },
+    { el: heroLine2.value, text: '在线 ●', delay: 1100 },
   ]
   typeTargets.forEach(({ el, text, delay }) => {
     if (!el) return
