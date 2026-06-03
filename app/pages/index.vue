@@ -11,7 +11,7 @@
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
 
-      <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="relative max-w-2xl mx-auto px-4 sm:px-6">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
@@ -65,97 +65,63 @@
     </section>
 
     <!-- Content grid -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 sm:gap-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <!-- Quick links row -->
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 mb-10 font-mono text-[11px] text-[var(--color-text-muted)]">
+        <a :href="authorGithub" target="_blank" rel="noopener"
+           class="hover:text-[var(--color-neon-cyan)] transition-colors">GitHub ↗</a>
+        <NuxtLink href="/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS ↗</NuxtLink>
+        <NuxtLink href="/explore" class="hover:text-[var(--color-neon-cyan)] transition-colors">Explore ↗</NuxtLink>
+        <NuxtLink href="/lab" class="hover:text-[var(--color-neon-cyan)] transition-colors">Lab ↗</NuxtLink>
+      </div>
+
       <!-- Posts list -->
       <section>
-        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-          <span class="text-[var(--color-neon-green)]">▶</span>
+        <h2 class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
           最近更新
           <span class="flex-1 h-px bg-gradient-to-r from-[var(--color-void-border)] to-transparent"></span>
         </h2>
 
-        <!-- Timeline -->
-        <div class="relative pl-4 sm:pl-5">
-          <!-- vertical line -->
-          <div class="absolute left-1.5 top-2 bottom-2 w-px" style="background:linear-gradient(to bottom,rgba(0,212,255,0.3),rgba(180,76,255,0.2),transparent)"></div>
-          <div class="space-y-0" ref="postListRef">
-            <NuxtLink
-              v-for="(post, i) in recentPosts"
-              :key="post.slug"
-              :href="`/blog/${post.slug}`"
-              class="post-item post-card-glow group block p-4 rounded-xl border border-transparent hover:border-[rgba(0,212,255,0.25)] hover:bg-[var(--color-void-card)] transition-all duration-200 relative"
-              >
-              <!-- timeline dot -->
-              <div
-                class="absolute -left-[1.15rem] top-5 w-2.5 h-2.5 rounded-full border-2 border-[var(--color-void)] shrink-0 z-10 transition-transform group-hover:scale-125"
-                :style="`background: var(--color-${getTagColor(post.tags[0] ?? '')}); box-shadow: 0 0 6px var(--color-${getTagColor(post.tags[0] ?? '')})`"
-              ></div>
-              <div class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4 min-w-0">
-                <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug line-clamp-2 min-w-0">
-                  {{ post.title }}
-                </h3>
-                <time :datetime="post.pub_date" class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">
-                  {{ formatDate(post.pub_date) }}
-                </time>
-              </div>
-              <p v-if="post.description" class="text-xs mt-1 line-clamp-2 sm:line-clamp-1 leading-relaxed" style="color:#9999bb">
-                {{ post.description }}
-              </p>
-              <div class="flex flex-wrap gap-1.5 mt-2">
-                <span v-for="tag in post.tags.slice(0, 3)" :key="tag"
-                      class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">
+        <div class="space-y-0" ref="postListRef">
+          <NuxtLink
+            v-for="post in recentPosts"
+            :key="post.slug"
+            :href="`/blog/${post.slug}`"
+            class="post-item group block border-b border-[var(--color-void-border)] py-7 last:border-0 transition-colors"
+          >
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <time :datetime="post.pub_date" class="font-mono text-[10px] font-bold tracking-wider text-[var(--color-text-muted)] uppercase shrink-0 pt-0.5">
+                {{ formatDate(post.pub_date) }}
+              </time>
+              <div class="flex flex-wrap gap-1.5 justify-end">
+                <span v-for="tag in post.tags.slice(0, 2)" :key="tag"
+                      class="font-mono text-[10px] px-2 py-0.5 rounded border border-[var(--color-void-border)] text-[var(--color-text-muted)] leading-none">
                   #{{ tag }}
                 </span>
               </div>
-            </NuxtLink>
-          </div>
+            </div>
+            <h3 class="font-mono text-base font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug mb-1.5 min-w-0">
+              {{ post.title }}
+            </h3>
+            <p v-if="post.description" class="text-sm leading-relaxed text-[var(--color-text-muted)] line-clamp-2 group-hover:text-[var(--color-text-secondary)] transition-colors">
+              {{ post.description }}
+            </p>
+            <div class="mt-2 font-mono text-sm text-[var(--color-neon-cyan)] opacity-0 group-hover:opacity-100 translate-x-0 group-hover:translate-x-1 transition-all duration-200">
+              阅读全文 →
+            </div>
+          </NuxtLink>
         </div>
 
-        <div class="mt-6">
+        <div class="mt-8">
           <NuxtLink href="/blog"
-             class="inline-flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.3)] px-4 py-2 rounded-lg">
+             class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">
             查看全部 {{ allPosts.length }} 篇文章 →
           </NuxtLink>
         </div>
       </section>
-
-      <!-- Sidebar -->
-      <aside class="space-y-8">
-        <div class="space-y-px">
-          <div class="font-mono text-xs text-[var(--color-text-muted)] py-1">
-            <span style="color:var(--color-neon-green)">{{ authorName }}</span>
-            <span class="ml-2 text-[10px]">C++ / Python / AI Agent / 桌面</span>
-          </div>
-          <div class="pt-3 mt-2 border-t border-[var(--color-void-border)] flex flex-wrap gap-x-4 gap-y-1.5">
-            <a :href="authorGithub" target="_blank" rel="noopener"
-               class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">GitHub ↗</a>
-            <NuxtLink href="/rss.xml" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">RSS ↗</NuxtLink>
-            <NuxtLink href="/explore?tab=search" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Search ↗</NuxtLink>
-            <NuxtLink href="/explore?tab=stats" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Stats ↗</NuxtLink>
-            <NuxtLink href="/lab" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Lab ↗</NuxtLink>
-          </div>
-        </div>
-
-        <!-- Hot tags -->
-        <div>
-          <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-3">
-            <span class="text-[var(--color-neon-purple)]">▶</span> 热门标签
-          </p>
-          <div class="flex flex-wrap gap-1.5">
-            <NuxtLink
-              v-for="[tag] in topTags"
-              :key="tag"
-              :href="`/tags/${tag}`"
-              class="font-mono text-[10px] px-2 py-0.5 rounded border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all"
-            >
-              #{{ tag }}
-            </NuxtLink>
-          </div>
-        </div>
-      </aside>
     </div>
 
-    <AppFooter maxW="max-w-6xl" backHref="">
+    <AppFooter maxW="max-w-2xl" backHref="">
       <span class="font-mono text-xs">
         构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 4</span> ·
         <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·

@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)] overflow-x-hidden">
     <AppNav :crumbs="[{ label: 'explore', href: '/explore' }]" />
 
-    <main class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-18" ref="mainRef">
+    <main class="w-full max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-18" ref="mainRef">
 
       <!-- ══════════════════════════════════════════
            §1  SEARCH

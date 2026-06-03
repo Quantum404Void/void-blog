@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab' }]" />
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-14">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-14">
       <div class="mb-12">
         <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-3">interactive_lab</p>
         <h1 class="font-mono text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-2" style="text-shadow:0 0 30px rgba(180,0,255,0.2)">
