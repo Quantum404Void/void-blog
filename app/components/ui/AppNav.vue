@@ -2,8 +2,13 @@
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
       <!-- Logo -->
-      <NuxtLink href="/" class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest shrink-0 cursor-blink">
-        {{ siteName }}
+      <NuxtLink href="/" class="flex items-center gap-2 shrink-0 group" aria-label="Home">
+        <!-- V 字简体 logo -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80">
+          <rect width="24" height="24" rx="5" fill="#0a0a0f"/>
+          <path d="M5 6 L12 18 L19 6" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest cursor-blink">{{ siteName }}</span>
       </NuxtLink>
 
       <!-- 面包屑 -->
@@ -99,14 +104,15 @@ const props = withDefaults(defineProps<{
 
 const navLinks = [
   { href: '/blog',   label: '~/blog',   activeClass: 'text-[var(--color-neon-cyan)]',   style: '', glowColor: 'var(--color-neon-cyan)' },
-  { href: '/tags',   label: '~/tags',   activeClass: 'text-[var(--color-neon-cyan)]',   style: '', glowColor: 'var(--color-neon-cyan)' },
-  { href: '/search', label: '~/search', activeClass: 'text-[var(--color-neon-cyan)]',   style: '', glowColor: 'var(--color-neon-cyan)' },
-  { href: '/about',  label: '~/about',  activeClass: 'text-[var(--color-neon-cyan)]',   style: '', glowColor: 'var(--color-neon-cyan)' },
-  { href: '/stats',  label: '~/stats',  activeClass: 'text-[var(--color-neon-cyan)]',   style: '', glowColor: 'var(--color-neon-cyan)' },
+  { href: '/explore', label: '~/explore', activeClass: 'text-[var(--color-neon-cyan)]', style: '', glowColor: 'var(--color-neon-cyan)' },
+  { href: '/about',   label: '~/about',   activeClass: 'text-[var(--color-neon-cyan)]', style: '', glowColor: 'var(--color-neon-cyan)' },
   { href: '/lab',    label: '~/lab',    activeClass: 'text-[var(--color-neon-purple)]', style: 'color:rgba(180,0,255,0.75)', glowColor: 'var(--color-neon-purple)' },
 ]
 
 function isActive(href: string) {
+  // /explore 也高亮原先独立的 /tags /search /stats 路径
+  if (href === '/explore' && ['/tags', '/search', '/stats'].some(p => route.path === p || route.path.startsWith(p + '/')))
+    return true
   return route.path === href || route.path.startsWith(href + '/')
 }
 
