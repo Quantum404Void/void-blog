@@ -27,17 +27,17 @@
               <p ref="heroLine0Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">interest</span>
                 <span style="color:#6666aa"> = </span>
-                <span ref="heroLine0" style="color:#00d4ff"></span>
+                <span ref="heroLine0" style="color:#00d4ff">"C++ · 嵌入式 · AI Agent"</span>
               </p>
               <p ref="heroLine1Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">stack</span>
                 <span style="color:#6666aa"> = </span>
-                <span ref="heroLine1" style="color:#39ff14"></span>
+                <span ref="heroLine1" style="color:#39ff14">"Qt · Python · Nuxt · Electron"</span>
               </p>
               <p ref="heroLine2Wrap" style="color:#c8c8e0">
                 <span style="color:#b400ff">status</span>
                 <span style="color:#6666aa"> = </span>
-                <span ref="heroLine2" style="color:#39ff14"></span>
+                <span ref="heroLine2" style="color:#39ff14">"folding reality, one commit at a time"</span>
               </p>
             </div>
           </div>

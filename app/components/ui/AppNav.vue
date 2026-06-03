@@ -36,9 +36,7 @@
             :style="`background:${link.glowColor};box-shadow:0 0 6px ${link.glowColor}`">
           </span>
         </NuxtLink>
-        <ClientOnly>
-          <span class="font-mono text-[10px] text-[var(--color-text-muted)] tabular-nums hidden sm:block select-none">{{ currentTime }}</span>
-        </ClientOnly>
+        <!-- 时钟已移除 -->
         <!-- 移动端 hamburger -->
         <button
           class="sm:hidden flex flex-col gap-1 -mr-1 p-2 rounded-md border border-transparent hover:border-[var(--color-void-border)] transition-colors"
