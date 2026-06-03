@@ -4,7 +4,7 @@
 
     <!-- Hero -->
     <section class="relative py-20 sm:py-24 border-b border-[var(--color-void-border)] overflow-hidden">
-      <div class="absolute inset-0 opacity-[0.06]"
+      <div class="absolute inset-0 opacity-[0.025]"
            style="background-image: linear-gradient(var(--color-neon-green) 1px, transparent 1px), linear-gradient(90deg, var(--color-neon-green) 1px, transparent 1px); background-size: 40px 40px;"></div>
       <div class="absolute top-0 right-0 rounded-full" style="width:600px;height:600px;background:radial-gradient(circle, rgba(180,76,255,0.12), transparent 70%);transform:translate(30%,-30%);pointer-events:none"></div>
       <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
@@ -13,14 +13,14 @@
 
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
-          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot neon-flicker" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
+          <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
             <p ref="heroPrompt" class="font-mono text-[10px] tracking-[0.2em] uppercase mb-3 flex items-center gap-2" >
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-neon-green)] hero-online-dot"></span>
               <span style="color:var(--color-neon-green)">root@void</span><span style="color:var(--color-text-muted)">:~$</span>
               <span style="color:var(--color-text-muted)">./init</span>
             </p>
-            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6 glitch-text" data-text="void.dev" >
+            <h1 ref="heroTitle" class="text-4xl sm:text-7xl font-bold font-mono leading-none mb-6" >
               <span class="text-[var(--color-text-primary)]">void</span><span class="gradient-text">.</span><span class="text-[var(--color-neon-cyan)]">dev</span><span class="cursor-blink text-[var(--color-neon-green)] text-4xl sm:text-5xl"></span>
             </h1>
             <div class="font-mono text-sm space-y-2.5 max-w-xl">

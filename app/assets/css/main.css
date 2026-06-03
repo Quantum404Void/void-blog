@@ -232,30 +232,20 @@
 
 
 /* ── 故障艺术 Glitch 效果 ── */
-@keyframes glitch-skew {
-  0%, 100% { transform: skewX(0deg); }
   20% { transform: skewX(-2deg); }
   40% { transform: skewX(1.5deg); }
   60% { transform: skewX(-1deg); }
   80% { transform: skewX(2deg); }
 }
-@keyframes glitch-clip1 {
-  0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-3px, 0); }
   25% { clip-path: inset(40% 0 50% 0); transform: translate(3px, 0); }
   50% { clip-path: inset(20% 0 70% 0); transform: translate(-2px, 0); }
   75% { clip-path: inset(70% 0 10% 0); transform: translate(2px, 0); }
 }
-@keyframes glitch-clip2 {
-  0%, 100% { clip-path: inset(80% 0 5% 0); transform: translate(3px, 0); }
   33% { clip-path: inset(10% 0 80% 0); transform: translate(-3px, 0); }
   66% { clip-path: inset(50% 0 30% 0); transform: translate(2px, 0); }
 }
-@keyframes scan-line {
-  0% { transform: translateY(-100%); }
   100% { transform: translateY(100vh); }
 }
-@keyframes neon-flicker {
-  0%, 100% { opacity: 1; }
   92% { opacity: 1; }
   93% { opacity: 0.4; }
   94% { opacity: 1; }
@@ -281,40 +271,8 @@
   box-shadow: 0 0 8px var(--color-neon-green);
 }
 
-/* Glitch 标题效果（hover 触发） */
-.glitch-text {
-  position: relative;
-}
-.glitch-text::before,
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-.glitch-text:hover {
-  animation: glitch-skew 0.4s ease infinite;
-}
-.glitch-text:hover::before {
-  color: var(--color-neon-cyan);
-  opacity: 0.7;
-  animation: glitch-clip1 0.4s ease infinite;
-}
-.glitch-text:hover::after {
-  color: var(--color-neon-pink);
-  opacity: 0.7;
-  animation: glitch-clip2 0.4s ease infinite;
-}
 
-/* Neon flicker（适用于在线状态点、标题发光等） */
-.neon-flicker {
-  animation: neon-flicker 4s ease-in-out infinite;
-}
 
-/* 扫描线进场（页面级，用 JS 控制一次播放） */
-.scan-enter {
-  animation: scan-line 0.8s ease-out forwards;
-}
 
 
 /* ═══════════════════════════════════════════════════════
@@ -496,69 +454,55 @@ body::after {
    _shiki.css — 代码高亮（Shiki）+ Callout 提示框
    ═══════════════════════════════════════════════════════ */
 
-/* Shiki 代码块样式 ── */
+/* Shiki 代码块样式 — ssvex 风格 */
 /* Shiki 输出: .shiki > code > span.line */
 .prose .shiki {
   position: relative;
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   border: 1px solid var(--color-void-border);
-  border-left: 3px solid rgba(0, 212, 255, 0.35);
-  padding: 2.5rem 1.5rem 1.25rem;
+  padding: 0;
   margin: 1.75rem 0;
-  overflow-x: auto;
+  overflow: hidden;
   font-family: var(--font-mono);
   font-size: 0.875rem;
   tab-size: 2;
-  background: var(--color-void-card) !important; /* 覆盖 Shiki 自带背景 */
-  -webkit-overflow-scrolling: touch;
+  background: var(--color-void-card) !important;
 }
+/* header bar: 语言名 + 文件名 */
+.prose .shiki[data-lang]::before {
+  content: attr(data-lang);
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 0.55rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(180, 180, 210, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--color-void-border);
+  pointer-events: none;
+  user-select: none;
+}
+/* code body */
 .prose .shiki code {
   background: transparent !important;
   font-family: inherit;
   font-size: inherit;
-  padding: 0;
+  padding: 1.1rem 1.25rem;
   border: none;
   color: inherit;
   display: block;
   width: max-content;
   min-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .prose .shiki .line {
   display: block;
   min-height: 1.2em;
-}
-/* 三圆点装饰 */
-.prose .shiki::before {
-  content: '';
-  position: absolute;
-  top: 0.8rem;
-  left: 1rem;
-  width: 54px;
-  height: 12px;
-  background-image:
-    radial-gradient(circle, #ff5f57 4px, transparent 4px),
-    radial-gradient(circle, #ffbd2e 4px, transparent 4px),
-    radial-gradient(circle, #28c840 4px, transparent 4px);
-  background-size: 18px 12px;
-  background-position: 0 0, 18px 0, 36px 0;
-  background-repeat: no-repeat;
-  opacity: 0.7;
-  pointer-events: none;
-}
-/* 语言 badge */
-.prose .shiki[data-lang]::after {
-  content: attr(data-lang);
-  position: absolute;
-  top: 0.55rem;
-  left: 4.5rem;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(0, 212, 255, 0.5);
-  pointer-events: none;
-  user-select: none;
 }
 /* Shiki 行号（通过 CSS counter 实现） */
 .prose .shiki.has-line-numbers code {
@@ -621,9 +565,9 @@ body::after {
 }
 
 /* ── 标题 glow 动效 ── */
-.glow-green  { text-shadow: 0 0 8px rgba(0,255,136,0.6); }
-.glow-cyan   { text-shadow: 0 0 8px rgba(0,212,255,0.6); }
-.glow-purple { text-shadow: 0 0 8px rgba(180,76,255,0.6); }
+.glow-green  { text-shadow: 0 0 6px rgba(0,255,136,0.35); }
+.glow-cyan   { text-shadow: 0 0 6px rgba(0,212,255,0.35); }
+.glow-purple { text-shadow: 0 0 6px rgba(180,76,255,0.35); }
 
 /* ── 布局工具 class ── */
 .nav-glass {
@@ -638,25 +582,29 @@ body::after {
 /* ── 复制按钮 copy-btn 增强（配合 useCodeCopy） ── */
 .copy-btn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 0.3rem;
+  right: 0.75rem;
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 5px;
+  gap: 4px;
+  padding: 2px 7px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
   cursor: pointer;
-  color: rgba(168,168,200,0.6);
+  color: rgba(168,168,200,0.45);
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.04em;
-  line-height: 1;
+  line-height: 1.6;
   user-select: none;
-  backdrop-filter: blur(4px);
   transition: all 0.15s ease;
+}
+.copy-btn:hover {
+  color: rgba(168,168,200,0.9);
+  border-color: rgba(0,212,255,0.3);
+  background: rgba(0,212,255,0.05);
 }
 .copy-btn:focus-visible {
   outline: 2px solid rgba(0,212,255,0.5);
@@ -908,14 +856,7 @@ body::before {
   z-index: 1;
   opacity: 0;
 }
-.post-scroll-item.scan-animate::before {
-  animation: post-scan-line 0.35s ease-out forwards;
-}
-@keyframes post-scan-line {
-  0%   { transform: scaleY(0); opacity: 0.9; }
-  60%  { transform: scaleY(1); opacity: 0.9; }
-  100% { transform: scaleY(1); opacity: 0; }
-}
+
 
 /* ── Lab 卡片扫描线 hover ── */
 .lab-card {
@@ -944,11 +885,6 @@ body::before {
   background: rgba(255,255,255,0.025);
 }
 
-/* prose 代码块左侧边条更亮 */
-.prose .shiki {
-  border-left-width: 3px;
-  border-left-color: rgba(0,212,255,0.4);
-}
 
 /* 滚动条美化增强 */
 ::-webkit-scrollbar { width: 4px; height: 4px; }

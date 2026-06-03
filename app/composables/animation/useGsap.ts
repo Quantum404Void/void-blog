@@ -18,10 +18,9 @@ export function useGsap(): Promise<GsapBundle | null> {
   if (!_gsapPromise) {
     _gsapPromise = Promise.all([
       import('gsap'),
-      import('gsap/TextPlugin'),
       import('gsap/ScrollTrigger'),
-    ]).then(([{ gsap }, { TextPlugin }, { ScrollTrigger }]) => {
-      gsap.registerPlugin(TextPlugin, ScrollTrigger)
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger)
       return { gsap, ScrollTrigger }
     })
   }
