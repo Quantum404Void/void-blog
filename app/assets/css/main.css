@@ -231,30 +231,8 @@
 .timeline-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-neon-purple); }
 
 
-/* ── 故障艺术 Glitch 效果 ── */
-  20% { transform: skewX(-2deg); }
-  40% { transform: skewX(1.5deg); }
-  60% { transform: skewX(-1deg); }
-  80% { transform: skewX(2deg); }
-}
-  25% { clip-path: inset(40% 0 50% 0); transform: translate(3px, 0); }
-  50% { clip-path: inset(20% 0 70% 0); transform: translate(-2px, 0); }
-  75% { clip-path: inset(70% 0 10% 0); transform: translate(2px, 0); }
-}
-  33% { clip-path: inset(10% 0 80% 0); transform: translate(-3px, 0); }
-  66% { clip-path: inset(50% 0 30% 0); transform: translate(2px, 0); }
-}
-  100% { transform: translateY(100vh); }
-}
-  92% { opacity: 1; }
-  93% { opacity: 0.4; }
-  94% { opacity: 1; }
-  96% { opacity: 0.6; }
-  97% { opacity: 1; }
-}
-
 /* 十六进制闪烁（背景装饰） */
-/* @keyframes hex-flash 已移除（未被任何元素使用） */
+/* @keyframes hex-flash, glitch-skew, glitch-clip1/2, scan-line, neon-flicker 已移除 */
 
 /* ── 终端加载条 ── */
 @keyframes load-bar {
