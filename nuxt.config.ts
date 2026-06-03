@@ -72,13 +72,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        // sitemap href: 生产地址，如需多域部署改这里
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico', sizes: '48x48' },
+        { rel: 'apple-touch-icon', href: '/icons/pwa-192x192.png' },
         { rel: 'sitemap', type: 'application/xml', href: '/sitemap.xml' },
-        // canonical 默认指向首页（各页面会覆盖）
         { rel: 'canonical', href: 'https://void.redx.space' },
-        // RSS 自动发现
         { rel: 'alternate', type: 'application/rss+xml', title: 'void.dev RSS', href: '/rss.xml' },
-        // 字体：使用系统字体栈，无外部请求（消除 Google Fonts 阻塞渲染）
       ],
       meta: [
         { name: 'robots', content: 'index, follow' },

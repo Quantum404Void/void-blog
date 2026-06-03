@@ -10,8 +10,6 @@
       <div class="absolute bottom-0 left-0 rounded-full" style="width:400px;height:400px;background:radial-gradient(circle, rgba(0,212,255,0.1), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
       <div class="absolute inset-0" style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,255,136,0.04), transparent);pointer-events:none"></div>
 
-      <!-- Boot status badge -->
-      <div class="hero-boot-status booting font-mono text-[9px] tracking-[0.15em] uppercase">INIT...</div>
 
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
@@ -234,92 +232,26 @@ const { formatDate } = useFormatDate()
 onMounted(async () => {
   const bundle = await useGsap()
   if (!bundle) return
-  const { gsap } = bundle
+  const { gsap, ScrollTrigger } = bundle
 
-  // ── 启动序列 ──────────────────────────────────────────────────────
-
-  // Boot status badge
-  const bootEl = document.querySelector<HTMLElement>('.hero-boot-status')
-
+  // Hero 简洁入场：prompt + title + lines stagger
   const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-
-  // t=0  Boot badge 出现
-  if (bootEl) {
-    tl.set(bootEl, { opacity: 1 })
-    tl.add(() => { bootEl.textContent = 'INIT...' }, 0)
-    tl.add(() => { bootEl.textContent = 'POST CHECK...' }, 0.4)
-    tl.add(() => { bootEl.textContent = 'LOADING KERNEL...' }, 0.9)
-    tl.add(() => { bootEl.textContent = 'SYSTEM READY ✓' }, 1.8)
-    tl.to(bootEl, { opacity: 0.5, duration: 0.5 }, 2.2)
-  }
-
-  // t=0  heroPrompt 瞬间出现（无滑入，像终端光标跳出）
-  tl.from(heroPrompt.value, { opacity: 0, duration: 0.1 }, 0)
-
-  // 扫描线扫过 hero 区一次
-  const heroSection = heroPrompt.value?.closest('section')
-  if (heroSection) {
-    const scanLine = document.createElement('div')
-    scanLine.style.cssText = 'position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(to right,transparent,rgba(0,212,255,0.8),transparent);pointer-events:none;z-index:10;opacity:0'
-    heroSection.style.position = 'relative'
-    heroSection.appendChild(scanLine)
-    tl.to(scanLine, { opacity: 1, duration: 0.05 }, 0.05)
-    tl.to(scanLine, { top: '100%', duration: 0.4, ease: 'none' }, 0.05)
-    tl.to(scanLine, { opacity: 0, duration: 0.1 }, 0.45)
-  }
-
-  // t=0.3  heroTitle: 全亮 → glitch 抖动 3 次 → 稳定
-  tl.from(heroTitle.value, { opacity: 0, duration: 0.05 }, 0.3)
-  tl.to(heroTitle.value, { skewX: -4, scaleX: 1.03, opacity: 0.7, duration: 0.05 }, 0.35)
-  tl.to(heroTitle.value, { skewX: 3, scaleX: 0.98, opacity: 1, duration: 0.05 }, 0.40)
-  tl.to(heroTitle.value, { skewX: -2, scaleX: 1.01, duration: 0.04 }, 0.45)
-  tl.to(heroTitle.value, { skewX: 1, scaleX: 0.995, duration: 0.04 }, 0.49)
-  tl.to(heroTitle.value, { skewX: 0, scaleX: 1, duration: 0.06 }, 0.53)
-
-  // t=0.6  三行代码像终端打字一样逐行出现
+  tl.from(heroPrompt.value, { opacity: 0, y: 8, duration: 0.3 }, 0)
+  tl.from(heroTitle.value,  { opacity: 0, y: 12, duration: 0.4 }, 0.1)
   const lineWraps = [heroLine0Wrap.value, heroLine1Wrap.value, heroLine2Wrap.value]
   lineWraps.forEach((wrap, i) => {
-    const t = 0.6 + i * 0.2
-    tl.from(wrap, { opacity: 0, x: -4, duration: 0.15 }, t)
+    tl.from(wrap, { opacity: 0, y: 6, duration: 0.3 }, 0.3 + i * 0.1)
   })
+  tl.from(heroStats.value, { opacity: 0, y: 8, duration: 0.3 }, 0.6)
 
-  // TextPlugin 打字机
-  const typeLines = [
-    { el: heroLine0, text: '["C++", "Python", "AI Agent", "桌面应用"]', delay: 0.65 },
-    { el: heroLine1, text: '["C++", "TypeScript", "Vue", "Nuxt"]',      delay: 0.85 },
-    { el: heroLine2, text: '在线 ●',                                     delay: 1.05 },
-  ]
-  typeLines.forEach(({ el, text, delay }) => {
-    if (!el.value) return
-    gsap.to(el.value, {
-      duration: text.length * 0.022,
-      text: { value: text, delimiter: '' },
-      ease: 'none',
-      delay,
-    })
-  })
-
-  // t=1.8  heroStats 从右侧滑入
-  tl.from(heroStats.value, { opacity: 0, x: 24, duration: 0.4, ease: 'power3.out' }, 1.8)
-
-  // ── 文章列表 ScrollTrigger stagger ────────────────────────────────
-  const gsapBundle2 = await useGsap()
-  if (postListRef.value && gsapBundle2) {
-    const { gsap: g2, ScrollTrigger } = gsapBundle2
+  // 文章列表 scroll reveal
+  if (postListRef.value) {
     const items = postListRef.value.querySelectorAll<HTMLElement>('.post-item')
-    g2.fromTo(items,
-      { opacity: 0, y: 20 },
+    gsap.fromTo(items,
+      { opacity: 0, y: 14 },
       {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power2.out',
-        stagger: 0.08,
-        scrollTrigger: {
-          trigger: postListRef.value,
-          start: 'top bottom',
-          once: true,
-        },
+        opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', stagger: 0.07,
+        scrollTrigger: { trigger: postListRef.value, start: 'top 88%', once: true },
       }
     )
   }

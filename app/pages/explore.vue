@@ -119,28 +119,19 @@
           </div>
         </div>
 
-        <div v-if="filteredTags.length" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        <!-- Tag Cloud -->
+        <div v-if="filteredTags.length"
+             class="flex flex-wrap justify-center items-baseline gap-x-3 gap-y-2 px-2 py-2 leading-relaxed">
           <NuxtLink
             v-for="item in filteredTags" :key="item.tag"
             :href="`/tags/${item.tag}`"
-            class="tag-card group relative flex flex-col rounded-xl border border-[var(--color-void-border)] bg-[var(--color-void-card)] overflow-hidden transition-all duration-200 min-w-0"
-            :style="{ '--tag-color': getTagColorVar(item.tag) }"
+            class="group inline-flex items-baseline gap-0.5 rounded-md px-2 py-1 transition-all duration-200 ease-out hover:scale-110"
+            :style="tagCloudStyle(item)"
           >
-            <div class="absolute left-0 top-0 bottom-0 w-0.5 group-hover:w-1 transition-all duration-200"
-                 :style="{ background: getTagColorVar(item.tag) }" />
-            <div class="px-4 py-3 flex flex-col gap-2 min-w-0">
-              <div class="flex items-center justify-between gap-2 min-w-0">
-                <span class="font-mono text-sm font-bold truncate min-w-0" :style="{ color: getTagColorVar(item.tag) }">#{{ item.tag }}</span>
-                <span class="font-mono text-[10px] shrink-0 px-1.5 py-0.5 rounded border font-bold tabular-nums"
-                      :style="{ color: getTagColorVar(item.tag), borderColor: `color-mix(in srgb, ${getTagColorVar(item.tag)} 30%, transparent)`, background: `color-mix(in srgb, ${getTagColorVar(item.tag)} 8%, transparent)` }">
-                  {{ item.count }}
-                </span>
-              </div>
-              <p v-if="item.latestTitle"
-                 class="font-mono text-[10px] text-[var(--color-text-muted)] leading-relaxed line-clamp-2 group-hover:text-[var(--color-text-secondary)] transition-colors min-w-0">
-                {{ item.latestTitle }}
-              </p>
-            </div>
+            {{ item.tag }}<span
+              class="ml-0.5 font-normal opacity-50 group-hover:opacity-80 transition-opacity"
+              :style="{ fontSize: '0.45em', fontWeight: '400' }"
+            >{{ item.count }}</span>
           </NuxtLink>
         </div>
 
@@ -259,7 +250,7 @@ onMounted(() => {
 })
 
 // ── 标签 ──────────────────────────────────────────────────
-const { getTagColorVar, getTagColor } = useTagColor()
+const { getTagColorVar } = useTagColor()
 const tagQuery = ref('')
 const { data: postsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
 
@@ -282,6 +273,24 @@ const filteredTags = computed(() => {
   const tq = tagQuery.value.trim().toLowerCase()
   return tq ? tags.value.filter(item => item.tag.toLowerCase().includes(tq)) : tags.value
 })
+
+// tag cloud 字体大小按 count 线性缩放 (0.85rem ~ 2.6rem)
+const maxTagCount = computed(() => Math.max(...tags.value.map(t => t.count), 1))
+const tagColors = ['#00d4ff','#39ff14','#b44cff','#ff6b35','#ff2d78','#ffd700','#00e5cc','#ff8c42']
+function tagCloudStyle(item: { tag: string; count: number }) {
+  const ratio = item.count / maxTagCount.value
+  // 字体：0.85rem ~ 2.6rem
+  const size = 0.85 + ratio * 1.75
+  const weight = Math.round(400 + ratio * 300)
+  const colorIdx = item.tag.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % tagColors.length
+  const color = tagColors[colorIdx]
+  return {
+    fontSize: `${size.toFixed(2)}rem`,
+    fontWeight: String(weight),
+    color,
+    opacity: String(0.6 + ratio * 0.4),
+  }
+}
 
 // ── 统计 ──────────────────────────────────────────────────
 interface StatsData {
