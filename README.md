@@ -1,31 +1,33 @@
 <div align="center">
+<br />
+<br />
+
+**void.dev**
+
+不灸水，不追热点，只写真正踩过坑的东西
 
 <br />
 
-# void.dev
+[void.redx.space](https://void.redx.space)
 
-**个人技术博客 — 不灸水，只写真正踩过坑的东西**
+<br />
+<br />
 
-[void.redx.space](https://void.redx.space) · Nuxt 4 · Cloudflare Pages + D1
+<table>
+<tr><td align="center" width="560">
+
+**Stack** — Nuxt 4 · Vue 3 · Tailwind v4 · Cloudflare Pages · D1 · Shiki · GSAP
+
+</td></tr>
+</table>
 
 <br />
 
 </div>
 
----
+<div align="center"><table><tr><td width="560">
 
-## 技术栈
-
-| | |
-|---|---|
-| 框架 | Nuxt 4 + Vue 3 |
-| 样式 | Tailwind CSS v4 |
-| 数据库 | Cloudflare D1 (SQLite + FTS5) |
-| 部署 | Cloudflare Pages (Edge) |
-| 代码高亮 | Shiki (客户端懒加载) |
-| AI 助手 | CF Workers AI — DeepSeek R1 蒸馏版 |
-
-## 快速开始
+## Get started
 
 ```bash
 git clone https://github.com/Quantum404Void/void-blog.git
@@ -34,15 +36,21 @@ npm install
 npm run dev
 ```
 
-首次部署需执行 D1 migrations：
+First deploy — run D1 migrations:
 
 ```bash
-npx wrangler d1 execute void-blog-posts --remote --file=migrations/0001_init.sql
-npx wrangler d1 execute void-blog-posts --remote --file=migrations/0002_fts_wordcount.sql
+npx wrangler d1 execute void-blog-posts --remote \
+  --file=migrations/0001_init.sql
+npx wrangler d1 execute void-blog-posts --remote \
+  --file=migrations/0002_fts_wordcount.sql
 ```
 
-CF Pages 环境变量：`NUXT_ADMIN_PASSWORD` · `NUXT_JWT_SECRET`
+CF Pages env vars: `NUXT_ADMIN_PASSWORD` · `NUXT_JWT_SECRET`
+
+<br />
 
 ---
 
-MIT © 2026 Void
+MIT © 2026 [Void](https://void.redx.space)
+
+</td></tr></table></div>
