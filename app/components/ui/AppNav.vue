@@ -51,6 +51,8 @@
         </button>
       </div>
     </div>
+    </div>
+
     <Transition
       enter-active-class="transition-all duration-200"
       enter-from-class="opacity-0 -translate-y-2"
