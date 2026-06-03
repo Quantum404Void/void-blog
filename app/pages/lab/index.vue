@@ -39,7 +39,7 @@
             :key="game.href"
             :href="game.href"
             class="lab-card group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
-            style="opacity:0;transform:translateY(20px)"
+            
             @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = game.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + game.color + '25' }"
             @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
           >
@@ -65,7 +65,7 @@
             :key="tool.href"
             :href="tool.href"
             class="lab-card group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px] border-l-2"
-            :style="`border-left-color:${tool.color}44;opacity:0;transform:translateY(20px)`"
+            :style="`border-left-color:${tool.color}44`"
             @mouseover="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color + '55'; el.style.borderLeftColor = tool.color + 'cc'; el.style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
             @mouseout="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = ''; el.style.borderLeftColor = tool.color + '44'; el.style.boxShadow = '' }"
           >
@@ -113,11 +113,10 @@ onMounted(async () => {
     if (!grid) return
     anime({
       targets: grid.querySelectorAll('.lab-card'),
-      opacity: [0, 1],
-      translateY: [20, 0],
-      duration: 480,
+      translateY: [8, 0],
+      duration: 350,
       easing: 'easeOutQuart',
-      delay: anime.stagger(50, { start: delay }),
+      delay: anime.stagger(40, { start: delay }),
     })
   }
 

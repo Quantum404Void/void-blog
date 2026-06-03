@@ -858,28 +858,9 @@ body::before {
 }
 
 
-/* ── Lab 卡片扫描线 hover ── */
+/* ── Lab 卡片 hover ── */
 .lab-card {
   position: relative;
-  overflow: hidden;
-}
-.lab-card::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--color-neon-cyan), transparent);
-  opacity: 0;
-  pointer-events: none;
-}
-.lab-card:hover::after {
-  animation: card-scan 0.5s ease-out forwards;
-}
-@keyframes card-scan {
-  0%   { top: 0%;   opacity: 0.9; }
-  100% { top: 100%; opacity: 0;   }
 }
 .prose .shiki .line:hover {
   background: rgba(255,255,255,0.025);
