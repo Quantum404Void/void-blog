@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)]">
+  <div class="min-h-screen bg-[var(--color-void)] overflow-x-hidden">
     <AppNav />
 
     <!-- Hero -->
@@ -92,8 +92,8 @@
                 class="absolute -left-[1.15rem] top-5 w-2.5 h-2.5 rounded-full border-2 border-[var(--color-void)] shrink-0 z-10 transition-transform group-hover:scale-125"
                 :style="`background: var(--color-${getTagColor(post.tags[0] ?? '')}); box-shadow: 0 0 6px var(--color-${getTagColor(post.tags[0] ?? '')})`"
               ></div>
-              <div class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug">
+              <div class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4 min-w-0">
+                <h3 class="font-mono text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-neon-cyan)] transition-colors leading-snug line-clamp-2 min-w-0">
                   {{ post.title }}
                 </h3>
                 <time :datetime="post.pub_date" class="font-mono text-[10px] text-[var(--color-text-muted)] shrink-0 pt-0.5">

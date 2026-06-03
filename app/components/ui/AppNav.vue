@@ -1,18 +1,17 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-2 sm:gap-3 min-w-0">
       <!-- Logo -->
-      <NuxtLink href="/" class="flex items-center gap-2 shrink-0 group" aria-label="Home">
-        <!-- V 字简体 logo -->
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80">
+      <NuxtLink href="/" class="flex items-center gap-1.5 shrink-0 group" aria-label="Home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80 shrink-0">
           <rect width="24" height="24" rx="5" fill="#0a0a0f"/>
           <path d="M5 6 L12 18 L19 6" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </svg>
-        <span class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest cursor-blink">{{ siteName }}</span>
+        <span class="font-mono font-bold text-[var(--color-neon-green)] glow-green text-sm tracking-widest">{{ siteName }}</span>
       </NuxtLink>
 
       <!-- 面包屑 -->
-      <div v-if="crumbs.length" class="hidden lg:flex items-center gap-2 min-w-0">
+      <div v-if="crumbs.length" class="hidden lg:flex items-center gap-2 min-w-0 overflow-hidden">
         <template v-for="(crumb, i) in crumbs" :key="i">
           <span class="text-[var(--color-void-muted)] font-mono text-xs shrink-0">/</span>
           <NuxtLink v-if="crumb.href" :href="crumb.href"

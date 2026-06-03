@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)]">
+  <div class="min-h-screen bg-[var(--color-void)] overflow-x-hidden">
     <AppNav :crumbs="[{ label: 'about' }]" />
 
     <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
