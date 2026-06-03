@@ -1,6 +1,7 @@
 <template>
   <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
-    <div class="w-full px-4 sm:px-6 xl:px-8 h-14 flex items-center justify-between gap-3 min-w-0">
+    <div class="w-full px-4 sm:px-6 xl:px-8 h-14">
+    <div class="max-w-2xl mx-auto h-full flex items-center justify-between gap-3 min-w-0">
 
       <!-- 左侧：Logo + 面包屑 -->
       <div class="flex items-center gap-2 min-w-0 overflow-hidden">
@@ -50,8 +51,6 @@
         </button>
       </div>
     </div>
-
-    <!-- 移动端下拉菜单 -->
     <Transition
       enter-active-class="transition-all duration-200"
       enter-from-class="opacity-0 -translate-y-2"

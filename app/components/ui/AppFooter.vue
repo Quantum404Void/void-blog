@@ -37,6 +37,6 @@ withDefaults(defineProps<{
 }>(), {
   backHref: '/',
   backLabel: '返回首页',
-  maxW: 'max-w-3xl',
+  maxW: 'max-w-2xl',
 })
 </script>
