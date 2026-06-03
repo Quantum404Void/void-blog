@@ -132,8 +132,8 @@
             <a :href="authorGithub" target="_blank" rel="noopener"
                class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">GitHub ↗</a>
             <NuxtLink href="/rss.xml" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">RSS ↗</NuxtLink>
-            <NuxtLink href="/search" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Search ↗</NuxtLink>
-            <NuxtLink href="/stats" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Stats ↗</NuxtLink>
+            <NuxtLink href="/explore?tab=search" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Search ↗</NuxtLink>
+            <NuxtLink href="/explore?tab=stats" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Stats ↗</NuxtLink>
             <NuxtLink href="/lab" class="font-mono text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">Lab ↗</NuxtLink>
           </div>
         </div>

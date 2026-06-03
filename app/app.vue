@@ -7,27 +7,38 @@
 </template>
 
 <script setup lang="ts">
-// 页面切换过渡：新页进入时淡入，不等旧页离开（避免 out-in 的黑屏间隙）
 const pageTransition = {
   name: 'page',
-  mode: 'default',   // 并行，不用 out-in
+  mode: 'default',
   appear: true,
+  onEnter(el: Element, done: () => void) {
+    if (import.meta.server) { done(); return }
+    useGsap().then(bundle => {
+      if (!bundle) { done(); return }
+      bundle.gsap.fromTo(el,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out', onComplete: done }
+      )
+    })
+  },
+  onLeave(el: Element, done: () => void) {
+    if (import.meta.server) { done(); return }
+    useGsap().then(bundle => {
+      if (!bundle) { done(); return }
+      bundle.gsap.to(el,
+        { opacity: 0, duration: 0.15, ease: 'power1.in', onComplete: done }
+      )
+    })
+  },
 }
 </script>
 
 <style>
-.page-enter-active {
-  transition: opacity 0.15s ease;
-}
+/* fallback for browsers before gsap loads */
+.page-enter-from { opacity: 0; }
+.page-leave-to   { opacity: 0; }
 .page-leave-active {
-  transition: opacity 0.1s ease;
-  position: absolute;   /* 脱离文档流，防止两页叠加时撑高页面 */
+  position: absolute;
   width: 100%;
-}
-.page-enter-from {
-  opacity: 0;
-}
-.page-leave-to {
-  opacity: 0;
 }
 </style>
