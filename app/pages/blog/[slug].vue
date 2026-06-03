@@ -6,9 +6,9 @@
     <AppNav :crumbs="[{ label: 'blog', href: '/blog' }, { label: post?.title ?? slug }]" />
 
     <!-- Layout: article + TOC -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex gap-8 xl:gap-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       <!-- Article -->
-      <main class="flex-1 min-w-0 max-w-3xl">
+      <main class="min-w-0">
         <header class="mb-12">
           <div v-if="post.tags.length" class="flex flex-wrap gap-2 mb-5">
             <NuxtLink
@@ -173,8 +173,8 @@
         </footer>
       </main>
 
-      <!-- TOC Sidebar -->
-      <aside v-if="tocHeadings.length > 1" class="hidden xl:block w-52 shrink-0 relative">
+      <!-- TOC Sidebar (hidden, using mobile drawer instead) -->
+      <aside v-if="false" class="hidden">
         <TableOfContents :headings="tocHeadings" />
       </aside>
     </div>
