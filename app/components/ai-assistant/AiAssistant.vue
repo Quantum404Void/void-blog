@@ -8,7 +8,7 @@
              hover:border-[rgba(180,76,255,1)] hover:shadow-[0_0_16px_rgba(180,76,255,0.5)]"
       aria-label="AI 助手"
       @click="open = !open"
-    >🤖</button>
+    >⚡</button>
 
     <!-- 浮窗 -->
     <Transition name="ai-slide">
@@ -22,7 +22,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-[rgba(180,76,255,0.3)]">
           <span class="font-mono text-xs text-[var(--color-neon-purple)] flex items-center gap-2">
-            <span>🤖</span> AI 助手
+            <span>⚡</span> 小新
           </span>
           <button
             class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors text-sm"
