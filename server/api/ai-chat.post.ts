@@ -1,4 +1,4 @@
-// server/api/ai-chat.post.ts — AI 助手（Cloudflare Workers AI, @cf/deepseek-ai/deepseek-r1-distill-qwen-32b）
+// server/api/ai-chat.post.ts — AI 助手（Cloudflare Workers AI, @cf/qwen/qwen2.5-7b-instruct）
 // 免费，无需额外 API key，直接通过 env.AI binding 调用
 import type { ChatMessage, AiChatResponse } from '~/types/ai'
 
@@ -28,14 +28,12 @@ export default defineEventHandler(async (event): Promise<AiChatResponse> => {
   ]
 
   try {
-    const resp = await ai.run('@cf/deepseek-ai/deepseek-r1-distill-qwen-32b', {
+    const resp = await ai.run('@cf/qwen/qwen2.5-7b-instruct', {
       messages: cfMessages,
-      max_tokens: 800,
+      max_tokens: 1200,
     }) as CfAiResponse
 
-    let text = resp?.response ?? resp?.result?.response ?? ''
-    // DeepSeek R1 会输出 <think>...</think> 推理链，过滤掉只返回答案
-    text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim()
+    const text = (resp?.response ?? resp?.result?.response ?? '').trim()
     return { reply: text || '（无响应，请稍后再试）' }
   } catch (err: any) {
     console.error('[ai-chat] CF AI error:', err)
