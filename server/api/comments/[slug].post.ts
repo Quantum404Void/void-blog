@@ -7,7 +7,7 @@ const MAX_NICKNAME_LEN = 50
 const RATE_LIMIT_SEC = 30
 
 export default defineEventHandler(async (event: H3Event) => {
-  const { slug } = getRouterParams(event)
+  const slug = getRouterParam(event, 'slug')!
   const body = await readBody<{
     nickname: string
     email?: string

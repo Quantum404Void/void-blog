@@ -2,7 +2,7 @@ import { queryD1 } from '~~/server/utils/d1'
 import type { H3Event } from 'h3'
 
 export default defineEventHandler(async (event: H3Event) => {
-  const { slug } = getRouterParams(event)
+  const slug = getRouterParam(event, 'slug')!
 
   const rows = await queryD1<{
     id: number
