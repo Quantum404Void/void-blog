@@ -167,7 +167,7 @@
               <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.2)] to-transparent"></span>
             </p>
             <ClientOnly>
-              <GiscusComments :slug="slug" />
+              <CusdisComments :slug="slug" />
             </ClientOnly>
           </div>
         </footer>
