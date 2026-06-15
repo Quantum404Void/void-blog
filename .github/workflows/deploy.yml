@@ -13,6 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -24,13 +28,12 @@ jobs:
         run: bun run build
 
       - name: Apply D1 migrations
-        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           for f in migrations/*.sql; do
             echo "Running migration: $f"
-            bun x wrangler d1 execute void-blog-posts --remote --file "$f" || echo "Migration $f skipped (may already be applied)"
+            npx wrangler d1 execute void-blog-posts --remote --file "$f"
           done
 
       - name: Deploy to Cloudflare Pages
