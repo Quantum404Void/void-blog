@@ -23,6 +23,14 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Apply D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          for f in migrations/*.sql; do
+            npx wrangler d1 execute void-blog-posts --remote --file "$f"
+          done
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
