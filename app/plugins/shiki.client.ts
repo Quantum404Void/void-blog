@@ -10,6 +10,7 @@ import {
 import MarkdownIt from 'markdown-it'
 // @ts-expect-error
 import markdownItContainer from 'markdown-it-container'
+import { katexPlugin } from '~~/app/utils/markdown-it-katex'
 
 type MdToken = { tag: string; nesting: number; info: string; attrSet: (k: string, v: string) => void; children?: Array<{ content: string }> }
 type MdOptions = Record<string, unknown>
@@ -94,6 +95,9 @@ function buildMd(): Promise<MarkdownIt> {
       transformerMetaHighlight(),
     ],
   }))
+
+  // KaTeX math rendering
+  _md.use(katexPlugin)
 
   const _defHeading: RenderRule = _md.renderer.rules.heading_open ||
     ((tokens: MdToken[], idx: number, options: MdOptions, _e: unknown, self: MdRenderer) => self.renderToken(tokens, idx, options))

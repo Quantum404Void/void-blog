@@ -17,6 +17,9 @@
 
 @import "tailwindcss";
 
+/* KaTeX math formulas */
+@import "katex/dist/katex.min.css";
+
 
 /* ═══════════════════════════════════════════════════════
    _theme.css — CSS 变量 + @theme + .light + @layer base

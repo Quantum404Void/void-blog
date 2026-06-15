@@ -48,6 +48,7 @@
     "ipaddr.js": "^2.4.0",
     "js-yaml": "^4.1.1",
     "jwt-decode": "^4.0.0",
+    "katex": "^0.17.0",
     "lorem-ipsum": "^3.0.0",
     "markdown-it": "^14.1.0",
     "markdown-it-container": "^4.0.0",
@@ -61,6 +62,7 @@
   "devDependencies": {
     "@types/diff": "^8.0.0",
     "@types/js-yaml": "^4.0.9",
+    "@types/katex": "^0.16.8",
     "@types/qrcode": "^1.5.6",
     "typescript": "^5.7.0",
     "vue-tsc": "^2.0.0",
