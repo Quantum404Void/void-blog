@@ -14,17 +14,17 @@
 
 ## 技术栈
 
-| 层       | 技术                         | 说明                                                           |
-| -------- | ---------------------------- | -------------------------------------------------------------- |
-| 框架     | Nuxt 4.4 + Vue 3             | `future.compatibilityVersion: 4`，`app/` 子目录结构            |
-| 样式     | Tailwind CSS v4              | CSS-native，`@theme` 自定义变量                                |
-| 数据库   | Cloudflare D1 (SQLite)       | FTS5 全文搜索，`post_stats` 访问/点赞统计，`comments` 评论系统 |
-| 部署     | Cloudflare Pages             | Edge 渲染，CI/CD 自动部署                                      |
-| 评论     | 自托管（D1 + Nuxt API）      | 匿名评论，Markdown 支持，IP 速率限制                           |
-| 代码高亮 | Shiki + markdown-it          | 客户端懒加载                                                   |
-| 动画     | GSAP 3 + Anime.js            | 页面过渡 + Lab 卡片                                            |
-| PWA      | @vite-pwa/nuxt               | 离线缓存，可安装                                               |
-| AI 助手  | CF Workers AI (Llama 3.1 8B) | 免费，无需 API Key，博客问答                                   |
+| 层       | 技术                          | 说明                                                           |
+| -------- | ----------------------------- | -------------------------------------------------------------- |
+| 框架     | Nuxt 4.4 + Vue 3              | `future.compatibilityVersion: 4`，`app/` 子目录结构            |
+| 样式     | Tailwind CSS v4               | CSS-native，`@theme` 自定义变量                                |
+| 数据库   | Cloudflare D1 (SQLite)        | FTS5 全文搜索，`post_stats` 访问/点赞统计，`comments` 评论系统 |
+| 部署     | Cloudflare Pages              | Edge 渲染，CI/CD 自动部署                                      |
+| 评论     | 自托管（D1 + Nuxt API）       | 匿名评论，Markdown 支持，IP 速率限制                           |
+| 代码高亮 | Shiki + markdown-it           | 客户端懒加载                                                   |
+| 动画     | GSAP 3 + Anime.js             | 页面过渡 + Lab 卡片                                            |
+| PWA      | @vite-pwa/nuxt                | 离线缓存，可安装                                               |
+| AI 助手  | CF Workers AI (Qwen3 30B MoE) | 免费，无需 API Key，博客问答                                   |  |
 
 ---
 

@@ -1,4 +1,4 @@
-// server/api/ai-chat.post.ts — AI 助手（Cloudflare Workers AI, @cf/meta/llama-3.1-8b-instruct）
+// server/api/ai-chat.post.ts — AI 助手（Cloudflare Workers AI, @cf/qwen/qwen3-30b-a3b-fp8）
 // 免费，无需额外 API key，直接通过 env.AI binding 调用
 import type { ChatMessage, AiChatResponse } from '~/types/ai'
 
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event): Promise<AiChatResponse> => {
   ]
 
   try {
-    const resp = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+    const resp = await ai.run('@cf/qwen/qwen3-30b-a3b-fp8', {
       messages: cfMessages,
       max_tokens: 1200,
     }) as CfAiResponse
