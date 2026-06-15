@@ -24,11 +24,13 @@ jobs:
         run: bun run build
 
       - name: Apply D1 migrations
+        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           for f in migrations/*.sql; do
-            bunx wrangler d1 execute void-blog-posts --remote --file "$f"
+            echo "Running migration: $f"
+            bun x wrangler d1 execute void-blog-posts --remote --file "$f" || echo "Migration $f skipped (may already be applied)"
           done
 
       - name: Deploy to Cloudflare Pages

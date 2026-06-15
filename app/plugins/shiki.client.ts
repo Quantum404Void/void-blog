@@ -69,7 +69,7 @@ function buildMd(): Promise<MarkdownIt> {
     engine: createJavaScriptRegexEngine(),
   })
 
-  _md = new MarkdownIt({ html: true, linkify: true, typographer: true })
+  const _md = new MarkdownIt({ html: true, linkify: true, typographer: true })
 
   _md.use(fromHighlighter(hl as Parameters<typeof fromHighlighter>[0], {
     theme: 'github-dark-dimmed',
