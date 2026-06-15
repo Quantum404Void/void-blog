@@ -1,7 +1,9 @@
-import { queryD1 } from '~~/server/utils/d1'
 import type { H3Event } from 'h3'
+import { ensureCommentsTable } from '~~/server/utils/comments-migration'
+import { queryD1 } from '~~/server/utils/d1'
 
 export default defineEventHandler(async (event: H3Event) => {
+  await ensureCommentsTable(event)
   const slug = getRouterParam(event, 'slug')!
 
   const rows = await queryD1<{
