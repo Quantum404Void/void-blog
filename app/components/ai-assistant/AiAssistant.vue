@@ -34,8 +34,8 @@
         <div ref="msgListRef" class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 scroll-smooth">
           <div v-if="history.length === 0" class="flex items-center justify-center h-full">
             <p class="font-mono text-xs text-[var(--color-text-muted)] text-center leading-relaxed">
-              你好！我是 void.redx.space 的 AI 助手 🤖<br />
-              <span class="opacity-60">有什么技术问题可以问我~</span>
+              你好，我是小新 ⚡<br />
+              <span class="opacity-60">void.dev 的 AI 助手，想了解什么？</span>
             </p>
           </div>
           <div
@@ -91,7 +91,7 @@ defineOptions({ name: 'AiAssistant' })
 import type { UiMessage, ChatMessage, AiChatResponse } from '~/types/ai'
 
 // ── 常量 ──────────────────────────────────────────────────
-const SYSTEM_PROMPT = '你是 void.redx.space 博客的 AI 助手，帮助读者理解技术文章。回答简洁，中文，带一点极客风格。'
+const SYSTEM_PROMPT = '你是 void.dev 博客的 AI 助手「小新」，帮助读者理解技术文章。回答简洁，中文，带一点极客风格。'
 const MAX_HISTORY_TURNS = 20
 const API_ENDPOINT = '/api/ai-chat'
 
