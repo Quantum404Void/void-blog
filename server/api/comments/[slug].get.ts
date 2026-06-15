@@ -1,0 +1,23 @@
+import { queryD1 } from '~~/server/utils/d1'
+import type { H3Event } from 'h3'
+
+export default defineEventHandler(async (event: H3Event) => {
+  const { slug } = getRouterParams(event)
+
+  const rows = await queryD1<{
+    id: number
+    nickname: string
+    content: string
+    parent_id: number | null
+    created_at: string
+  }>(
+    event,
+    `SELECT id, nickname, content, parent_id, created_at
+     FROM comments
+     WHERE slug = ? AND approved = 1
+     ORDER BY created_at ASC`,
+    [slug],
+  )
+
+  return rows
+})

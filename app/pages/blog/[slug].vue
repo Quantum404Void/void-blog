@@ -166,9 +166,7 @@
               <span class="text-[var(--color-neon-cyan)]">&#9654;</span> 评论
               <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.2)] to-transparent"></span>
             </p>
-            <ClientOnly>
-              <CusdisComments :slug="slug" />
-            </ClientOnly>
+            <BlogComments :slug="slug" />
           </div>
         </footer>
       </main>

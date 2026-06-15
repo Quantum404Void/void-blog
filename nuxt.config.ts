@@ -66,7 +66,6 @@ export default defineNuxtConfig({
       authorInitial: '王',
       authorMotto: '不灸水，不追热点，不水文章',
       buildHash: (process.env.CF_PAGES_COMMIT_SHA ?? '').slice(0, 7) || 'local',
-      cusdisAppId: '',  // Cusdis 匿名评论 App ID，设置 NUXT_PUBLIC_CUSDIS_APP_ID 环境变量
     },
   },
 
