@@ -1,93 +1,93 @@
-<template>
-  <LabLayout title="jwt" desc="解析 JWT 的 Header / Payload / Signature" accent="var(--color-neon-pink)">
-    <textarea v-model="input" placeholder="粘贴 JWT token…"
-      class="w-full font-mono text-xs rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none focus:border-[rgba(244,112,103,0.4)] transition-colors"
-      style="height:90px"
-    />
-
-    <div v-if="error" class="mt-4 font-mono text-xs px-4 py-3 rounded-xl border" style="background:rgba(255,0,170,0.07);color:#ff00aa;border-color:rgba(255,0,170,0.25)">
-      ❌ {{ error }}
-    </div>
-
-    <div v-if="parsed" class="mt-6 grid gap-4">
-      <!-- Header -->
-      <div class="rounded-xl border border-[var(--color-void-border)] overflow-hidden">
-        <div class="px-4 py-2 font-mono text-xs font-bold flex items-center gap-2" style="background:rgba(0,212,255,0.08);color:#00d4ff;border-bottom:1px solid rgba(0,212,255,0.2)">
-          <span class="w-2 h-2 rounded-full" style="background:#00d4ff" />HEADER
-        </div>
-        <table class="w-full font-mono text-xs">
-          <tr v-for="(val, key) in parsed.header" :key="String(key)" class="border-b border-[var(--color-void-border)] last:border-0">
-            <td class="px-4 py-2 w-1/3" style="color:#00d4ff">{{ key }}</td>
-            <td class="px-4 py-2 text-[var(--color-text-primary)] break-all">{{ val }}</td>
-          </tr>
-        </table>
-      </div>
-      <!-- Payload -->
-      <div class="rounded-xl border border-[var(--color-void-border)] overflow-hidden">
-        <div class="px-4 py-2 font-mono text-xs font-bold flex items-center gap-2" style="background:rgba(0,255,136,0.08);color:#00ff88;border-bottom:1px solid rgba(0,255,136,0.2)">
-          <span class="w-2 h-2 rounded-full" style="background:#00ff88" />PAYLOAD
-        </div>
-        <table class="w-full font-mono text-xs">
-          <tr v-for="(val, key) in parsed.payload" :key="String(key)" class="border-b border-[var(--color-void-border)] last:border-0">
-            <td class="px-4 py-2 w-1/3" style="color:#00ff88">{{ key }}</td>
-            <td class="px-4 py-2 text-[var(--color-text-primary)] break-all">
-              <template v-if="key === 'exp' || key === 'iat' || key === 'nbf'">
-                {{ val }} <span class="ml-2 text-[var(--color-text-muted)]">({{ formatTs(Number(val)) }})</span>
-                <span v-if="key === 'exp'" class="ml-2 font-bold" :style="isExpired(Number(val)) ? 'color:#ff00aa' : 'color:#00ff88'">
-                  {{ isExpired(Number(val)) ? '已过期' : '未过期' }}
-                </span>
-              </template>
-              <template v-else>{{ val }}</template>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="rounded-xl border border-[var(--color-void-border)] overflow-hidden">
-        <div class="px-4 py-2 font-mono text-xs font-bold flex items-center gap-2" style="background:rgba(180,0,255,0.08);color:#b400ff;border-bottom:1px solid rgba(180,0,255,0.2)">
-          <span class="w-2 h-2 rounded-full" style="background:#b400ff" />SIGNATURE
-        </div>
-        <div class="px-4 py-3 font-mono text-xs break-all" style="color:#b400ff">{{ parsed.signature }}</div>
-        <div class="px-4 pb-3 font-mono text-[10px] text-[var(--color-text-muted)]">⚠️ 签名未验证（无密钥）</div>
-      </div>
-    </div>
-
-    <div v-else-if="!error && !input" class="mt-10 text-center font-mono text-xs text-[var(--color-text-muted)]">
-      在上方粘贴 JWT token 即可解析
-    </div>
-  </LabLayout>
-</template>
-
 <script setup lang="ts">
 import { jwtDecode } from 'jwt-decode'
+
+interface ParsedJwt {
+  header: Record<string, unknown>
+  payload: Record<string, unknown>
+  signature: string
+}
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `JWT 解析器 | ${siteName}` })
 
-const input = ref('')
-const error = ref('')
+const input = shallowRef('')
+const error = shallowRef('')
+const parsed = shallowRef<ParsedJwt | null>(null)
 
-interface Parsed { header: Record<string, unknown>; payload: Record<string, unknown>; signature: string }
-const parsed = computed<Parsed | null>(() => {
-  const token = input.value.trim()
-  if (!token) { error.value = ''; return null }
-  const segs = token.split('.')
-  if (segs.length !== 3) { error.value = '无效的 JWT：应包含 3 段'; return null }
+watch(input, (value) => {
+  const token = value.trim()
+  error.value = ''
+  parsed.value = null
+  if (!token) return
+  const segments = token.split('.')
+  if (segments.length !== 3) {
+    error.value = 'JWT 应由 Header、Payload、Signature 三段组成。'
+    return
+  }
   try {
-    error.value = ''
-    return {
+    parsed.value = {
       header: jwtDecode(token, { header: true }) as Record<string, unknown>,
       payload: jwtDecode(token) as Record<string, unknown>,
-      signature: segs[2],
+      signature: segments[2] ?? '',
     }
-  } catch (e: unknown) {
-    error.value = '解析失败：' + (e instanceof Error ? e.message : String(e))
-    return null
+  }
+  catch (cause) {
+    error.value = `解析失败：${cause instanceof Error ? cause.message : 'Token 格式无效'}`
   }
 })
 
-function formatTs(ts: number): string {
-  return new Date(ts * 1000).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+function displayValue(value: unknown) {
+  return typeof value === 'string' ? value : JSON.stringify(value)
 }
-function isExpired(ts: number): boolean { return Date.now() / 1000 > ts }
+
+function formatTimestamp(value: unknown) {
+  const timestamp = Number(value)
+  if (!Number.isFinite(timestamp)) return '无效时间'
+  return new Date(timestamp * 1000).toLocaleString('zh-CN')
+}
+
+function isExpired(value: unknown) {
+  const timestamp = Number(value)
+  return Number.isFinite(timestamp) && Date.now() >= timestamp * 1000
+}
 </script>
 
+<template>
+  <LabLayout title="JWT 解析器" desc="在本地解码 JWT Header 与 Payload。此工具不会验证签名，也不会发送 Token。" accent="var(--color-neon-pink)">
+    <section>
+      <label for="jwt-input" class="tool-label">JWT Token</label>
+      <textarea id="jwt-input" v-model="input" class="tool-field tool-textarea min-h-32" spellcheck="false" placeholder="eyJhbGciOi..." />
+      <p class="tool-help mt-2">不要在不可信设备上粘贴仍然有效的生产 Token。</p>
+    </section>
+
+    <p v-if="error" class="tool-status mt-5 text-[var(--color-neon-pink)]" role="alert">! {{ error }}</p>
+
+    <div v-if="parsed" class="mt-6 grid gap-5 lg:grid-cols-2">
+      <section v-for="section in [{ title: 'Header', data: parsed.header, color: 'var(--color-neon-cyan)' }, { title: 'Payload', data: parsed.payload, color: 'var(--color-neon-green)' }]" :key="section.title" class="tool-panel overflow-hidden p-0">
+        <h2 class="border-b border-[var(--color-void-border)] px-4 py-3 font-mono text-sm font-semibold" :style="{ color: section.color }">{{ section.title }}</h2>
+        <dl>
+          <div v-for="(value, key) in section.data" :key="String(key)" class="grid gap-1 border-b border-[var(--color-void-border)] px-4 py-3 last:border-0 sm:grid-cols-[7rem_1fr]">
+            <dt class="font-mono text-xs" :style="{ color: section.color }">{{ key }}</dt>
+            <dd class="min-w-0 break-all font-mono text-xs text-[var(--color-text-primary)]">
+              {{ displayValue(value) }}
+              <span v-if="key === 'exp' || key === 'iat' || key === 'nbf'" class="mt-1 block text-[var(--color-text-muted)]">
+                {{ formatTimestamp(value) }}
+                <strong v-if="key === 'exp'" :class="isExpired(value) ? 'text-[var(--color-neon-pink)]' : 'text-[var(--color-neon-green)]'"> · {{ isExpired(value) ? '已过期' : '未过期' }}</strong>
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="tool-panel lg:col-span-2">
+        <h2 class="font-mono text-sm font-semibold text-[var(--color-neon-purple)]">Signature</h2>
+        <p class="mt-3 break-all font-mono text-xs text-[var(--color-text-secondary)]">{{ parsed.signature }}</p>
+        <p class="tool-help mt-3">仅展示签名片段，未使用密钥验证真实性。</p>
+      </section>
+    </div>
+
+    <div v-else-if="!input && !error" class="mt-10 border-y border-[var(--color-void-border)] py-12 text-center">
+      <p class="font-mono text-sm text-[var(--color-text-muted)]">粘贴 Token 后自动解析</p>
+    </div>
+  </LabLayout>
+</template>

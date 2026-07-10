@@ -1,59 +1,96 @@
-<template>
-  <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'json' }]" />
-    <div class="max-w-3xl mx-auto px-6 py-10">
-      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/json</p>
-
-      <h1 class="font-mono text-xl font-bold text-[var(--color-neon-green)] mb-6">JSON 工具</h1>
-      <div class="grid gap-4">
-        <textarea v-model="input" placeholder='{ "key": "value" }' class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:200px"></textarea>
-        <div class="flex gap-2 flex-wrap">
-          <button @click="format(2)" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(57,255,20,0.4)] text-[var(--color-neon-green)] hover:bg-[rgba(57,255,20,0.1)] transition-all">格式化</button>
-          <button @click="minify" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.1)] transition-all">压缩</button>
-          <button @click="sort" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(180,0,255,0.4)] text-[var(--color-neon-purple)] hover:bg-[rgba(180,0,255,0.1)] transition-all">排序 key</button>
-          <button @click="clear" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,0,170,0.3)] text-[rgba(255,0,170,0.7)] hover:bg-[rgba(255,0,170,0.1)] transition-all">清空</button>
-        </div>
-        <div class="flex gap-2">
-          <input v-model="pathQuery" placeholder="$.store.book[0].title" class="flex-1 font-mono text-sm rounded-xl border border-[var(--color-void-border)] px-4 py-2 bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none">
-          <button @click="runQuery" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,165,0,0.4)] text-[#ffa500] hover:bg-[rgba(255,165,0,0.1)] transition-all">JSONPath 查询</button>
-        </div>
-        <div v-if="pathResult" class="font-mono text-xs px-4 py-2 rounded-lg whitespace-pre-wrap" :style="pathOk?'background:rgba(57,255,20,0.1);color:#39ff14;border:1px solid rgba(57,255,20,0.2)':'background:rgba(255,0,170,0.1);color:#ff00aa;border:1px solid rgba(255,0,170,0.2)'">{{ pathResult }}</div>
-        <div v-if="msg" class="font-mono text-xs px-4 py-2 rounded-lg" :style="msgOk?'background:rgba(57,255,20,0.1);color:#39ff14;border:1px solid rgba(57,255,20,0.2)':'background:rgba(255,0,170,0.1);color:#ff00aa;border:1px solid rgba(255,0,170,0.2)'">{{ msg }}</div>
-      </div>
-    </div>
-    <AppFooter />
-  </div>
-</template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `JSON 工具 | ${siteName}` })
-const input=ref(''),msg=ref(''),msgOk=ref(true)
-function parse(){try{return{ok:true,val:JSON.parse(input.value)}}catch(e:any){return{ok:false,err:e.message}}}
-function format(indent: number){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(r.val,null,indent);msg.value='✓ 格式化完成';msgOk.value=true}
-function minify(){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(r.val);msg.value='✓ 压缩完成';msgOk.value=true}
-function sortKeys(obj: any): any{if(Array.isArray(obj))return obj.map(sortKeys);if(obj&&typeof obj==='object'){return Object.keys(obj).sort().reduce((a:any,k)=>{a[k]=sortKeys(obj[k]);return a},{})}return obj}
-function sort(){const r=parse();if(!r.ok){msg.value='❌ '+r.err;msgOk.value=false;return};input.value=JSON.stringify(sortKeys(r.val),null,2);msg.value='✓ Key 已排序';msgOk.value=true}
-function clear(){input.value='';msg.value='';pathResult.value=''}
 
-function queryPath(obj: any, path: string): any {
-  const keys = path.replace(/^\$\.?/, '').split(/[.\[\]]+/).filter(Boolean)
-  let cur = obj
-  for (const k of keys) {
-    if (cur == null) return undefined
-    cur = cur[isNaN(Number(k)) ? k : Number(k)]
+const input = shallowRef('{\n  "name": "void.dev",\n  "stack": ["Nuxt", "Vue", "Cloudflare"]\n}')
+const message = shallowRef('')
+const messageOk = shallowRef(true)
+const pathQuery = shallowRef('$.stack[0]')
+const pathResult = shallowRef('')
+const pathOk = shallowRef(true)
+
+function parseInput() {
+  try {
+    return { ok: true as const, value: JSON.parse(input.value) }
   }
-  return cur
+  catch (error) {
+    return { ok: false as const, error: error instanceof Error ? error.message : 'JSON 解析失败' }
+  }
 }
 
-const pathQuery = ref('')
-const pathResult = ref('')
-const pathOk = ref(true)
+function updateInput(transform: (value: unknown) => string, successMessage: string) {
+  const result = parseInput()
+  if (!result.ok) {
+    message.value = result.error
+    messageOk.value = false
+    return
+  }
+  input.value = transform(result.value)
+  message.value = successMessage
+  messageOk.value = true
+}
 
-function runQuery(){
-  const r = parse()
-  if (!r.ok) { pathResult.value = '❌ JSON 解析失败'; pathOk.value = false; return }
-  const res = queryPath(r.val, pathQuery.value)
-  if (res === undefined) { pathResult.value = '⚠ 路径不存在'; pathOk.value = false }
-  else { pathResult.value = JSON.stringify(res, null, 2); pathOk.value = true }
+function sortKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortKeys)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, nested]) => [key, sortKeys(nested)]))
+  }
+  return value
+}
+
+function format() { updateInput(value => JSON.stringify(value, null, 2), '格式化完成') }
+function minify() { updateInput(value => JSON.stringify(value), '压缩完成') }
+function sort() { updateInput(value => JSON.stringify(sortKeys(value), null, 2), 'Key 已按字母排序') }
+function clear() { input.value = ''; message.value = ''; pathResult.value = '' }
+
+function queryPath(value: unknown, path: string): unknown {
+  const keys = path.replace(/^\$\.?/, '').split(/[.\[\]]+/).filter(Boolean)
+  let current = value
+  for (const key of keys) {
+    if (current == null || typeof current !== 'object') return undefined
+    current = (current as Record<string, unknown>)[key]
+  }
+  return current
+}
+
+function runQuery() {
+  const result = parseInput()
+  if (!result.ok) {
+    pathResult.value = '请先修复 JSON 语法错误'
+    pathOk.value = false
+    return
+  }
+  const value = queryPath(result.value, pathQuery.value)
+  pathOk.value = value !== undefined
+  pathResult.value = value === undefined ? '路径不存在' : JSON.stringify(value, null, 2)
 }
 </script>
+
+<template>
+  <LabLayout title="JSON 工具" desc="格式化、压缩、排序并用简化 JSONPath 提取数据。所有处理都在浏览器本地完成。" accent="var(--color-neon-green)">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <section>
+        <label for="json-input" class="tool-label">JSON 输入</label>
+        <textarea id="json-input" v-model="input" spellcheck="false" class="tool-field tool-textarea min-h-[22rem]" />
+        <div class="mt-3 flex flex-wrap gap-2" aria-label="JSON 操作">
+          <button class="tool-button tool-button-success" @click="format">格式化</button>
+          <button class="tool-button tool-button-primary" @click="minify">压缩</button>
+          <button class="tool-button" @click="sort">排序 Key</button>
+          <button class="tool-button tool-button-danger" @click="clear">清空</button>
+        </div>
+        <div v-if="message" class="tool-status mt-3" :class="messageOk ? 'text-[var(--color-neon-green)]' : 'text-[var(--color-neon-pink)]'" role="status">
+          {{ messageOk ? '✓' : '!' }} {{ message }}
+        </div>
+      </section>
+
+      <aside class="tool-panel h-fit">
+        <h2 class="mb-1 font-mono text-sm font-semibold text-[var(--color-text-primary)]">JSONPath 查询</h2>
+        <p class="tool-help mb-4">支持点号与数组索引，例如 <code>$.stack[0]</code>。</p>
+        <label for="json-path" class="tool-label">查询路径</label>
+        <input id="json-path" v-model="pathQuery" class="tool-field" placeholder="$.store.book[0].title">
+        <button class="tool-button tool-button-primary mt-3 w-full" @click="runQuery">运行查询</button>
+        <pre v-if="pathResult" class="mt-4 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-[var(--color-void)] p-3 font-mono text-xs" :class="pathOk ? 'text-[var(--color-neon-cyan)]' : 'text-[var(--color-neon-pink)]'" aria-live="polite">{{ pathResult }}</pre>
+      </aside>
+    </div>
+  </LabLayout>
+</template>

@@ -7,12 +7,21 @@
 </template>
 
 <script setup lang="ts">
+const prefersReducedMotion = useReducedMotion()
+const route = useRoute()
+
+useHead(() => ({
+  bodyAttrs: {
+    class: route.path.startsWith('/lab/tools/') ? 'lab-tools-route' : route.path.startsWith('/lab/games/') ? 'lab-games-route' : '',
+  },
+}))
+
 const pageTransition = {
   name: 'page',
   mode: 'default',
   appear: true,
   onEnter(el: Element, done: () => void) {
-    if (import.meta.server) { done(); return }
+    if (import.meta.server || prefersReducedMotion.value) { done(); return }
     useGsap().then(bundle => {
       if (!bundle) { done(); return }
       bundle.gsap.fromTo(el,
@@ -22,7 +31,7 @@ const pageTransition = {
     })
   },
   onLeave(el: Element, done: () => void) {
-    if (import.meta.server) { done(); return }
+    if (import.meta.server || prefersReducedMotion.value) { done(); return }
     useGsap().then(bundle => {
       if (!bundle) { done(); return }
       bundle.gsap.to(el,
@@ -30,7 +39,7 @@ const pageTransition = {
       )
     })
   },
-}
+} as const
 </script>
 
 <style>
@@ -40,5 +49,13 @@ const pageTransition = {
 .page-leave-active {
   position: absolute;
   width: 100%;
+}
+
+@media (max-width: 640px) {
+  .lab-tools-route button:not([data-compact]),
+  .lab-tools-route input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  .lab-tools-route select {
+    min-height: 44px;
+  }
 }
 </style>

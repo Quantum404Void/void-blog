@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'sort-visualizer' }]" />
+    <h1 class="sr-only">排序算法可视化</h1>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex flex-col gap-3">
       <div class="flex flex-wrap gap-2">
         <button v-for="([algo, label, tc, color]) in algos" :key="algo"

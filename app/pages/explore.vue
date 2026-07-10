@@ -2,15 +2,15 @@
   <div class="min-h-screen bg-[var(--color-void)] overflow-x-hidden">
     <AppNav :crumbs="[{ label: 'explore', href: '/explore' }]" />
 
-    <main class="w-full max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-18" ref="mainRef">
+    <main class="w-full max-w-3xl mx-auto px-5 sm:px-8 py-12 sm:py-18" ref="mainRef">
 
       <!-- ══════════════════════════════════════════
            §1  SEARCH
            ══════════════════════════════════════════ -->
-      <section class="mb-20 section-search">
+      <section class="mb-12 sm:mb-16 section-search">
         <div class="mb-6">
-          <h2 class="font-mono text-xs text-[var(--color-neon-green)] uppercase tracking-[0.2em] mb-1">▸ 搜索</h2>
-          <p class="font-mono text-[11px] text-[var(--color-text-muted)]">全文搜索文章标题、摘要、标签</p>
+          <h1 class="font-mono text-2xl font-bold text-[var(--color-text-primary)] mb-2">搜索与探索</h1>
+          <p class="text-sm text-[var(--color-text-secondary)]">全文搜索文章，并从标签与写作统计中发现内容。</p>
         </div>
 
         <form @submit.prevent="doSearch" class="mb-5">
@@ -21,7 +21,8 @@
                 v-model="q"
                 type="text"
                 placeholder="搜索文章、标签..."
-                class="w-full bg-[#0f0f1a] border border-[var(--color-void-border)] rounded-lg px-4 py-2.5 pr-9 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-neon-cyan)] transition-colors"
+                aria-label="搜索文章"
+                class="tool-field pr-12"
               />
               <div v-if="pending" class="absolute right-3 top-1/2 -translate-y-1/2">
                 <svg class="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="2">
@@ -29,10 +30,10 @@
                 </svg>
               </div>
               <button v-else-if="q" type="button" @click="q = ''; results = []; searched = false"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors text-xs">✕</button>
+                class="absolute right-1 top-1/2 size-10 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors text-xs" aria-label="清空搜索">✕</button>
             </div>
             <button type="submit"
-              class="shrink-0 px-5 py-2.5 bg-[rgba(0,212,255,0.08)] border border-[rgba(0,212,255,0.3)] rounded-lg font-mono text-sm text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.18)] transition-colors">
+              class="tool-button tool-button-primary shrink-0 px-5">
               搜索
             </button>
           </div>
@@ -50,7 +51,7 @@
             <button
               v-for="tag in hotTags" :key="tag"
               @click="q = tag; doSearch()"
-              class="font-mono text-[11px] px-3 py-1 rounded-full border border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-all"
+              class="inline-flex min-h-11 items-center rounded-full border border-[var(--color-void-border)] px-3 font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[rgba(0,212,255,0.3)] transition-colors"
             >#{{ tag }}</button>
           </div>
         </div>
@@ -92,13 +93,13 @@
       </section>
 
       <!-- Divider -->
-      <div class="mb-20 h-px bg-gradient-to-r from-transparent via-[var(--color-void-border)] to-transparent"></div>
+      <div class="mb-12 h-px bg-gradient-to-r from-transparent via-[var(--color-void-border)] to-transparent sm:mb-16"></div>
 
       <!-- ══════════════════════════════════════════
            §2  TAGS
            ══════════════════════════════════════════ -->
-      <section class="mb-20 section-tags">
-        <div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+      <section class="mb-12 section-tags sm:mb-16">
+        <div class="mb-6 flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 class="font-mono text-xs text-[var(--color-neon-cyan)] uppercase tracking-[0.2em] mb-1">▸ 标签</h2>
             <p class="font-mono text-[11px] text-[var(--color-text-muted)]">
@@ -106,16 +107,17 @@
               <span class="text-[var(--color-text-secondary)] font-bold">{{ totalTagPosts }}</span> 篇文章
             </p>
           </div>
-          <div class="relative shrink-0">
+          <div class="relative w-full shrink-0 sm:w-52">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[var(--color-neon-cyan)] text-sm pointer-events-none">/</span>
             <input
               v-model="tagQuery"
               type="text"
               placeholder="过滤标签..."
-              class="w-44 bg-transparent border border-[var(--color-void-border)] rounded-lg pl-8 pr-8 py-2 font-mono text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[rgba(0,212,255,0.5)] transition-colors"
+              aria-label="过滤标签"
+              class="tool-field w-full pl-8 pr-12"
             />
-            <span v-if="tagQuery" @click="tagQuery=''"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] cursor-pointer text-xs">✕</span>
+            <button v-if="tagQuery" @click="tagQuery=''"
+              class="absolute right-1 top-1/2 size-10 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] text-xs" aria-label="清空标签过滤">✕</button>
           </div>
         </div>
 
@@ -143,7 +145,7 @@
       </section>
 
       <!-- Divider -->
-      <div class="mb-20 h-px bg-gradient-to-r from-transparent via-[var(--color-void-border)] to-transparent"></div>
+      <div class="mb-12 h-px bg-gradient-to-r from-transparent via-[var(--color-void-border)] to-transparent sm:mb-16"></div>
 
       <!-- ══════════════════════════════════════════
            §3  STATS
@@ -199,7 +201,8 @@ import type { PostSummary } from '~/types/post'
 const { siteUrl, siteName } = useSiteConfig()
 const route = useRoute()
 const router = useRouter()
-const mainRef = ref<HTMLElement | null>(null)
+const mainRef = useTemplateRef<HTMLElement>('mainRef')
+const prefersReducedMotion = useReducedMotion()
 
 useCanonical('/explore')
 useSeoMeta({
@@ -209,12 +212,12 @@ useSeoMeta({
 })
 
 // ── 搜索 ──────────────────────────────────────────────────
-const searchInput = ref<HTMLInputElement | null>(null)
-const q = ref((route.query.q as string) || '')
+const searchInput = useTemplateRef<HTMLInputElement>('searchInput')
+const q = shallowRef((route.query.q as string) || '')
 const results = ref<PostSummary[]>([])
-const pending = ref(false)
-const searched = ref(false)
-const lastQ = ref('')
+const pending = shallowRef(false)
+const searched = shallowRef(false)
+const lastQ = shallowRef('')
 
 const { data: tagsData } = await useFetch('/api/tags', { default: () => ({} as Record<string, number>) })
 
@@ -223,9 +226,14 @@ const hotTags = computed(() =>
 )
 
 function highlight(text: string): string {
-  if (!lastQ.value || !text) return text
+  const safeText = escapeHtml(text)
+  if (!lastQ.value || !safeText) return safeText
   const escaped = lastQ.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="search-highlight">$1</mark>')
+  return safeText.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="search-highlight">$1</mark>')
+}
+
+function escapeHtml(text: string) {
+  return text.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ?? character)
 }
 
 function formatFullDate(date: string) {
@@ -251,7 +259,7 @@ onMounted(() => {
 
 // ── 标签 ──────────────────────────────────────────────────
 const { getTagColorVar } = useTagColor()
-const tagQuery = ref('')
+const tagQuery = shallowRef('')
 const { data: postsData } = await useFetch('/api/posts', { default: () => [] as PostSummary[] })
 
 const tags = computed(() =>
@@ -326,6 +334,7 @@ const tagPlotData = computed(() => {
 
 // ── 入场动画 ───────────────────────────────────────────────
 onMounted(async () => {
+  if (prefersReducedMotion.value) return
   const bundle = await useGsap()
   if (!bundle) return
   const { gsap, ScrollTrigger } = bundle

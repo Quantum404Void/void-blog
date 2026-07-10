@@ -1,46 +1,76 @@
-<template>
-  <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'timestamp' }]" />
-    <div class="max-w-3xl mx-auto px-6 py-10 space-y-6">
-      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/timestamp</p>
-
-      <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">时间戳工具</h1>
-      <div class="border border-[var(--color-void-border)] rounded-xl p-6 bg-[var(--color-void-card)]">
-        <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-3">当前时间</div>
-        <div class="font-mono text-2xl font-bold text-[var(--color-neon-green)] mb-1">{{ nowTs }}</div>
-        <div class="font-mono text-sm text-[var(--color-text-muted)]">{{ nowStr }}</div>
-      </div>
-      <div class="grid grid-cols-1 gap-4">
-        <div>
-          <label class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">时间戳 → 时间</label>
-          <div class="flex gap-2">
-            <input v-model="tsInput" placeholder="1700000000" class="flex-1 font-mono text-sm rounded-xl border border-[var(--color-void-border)] px-4 py-2 bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none">
-            <button @click="ts2date" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.1)] transition-all">转换</button>
-          </div>
-          <div v-if="tsResult" class="mt-2 font-mono text-sm text-[var(--color-neon-cyan)] px-4 py-2 rounded-lg bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.1)]">{{ tsResult }}</div>
-        </div>
-        <div>
-          <label class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">时间 → 时间戳</label>
-          <div class="flex gap-2">
-            <input v-model="dateInput" type="datetime-local" class="flex-1 font-mono text-sm rounded-xl border border-[var(--color-void-border)] px-4 py-2 bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none">
-            <button @click="date2ts" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(57,255,20,0.4)] text-[var(--color-neon-green)] hover:bg-[rgba(57,255,20,0.1)] transition-all">转换</button>
-          </div>
-          <div v-if="dateResult" class="mt-2 font-mono text-sm text-[var(--color-neon-green)] px-4 py-2 rounded-lg bg-[rgba(57,255,20,0.05)] border border-[rgba(57,255,20,0.1)]">{{ dateResult }}</div>
-        </div>
-      </div>
-    </div>
-    <AppFooter />
-  </div>
-</template>
 <script setup lang="ts">
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `时间戳工具 | ${siteName}` })
-const tsInput=ref(''),dateInput=ref(''),tsResult=ref(''),dateResult=ref('')
-const nowTs=ref(''),nowStr=ref('')
-function update(){const d=new Date();nowTs.value=String(Math.floor(d.getTime()/1000));nowStr.value=d.toLocaleString('zh-CN')}
-function ts2date(){const ts=parseInt(tsInput.value);if(isNaN(ts)){tsResult.value='无效时间戳';return};const d=new Date(ts*(String(ts).length<=10?1000:1));tsResult.value=d.toLocaleString('zh-CN')+' (UTC: '+d.toUTCString()+')'}
-function date2ts(){if(!dateInput.value){dateResult.value='请选择时间';return};const d=new Date(dateInput.value);dateResult.value=`${Math.floor(d.getTime()/1000)} (ms: ${d.getTime()})`}
-let interval: any
-onMounted(()=>{update();interval=setInterval(update,1000)})
-onUnmounted(()=>clearInterval(interval))
+
+const timestampInput = shallowRef('1700000000')
+const dateInput = shallowRef('')
+const timestampResult = shallowRef('')
+const dateResult = shallowRef('')
+const now = shallowRef(new Date())
+
+const currentTimestamp = computed(() => Math.floor(now.value.getTime() / 1000))
+const currentDate = computed(() => now.value.toLocaleString('zh-CN', { dateStyle: 'full', timeStyle: 'medium' }))
+
+function timestampToDate() {
+  const timestamp = Number(timestampInput.value)
+  if (!Number.isFinite(timestamp)) {
+    timestampResult.value = '请输入有效的数字时间戳'
+    return
+  }
+  const date = new Date(timestamp * (String(Math.trunc(timestamp)).length <= 10 ? 1000 : 1))
+  timestampResult.value = Number.isNaN(date.getTime()) ? '时间戳超出有效范围' : `${date.toLocaleString('zh-CN')} · ${date.toUTCString()}`
+}
+
+function dateToTimestamp() {
+  if (!dateInput.value) {
+    dateResult.value = '请先选择日期和时间'
+    return
+  }
+  const date = new Date(dateInput.value)
+  dateResult.value = `${Math.floor(date.getTime() / 1000)} 秒 · ${date.getTime()} 毫秒`
+}
+
+let clock: ReturnType<typeof setInterval> | undefined
+onMounted(() => { clock = setInterval(() => { now.value = new Date() }, 1000) })
+onUnmounted(() => clearInterval(clock))
 </script>
+
+<template>
+  <LabLayout title="时间戳转换" desc="在 Unix 秒/毫秒时间戳与本地日期时间之间转换。" accent="#ffa500">
+    <div class="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <aside class="tool-panel h-fit">
+        <p class="tool-label">当前 Unix 时间</p>
+        <div class="break-all font-mono text-3xl font-bold tabular-nums text-[var(--color-neon-green)]">{{ currentTimestamp }}</div>
+        <p class="tool-help mt-3">{{ currentDate }}</p>
+      </aside>
+
+      <div class="space-y-6">
+        <section class="tool-panel">
+          <h2 class="mb-1 font-mono text-sm font-semibold text-[var(--color-text-primary)]">时间戳 → 日期时间</h2>
+          <p class="tool-help mb-4">自动识别 10 位秒时间戳和 13 位毫秒时间戳。</p>
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="flex-1">
+              <label for="timestamp-input" class="tool-label">Unix 时间戳</label>
+              <input id="timestamp-input" v-model="timestampInput" inputmode="numeric" class="tool-field" placeholder="1700000000">
+            </div>
+            <button class="tool-button tool-button-primary self-end sm:min-w-24" @click="timestampToDate">转换</button>
+          </div>
+          <div v-if="timestampResult" class="tool-status mt-4 text-[var(--color-neon-cyan)]" role="status">{{ timestampResult }}</div>
+        </section>
+
+        <section class="tool-panel">
+          <h2 class="mb-1 font-mono text-sm font-semibold text-[var(--color-text-primary)]">日期时间 → 时间戳</h2>
+          <p class="tool-help mb-4">浏览器按当前系统时区解释选择的日期时间。</p>
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="flex-1">
+              <label for="date-input" class="tool-label">本地日期时间</label>
+              <input id="date-input" v-model="dateInput" type="datetime-local" class="tool-field">
+            </div>
+            <button class="tool-button tool-button-success self-end sm:min-w-24" @click="dateToTimestamp">转换</button>
+          </div>
+          <div v-if="dateResult" class="tool-status mt-4 text-[var(--color-neon-green)]" role="status">{{ dateResult }}</div>
+        </section>
+      </div>
+    </div>
+  </LabLayout>
+</template>

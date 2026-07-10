@@ -144,9 +144,11 @@ const byYear = computed(() => {
 const years = computed(() => Object.keys(byYear.value).sort((a, b) => Number(b) - Number(a)))
 
 const [listParent] = useAutoAnimate({ duration: 200 })
-const mainRef = ref<HTMLElement | null>(null)
+const mainRef = useTemplateRef<HTMLElement>('mainRef')
+const prefersReducedMotion = useReducedMotion()
 
 onMounted(async () => {
+  if (prefersReducedMotion.value) return
   const bundle = await useGsap()
   if (!bundle) return
   const { gsap, ScrollTrigger } = bundle

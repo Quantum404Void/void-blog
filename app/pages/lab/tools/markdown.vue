@@ -1,142 +1,77 @@
-<template>
-  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'markdown' }]" />
-
-    <div class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6">
-      <div class="flex items-center justify-between mb-4">
-        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/markdown</p>
-
-        <h1 class="font-mono text-xl font-bold" style="color:#b400ff">MD Markdown 预览</h1>
-        <button @click="clear" class="font-mono text-[10px] px-3 py-1.5 rounded-lg border transition-all" style="border-color:rgba(255,0,170,0.3);color:rgba(255,0,170,0.7)">清空</button>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1" style="min-height:60vh">
-        <!-- 左侧输入 -->
-        <div class="flex flex-col gap-2">
-          <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest flex items-center gap-2">
-            <span style="color:#b400ff">▌</span> 输入
-            <span class="ml-auto">{{ charCount }} 字符</span>
-          </div>
-          <textarea
-            v-model="source"
-            placeholder="# 在这里输入 Markdown…"
-            class="flex-1 w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none leading-relaxed"
-            style="min-height:50vh"
-          ></textarea>
-        </div>
-
-        <!-- 右侧预览 -->
-        <div class="flex flex-col gap-2">
-          <div class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest flex items-center gap-2">
-            <span style="color:#00ff88">▌</span> 预览
-          </div>
-          <div
-            class="flex-1 rounded-xl border border-[var(--color-void-border)] bg-[var(--color-void-card)] p-5 overflow-y-auto prose-void"
-            style="min-height:50vh"
-            v-html="rendered"
-          ></div>
-        </div>
-      </div>
-    </div>
-    <AppFooter />
-  </div>
-</template>
-
 <script setup lang="ts">
+// @ts-expect-error markdown-it does not ship declarations in this project
+import MarkdownIt from 'markdown-it'
+
+interface MarkdownToken { attrSet: (name: string, value: string) => void }
+interface MarkdownRenderer { renderToken: (tokens: MarkdownToken[], index: number, options: Record<string, unknown>) => string }
+type LinkOpenRule = (
+  tokens: MarkdownToken[],
+  index: number,
+  options: Record<string, unknown>,
+  env: unknown,
+  self: MarkdownRenderer,
+) => string
+
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Markdown 预览 | ${siteName}` })
 
-const { buildMd } = useMarkdown()
-const mdInst = shallowRef<any>(null)
-onMounted(async () => { mdInst.value = await buildMd() })
+const source = shallowRef(`# Markdown 预览
 
-const rendered = computed(() => source.value && mdInst.value ? mdInst.value.render(source.value) : source.value)
+在左侧输入内容，右侧会即时渲染。
 
-const source = ref(`# Hello, Markdown!
+- **粗体** 与 *斜体*
+- [安全链接](https://void.dev)
+- \`inline code\`
 
-## 基本语法示例
+> 原始 HTML 会作为文本显示，避免预览注入。`)
 
-**粗体** 和 *斜体* 以及 \`行内代码\`
-
-> 引用块示例：写代码，记录思考
-
-\`\`\`js
-const greet = name => \`Hello, \${name}!\`
-console.log(greet('void'))
-\`\`\`
-
-- 无序列表项 1
-- 无序列表项 2
-  - 嵌套项目
-
-1. 有序列表
-2. 第二项
-
-[链接示例](https://void.dev) | ![图片](https://via.placeholder.com/40)
-
----
-
-| 列1 | 列2 | 列3 |
-|-----|-----|-----|
-| A   | B   | C   |
-`)
-
-const charCount = computed(() => source.value.length)
-
-function clear() {
-  source.value = ''
+const markdown = new MarkdownIt({ html: false, linkify: true, typographer: true, breaks: false })
+const defaultLinkOpen = markdown.renderer.rules.link_open as LinkOpenRule | undefined
+const safeLinkOpen: LinkOpenRule = (tokens, index, options, env, self) => {
+  tokens[index]?.attrSet('target', '_blank')
+  tokens[index]?.attrSet('rel', 'noopener noreferrer')
+  return defaultLinkOpen ? defaultLinkOpen(tokens, index, options, env, self) : self.renderToken(tokens, index, options)
 }
+markdown.renderer.rules.link_open = safeLinkOpen
+
+const rendered = computed(() => markdown.render(source.value))
+const characterCount = computed(() => source.value.length)
+const wordCount = computed(() => source.value.trim() ? source.value.trim().split(/\s+/).length : 0)
 </script>
 
-<style>
-.prose-void h1, .prose-void h2, .prose-void h3, .prose-void h4 {
-  color: var(--color-neon-green);
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  margin: 1em 0 0.5em;
-  font-weight: 700;
-}
-.prose-void h1 { font-size: 1.5rem; }
-.prose-void h2 { font-size: 1.2rem; }
-.prose-void h3 { font-size: 1rem; }
-.prose-void p { color: var(--color-text-primary); margin: 0.6em 0; line-height: 1.7; font-size: 0.875rem; }
-.prose-void a { color: #00d4ff; text-decoration: underline; }
-.prose-void strong { color: #00ff88; }
-.prose-void em { color: #b400ff; }
-.prose-void code {
-  background: rgba(180,0,255,0.12);
-  color: #b400ff;
-  padding: 0.1em 0.4em;
-  border-radius: 4px;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 0.8rem;
-}
-.prose-void pre {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid var(--color-void-border);
-  border-radius: 10px;
-  padding: 1rem;
-  overflow-x: auto;
-  margin: 0.8em 0;
-}
-.prose-void pre code {
-  background: none;
-  color: #00d4ff;
-  padding: 0;
-  font-size: 0.8rem;
-}
-.prose-void blockquote {
-  border-left: 3px solid rgba(180,0,255,0.5);
-  padding: 0.3em 1em;
-  margin: 0.8em 0;
-  color: var(--color-text-muted);
-  background: rgba(180,0,255,0.05);
-  border-radius: 0 8px 8px 0;
-}
-.prose-void ul, .prose-void ol { padding-left: 1.4em; color: var(--color-text-primary); font-size: 0.875rem; }
-.prose-void li { margin: 0.25em 0; }
-.prose-void hr { border: none; border-top: 1px solid var(--color-void-border); margin: 1em 0; }
-.prose-void table { border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 0.8em 0; }
-.prose-void th { color: #00d4ff; border: 1px solid rgba(0,212,255,0.2); padding: 0.4em 0.8em; background: rgba(0,212,255,0.06); font-family: var(--font-mono, monospace); }
-.prose-void td { color: var(--color-text-primary); border: 1px solid var(--color-void-border); padding: 0.4em 0.8em; }
-.prose-void img { max-width: 100%; height: auto; border-radius: 8px; display: block; }
+<template>
+  <LabLayout title="Markdown 预览" desc="实时预览常用 Markdown。原始 HTML 默认禁用，外部链接在新标签页安全打开。" accent="var(--color-neon-purple)">
+    <div class="mb-4 flex flex-wrap items-center gap-4 font-mono text-xs text-[var(--color-text-muted)]">
+      <span>{{ characterCount }} 字符</span>
+      <span>{{ wordCount }} 词</span>
+      <button class="tool-button px-3 sm:ml-auto" @click="source = ''">清空</button>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-2">
+      <section>
+        <label for="markdown-input" class="tool-label">Markdown 输入</label>
+        <textarea id="markdown-input" v-model="source" class="tool-field tool-textarea min-h-[34rem]" spellcheck="false" />
+      </section>
+      <section>
+        <p class="tool-label">安全预览</p>
+        <div class="markdown-preview min-h-[34rem] overflow-auto rounded-xl border border-[var(--color-void-border)] bg-[var(--color-void-card)] p-5" v-html="rendered" />
+      </section>
+    </div>
+  </LabLayout>
+</template>
+
+<style scoped>
+.markdown-preview :deep(h1), .markdown-preview :deep(h2), .markdown-preview :deep(h3) { margin: 1.4em 0 0.6em; color: var(--color-text-primary); font-family: var(--font-mono); font-weight: 700; }
+.markdown-preview :deep(h1:first-child), .markdown-preview :deep(h2:first-child) { margin-top: 0; }
+.markdown-preview :deep(h1) { font-size: 1.5rem; }
+.markdown-preview :deep(h2) { border-bottom: 1px solid var(--color-void-border); padding-bottom: 0.5rem; font-size: 1.2rem; }
+.markdown-preview :deep(p), .markdown-preview :deep(li) { color: var(--color-text-secondary); font-size: 0.9rem; line-height: 1.75; }
+.markdown-preview :deep(ul), .markdown-preview :deep(ol) { margin: 0.8rem 0; padding-left: 1.5rem; }
+.markdown-preview :deep(a) { color: var(--color-neon-cyan); text-decoration: underline; text-underline-offset: 0.18em; }
+.markdown-preview :deep(code) { border-radius: 0.3rem; background: rgba(180, 76, 255, 0.1); padding: 0.12rem 0.35rem; color: var(--color-neon-purple); font-family: var(--font-mono); }
+.markdown-preview :deep(pre) { margin: 1rem 0; overflow-x: auto; border: 1px solid var(--color-void-border); border-radius: 0.75rem; background: var(--color-void); padding: 1rem; }
+.markdown-preview :deep(pre code) { background: transparent; padding: 0; color: var(--color-text-primary); }
+.markdown-preview :deep(blockquote) { margin: 1rem 0; border-left: 2px solid var(--color-neon-purple); padding-left: 1rem; }
+.markdown-preview :deep(table) { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.markdown-preview :deep(th), .markdown-preview :deep(td) { border: 1px solid var(--color-void-border); padding: 0.5rem 0.75rem; text-align: left; }
 </style>

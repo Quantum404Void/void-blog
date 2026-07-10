@@ -131,7 +131,7 @@ function numToHex(n: number): string {
 }
 
 function getIPClass(ip: string, isPrivate: boolean): string {
-  const first = parseInt(ip.split('.')[0])
+  const first = parseInt(ip.split('.')[0] ?? '0')
   const cls = first < 128 ? 'A' : first < 192 ? 'B' : first < 224 ? 'C' : first < 240 ? 'D (Multicast)' : 'E (Reserved)'
   return `${cls} / ${isPrivate ? 'Private' : 'Public'}`
 }
@@ -215,7 +215,7 @@ const BinaryRow = defineComponent({
       let bitPos = 0
       for (let i = 0; i < 4; i++) {
         if (i > 0) children.push(h('span', { style: 'color:#333;margin:0 4px' }, '.'))
-        const octet = (props.octets as string[])[i]
+        const octet = (props.octets as string[])[i] ?? '00000000'
         for (let b = 0; b < 8; b++) {
           const bit = octet[b]
           const isNetPart = bitPos < props.prefix

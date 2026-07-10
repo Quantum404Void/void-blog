@@ -1,8 +1,28 @@
 // server/api/stats.get.ts
 import type { PostRow } from '../../types/index'
 import { parseTags } from '../../utils/response'
+import { demoPost } from '../../content/demo-post'
+import { hasD1 } from '../../utils/d1'
 
 export default defineEventHandler(async (event) => {
+  if (!hasD1(event)) {
+    const year = demoPost.pub_date.slice(0, 4)
+    const month = demoPost.pub_date.slice(0, 7)
+    const tagCounts = Object.fromEntries(demoPost.tags.map(tag => [tag, 1]))
+    return {
+      totalPosts: 1,
+      totalTags: demoPost.tags.length,
+      byYear: { [year]: 1 },
+      byMonth: { [month]: 1 },
+      tagCounts,
+      recentPosts: [{ slug: demoPost.slug, pub_date: demoPost.pub_date, tags: demoPost.tags }],
+      totalWords: demoPost.word_count ?? 0,
+      longestPost: null,
+      shortestPost: null,
+      tagPosts: Object.fromEntries(demoPost.tags.map(tag => [tag, [demoPost.slug]])),
+    }
+  }
+
   const rows = await queryD1<PostRow>(
     event, 'SELECT slug,pub_date,tags,content,title FROM posts WHERE draft=0 ORDER BY pub_date DESC'
   )

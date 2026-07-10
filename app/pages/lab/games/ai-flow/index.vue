@@ -387,6 +387,7 @@ onUnmounted(() => {
 <template>
   <div class="h-screen flex flex-col overflow-hidden" style="background:#08080f;color:var(--color-text-primary)">
     <AppNav :crumbs="crumbs" />
+    <h1 class="sr-only">AI Flow 可视化编辑器</h1>
 
     <!-- 顶部工具栏 -->
     <AiFlowToolbar

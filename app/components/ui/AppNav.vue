@@ -1,11 +1,11 @@
 <template>
-  <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.9);backdrop-filter:blur(16px) saturate(180%)">
+  <nav aria-label="主导航" class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.96);backdrop-filter:blur(10px)">
     <div class="w-full px-4 sm:px-6 xl:px-8 h-14">
     <div class="max-w-2xl mx-auto h-full flex items-center justify-between gap-3 min-w-0">
 
       <!-- 左侧：Logo + 面包屑 -->
       <div class="flex items-center gap-2 min-w-0 overflow-hidden">
-        <NuxtLink href="/" class="flex items-center gap-1.5 shrink-0 group" aria-label="Home">
+        <NuxtLink href="/" class="flex min-h-11 items-center gap-1.5 shrink-0 group" aria-label="返回首页">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-opacity group-hover:opacity-80 shrink-0">
             <rect width="24" height="24" rx="5" fill="#0a0a0f"/>
             <path d="M5 6 L12 18 L19 6" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -39,9 +39,11 @@
         <!-- 时钟已移除 -->
         <!-- 移动端 hamburger -->
         <button
-          class="sm:hidden flex flex-col gap-1 -mr-1 p-2 rounded-md border border-transparent hover:border-[var(--color-void-border)] transition-colors"
+          class="sm:hidden flex size-11 flex-col items-center justify-center gap-1 -mr-1 rounded-md border border-transparent hover:border-[var(--color-void-border)] transition-colors"
           @click="mobileOpen = !mobileOpen"
-          aria-label="Toggle menu"
+          aria-label="切换导航菜单"
+          :aria-expanded="mobileOpen"
+          aria-controls="mobile-navigation"
         >
           <span class="block w-4 h-0.5 transition-all" :class="mobileOpen ? 'rotate-45 translate-y-1.5 bg-[var(--color-neon-cyan)]' : 'bg-[var(--color-text-muted)]'"></span>
           <span class="block w-4 h-0.5 transition-all" :class="mobileOpen ? 'opacity-0' : 'bg-[var(--color-text-muted)]'"></span>
@@ -59,12 +61,12 @@
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-2"
     >
-      <div v-if="mobileOpen" class="sm:hidden border-t border-[var(--color-void-border)] px-4 py-3 flex flex-col gap-2" style="background:rgba(5,5,12,0.95)">
+      <div id="mobile-navigation" v-if="mobileOpen" class="sm:hidden border-t border-[var(--color-void-border)] px-4 py-2 flex flex-col" style="background:rgba(5,5,12,0.98)">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.href"
           :href="link.href"
-          class="font-mono text-xs py-2 transition-colors"
+          class="font-mono text-sm min-h-11 flex items-center transition-colors"
           :class="isActive(link.href) ? link.activeClass : 'text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)]'"
           :style="link.style"
           @click="mobileOpen = false"

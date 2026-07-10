@@ -3,11 +3,11 @@
     <div :class="maxW" class="mx-auto px-4 sm:px-6 py-8">
       <div class="mb-6 h-px bg-gradient-to-r from-transparent via-[var(--color-void-border)] to-transparent"></div>
       <!-- nav links -->
-      <div class="flex items-center justify-center gap-6 mb-6">
-        <NuxtLink href="/" class="font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors">~/home</NuxtLink>
-        <NuxtLink href="/blog" class="font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
-        <NuxtLink href="/explore" class="font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">~/explore</NuxtLink>
-        <NuxtLink href="/about" class="font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">~/about</NuxtLink>
+      <div class="flex flex-wrap items-center justify-center gap-x-5 mb-4">
+        <NuxtLink href="/" class="font-mono text-xs min-h-11 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors">~/home</NuxtLink>
+        <NuxtLink href="/blog" class="font-mono text-xs min-h-11 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">~/blog</NuxtLink>
+        <NuxtLink href="/explore" class="font-mono text-xs min-h-11 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">~/explore</NuxtLink>
+        <NuxtLink href="/about" class="font-mono text-xs min-h-11 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">~/about</NuxtLink>
       </div>
       <!-- back link slot -->
       <div v-if="backHref" class="flex justify-center mb-5">
@@ -17,7 +17,7 @@
       </div>
       <slot />
       <!-- bottom -->
-      <div class="flex items-center justify-between font-mono text-[10px] text-[var(--color-text-muted)] opacity-40 select-none">
+      <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-[var(--color-text-muted)] opacity-70 select-none">
         <span>CC BY-NC 4.0 &copy; {{ new Date().getFullYear() }} Void</span>
         <span class="tabular-nums">nuxt4 · cf-pages · d1</span>
       </div>

@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'wordle' }]" />
+    <h1 class="sr-only">Code Wordle</h1>
     <div class="max-w-xl mx-auto px-4 sm:px-6 py-10 flex flex-col items-center">
       <div v-if="message" class="font-mono text-sm px-4 py-2 rounded-lg mb-4" :style="msgStyle">{{ message }}</div>
       <!-- Grid -->

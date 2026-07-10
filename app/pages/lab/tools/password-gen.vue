@@ -122,6 +122,15 @@ const charsetOpts = reactive([
 
 const wordlist = 'apple brave cloud dance eager flame globe happy input judge knife lemon magic noble ocean proud quiet river storm tiger unity valor water xray yield zebra alpha beta core data echo forest grain hero image jump karma light monk nova orbit pixel quest radar solar trace ultra vivid wave xenon youth'.split(' ')
 
+function secureIndex(limit: number): number {
+  if (limit <= 0) return 0
+  const max = Math.floor(0x100000000 / limit) * limit
+  const value = new Uint32Array(1)
+  do crypto.getRandomValues(value)
+  while ((value[0] ?? 0) >= max)
+  return (value[0] ?? 0) % limit
+}
+
 function buildCharset(): string {
   const similar = new Set('0OlI1')
   let chars = ''
@@ -136,14 +145,12 @@ function buildCharset(): string {
 
 function genPassword(): string {
   if (wordBased.value) {
-    const words = Array.from({ length: 3 + Math.floor(Math.random() * 2) }, () => wordlist[Math.floor(Math.random() * wordlist.length)])
-    return words.join('-') + Math.floor(Math.random() * 100)
+    const words = Array.from({ length: 3 + secureIndex(2) }, () => wordlist[secureIndex(wordlist.length)])
+    return `${words.join('-')}${String(secureIndex(100)).padStart(2, '0')}`
   }
   const charset = buildCharset()
   if (!charset) return ''
-  const arr = new Uint32Array(length.value)
-  crypto.getRandomValues(arr)
-  return Array.from(arr, n => charset[n % charset.length]).join('')
+  return Array.from({ length: length.value }, () => charset[secureIndex(charset.length)]).join('')
 }
 
 function generate() {
@@ -153,9 +160,13 @@ function generate() {
 }
 
 const entropy = computed(() => {
-  if (!passwords.value[0]) return 0
-  const charset = wordBased.value ? 50000 : buildCharset().length
-  return Math.round(Math.log2(charset) * (wordBased.value ? 4 : length.value))
+  const password = passwords.value[0]
+  if (!password) return 0
+  if (wordBased.value) {
+    const wordCount = password.split('-').length
+    return Math.round(Math.log2(wordlist.length) * wordCount + Math.log2(100))
+  }
+  return Math.round(Math.log2(buildCharset().length) * length.value)
 })
 
 const strengthLabel = computed(() => {
@@ -177,7 +188,9 @@ const strengthColor = computed(() => {
 const strengthPct = computed(() => Math.min(100, Math.round(entropy.value / 128 * 100)))
 
 async function copySingle(i: number) {
-  await copyToClipboard(passwords.value[i])
+  const password = passwords.value[i]
+  if (!password) return
+  await copyToClipboard(password)
   copiedIdx.value = i
   setTimeout(() => copiedIdx.value = null, 2000)
 }

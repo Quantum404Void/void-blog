@@ -1,6 +1,7 @@
 <template>
   <div class="doom-fire-page">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'games', href: '/lab' }, { label: 'Doom Fire' }]" />
+    <h1 class="sr-only">Doom Fire</h1>
 
     <main class="content">
       <div class="controls">

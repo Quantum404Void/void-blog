@@ -12,6 +12,11 @@ export function getD1(event: H3Event): D1Database {
   return env.void_blog_posts
 }
 
+export function hasD1(event: H3Event): boolean {
+  const env = event.context.cloudflare?.env as { void_blog_posts?: D1Database } | undefined
+  return Boolean(env?.void_blog_posts)
+}
+
 export async function queryD1<T = Record<string, unknown>>(
   event: H3Event,
   sql: string,

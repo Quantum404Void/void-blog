@@ -175,8 +175,10 @@ useSeoMeta({
 })
 
 onMounted(async () => {
-  const { gsap, ScrollTrigger } = await useGsap()
-  if (!gsap) return
+  if (prefersReducedMotion.value) return
+  const bundle = await useGsap()
+  if (!bundle) return
+  const { gsap, ScrollTrigger } = bundle
 
   // 终端行逐行打字机效果
   const termLines = document.querySelectorAll('.text-xs.space-y-1 > div')
@@ -208,6 +210,8 @@ onMounted(async () => {
   // SPA 导航后 ScrollTrigger 需要 refresh 重新计算位置
   setTimeout(() => ScrollTrigger.refresh(), 100)
 })
+
+const prefersReducedMotion = useReducedMotion()
 
 const topics = [
   { icon: '⚙️', tag: 'cpp',      title: '系统与底层',  desc: 'C++、驱动、通信协议、性能调优' },

@@ -11,6 +11,8 @@ export interface PostSummary {
   likes?: number
   /** 字数（来自 D1 migration 0002，可能为空） */
   word_count?: number
+  /** 源码内置演示文章，不写入统计与评论 */
+  demo?: boolean
 }
 
 export interface Post extends PostSummary {

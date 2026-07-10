@@ -1,5 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-01',
 
@@ -131,13 +133,13 @@ export default defineNuxtConfig({
 
   routeRules: {
     // 页面级 ISR 缓存（CF Pages 支持）
-    '/': { isr: 300 },
-    '/blog': { isr: 300 },
-    '/blog/**': { isr: 600 },
-    '/tags': { isr: 600 },
-    '/tags/**': { isr: 600 },
-    '/about': { isr: 3600 },
-    '/stats': { isr: 300 },
+    '/': { isr: isProduction ? 300 : false },
+    '/blog': { isr: isProduction ? 300 : false },
+    '/blog/**': { isr: isProduction ? 600 : false },
+    '/tags': { isr: isProduction ? 600 : false },
+    '/tags/**': { isr: isProduction ? 600 : false },
+    '/about': { isr: isProduction ? 3600 : false },
+    '/stats': { isr: isProduction ? 300 : false },
     // 只读数据：CF Edge 缓存 60s，D1 写入后自动过期（浏览器不缓存，只缓存在 CF edge）
     '/api/posts': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
     '/api/posts/**': { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } },
@@ -149,8 +151,8 @@ export default defineNuxtConfig({
     '/api/admin/**': { headers: { 'Cache-Control': 'no-store' } },
     '/api/auth/**': { headers: { 'Cache-Control': 'no-store' } },
     '/api/ai-chat': { headers: { 'Cache-Control': 'no-store' } },
-    '/rss.xml': { isr: 3600 },
-    '/sitemap.xml': { isr: 3600 },
+    '/rss.xml': { isr: isProduction ? 3600 : false },
+    '/sitemap.xml': { isr: isProduction ? 3600 : false },
   },
 
   nitro: {

@@ -37,7 +37,7 @@
 
   --color-text-primary: #e8e8f0;
   --color-text-secondary: #a8a8c8;
-  --color-text-muted: #6868a0;
+  --color-text-muted: #9292b8;
 
   /* Typography */
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", "Fira Code", "Source Code Pro", Consolas, "Courier New", monospace;
@@ -59,7 +59,7 @@
   --color-void-muted: #c0c0d0;
   --color-text-primary: #0a0a1a;
   --color-text-secondary: #3a3a5a;
-  --color-text-muted: #6868a0;
+  --color-text-muted: #56567a;
   --color-neon-green: #00aa55;
   --color-neon-cyan: #0099cc;
   --color-neon-purple: #8833cc;
@@ -84,13 +84,6 @@
     font-family: var(--font-sans);
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 3px,
-      rgba(0,0,0,0.06) 3px,
-      rgba(0,0,0,0.06) 4px
-    );
   }
 
   button, [role="button"], select, input[type="range"], input[type="checkbox"], input[type="radio"], label[for], a {
@@ -209,16 +202,10 @@
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-neon-green), var(--color-neon-cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-neon-green);
 }
 .gradient-text-purple {
-  background: linear-gradient(135deg, var(--color-neon-purple), var(--color-neon-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-neon-purple);
 }
 
 /* Timeline scrollbar */
@@ -268,10 +255,11 @@
 .prose h1, .prose h2, .prose h3, .prose h4 {
   font-family: var(--font-mono);
   font-weight: 700;
-  line-height: 1.3;
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
+  line-height: 1.25;
+  margin-top: 3.5rem;
+  margin-bottom: 1.25rem;
   position: relative;
+  text-wrap: balance;
 }
 /* 标题锚点 hover 链接 */
 .prose h2[id], .prose h3[id] {
@@ -290,14 +278,15 @@
 .prose h2[id]:hover::before, .prose h3[id]:hover::before {
   opacity: 0.5;
 }
-.prose h2 { font-size: 1.25rem; color: var(--color-text-primary); border-bottom: 1px solid var(--color-void-border); padding-bottom: 0.5rem; }
-.prose h3 { font-size: 1.05rem; color: var(--color-text-secondary); }
+.prose h2 { font-size: clamp(1.4rem, 3vw, 1.75rem); color: var(--color-text-primary); border-bottom: 1px solid var(--color-void-border); padding-bottom: 0.75rem; }
+.prose h3 { font-size: clamp(1.12rem, 2vw, 1.3rem); color: var(--color-text-primary); margin-top: 2.5rem; }
 .prose h4 { font-size: 0.95rem; color: var(--color-text-muted); }
 .prose p {
   margin-bottom: 1.25rem;
-  text-align: justify;
+  text-align: left;
   overflow-wrap: break-word;
   word-break: break-word;
+  text-wrap: pretty;
 }
 .prose img {
   border-radius: 0.75rem;
@@ -327,22 +316,6 @@
    _prose-extended.css — prose 扩展：blockquote/表格/列表/链接/kbd/mark
    ═══════════════════════════════════════════════════════ */
 
-/* ── 扫描线 scanline 效果（赛博朋克标志性） ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.035) 2px,
-    rgba(0,0,0,0.035) 4px
-  );
-  pointer-events: none;
-  z-index: 9999;
-}
-
 /* ── 全局 neon 光晕选择框（terminal 风） ── */
 :focus-visible {
   outline: 1px solid rgba(0,212,255,0.6);
@@ -356,11 +329,11 @@ body::after {
 
 /* ── prose blockquote 赛博风 ── */
 .prose blockquote {
-  border-left: 3px solid var(--color-neon-purple);
+  border: 1px solid rgba(180,76,255,0.24);
   background: rgba(180,76,255,0.05);
-  border-radius: 0 0.5rem 0.5rem 0;
-  padding: 0.75rem 1.25rem;
-  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  margin: 2rem 0;
   font-style: normal;
   color: var(--color-text-secondary);
 }
@@ -382,6 +355,7 @@ body::after {
   font-size: 0.875rem;
   font-family: var(--font-mono);
   margin: 1.5rem 0;
+  min-width: 36rem;
 }
 .prose thead tr {
   background: rgba(0,212,255,0.08);
@@ -479,8 +453,10 @@ body::after {
   -webkit-overflow-scrolling: touch;
 }
 .prose .shiki .line {
-  display: block;
+  display: inline-block;
+  width: 100%;
   min-height: 1.2em;
+  line-height: 1.65;
 }
 /* Shiki 行号（通过 CSS counter 实现） */
 .prose .shiki.has-line-numbers code {
@@ -509,8 +485,8 @@ body::after {
 .callout {
   border-radius: 0.75rem;
   padding: 1rem 1.25rem;
-  margin: 1.5rem 0;
-  border-left: 4px solid;
+  margin: 2rem 0;
+  border: 1px solid;
 }
 .callout-title {
   font-weight: 600;
@@ -680,8 +656,8 @@ body::after {
 
 @media (max-width: 640px) {
   .prose {
-    font-size: 0.95rem;
-    line-height: 1.8;
+    font-size: 1rem;
+    line-height: 1.82;
   }
 
   .prose p {
@@ -689,7 +665,7 @@ body::after {
   }
 
   .prose h1, .prose h2, .prose h3, .prose h4 {
-    margin-top: 2rem;
+    margin-top: 2.75rem;
     margin-bottom: 0.85rem;
   }
 
@@ -802,9 +778,9 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
+  background: radial-gradient(ellipse at center, transparent 65%, rgba(0,0,0,0.22) 100%);
   pointer-events: none;
-  z-index: 9998;
+  z-index: -1;
 }
 
 /* lab 卡片 hover neon 发光 */
@@ -853,3 +829,76 @@ body::before {
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.5); }
+
+/* Lab tools — shared accessible controls */
+.tool-field {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--color-void-border);
+  border-radius: 0.75rem;
+  background: var(--color-void-card);
+  color: var(--color-text-primary);
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.tool-field:hover { border-color: color-mix(in srgb, var(--color-text-muted) 45%, var(--color-void-border)); }
+.tool-field:focus { border-color: rgba(0, 212, 255, 0.55); }
+.tool-field:disabled { cursor: not-allowed; opacity: 0.55; }
+.tool-field[readonly] { background: color-mix(in srgb, var(--color-void-card) 72%, var(--color-void)); }
+.tool-textarea { min-height: 12rem; resize: vertical; line-height: 1.65; }
+.tool-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.tool-help { color: var(--color-text-muted); font-size: 0.75rem; line-height: 1.6; }
+.tool-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-void-border);
+  border-radius: 0.65rem;
+  padding: 0.55rem 1rem;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.tool-button:hover { border-color: rgba(0, 212, 255, 0.45); color: var(--color-neon-cyan); background: rgba(0, 212, 255, 0.06); }
+.tool-button:active { transform: translateY(1px); }
+.tool-button:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
+.tool-button-primary { border-color: rgba(0, 212, 255, 0.45); color: var(--color-neon-cyan); background: rgba(0, 212, 255, 0.06); }
+.tool-button-success { border-color: rgba(0, 255, 136, 0.4); color: var(--color-neon-green); background: rgba(0, 255, 136, 0.05); }
+.tool-button-danger:hover { border-color: rgba(255, 45, 120, 0.45); color: var(--color-neon-pink); background: rgba(255, 45, 120, 0.06); }
+.tool-panel { border: 1px solid var(--color-void-border); border-radius: 0.875rem; background: var(--color-void-card); padding: 1.25rem; }
+.tool-status { border: 1px solid var(--color-void-border); border-radius: 0.65rem; padding: 0.75rem 1rem; font-family: var(--font-mono); font-size: 0.75rem; }
+.tool-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.tool-output { min-height: 5.5rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+.tool-tabs { display: inline-flex; gap: 0.25rem; border: 1px solid var(--color-void-border); border-radius: 0.75rem; padding: 0.25rem; background: var(--color-void-card); }
+.tool-tab { min-height: 2.75rem; border-radius: 0.5rem; padding: 0.4rem 0.85rem; color: var(--color-text-muted); font-family: var(--font-mono); font-size: 0.75rem; }
+.tool-tab[aria-selected="true"] { background: rgba(0, 212, 255, 0.08); color: var(--color-neon-cyan); }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .cursor-blink::after {
+    animation: none;
+  }
+}

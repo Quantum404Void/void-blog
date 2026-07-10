@@ -2,13 +2,13 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab' }]" />
 
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-14">
+    <main class="max-w-5xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
       <div class="mb-12">
-        <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-3">interactive_lab</p>
-        <h1 class="font-mono text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-2" style="text-shadow:0 0 30px rgba(180,0,255,0.2)">
+        <p class="font-mono text-xs text-[var(--color-text-muted)] mb-3">interactive_lab</p>
+        <h1 class="font-mono text-4xl sm:text-5xl font-bold tracking-[-0.035em] text-[var(--color-text-primary)] mb-3">
           <span style="color:rgba(180,0,255,0.9)">~/</span>lab
         </h1>
-        <p class="font-mono text-sm text-[var(--color-text-muted)]">技术宅的实验室 — 游戏、工具、可视化</p>
+        <p class="max-w-xl text-base leading-relaxed text-[var(--color-text-secondary)]">游戏、开发工具与计算机科学可视化。搜索后直接进入，不需要安装。</p>
         <div class="flex flex-wrap gap-x-6 gap-y-2 mt-4 font-mono text-xs text-[var(--color-text-muted)]">
           <span><span style="color:rgba(180,0,255,0.9)">{{ games.length }}</span> 游戏</span>
           <span><span style="color:rgba(0,212,255,0.9)">{{ tools.length }}</span> 工具</span>
@@ -16,15 +16,18 @@
         </div>
 
         <!-- 搜索过滤 -->
-        <div class="mt-6 relative w-full max-w-sm">
+        <div class="mt-7 relative w-full max-w-xl">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] font-mono text-xs pointer-events-none">~/</span>
           <input
             v-model="searchQuery"
+            aria-label="搜索实验与工具"
             type="text"
-            placeholder="search games & tools..."
-            class="w-full font-mono text-xs bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg pl-7 pr-4 py-2 text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:border-[rgba(180,0,255,0.5)] focus:outline-none transition-colors"
+            placeholder="搜索名称、类别或功能..."
+            class="tool-field pl-8 pr-10"
           />
+          <button v-if="searchQuery" class="absolute right-1 top-1/2 size-10 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]" aria-label="清空搜索" @click="searchQuery = ''">✕</button>
         </div>
+        <p class="tool-help mt-2" aria-live="polite">显示 {{ filteredGames.length + filteredTools.length }} / {{ games.length + tools.length }} 个项目</p>
       </div>
 
       <!-- GAMES -->
@@ -34,22 +37,19 @@
           <span class="flex-1 h-px bg-gradient-to-r from-[rgba(180,0,255,0.3)] to-transparent"></span>
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" ref="gamesGrid">
-          <a
+          <NuxtLink
             v-for="game in filteredGames"
             :key="game.href"
             :href="game.href"
-            class="lab-card group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px]"
-            
-            @mouseover="e => { (e.currentTarget as HTMLElement).style.borderColor = game.color + '55'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px ' + game.color + '25' }"
-            @mouseout="e => { (e.currentTarget as HTMLElement).style.borderColor = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }"
+            class="lab-card group block min-h-36 border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-colors hover:border-[rgba(180,76,255,0.4)]"
           >
             <div class="flex items-start justify-between gap-3 mb-3">
               <span class="text-2xl transition-transform duration-200 group-hover:scale-110">{{ game.icon }}</span>
-              <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border tracking-wider" :style="`border-color:${game.color}44;color:${game.color}cc;background:${game.color}0d`">{{ game.tag }}</span>
+              <span class="font-mono text-[10px] px-2 py-0.5 rounded-full border" :style="`border-color:${game.color}44;color:${game.color}`">{{ game.tag }}</span>
             </div>
             <h3 class="font-mono text-sm font-bold text-[var(--color-text-primary)] mb-1 group-hover:transition-colors" style="transition:color 0.2s">{{ game.label }}</h3>
-            <p class="font-mono text-[11px] text-[var(--color-text-muted)]">{{ game.desc }}</p>
-          </a>
+            <p class="text-xs leading-relaxed text-[var(--color-text-muted)]">{{ game.desc }}</p>
+          </NuxtLink>
         </div>
       </section>
 
@@ -60,31 +60,29 @@
           <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.3)] to-transparent"></span>
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" ref="toolsGrid">
-          <a
+          <NuxtLink
             v-for="tool in filteredTools"
             :key="tool.href"
             :href="tool.href"
-            class="lab-card group block border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-all hover:translate-y-[-2px] border-l-2"
-            :style="`border-left-color:${tool.color}44`"
-            @mouseover="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color + '55'; el.style.borderLeftColor = tool.color + 'cc'; el.style.boxShadow = '0 8px 32px ' + tool.color + '25' }"
-            @mouseout="e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = ''; el.style.borderLeftColor = tool.color + '44'; el.style.boxShadow = '' }"
+            class="lab-card group block min-h-36 border border-[var(--color-void-border)] rounded-xl p-4 sm:p-5 bg-[var(--color-void-card)] transition-colors hover:border-[rgba(0,212,255,0.4)]"
           >
             <div class="flex items-start justify-between gap-3 mb-3">
               <span class="text-xl font-mono font-bold transition-transform duration-200 group-hover:scale-110 inline-block" :style="`color:${tool.color}`">{{ tool.icon }}</span>
-              <span class="font-mono text-[9px] px-2 py-0.5 rounded-full border tracking-wider" :style="`border-color:${tool.color}44;color:${tool.color}cc;background:${tool.color}0d`">{{ tool.tag }}</span>
+              <span class="font-mono text-[10px] px-2 py-0.5 rounded-full border" :style="`border-color:${tool.color}44;color:${tool.color}`">{{ tool.tag }}</span>
             </div>
             <h3 class="font-mono text-sm font-bold text-[var(--color-text-primary)] mb-1">{{ tool.label }}</h3>
-            <p class="font-mono text-[11px] text-[var(--color-text-muted)]">{{ tool.desc }}</p>
-          </a>
+            <p class="text-xs leading-relaxed text-[var(--color-text-muted)]">{{ tool.desc }}</p>
+          </NuxtLink>
         </div>
 
-        <!-- 无结果提示 -->
-        <div v-if="searchQuery && !filteredGames.length && !filteredTools.length" class="text-center py-16 font-mono text-[var(--color-text-muted)]">
-          <p class="text-sm mb-1">bash: {{ searchQuery }}: command not found</p>
-          <p class="text-xs opacity-50">try a different search term</p>
-        </div>
       </section>
-    </div>
+
+      <div v-if="searchQuery && !filteredGames.length && !filteredTools.length" class="border-y border-[var(--color-void-border)] py-16 text-center font-mono text-[var(--color-text-muted)]">
+        <p class="text-sm mb-2">没有找到“{{ searchQuery }}”</p>
+        <button class="tool-button mt-2" @click="searchQuery = ''">清空搜索</button>
+      </div>
+    </main>
+    <AppFooter maxW="max-w-5xl" />
   </div>
 </template>
 
@@ -92,8 +90,9 @@
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Lab | ${siteName}` })
 
-const gamesGrid = ref<HTMLElement | null>(null)
-const toolsGrid = ref<HTMLElement | null>(null)
+const gamesGrid = useTemplateRef<HTMLElement>('gamesGrid')
+const toolsGrid = useTemplateRef<HTMLElement>('toolsGrid')
+const prefersReducedMotion = useReducedMotion()
 
 // 将滚动位置写入 sessionStorage，以便返回时恢复
 const SCROLL_KEY = 'lab-index-scroll'
@@ -101,9 +100,11 @@ onMounted(async () => {
   const saved = sessionStorage.getItem(SCROLL_KEY)
   if (saved) {
     const y = parseInt(saved)
-    nextTick(() => window.scrollTo({ top: y, behavior: 'instant' }))
+    nextTick(() => window.scrollTo({ top: y, behavior: 'auto' }))
     sessionStorage.removeItem(SCROLL_KEY)
   }
+
+  if (prefersReducedMotion.value) return
 
   // Anime.js 卡片入场 stagger
   const anime = await useAnime()
@@ -139,7 +140,7 @@ onBeforeUnmount(() => {
   sessionStorage.setItem(SCROLL_KEY, String(window.scrollY))
 })
 
-const searchQuery = ref('')
+const searchQuery = shallowRef('')
 
 const filteredGames = computed(() => {
   if (!searchQuery.value) return games

@@ -11,10 +11,18 @@
         <div class="relative border border-[var(--color-void-border)] rounded-xl overflow-hidden" style="background:#06060e;box-shadow:0 0 40px rgba(180,0,255,0.08)">
           <canvas ref="mainCanvas" width="300" height="600" style="display:block"></canvas>
           <div ref="overlay" class="absolute inset-0 flex flex-col items-center justify-center font-mono" style="background:rgba(6,6,14,0.92)">
-            <div style="font-size:2.5rem;margin-bottom:0.75rem">🧩</div>
-            <div class="text-xl font-bold mb-2" style="color:#b400ff;text-shadow:0 0 15px #b400ff">TETRIS</div>
-            <div class="text-xs mb-6" style="color:#8888aa">按 Space 或 Enter 开始</div>
-            <button @click="startGame" class="font-mono text-sm px-6 py-2 rounded-lg border transition-all" style="border-color:rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08)">START GAME</button>
+            <template v-if="overlayMode === 'gameover'">
+              <div class="mb-3 text-4xl" aria-hidden="true">💀</div>
+              <div class="mb-2 font-mono text-xl font-bold text-[#ff4444]">GAME OVER</div>
+              <div class="mb-6 font-mono text-sm text-[var(--color-text-muted)]">Score: <span class="text-[var(--color-neon-purple)]">{{ scoreVal }}</span></div>
+              <button @click="startGame" class="font-mono text-sm px-6 py-2 rounded-lg border transition-all" style="border-color:rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08)">RETRY</button>
+            </template>
+            <template v-else>
+              <div class="mb-3 text-4xl" aria-hidden="true">🧩</div>
+              <div class="text-xl font-bold mb-2" style="color:#b400ff;text-shadow:0 0 15px #b400ff">TETRIS</div>
+              <div class="text-xs mb-6" style="color:#8888aa">按 Space 或 Enter 开始</div>
+              <button @click="startGame" class="font-mono text-sm px-6 py-2 rounded-lg border transition-all" style="border-color:rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08)">START GAME</button>
+            </template>
           </div>
         </div>
         <div class="flex flex-col gap-4 min-w-[120px]">
@@ -48,6 +56,7 @@ const scoreVal = ref(0)
 const levelVal = ref(1)
 const linesVal = ref(0)
 const bestVal = ref(0)
+const overlayMode = shallowRef<'start' | 'gameover'>('start')
 
 const sideStats = computed(() => [
   { label: 'SCORE', value: scoreVal.value, color: '#b400ff' },
@@ -137,6 +146,7 @@ function startGame() {
   dropTimer=performance.now()
   bestVal.value=parseInt(safeGet('tetris-best','0'))
   next=randomPiece(); spawnPiece(); updateUI()
+  overlayMode.value='start'
   if(overlay.value) overlay.value.style.display='none'
   cancelAnimationFrame(animFrame); animFrame=requestAnimationFrame(gameLoop)
 }
@@ -145,7 +155,8 @@ function endGame() {
   gameOver=true; started=false
   const best=parseInt(safeGet('tetris-best','0'))
   if(score>best) safeSet('tetris-best',String(score))
-  if(overlay.value){overlay.value.style.display='flex';overlay.value.innerHTML=`<div style="font-size:2.5rem;margin-bottom:0.75rem">💀</div><div style="color:#ff4444;font-family:monospace;font-size:1.2rem;font-weight:bold;margin-bottom:0.5rem">GAME OVER</div><div style="color:#8888aa;font-family:monospace;font-size:0.875rem;margin-bottom:1.5rem">Score: <span style="color:#b400ff">${score}</span></div><button onclick="this.dispatchEvent(new CustomEvent('retry',{bubbles:true}))" style="font-family:monospace;font-size:0.875rem;padding:0.5rem 1.5rem;border:1px solid rgba(180,0,255,0.4);color:#b400ff;background:rgba(180,0,255,0.08);border-radius:0.5rem;cursor:pointer">RETRY</button>`; overlay.value.querySelector('button')?.addEventListener('click',startGame)}
+  overlayMode.value='gameover'
+  if(overlay.value) overlay.value.style.display='flex'
 }
 
 const handleKeydown = (e: KeyboardEvent) => {

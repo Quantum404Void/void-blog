@@ -136,5 +136,5 @@ async function copyOutput() {
   await copyToClipboard(output.value)
 }
 
-generate()
+onMounted(generate)
 </script>

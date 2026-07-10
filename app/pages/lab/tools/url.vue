@@ -1,34 +1,79 @@
-<template>
-  <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'url' }]" />
-    <div class="max-w-3xl mx-auto px-6 py-10 space-y-4">
-      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/url</p>
-
-      <h1 class="font-mono text-xl font-bold text-[var(--color-neon-purple)] mb-6">URL 工具</h1>
-      <textarea v-model="input" placeholder="输入 URL 或文本..." class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:100px"></textarea>
-      <div class="flex gap-2 flex-wrap">
-        <button @click="encode" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.1)] transition-all">Encode</button>
-        <button @click="decode" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(57,255,20,0.4)] text-[var(--color-neon-green)] hover:bg-[rgba(57,255,20,0.1)] transition-all">Decode</button>
-        <button @click="parse" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(180,0,255,0.4)] text-[var(--color-neon-purple)] hover:bg-[rgba(180,0,255,0.1)] transition-all">解析 URL</button>
-        <button @click="clear" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,0,170,0.3)] text-[rgba(255,0,170,0.7)] hover:bg-[rgba(255,0,170,0.1)] transition-all">清空</button>
-      </div>
-      <div v-if="output" class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] font-mono text-sm text-[var(--color-neon-cyan)] break-all">{{ output }}</div>
-      <div v-if="parsed" class="border border-[var(--color-void-border)] rounded-xl p-4 bg-[var(--color-void-card)] space-y-2">
-        <div v-for="(v,k) in parsed" :key="k" class="flex gap-3 font-mono text-xs">
-          <span class="text-[var(--color-text-muted)] shrink-0 w-20">{{ k }}</span>
-          <span class="text-[var(--color-neon-cyan)] break-all">{{ v||'—' }}</span>
-        </div>
-      </div>
-    </div>
-    <AppFooter />
-  </div>
-</template>
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
+
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `URL 工具 | ${siteName}` })
-const input=ref(''),output=ref(''),parsed=ref<Record<string,string>|null>(null)
-function encode(){try{output.value=encodeURIComponent(input.value);parsed.value=null}catch(e){output.value='编码失败'}}
-function decode(){try{output.value=decodeURIComponent(input.value);parsed.value=null}catch(e){output.value='解码失败'}}
-function parse(){try{const u=new URL(input.value);parsed.value={protocol:u.protocol,host:u.host,pathname:u.pathname,search:u.search,hash:u.hash,origin:u.origin};output.value='';u.searchParams.forEach((v,k)=>parsed.value![`param: ${k}`]=v)}catch(e){output.value='无效 URL';parsed.value=null}}
-function clear(){input.value='';output.value='';parsed.value=null}
+
+const input = shallowRef('https://void.dev/blog?tag=Nuxt&lang=zh-CN#content')
+const output = shallowRef('')
+const error = shallowRef('')
+const parsed = shallowRef<Array<{ label: string; value: string }>>([])
+const { copy, copied } = useClipboard()
+
+function setOutput(value: string) {
+  output.value = value
+  parsed.value = []
+  error.value = ''
+}
+
+function encode() { setOutput(encodeURIComponent(input.value)) }
+
+function decode() {
+  try { setOutput(decodeURIComponent(input.value)) }
+  catch { output.value = ''; parsed.value = []; error.value = '存在无效的百分号编码。' }
+}
+
+function parseUrl() {
+  try {
+    const url = new URL(input.value.trim())
+    const rows = [
+      { label: '协议', value: url.protocol },
+      { label: '主机', value: url.host },
+      { label: '路径', value: url.pathname || '/' },
+      { label: '查询', value: url.search || '—' },
+      { label: '锚点', value: url.hash || '—' },
+      ...Array.from(url.searchParams.entries(), ([key, value]) => ({ label: `参数 · ${key}`, value })),
+    ]
+    parsed.value = rows
+    output.value = url.href
+    error.value = ''
+  }
+  catch { parsed.value = []; output.value = ''; error.value = '请输入包含协议的完整 URL，例如 https://void.dev。' }
+}
+
+function clear() { input.value = ''; output.value = ''; parsed.value = []; error.value = '' }
 </script>
+
+<template>
+  <LabLayout title="URL 工具" desc="编解码 URL 组件，并检查协议、主机、路径、查询参数与锚点。" accent="var(--color-neon-purple)">
+    <section class="tool-panel">
+      <label for="url-input" class="tool-label">URL 或文本</label>
+      <textarea id="url-input" v-model="input" class="tool-field tool-textarea min-h-32" spellcheck="false" />
+      <div class="tool-toolbar mt-3">
+        <button class="tool-button tool-button-primary" @click="encode">编码组件</button>
+        <button class="tool-button tool-button-success" @click="decode">解码组件</button>
+        <button class="tool-button" @click="parseUrl">解析 URL</button>
+        <button class="tool-button tool-button-danger" @click="clear">清空</button>
+      </div>
+    </section>
+
+    <p v-if="error" class="tool-status mt-6 text-[var(--color-neon-pink)]" role="alert">! {{ error }}</p>
+
+    <section v-if="output" class="tool-panel mt-6">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="font-mono text-sm font-semibold text-[var(--color-text-primary)]">结果</h2>
+        <button class="tool-button px-3" @click="copy(output)">{{ copied ? '已复制' : '复制' }}</button>
+      </div>
+      <p class="tool-output mt-3 font-mono text-sm text-[var(--color-neon-cyan)]">{{ output }}</p>
+    </section>
+
+    <section v-if="parsed.length" class="mt-6 overflow-hidden rounded-xl border border-[var(--color-void-border)]">
+      <dl>
+        <div v-for="row in parsed" :key="`${row.label}-${row.value}`" class="grid gap-1 border-b border-[var(--color-void-border)] px-4 py-3 last:border-0 sm:grid-cols-[8rem_1fr]">
+          <dt class="font-mono text-xs text-[var(--color-text-muted)]">{{ row.label }}</dt>
+          <dd class="break-all font-mono text-sm text-[var(--color-text-primary)]">{{ row.value }}</dd>
+        </div>
+      </dl>
+    </section>
+  </LabLayout>
+</template>

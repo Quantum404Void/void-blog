@@ -3,10 +3,18 @@ import type { PostRow } from '../../types/index'
 import { parseTags } from '../../utils/response'
 
 import { getServerMd } from '../../utils/markdown'
+import { DEMO_POST_SLUG, demoPost } from '../../content/demo-post'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   if (!slug) throw createError({ statusCode: 400, message: 'Missing slug' })
+
+  if (slug === DEMO_POST_SLUG) {
+    return {
+      ...demoPost,
+      content_html: getServerMd().render(demoPost.content),
+    }
+  }
 
   const rows = await queryD1<PostRow>(event, 'SELECT * FROM posts WHERE slug=? AND draft=0', [slug])
 

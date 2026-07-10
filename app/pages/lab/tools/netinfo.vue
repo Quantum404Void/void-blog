@@ -37,12 +37,15 @@ const online=ref(true),connType=ref('未知')
 const onOnline = () => { online.value = true }
 const onOffline = () => { online.value = false }
 onMounted(()=>{
-  items.value[0].value=navigator.userAgent.slice(0,80)+'...'
-  items.value[1].value=navigator.language
-  items.value[2].value=navigator.platform||'未知'
-  items.value[3].value=navigator.cookieEnabled?'已启用':'已禁用'
-  items.value[4].value=`${screen.width}x${screen.height} @${window.devicePixelRatio}x`
-  items.value[5].value=Intl.DateTimeFormat().resolvedOptions().timeZone
+  const values = [
+    `${navigator.userAgent.slice(0, 80)}...`,
+    navigator.language,
+    navigator.platform || '未知',
+    navigator.cookieEnabled ? '已启用' : '已禁用',
+    `${screen.width}x${screen.height} @${window.devicePixelRatio}x`,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  ]
+  items.value.forEach((item, index) => { item.value = values[index] ?? '未知' })
   online.value=navigator.onLine
   const conn=(navigator as any).connection
   if(conn) connType.value=conn.effectiveType||conn.type||'未知'

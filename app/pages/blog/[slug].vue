@@ -1,4 +1,5 @@
 <template>
+  <div>
   <div v-if="post" class="min-h-screen bg-[var(--color-void)]">
     <ReadingProgress />
     
@@ -6,52 +7,51 @@
     <AppNav :crumbs="[{ label: 'blog', href: '/blog' }, { label: post?.title ?? slug }]" />
 
     <!-- Layout: article + TOC -->
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="article-shell mx-auto px-5 py-10 sm:px-8 sm:py-16">
       <!-- Article -->
       <main class="min-w-0">
-        <header class="mb-12">
-          <div v-if="post.tags.length" class="flex flex-wrap gap-2 mb-5">
+        <header class="article-header mb-12 sm:mb-16">
+          <div class="mb-6 flex flex-wrap items-center gap-2">
+            <span v-if="post.demo" class="inline-flex min-h-8 items-center rounded-full border border-[rgba(0,255,136,0.32)] px-3 font-mono text-[11px] text-[var(--color-neon-green)]">
+              Demo · 阅读体验预览
+            </span>
             <NuxtLink
               v-for="tag in post.tags"
               :key="tag"
               :href="`/tags/${tag}`"
-              class="group font-mono text-xs px-3 py-1 rounded-full border border-[rgba(0,212,255,0.2)] text-[var(--color-text-muted)] bg-[rgba(0,212,255,0.03)] hover:border-[rgba(0,212,255,0.5)] hover:text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.08)] transition-all duration-150"
+              class="group inline-flex min-h-8 items-center rounded-full px-3 font-mono text-[11px] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-neon-cyan)]"
             >
-              <span class="text-[var(--color-neon-cyan)] opacity-50 group-hover:opacity-100">#</span>{{ tag }}
+              <span class="mr-0.5 text-[var(--color-neon-cyan)] opacity-70">#</span>{{ tag }}
             </NuxtLink>
           </div>
 
-          <h1 class="text-3xl sm:text-4xl font-bold font-mono leading-tight mb-6 text-[var(--color-text-primary)]" style="text-shadow:0 0 30px rgba(0,255,136,0.15),0 0 60px rgba(0,255,136,0.05)">
+          <h1 class="article-title mb-6 font-mono font-bold leading-[1.15] tracking-[-0.035em] text-[var(--color-text-primary)] text-balance">
             {{ post.title }}
           </h1>
 
-          <p v-if="post.description" class="text-base sm:text-lg text-[var(--color-text-secondary)] mb-6 leading-relaxed">
+          <p v-if="post.description" class="article-deck mb-8 max-w-[65ch] text-lg leading-relaxed text-[var(--color-text-secondary)] text-pretty sm:text-xl">
             {{ post.description }}
           </p>
 
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs text-[var(--color-text-muted)] border-t border-[var(--color-void-border)] pt-4 mt-6">
-            <span class="flex items-center gap-1.5">
-              <span class="text-[var(--color-neon-green)]">$</span>
+          <div class="article-meta flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-[var(--color-void-border)] py-4 font-mono text-xs text-[var(--color-text-muted)]">
+            <span class="flex min-h-8 items-center gap-1.5">
+              <span aria-hidden="true" class="text-[var(--color-neon-green)]">$</span>
               <time :datetime="post.pub_date" class="text-[var(--color-text-secondary)]">{{ formatDateLong(post.pub_date) }}</time>
             </span>
-            <span class="hidden sm:inline text-[var(--color-void-muted)]">·</span>
-            <span class="flex items-center gap-1.5">
-              <span class="text-[var(--color-neon-purple)]">⏱</span>
+            <span class="flex min-h-8 items-center gap-1.5">
+              <span aria-hidden="true" class="text-[var(--color-neon-purple)]">◷</span>
               <span>{{ formatCount(wordCount) }} 字</span>
               <span class="text-[var(--color-void-muted)]">/</span>
-              <span>约 {{ readingTime }} min</span>
+              <span>约 {{ readingTime }} 分钟</span>
             </span>
-            <span class="hidden sm:inline text-[var(--color-void-muted)]">·</span>
-            <span class="flex items-center gap-1.5">
-              <span class="text-[var(--color-neon-cyan)]">👁</span>
-              <span>{{ postViews || '—' }} views</span>
+            <span v-if="!post.demo" class="flex min-h-8 items-center gap-1.5">
+              <span aria-hidden="true" class="text-[var(--color-neon-cyan)]">◎</span>
+              <span>{{ postViews || '—' }} 次阅读</span>
             </span>
-            <span v-if="ttsSupported" class="hidden sm:inline text-[var(--color-void-muted)]">·</span>
             <button
               v-if="ttsSupported"
               @click="toggleTts"
-              class="flex items-center gap-1 font-mono text-xs transition-all"
-              :style="{ color: 'var(--color-neon-green)', textShadow: ttsLabel !== '▶ 朗读' ? '0 0 8px var(--color-neon-green)' : 'none' }"
+              class="flex min-h-8 items-center gap-1 font-mono text-xs text-[var(--color-neon-green)] transition-colors hover:text-[var(--color-text-primary)]"
             >
               <span>{{ ttsLabel }}</span>
             </button>
@@ -60,12 +60,12 @@
 
         <!-- Content -->
         <!-- SSR: content_html 立刻渲染，Shiki 就绪后 renderedContent 静默替换 -->
-        <article class="prose" v-html="displayContent" />
+        <article class="prose article-prose" v-html="displayContent" />
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 border-t border-[var(--color-void-border)] space-y-10">
           <!-- Views + Likes -->
-          <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
+          <div v-if="!post.demo" class="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
             <div class="flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
               <span class="text-base">👁</span>
               <span>{{ postViews }} 次阅读</span>
@@ -73,7 +73,7 @@
             <button
               @click="handleLike"
               :disabled="liked"
-              class="flex items-center gap-2 font-mono text-xs px-4 py-2 rounded-full border transition-all"
+              class="flex min-h-11 items-center gap-2 rounded-full border px-4 font-mono text-xs transition-all"
               :class="liked
                 ? 'border-[rgba(255,45,120,0.6)] text-[var(--color-neon-pink)] bg-[rgba(255,45,120,0.08)] cursor-default'
                 : 'border-[var(--color-void-border)] text-[var(--color-text-muted)] hover:border-[rgba(255,45,120,0.5)] hover:text-[var(--color-neon-pink)] hover:bg-[rgba(255,45,120,0.05)]'"
@@ -132,7 +132,7 @@
           </div>
 
           <!-- Author strip + Share -->
-          <div class="flex flex-col items-start gap-4 py-4 border-t border-[var(--color-void-border)] sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col items-start gap-4 py-5 border-t border-[var(--color-void-border)] sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-3 font-mono text-xs text-[var(--color-text-muted)]">
               <div class="w-8 h-8 rounded-full border border-[rgba(0,212,255,0.3)] flex items-center justify-center text-sm" style="background:rgba(0,212,255,0.08);color:#00d4ff">{{ authorInitial }}</div>
               <div>
@@ -141,11 +141,11 @@
               </div>
             </div>
             <div class="flex flex-wrap gap-3 font-mono text-[10px] text-[var(--color-text-muted)] items-center">
-              <a :href="authorGithub" target="_blank" rel="noopener" class="hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
-              <NuxtLink href="/rss.xml" class="hover:text-[var(--color-neon-cyan)] transition-colors">RSS</NuxtLink>
+              <a :href="authorGithub" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center hover:text-[var(--color-neon-green)] transition-colors">GitHub</a>
+              <a href="/rss.xml" class="inline-flex min-h-11 items-center hover:text-[var(--color-neon-cyan)] transition-colors">RSS</a>
               <button
                 @click="copyLink"
-                class="flex items-center gap-1 whitespace-nowrap px-2.5 py-1 rounded border border-[var(--color-void-border)] hover:border-[rgba(0,212,255,0.35)] hover:text-[var(--color-neon-cyan)] transition-all"
+                class="flex min-h-11 items-center gap-1 whitespace-nowrap rounded border border-[var(--color-void-border)] px-3 hover:border-[rgba(0,212,255,0.35)] hover:text-[var(--color-neon-cyan)] transition-all"
                 :class="copied ? 'text-[var(--color-neon-green)] border-[rgba(0,255,136,0.35)]' : ''"
               >
                 <svg v-if="!copied" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -156,12 +156,12 @@
             </div>
           </div>
 
-          <button @click="router.back()" class="font-mono text-sm text-[var(--color-neon-cyan)] hover:text-[var(--color-neon-green)] transition-colors flex items-center gap-2">
+          <button @click="router.back()" class="flex min-h-11 items-center gap-2 font-mono text-sm text-[var(--color-neon-cyan)] transition-colors hover:text-[var(--color-neon-green)]">
             <span>←</span> 返回
           </button>
 
           <!-- 评论 -->
-          <div class="pt-8 border-t border-[var(--color-void-border)]">
+          <div v-if="!post.demo" class="pt-8 border-t border-[var(--color-void-border)]">
             <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
               <span class="text-[var(--color-neon-cyan)]">&#9654;</span> 评论
               <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.2)] to-transparent"></span>
@@ -171,8 +171,8 @@
         </footer>
       </main>
 
-      <!-- TOC Sidebar (hidden, using mobile drawer instead) -->
-      <aside v-if="false" class="hidden">
+      <!-- Desktop TOC -->
+      <aside v-if="tocHeadings.length > 1" class="article-toc hidden xl:block" aria-label="文章目录">
         <TableOfContents :headings="tocHeadings" />
       </aside>
     </div>
@@ -182,13 +182,13 @@
   </div>
   <!-- Mobile TOC drawer -->
   <Transition name="slide-up">
-    <div v-if="tocOpen" class="xl:hidden fixed inset-0 z-40 flex flex-col justify-end" @click.self="tocOpen = false">
-      <div class="bg-[var(--color-void-card)] border-t border-[var(--color-void-border)] rounded-t-2xl p-4 sm:p-6 max-h-[60vh] overflow-y-auto shadow-2xl">
+    <div v-if="tocOpen" class="xl:hidden fixed inset-0 z-40 flex flex-col justify-end bg-black/60" @click.self="tocOpen = false">
+      <div id="mobile-toc" role="dialog" aria-modal="true" aria-label="文章目录" class="bg-[var(--color-void-card)] border-t border-[var(--color-void-border)] rounded-t-2xl p-5 sm:p-6 max-h-[70vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
           <p class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
             <span class="text-[var(--color-neon-green)]">▶</span> 目录
           </p>
-          <button @click="tocOpen = false" class="font-mono text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] text-lg">✕</button>
+          <button @click="tocOpen = false" class="flex size-11 items-center justify-center rounded-md font-mono text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]" aria-label="关闭文章目录">✕</button>
         </div>
         <TableOfContents :headings="tocHeadings" />
       </div>
@@ -198,9 +198,11 @@
   <button
     v-if="tocHeadings.length > 1"
     @click="tocOpen = !tocOpen"
-    class="xl:hidden fixed bottom-4 right-[3.5rem] sm:bottom-6 sm:right-[4rem] z-50 w-9 h-9 rounded-full flex items-center justify-center font-mono text-base shadow-lg transition-all"
+    class="xl:hidden fixed bottom-4 right-[4.25rem] sm:bottom-6 sm:right-[4.75rem] z-50 size-11 rounded-full flex items-center justify-center font-mono text-base transition-colors"
     style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--color-neon-cyan);backdrop-filter:blur(8px);"
-    title="目录"
+    aria-label="打开文章目录"
+    :aria-expanded="tocOpen"
+    aria-controls="mobile-toc"
   >
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
@@ -223,7 +225,7 @@
       <button @click="continueBar.show = false" style="color:var(--color-text-muted)">✕</button>
     </div>
   </Transition>
-
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -278,7 +280,7 @@ useHead({
 })
 
 // displayContent: SSR 用 content_html，Shiki 就绪后用 renderedContent（含高亮）
-const renderedContent = ref<string>('')
+const renderedContent = shallowRef('')
 // computed: 优先用 Shiki 渲染结果，否则 fallback 到服务端 HTML（无高亮但立刻可见）
 const displayContent = computed<string>(() =>
   renderedContent.value || post.value?.content_html || ''
@@ -302,12 +304,13 @@ onMounted(() => {
 // h2 为一级，h3 为二级（缩进显示）
 interface Heading { depth: number; slug: string; text: string }
 const tocHeadings = computed<Heading[]>(() => {
-  if (!renderedContent.value) return []
-  const matches = [...renderedContent.value.matchAll(/<(h[23])[^>]*id="([^"]+)"[^>]*>(.*?)<\/h[23]>/gs)]
+  const content = displayContent.value
+  if (!content) return []
+  const matches = [...content.matchAll(/<(h[23])[^>]*id="([^"]+)"[^>]*>(.*?)<\/h[23]>/gs)]
   return matches.map(m => ({
     depth: m[1] === 'h2' ? 2 : 3,
-    slug: m[2],
-    text: m[3].replace(/<[^>]+>/g, '')
+    slug: m[2] ?? '',
+    text: (m[3] ?? '').replace(/<[^>]+>/g, '')
       .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&apos;/g, "'")
       .replace(/&#39;/g, "'").replace(/&#x27;/g, "'").trim(),
@@ -322,13 +325,14 @@ const wordCount = computed(() => post.value ? calcWordCount(post.value.content) 
 
 // Get all posts for prev/next/related（lazy：不阻塞文章内容渲染）
 const { data: allPostsData } = useLazyFetch('/api/posts', { default: () => [] as PostSummary[] })
-const allPosts = computed(() => (allPostsData.value || []).filter((p: PostSummary) => p.slug !== slug && p.slug !== 'about'))
+const allPosts = computed(() => (allPostsData.value || []).filter((item: PostSummary) => item.slug !== 'about'))
+const otherPosts = computed(() => allPosts.value.filter((item: PostSummary) => item.slug !== slug))
 
 const postTags = computed(() => new Set(post.value?.tags ?? []))
 
 const related = computed(() => {
   const curYear = post.value?.pub_date?.slice(0, 4) ?? ''
-  const scored = allPosts.value
+  const scored = otherPosts.value
     .map((p: PostSummary) => {
       const tagOverlap = p.tags.filter((t: string) => postTags.value.has(t)).length
       const yearBonus = p.pub_date?.slice(0, 4) === curYear ? 1 : 0
@@ -340,11 +344,11 @@ const related = computed(() => {
     .map((x: { post: PostSummary; score: number }) => x.post)
   if (scored.length > 0) return scored
   // fallback: 2 latest
-  return allPosts.value.slice(0, 2)
+  return otherPosts.value.slice(0, 2)
 })
 
 const curIdx = computed(() => allPosts.value.findIndex((p: PostSummary) => p.slug === slug))
-const prevPost = computed(() => curIdx.value < allPosts.value.length - 1 ? allPosts.value[curIdx.value + 1] : null)
+const prevPost = computed(() => curIdx.value >= 0 && curIdx.value < allPosts.value.length - 1 ? allPosts.value[curIdx.value + 1] : null)
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
 
 // prev/next prefetch
@@ -356,13 +360,14 @@ useHead(computed(() => ({
 })))
 
 // 浏览量 + 点赞
-const postViews = ref(0)
-const postLikes = ref(0)
+const postViews = shallowRef(0)
+const postLikes = shallowRef(0)
 // 使用 useLocalStorage 持久化点赞状态（避免刷新后重复点赞）
 const likedPosts = useLocalStorage<string[]>('void-liked-posts', [])
 const liked = computed(() => likedPosts.value.includes(slug))
 
 async function loadStats() {
+  if (post.value?.demo) return
   try {
     const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`)
     postViews.value = data.views
@@ -371,6 +376,7 @@ async function loadStats() {
 }
 
 async function recordView() {
+  if (post.value?.demo) return
   try {
     const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`, {
       method: 'POST', body: { action: 'view' }
@@ -381,7 +387,7 @@ async function recordView() {
 }
 
 async function handleLike() {
-  if (liked.value) return
+  if (liked.value || post.value?.demo) return
   likedPosts.value = [...likedPosts.value, slug]
   try {
     const data = await $fetch<{ views: number; likes: number }>(`/api/stats/${slug}`, {
@@ -392,7 +398,7 @@ async function handleLike() {
 }
 
 // Mobile TOC
-const tocOpen = ref(false)
+const tocOpen = shallowRef(false)
 
 // 阅读进度持久化
 const { bar: continueBar, jumpToSaved } = useReadingProgress(slug)
@@ -406,6 +412,8 @@ watch(renderedContent, async () => {
   attachCopyButtons(articleEl)
 }, { flush: 'post' })
 
+let recordViewTimer: ReturnType<typeof setTimeout> | undefined
+
 onMounted(async () => {
   // 首次挂载注入复制按钮（客户端 hydration 完成后）
   await nextTick()
@@ -413,8 +421,10 @@ onMounted(async () => {
 
   loadStats()
   // 延迟 1s 再记录阅读，避免预览模式误计
-  setTimeout(recordView, 1000)
+  recordViewTimer = setTimeout(recordView, 1000)
 })
+
+onUnmounted(() => clearTimeout(recordViewTimer))
 
 // TTS — 使用 useTts composable 封装
 const { supported: ttsSupported, label: ttsLabel, speak: speakArticle } = useTts()
@@ -431,6 +441,41 @@ const copyLink = () => copyToClipboard(shareUrl.value)
 </script>
 
 <style scoped>
+.article-shell {
+  width: min(100%, 76rem);
+}
+
+.article-title {
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  max-width: 18ch;
+}
+
+.article-deck {
+  border-left: 1px solid rgba(0, 212, 255, 0.3);
+  padding-left: 1rem;
+}
+
+.article-prose {
+  margin-inline: auto;
+}
+
+@media (min-width: 1280px) {
+  .article-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 46rem) 14rem;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .article-prose {
+    margin-inline: 0;
+  }
+
+  .article-toc {
+    min-width: 0;
+  }
+}
+
 .slide-down-enter-active, .slide-down-leave-active { transition: transform 0.25s ease, opacity 0.25s ease; }
 .slide-down-enter-from, .slide-down-leave-to { transform: translateY(-100%); opacity: 0; }
 .slide-up-enter-active, .slide-up-leave-active { transition: transform 0.25s ease, opacity 0.25s ease; }

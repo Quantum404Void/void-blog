@@ -1,16 +1,17 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-void)]">
+  <div class="min-h-screen bg-[var(--color-void)] flex flex-col">
     <AppNav :crumbs="crumbItems" />
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <div class="mb-6">
-        <h1 class="font-mono text-xl sm:text-2xl font-bold mb-1" :style="`color:${accent}`">
-          <span class="text-[var(--color-text-muted)] font-normal text-base">~/lab/ </span>{{ title }}
+    <main class="w-full max-w-5xl mx-auto flex-1 px-5 sm:px-8 py-10 sm:py-14">
+      <header class="mb-8 border-b border-[var(--color-void-border)] pb-7">
+        <p class="mb-2 font-mono text-xs text-[var(--color-text-muted)]">~/lab/{{ section }}/</p>
+        <h1 class="font-mono text-2xl sm:text-3xl font-bold tracking-[-0.025em] mb-2" :style="{ color: accent }">
+          {{ title }}
         </h1>
-        <p v-if="desc" class="font-mono text-xs text-[var(--color-text-muted)]">{{ desc }}</p>
-      </div>
+        <p v-if="desc" class="max-w-2xl text-sm sm:text-base leading-relaxed text-[var(--color-text-secondary)] text-pretty">{{ desc }}</p>
+      </header>
       <slot />
-    </div>
-    <AppFooter />
+    </main>
+    <AppFooter maxW="max-w-5xl" />
   </div>
 </template>
 

@@ -1,40 +1,81 @@
-<template>
-  <div class="min-h-screen bg-[var(--color-void)]">
-    <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'base64' }]" />
-    <div class="max-w-3xl mx-auto px-6 py-10">
-      <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/base64</p>
-
-      <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">Base64 工具</h1>
-      <div class="grid gap-4">
-        <div>
-          <label class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">输入</label>
-          <textarea v-model="input" class="w-full font-mono text-sm rounded-xl border border-[var(--color-void-border)] p-4 resize-none bg-[var(--color-void-card)] text-[var(--color-text-primary)] outline-none" style="height:120px"></textarea>
-        </div>
-        <div class="flex gap-2">
-          <button @click="encode" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.1)] transition-all">Encode →</button>
-          <button @click="decode" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(57,255,20,0.4)] text-[var(--color-neon-green)] hover:bg-[rgba(57,255,20,0.1)] transition-all">← Decode</button>
-          <button @click="swap" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.1)] text-[var(--color-text-muted)] hover:bg-[rgba(255,255,255,0.05)] transition-all">⇆ 交换</button>
-          <button @click="clear" class="font-mono text-xs px-4 py-2 rounded-lg border border-[rgba(255,0,170,0.3)] text-[rgba(255,0,170,0.7)] hover:bg-[rgba(255,0,170,0.1)] transition-all">清空</button>
-        </div>
-        <div v-if="output!==null">
-          <label class="font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">输出 {{ error?'（错误）':'' }}</label>
-          <div class="border rounded-xl p-4 bg-[var(--color-void-card)] font-mono text-sm break-all" :style="error?'border-color:rgba(255,0,170,0.3);color:#ff00aa':'border-color:rgba(255,255,255,0.08);color:#e8e8f0'">{{ output }}</div>
-          <button v-if="!error" @click="copyOut" class="mt-2 font-mono text-[10px] px-3 py-1 rounded border border-[rgba(0,212,255,0.3)] text-[rgba(0,212,255,0.7)] hover:bg-[rgba(0,212,255,0.1)] transition-all">{{ copied?'✓ 已复制':'复制' }}</button>
-        </div>
-      </div>
-    </div>
-    <AppFooter />
-  </div>
-</template>
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
-const { copy: copyToClipboard, copied } = useClipboard()
+
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Base64 工具 | ${siteName}` })
-const input=ref(''),output=ref<string|null>(null),error=ref(false)
-function encode(){try{output.value=btoa(unescape(encodeURIComponent(input.value)));error.value=false}catch(e){output.value='编码失败';error.value=true}}
-function decode(){try{output.value=decodeURIComponent(escape(atob(input.value)));error.value=false}catch(e){output.value='非有效 Base64';error.value=true}}
-function swap(){const t=input.value;input.value=output.value??'';output.value=t}
-function clear(){input.value='';output.value=null;error.value=false}
-async function copyOut(){if(output.value)await copyToClipboard(output.value)}
+
+const input = shallowRef('void.dev 你好')
+const output = shallowRef('')
+const error = shallowRef('')
+const { copy, copied } = useClipboard()
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary)
+}
+
+function base64ToBytes(value: string) {
+  const normalized = value.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/')
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+  const binary = atob(padded)
+  return Uint8Array.from(binary, character => character.charCodeAt(0))
+}
+
+function encode() {
+  error.value = ''
+  output.value = bytesToBase64(new TextEncoder().encode(input.value))
+}
+
+function decode() {
+  try {
+    output.value = new TextDecoder('utf-8', { fatal: true }).decode(base64ToBytes(input.value))
+    error.value = ''
+  }
+  catch {
+    output.value = ''
+    error.value = '输入不是有效的 Base64 或 UTF-8 文本。'
+  }
+}
+
+function swap() {
+  if (!output.value) return
+  const previous = input.value
+  input.value = output.value
+  output.value = previous
+  error.value = ''
+}
+
+function clear() {
+  input.value = ''
+  output.value = ''
+  error.value = ''
+}
 </script>
+
+<template>
+  <LabLayout title="Base64 编解码" desc="安全处理 UTF-8 文本与 Base64，也兼容 URL-safe Base64。数据不会离开浏览器。">
+    <div class="grid gap-6 lg:grid-cols-2">
+      <section>
+        <label for="base64-input" class="tool-label">输入</label>
+        <textarea id="base64-input" v-model="input" class="tool-field tool-textarea min-h-64" spellcheck="false" />
+        <div class="tool-toolbar mt-3">
+          <button class="tool-button tool-button-primary" @click="encode">编码</button>
+          <button class="tool-button tool-button-success" @click="decode">解码</button>
+          <button class="tool-button" :disabled="!output" @click="swap">交换</button>
+          <button class="tool-button tool-button-danger" @click="clear">清空</button>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-center justify-between gap-3">
+          <label for="base64-output" class="tool-label">输出</label>
+          <button class="tool-button px-3" :disabled="!output" @click="copy(output)">{{ copied ? '已复制' : '复制' }}</button>
+        </div>
+        <textarea id="base64-output" :value="output" readonly class="tool-field tool-textarea min-h-64" placeholder="结果将在这里显示" />
+        <p v-if="error" class="tool-status mt-3 text-[var(--color-neon-pink)]" role="alert">! {{ error }}</p>
+        <p v-else class="tool-help mt-3">支持中文、Emoji 与多行文本。</p>
+      </section>
+    </div>
+  </LabLayout>
+</template>

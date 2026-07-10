@@ -1,6 +1,6 @@
 <template>
-  <nav v-if="headings.length > 0" class="toc">
-    <p class="toc-title"><span style="color:var(--color-neon-green)">&#9658;</span> 目录</p>
+  <nav v-if="headings.length > 0" class="toc" aria-label="文章章节">
+    <p class="toc-title"><span style="color:var(--color-neon-green)">&#9658;</span> 本文目录</p>
     <ul>
       <li
         v-for="h in headings"
@@ -19,18 +19,17 @@
 <script setup lang="ts">
 defineOptions({ name: 'TableOfContents' })
 
-import { ref, onMounted, onUnmounted } from 'vue'
-
 interface Heading { depth: number; slug: string; text: string }
 const props = defineProps<{ headings: Heading[] }>()
 
-const activeSlug = ref('')
+const activeSlug = shallowRef('')
+const prefersReducedMotion = useReducedMotion()
 
 function scrollTo(slug: string) {
   const el = document.getElementById(slug)
   if (el) {
     const y = el.getBoundingClientRect().top + window.scrollY - 80
-    window.scrollTo({ top: y, behavior: 'smooth' })
+    window.scrollTo({ top: y, behavior: prefersReducedMotion.value ? 'auto' : 'smooth' })
   }
 }
 
@@ -41,8 +40,10 @@ function onScroll() {
 
   const scrollY = window.scrollY + 120
   for (let i = headingEls.length - 1; i >= 0; i--) {
-    if (headingEls[i].offsetTop <= scrollY) {
-      activeSlug.value = props.headings[i].slug
+    const heading = headingEls[i]
+    const sourceHeading = props.headings[i]
+    if (heading && sourceHeading && heading.offsetTop <= scrollY) {
+      activeSlug.value = sourceHeading.slug
       return
     }
   }
@@ -64,18 +65,13 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   overflow-y: auto;
   font-size: 0.75rem;
   font-family: var(--font-mono);
-  padding: 1rem;
-  border: 1px solid var(--color-void-border);
-  border-radius: 0.75rem;
-  background: rgba(19,19,31,0.6);
-  backdrop-filter: blur(8px);
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 1px solid var(--color-void-border);
   scrollbar-width: thin;
   scrollbar-color: rgba(0,212,255,0.2) transparent;
 }
 .toc-title {
-  font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   margin-bottom: 0.75rem;
   display: flex;
@@ -92,34 +88,31 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   align-items: baseline;
   gap: 0.25rem;
   transition: color 0.15s, padding-left 0.15s;
-  border-left: 2px solid transparent;
-  padding-left: 0.6rem;
-  font-size: 0.7rem;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.75rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .toc-item.active a {
   color: var(--color-neon-cyan);
-  border-left-color: var(--color-neon-cyan);
-  text-shadow: 0 0 6px rgba(0,212,255,0.4);
-  padding-left: 0.9rem;
+  background: rgba(0,212,255,0.07);
+  padding-left: 0.75rem;
 }
 .toc-item a:hover {
   color: var(--color-text-secondary);
-  padding-left: 0.9rem;
+  padding-left: 0.75rem;
 }
 /* h3 内嵌级 */
 .toc-h3 { }
 .toc-h3 a {
   padding-left: 1.25rem;
-  font-size: 0.65rem;
-  opacity: 0.75;
+  font-size: 0.7rem;
+  opacity: 0.82;
 }
 .toc-h3.active a {
   padding-left: 1.5rem;
   opacity: 1;
-  border-left-color: rgba(0,212,255,0.6);
   color: rgba(0,212,255,0.8);
 }
 .toc-h3 a:hover {
