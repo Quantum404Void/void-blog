@@ -34,6 +34,8 @@ const quickAddQuery = ref('')
 const contextMenu = ref<{ x: number; y: number; nodeId: string } | null>(null)
 const helpOpen = ref(false)
 const snapToGrid = ref(false)
+const paletteOpen = shallowRef(false)
+const logPanelOpen = shallowRef(false)
 const GRID_SIZE = 20
 
 const view = reactive({ x: 120, y: 80, scale: 1 })
@@ -95,7 +97,11 @@ function resetZoom() { view.scale = 1; view.x = 120; view.y = 80 }
 function undo() { undoFn(view) }
 function redo() { redoFn(view) }
 function autoLayout() { autoLayoutFn(viewportSize.value, fitView) }
-function loadPreset(key: string) { selectedPreset.value = key; loadPresetFn(key, fitView) }
+function loadPreset(key: string) {
+  selectedPreset.value = key
+  loadPresetFn(key, fitView)
+  paletteOpen.value = false
+}
 function importGraphJson() { importJsonFn(importJsonText.value, fitView) }
 function runGraph() { doRunGraph() }
 
@@ -414,9 +420,38 @@ onUnmounted(() => {
       @toggle-snap="snapToGrid = !snapToGrid"
     />
 
+    <div class="flex gap-2 border-b border-[var(--color-void-border)] px-3 py-2 lg:hidden">
+      <button
+        class="min-h-11 flex-1 rounded border border-[rgba(0,212,255,0.4)] bg-[rgba(0,212,255,0.08)] px-3 font-mono text-xs text-[#9aeaff]"
+        aria-label="打开节点侧栏"
+        @click="paletteOpen = true; logPanelOpen = false"
+      >节点与预设</button>
+      <button
+        class="min-h-11 flex-1 rounded border border-[rgba(139,92,246,0.4)] bg-[rgba(139,92,246,0.08)] px-3 font-mono text-xs text-[#c4b5fd]"
+        aria-label="打开运行侧栏"
+        @click="logPanelOpen = true; paletteOpen = false"
+      >运行与导入</button>
+    </div>
+
     <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 96px)">
+      <button
+        v-if="paletteOpen || logPanelOpen"
+        class="fixed inset-0 z-40 bg-black/60 lg:hidden"
+        aria-label="点击空白关闭侧栏"
+        @click="paletteOpen = false; logPanelOpen = false"
+      />
+
+      <button
+        v-if="paletteOpen || logPanelOpen"
+        class="fixed right-3 top-3 z-[60] size-11 rounded-full border border-[rgba(255,255,255,0.2)] bg-[#0d0d14] font-mono text-sm text-white shadow-xl lg:hidden"
+        aria-label="关闭侧栏"
+        @click="paletteOpen = false; logPanelOpen = false"
+      >✕</button>
+
       <!-- 左侧面板 -->
       <AiFlowNodePalette
+        class="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-[min(20rem,88vw)] max-lg:shadow-2xl max-lg:transition-transform"
+        :style="paletteOpen ? { translate: '0' } : undefined"
         :grouped-specs="groupedSpecs"
         :presets="PRESETS"
         :selected-preset="selectedPreset"
@@ -665,6 +700,8 @@ onUnmounted(() => {
 
       <!-- 右侧面板 -->
       <AiFlowLogPanel
+        class="max-lg:fixed max-lg:inset-y-0 max-lg:right-0 max-lg:z-50 max-lg:w-[min(22rem,92vw)] max-lg:shadow-2xl max-lg:transition-transform"
+        :style="logPanelOpen ? { translate: '0' } : undefined"
         :node-count="nodes.length"
         :wire-count="wires.length"
         :group-count="groups.length"

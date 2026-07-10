@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="w-72 shrink-0 p-3 border-r overflow-y-auto"
+    class="w-72 shrink-0 p-3 border-r overflow-y-auto max-lg:-translate-x-full"
     style="border-color:var(--color-void-border);background:var(--color-void-card)"
     @wheel.stop
   >
