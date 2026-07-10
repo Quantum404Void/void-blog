@@ -21,20 +21,6 @@
 
     <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
 
-      <!-- ⚠️ 环境变量缺失提示 -->
-      <div v-if="!overview?.aiKeyConfigured && !aiNoticeDismissed"
-        class="flex items-start gap-3 px-4 py-3 rounded-xl border border-[rgba(255,200,0,0.4)] bg-[rgba(255,200,0,0.05)] font-mono text-xs">
-        <span class="text-[#ffc800] shrink-0 mt-0.5">⚠</span>
-        <div class="space-y-1">
-          <div class="text-[#ffc800]">AI 助手未激活 — CF Pages 缺少环境变量</div>
-          <div class="text-[var(--color-text-muted)]">
-            前往 Cloudflare Pages → Settings → Environment Variables，添加：
-            <code class="text-[var(--color-neon-cyan)] ml-1">NUXT_OPENAI_KEY</code>（GitHub Copilot token）
-          </div>
-        </div>
-        <button @click="aiNoticeDismissed = true" class="ml-auto px-3 text-[var(--color-text-muted)] hover:text-white transition-colors shrink-0" aria-label="关闭提示">✕</button>
-      </div>
-
       <!-- Dashboard 卡片 -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div v-for="card in dashCards" :key="card.label"
@@ -271,7 +257,6 @@
 import type { PostSummary } from '~/types/post'
 
 interface AdminOverview {
-  aiKeyConfigured: boolean
   posts: { total: number; published: number; drafts: number }
   stats: { totalViews: number; totalLikes: number }
   topViewed: Array<{ slug: string; title: string; views: number; likes: number }>
@@ -303,7 +288,6 @@ interface TagCount { tag: string; count: number }
 const { data: tagsData } = await useFetch<TagCount[]>('/api/admin/tags')
 const tags = computed(() => tagsData.value || [])
 
-const aiNoticeDismissed = shallowRef(false)
 const q = shallowRef('')
 const sortBy = shallowRef<'date' | 'views' | 'likes' | 'wc'>('date')
 

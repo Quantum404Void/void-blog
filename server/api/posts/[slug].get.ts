@@ -4,16 +4,20 @@ import { parseTags } from '../../utils/response'
 
 import { getServerMd } from '../../utils/markdown'
 import { DEMO_POST_SLUG, demoPost } from '../../content/demo-post'
+import { hasD1 } from '../../utils/d1'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   if (!slug) throw createError({ statusCode: 400, message: 'Missing slug' })
 
-  if (slug === DEMO_POST_SLUG) {
-    return {
-      ...demoPost,
-      content_html: getServerMd().render(demoPost.content),
+  if (!hasD1(event)) {
+    if (slug === DEMO_POST_SLUG) {
+      return {
+        ...demoPost,
+        content_html: getServerMd().render(demoPost.content),
+      }
     }
+    throw createError({ statusCode: 404, message: 'Post not found' })
   }
 
   const rows = await queryD1<PostRow>(event, 'SELECT * FROM posts WHERE slug=? AND draft=0', [slug])

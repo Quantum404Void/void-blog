@@ -11,5 +11,5 @@ export default defineEventHandler(async (event) => {
     event,
     "SELECT slug,title,description,pub_date,tags,draft,word_count FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC, updated_at DESC"
   )
-  return [demoPostSummary, ...rows.map(rowToSummary)]
+  return rows.map(rowToSummary)
 })
