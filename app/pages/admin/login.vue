@@ -1,3 +1,39 @@
+<script setup lang="ts">
+definePageMeta({ layout: false })
+
+interface LoginError {
+  data?: { message?: string }
+}
+
+const { siteName } = useSiteConfig()
+useSeoMeta({ title: `Admin Login | ${siteName}`, robots: 'noindex' })
+
+const password = shallowRef('')
+const error = shallowRef('')
+const loading = shallowRef(false)
+const showPassword = shallowRef(false)
+
+const { data } = await useFetch('/api/auth/me').catch(() => ({ data: null }))
+if (data?.value) navigateTo('/admin')
+
+async function handleLogin() {
+  if (!password.value) {
+    error.value = '请输入管理密码'
+    return
+  }
+  error.value = ''
+  loading.value = true
+  try {
+    await $fetch('/api/auth/login', { method: 'POST', body: { password: password.value } })
+    await navigateTo('/admin')
+  } catch (loginError: unknown) {
+    error.value = (loginError as LoginError).data?.message ?? '验证失败，请检查密码后重试'
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <div class="min-h-screen bg-[var(--color-void)] flex items-center justify-center px-4">
     <div class="w-full max-w-sm">
@@ -17,18 +53,26 @@
       <!-- Form -->
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label class="block font-mono text-xs text-[var(--color-text-muted)] mb-2 tracking-wider uppercase">
+          <label for="admin-password" class="block font-mono text-xs text-[var(--color-text-secondary)] mb-2 tracking-wider uppercase">
             Password
           </label>
-          <input
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            class="w-full bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-4 py-3 font-mono text-sm text-[var(--color-text-primary)] outline-none transition-all focus:border-[rgba(0,212,255,0.5)] focus:shadow-[0_0_0_2px_rgba(0,212,255,0.1)] placeholder:text-[var(--color-void-muted)]"
-            :class="{ 'border-[rgba(255,45,120,0.5)] focus:border-[rgba(255,45,120,0.5)]': error }"
-          />
-          <p v-if="error" class="font-mono text-[10px] text-[var(--color-neon-pink)] mt-2">{{ error }}</p>
+          <div class="relative">
+            <input
+              id="admin-password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="输入管理密码"
+              :aria-invalid="Boolean(error)"
+              aria-describedby="admin-login-error"
+              class="w-full bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg pl-4 pr-16 py-3 font-mono text-sm text-[var(--color-text-primary)] outline-none transition-colors focus:border-[rgba(0,212,255,0.5)] focus:shadow-[0_0_0_2px_rgba(0,212,255,0.1)] placeholder:text-[var(--color-text-muted)]"
+              :class="{ 'border-[rgba(255,45,120,0.5)] focus:border-[rgba(255,45,120,0.5)]': error }"
+            />
+            <button type="button" class="absolute inset-y-0 right-0 px-4 font-mono text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-neon-cyan)]" :aria-label="showPassword ? '隐藏密码' : '显示密码'" @click="showPassword = !showPassword">
+              {{ showPassword ? '隐藏' : '显示' }}
+            </button>
+          </div>
+          <p v-if="error" id="admin-login-error" role="alert" class="font-mono text-xs text-[var(--color-neon-pink)] mt-2">{{ error }}</p>
         </div>
 
         <button
@@ -48,39 +92,10 @@
       </form>
 
       <div class="mt-8 text-center">
-        <NuxtLink href="/" class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">
+        <NuxtLink href="/" class="admin-action inline-flex items-center px-3 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">
           ← 返回博客
         </NuxtLink>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-definePageMeta({ layout: false })
-
-const { siteName } = useSiteConfig()
-useSeoMeta({ title: `Admin Login | ${siteName}`, robots: 'noindex' })
-
-const password = ref('')
-const error = ref('')
-const loading = ref(false)
-
-// 已登录直接跳转
-const { data } = await useFetch('/api/auth/me').catch(() => ({ data: null }))
-if (data?.value) navigateTo('/admin')
-
-async function handleLogin() {
-  if (!password.value) return
-  error.value = ''
-  loading.value = true
-  try {
-    await $fetch('/api/auth/login', { method: 'POST', body: { password: password.value } })
-    navigateTo('/admin')
-  } catch (e: unknown) {
-    error.value = e?.data?.message || '密码错误'
-  } finally {
-    loading.value = false
-  }
-}
-</script>

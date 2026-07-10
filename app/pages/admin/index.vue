@@ -1,28 +1,28 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <!-- Nav -->
-    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
+    <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass" aria-label="管理后台导航">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 min-h-16 py-2 flex flex-wrap items-center gap-3">
         <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)]">void.dev</NuxtLink>
         <span class="text-[var(--color-text-muted)] font-mono text-xs">/</span>
         <span class="font-mono text-sm text-[var(--color-neon-cyan)]">admin</span>
-        <div class="ml-auto flex items-center gap-4">
+        <div class="ml-auto flex items-center gap-2">
           <NuxtLink href="/admin/posts/new"
-            class="font-mono text-xs px-3 py-1.5 rounded-lg border border-[rgba(0,255,136,0.4)] text-[var(--color-neon-green)] bg-[rgba(0,255,136,0.06)] hover:bg-[rgba(0,255,136,0.12)] transition-all">
+            class="admin-action inline-flex items-center font-mono text-xs px-3 rounded-lg border border-[rgba(0,255,136,0.4)] text-[var(--color-neon-green)] bg-[rgba(0,255,136,0.06)] hover:bg-[rgba(0,255,136,0.12)] transition-colors">
             + 新文章
           </NuxtLink>
           <button @click="logout"
-            class="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] transition-colors">
+            class="px-3 font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] transition-colors">
             退出
           </button>
         </div>
       </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
 
       <!-- ⚠️ 环境变量缺失提示 -->
-      <div v-if="!aiKeyConfigured"
+      <div v-if="!overview?.aiKeyConfigured && !aiNoticeDismissed"
         class="flex items-start gap-3 px-4 py-3 rounded-xl border border-[rgba(255,200,0,0.4)] bg-[rgba(255,200,0,0.05)] font-mono text-xs">
         <span class="text-[#ffc800] shrink-0 mt-0.5">⚠</span>
         <div class="space-y-1">
@@ -32,7 +32,7 @@
             <code class="text-[var(--color-neon-cyan)] ml-1">NUXT_OPENAI_KEY</code>（GitHub Copilot token）
           </div>
         </div>
-        <button @click="aiKeyConfigured = true" class="ml-auto text-[var(--color-text-muted)] hover:text-white transition-colors shrink-0">✕</button>
+        <button @click="aiNoticeDismissed = true" class="ml-auto px-3 text-[var(--color-text-muted)] hover:text-white transition-colors shrink-0" aria-label="关闭提示">✕</button>
       </div>
 
       <!-- Dashboard 卡片 -->
@@ -51,7 +51,7 @@
         <!-- 最热文章 -->
         <div v-if="overview?.topViewed?.length" class="lg:col-span-2 rounded-xl border border-[var(--color-void-border)] overflow-hidden">
           <div class="px-4 py-2.5 border-b border-[var(--color-void-border)] bg-[rgba(0,212,255,0.04)] font-mono text-[10px] tracking-widest uppercase text-[var(--color-neon-cyan)]">
-            🔥 最热文章 Top 5
+            最热文章 · Top 5
           </div>
           <div class="divide-y divide-[var(--color-void-border)]">
             <div v-for="(p, i) in overview.topViewed" :key="p.slug"
@@ -70,7 +70,7 @@
         <!-- 标签统计 -->
         <div class="rounded-xl border border-[var(--color-void-border)] overflow-hidden">
           <div class="px-4 py-2.5 border-b border-[var(--color-void-border)] bg-[rgba(180,0,255,0.04)] font-mono text-[10px] tracking-widest uppercase text-[var(--color-neon-purple, #b400ff)]">
-            🏷 标签分布 Top 10
+            标签分布 · Top 10
           </div>
           <div v-if="tags.length" class="px-4 py-3 space-y-2">
             <div v-for="t in tags.slice(0,10)" :key="t.tag" class="flex items-center gap-2">
@@ -89,7 +89,7 @@
       <!-- 最近活跃 -->
       <div v-if="overview?.recentActive?.length" class="rounded-xl border border-[var(--color-void-border)] overflow-hidden">
         <div class="px-4 py-2.5 border-b border-[var(--color-void-border)] bg-[rgba(0,255,136,0.04)] font-mono text-[10px] tracking-widest uppercase text-[var(--color-neon-green)]">
-          📈 最近活跃
+          最近活跃
         </div>
         <div class="divide-y divide-[var(--color-void-border)]">
           <div v-for="p in overview.recentActive" :key="p.slug"
@@ -107,54 +107,55 @@
       <!-- 系统操作 -->
       <div class="rounded-xl border border-[var(--color-void-border)] overflow-hidden">
         <div class="px-4 py-2.5 border-b border-[var(--color-void-border)] bg-[rgba(0,0,0,0.2)] font-mono text-[10px] tracking-widest uppercase text-[var(--color-text-muted)]">
-          ⚙ 系统操作
+          系统操作
         </div>
         <div class="flex flex-wrap items-center gap-3 px-4 py-4">
           <button @click="syncWordCount" :disabled="syncing"
             class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
             :class="syncing ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] cursor-wait'
               : 'border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.06)]'">
-            {{ syncing ? '同步中…' : '🔄 同步字数' }}
+            {{ syncing ? '同步中…' : '同步字数' }}
           </button>
           <button @click="rebuildFts" :disabled="rebuilding"
             class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
             :class="rebuilding ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] cursor-wait'
               : 'border-[rgba(180,0,255,0.4)] text-[var(--color-neon-purple,#b400ff)] hover:bg-[rgba(180,0,255,0.06)]'">
-            {{ rebuilding ? '重建中…' : '🔍 重建 FTS 索引' }}
+            {{ rebuilding ? '重建中…' : '重建 FTS 索引' }}
           </button>
-          <span v-if="opsMsg" class="font-mono text-[10px]"
-            :class="opsMsg.startsWith('✅') ? 'text-[var(--color-neon-green)]' : 'text-[var(--color-neon-pink)]'">
+          <span v-if="opsMsg" role="status" aria-live="polite" class="font-mono text-[10px]"
+            :class="opsMsg.startsWith('已') || opsMsg.startsWith('FTS') ? 'text-[var(--color-neon-green)]' : 'text-[var(--color-neon-pink)]'">
             {{ opsMsg }}
           </span>
         </div>
       </div>
 
       <!-- 文章列表 -->
-      <div>
-        <div class="flex items-center justify-between mb-4">
+      <section aria-labelledby="posts-heading">
+        <div class="flex flex-col gap-4 mb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 class="font-mono text-xl font-bold text-[var(--color-text-primary)]">
+            <h1 id="posts-heading" class="font-mono text-xl font-bold text-[var(--color-text-primary)]">
               <span class="text-[var(--color-neon-cyan)]">$</span> ls ~/posts
             </h1>
             <p class="font-mono text-xs text-[var(--color-text-muted)] mt-1">
               共 {{ posts.length }} 篇 · 草稿 {{ drafts }} 篇
             </p>
           </div>
-          <div class="flex items-center gap-3">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-[9rem_13rem]">
             <select v-model="sortBy"
-              class="font-mono text-xs bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-3 py-2 outline-none text-[var(--color-text-muted)] cursor-pointer">
+              aria-label="文章排序"
+              class="font-mono text-xs bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-3 outline-none text-[var(--color-text-secondary)] cursor-pointer">
               <option value="date">按日期</option>
               <option value="views">按访问量</option>
               <option value="likes">按点赞</option>
               <option value="wc">按字数</option>
             </select>
-            <input v-model="q" placeholder="过滤文章…"
-              class="font-mono text-sm bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-4 py-2 w-48 outline-none focus:border-[rgba(0,212,255,0.4)] text-[var(--color-text-primary)] placeholder:text-[var(--color-void-muted)]" />
+            <input v-model="q" placeholder="过滤标题、slug 或标签…" aria-label="过滤文章"
+              class="font-mono text-sm bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-4 outline-none focus:border-[rgba(0,212,255,0.4)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
           </div>
         </div>
 
-        <div class="border border-[var(--color-void-border)] rounded-xl overflow-hidden">
-          <table class="w-full font-mono text-xs">
+        <div class="hidden border border-[var(--color-void-border)] rounded-xl overflow-x-auto md:block">
+          <table class="w-full min-w-[58rem] font-mono text-xs">
             <thead>
               <tr class="border-b border-[var(--color-void-border)] bg-[rgba(0,212,255,0.05)]">
                 <th class="text-left px-4 py-3 text-[var(--color-neon-cyan)] font-semibold tracking-wider uppercase">标题</th>
@@ -219,7 +220,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
-                  <div class="flex items-center justify-end gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                  <div class="flex items-center justify-end gap-3">
                     <NuxtLink :href="`/blog/${post.slug}`" target="_blank"
                       class="text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">预览</NuxtLink>
                     <NuxtLink :href="`/admin/posts/${post.slug}`"
@@ -235,13 +236,53 @@
             无文章
           </div>
         </div>
-      </div>
+
+        <div class="space-y-3 md:hidden">
+          <article v-for="post in filtered" :key="post.slug" class="rounded-xl border border-[var(--color-void-border)] bg-[var(--color-void-card)] p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h2 class="text-sm font-semibold text-[var(--color-text-primary)]">{{ post.title }}</h2>
+                <p class="mt-1 break-all font-mono text-[10px] text-[var(--color-text-muted)]">{{ post.slug }}</p>
+              </div>
+              <button class="shrink-0 rounded-full border px-2.5 font-mono text-[10px]" :class="post.draft ? 'border-[rgba(255,200,0,0.3)] text-[#ffc800]' : 'border-[rgba(0,255,136,0.3)] text-[var(--color-neon-green)]'" @click="toggleDraft(post)">
+                {{ post.draft ? '草稿' : '已发布' }}
+              </button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              <span v-for="tag in post.tags.slice(0, 4)" :key="tag" class="rounded-md border border-[var(--color-void-border)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)]">#{{ tag }}</span>
+            </div>
+            <div class="mt-4 flex items-center justify-between border-t border-[var(--color-void-border)] pt-3">
+              <span class="font-mono text-[10px] text-[var(--color-text-muted)]">{{ post.pub_date }} · {{ post.word_count ?? 0 }} 字</span>
+              <div class="flex items-center gap-1">
+                <NuxtLink :href="`/blog/${post.slug}`" target="_blank" class="admin-action inline-flex items-center px-3 font-mono text-xs text-[var(--color-neon-cyan)]">预览</NuxtLink>
+                <NuxtLink :href="`/admin/posts/${post.slug}`" class="admin-action inline-flex items-center px-3 font-mono text-xs text-[var(--color-neon-green)]">编辑</NuxtLink>
+                <button class="px-3 font-mono text-xs text-[var(--color-neon-pink)]" @click="deletePost(post.slug)">删除</button>
+              </div>
+            </div>
+          </article>
+          <div v-if="filtered.length === 0" class="border-y border-[var(--color-void-border)] py-12 text-center font-mono text-xs text-[var(--color-text-muted)]">没有匹配文章</div>
+        </div>
+      </section>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { PostSummary } from '~/types/post'
+
+interface AdminOverview {
+  aiKeyConfigured: boolean
+  posts: { total: number; published: number; drafts: number }
+  stats: { totalViews: number; totalLikes: number }
+  topViewed: Array<{ slug: string; title: string; views: number; likes: number }>
+  recentActive: Array<{ slug: string; views: number; updated_at: string }>
+}
+
+interface ApiError {
+  data?: { message?: string }
+  message?: string
+}
+
 definePageMeta({ layout: false })
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Admin | ${siteName}`, robots: 'noindex' })
@@ -250,7 +291,7 @@ useSeoMeta({ title: `Admin | ${siteName}`, robots: 'noindex' })
 const { error: authError } = await useFetch('/api/auth/me')
 if (authError.value) navigateTo('/admin/login')
 
-const { data: overviewData } = await useFetch<any>('/api/admin/overview')
+const { data: overviewData } = await useFetch<AdminOverview>('/api/admin/overview')
 const overview = computed(() => overviewData.value)
 
 const { data, refresh } = await useFetch<PostSummary[]>('/api/admin/posts')
@@ -262,31 +303,19 @@ interface TagCount { tag: string; count: number }
 const { data: tagsData } = await useFetch<TagCount[]>('/api/admin/tags')
 const tags = computed(() => tagsData.value || [])
 
-// AI key 提示（客户端检测）
-const aiKeyConfigured = ref(true)
-onMounted(async () => {
-  try {
-    const r = await $fetch<any>('/api/ai-chat', {
-      method: 'POST',
-      body: { messages: [{ role: 'user', content: 'ping' }] },
-    })
-    // NO_KEY_REPLY 说明没有配置 key
-    if (r?.reply?.includes('未配置') || r?.reply?.includes('NUXT_OPENAI_KEY')) {
-      aiKeyConfigured.value = false
-    }
-  } catch {
-    aiKeyConfigured.value = false
-  }
-})
-
-const q = ref('')
-const sortBy = ref<'date' | 'views' | 'likes' | 'wc'>('date')
+const aiNoticeDismissed = shallowRef(false)
+const q = shallowRef('')
+const sortBy = shallowRef<'date' | 'views' | 'likes' | 'wc'>('date')
 
 const filtered = computed(() => {
   let list = [...posts.value]
   if (q.value) {
     const s = q.value.toLowerCase()
-    list = list.filter((p: PostSummary) => p.title.toLowerCase().includes(s) || p.slug.includes(s))
+    list = list.filter((p: PostSummary) =>
+      p.title.toLowerCase().includes(s)
+      || p.slug.toLowerCase().includes(s)
+      || p.tags.some(tag => tag.toLowerCase().includes(s)),
+    )
   }
   if (sortBy.value === 'views') list.sort((a: PostSummary, b: PostSummary) => (b.views ?? 0) - (a.views ?? 0))
   else if (sortBy.value === 'likes') list.sort((a: PostSummary, b: PostSummary) => (b.likes ?? 0) - (a.likes ?? 0))
@@ -306,22 +335,37 @@ const dashCards = computed(() => {
 })
 
 // 系统操作
-const syncing = ref(false)
-const rebuilding = ref(false)
-const opsMsg = ref('')
+const syncing = shallowRef(false)
+const rebuilding = shallowRef(false)
+const opsMsg = shallowRef('')
+let opsTimer: ReturnType<typeof setTimeout> | undefined
+
+function getErrorMessage(error: unknown) {
+  const apiError = error as ApiError
+  return apiError.data?.message ?? apiError.message ?? String(error)
+}
+
+function clearOpsMessageLater() {
+  if (opsTimer) clearTimeout(opsTimer)
+  opsTimer = setTimeout(() => { opsMsg.value = '' }, 4000)
+}
+
+onUnmounted(() => {
+  if (opsTimer) clearTimeout(opsTimer)
+})
 
 async function syncWordCount() {
   syncing.value = true
   opsMsg.value = ''
   try {
     const r = await $fetch<{ updated: number }>('/api/admin/sync-wordcount', { method: 'POST' })
-    opsMsg.value = `✅ 已同步 ${r.updated} 篇字数`
+    opsMsg.value = `已同步 ${r.updated} 篇字数`
     await refresh()
-  } catch (e: any) {
-    opsMsg.value = `❌ 同步失败: ${e?.message || e}`
+  } catch (error: unknown) {
+    opsMsg.value = `同步失败：${getErrorMessage(error)}`
   } finally {
     syncing.value = false
-    setTimeout(() => { opsMsg.value = '' }, 4000)
+    clearOpsMessageLater()
   }
 }
 
@@ -330,12 +374,12 @@ async function rebuildFts() {
   opsMsg.value = ''
   try {
     const r = await $fetch<{ rebuilt: number }>('/api/admin/rebuild-fts', { method: 'POST' })
-    opsMsg.value = `✅ FTS 已重建 ${r.rebuilt} 篇`
-  } catch (e: any) {
-    opsMsg.value = `❌ 重建失败: ${e?.message || e}`
+    opsMsg.value = `FTS 已重建 ${r.rebuilt} 篇`
+  } catch (error: unknown) {
+    opsMsg.value = `重建失败：${getErrorMessage(error)}`
   } finally {
     rebuilding.value = false
-    setTimeout(() => { opsMsg.value = '' }, 4000)
+    clearOpsMessageLater()
   }
 }
 
@@ -345,15 +389,23 @@ async function logout() {
 }
 
 async function toggleDraft(post: PostSummary) {
-  await $fetch(`/api/admin/posts/${post.slug}`, {
-    method: 'PUT', body: { draft: !post.draft }
-  })
-  post.draft = !post.draft
+  try {
+    await $fetch(`/api/admin/posts/${post.slug}`, {
+      method: 'PUT', body: { draft: !post.draft },
+    })
+    await refresh()
+  } catch (error: unknown) {
+    opsMsg.value = `状态更新失败：${getErrorMessage(error)}`
+  }
 }
 
 async function deletePost(slug: string) {
   if (!confirm(`确认删除 ${slug}？`)) return
-  await $fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
-  await refresh()
+  try {
+    await $fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
+    await refresh()
+  } catch (error: unknown) {
+    opsMsg.value = `删除失败：${getErrorMessage(error)}`
+  }
 }
 </script>

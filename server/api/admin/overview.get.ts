@@ -1,5 +1,6 @@
 // server/api/admin/overview.get.ts — 全站概览（admin 专用）
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig(event)
   const [postRow] = await queryD1<{ total: number; published: number; drafts: number }>(
     event,
     `SELECT COUNT(*) AS total,
@@ -34,6 +35,7 @@ export default defineEventHandler(async (event) => {
   )
 
   return {
+    aiKeyConfigured: Boolean(config.openaiKey),
     posts: {
       total: postRow?.total ?? 0,
       published: postRow?.published ?? 0,
