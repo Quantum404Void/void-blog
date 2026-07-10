@@ -106,7 +106,7 @@ export function makeId(prefix: string): string {
 }
 
 export function makeNode(type: string, x: number, y: number): FlowNode {
-  const spec = NODE_SPECS[type]
+  const spec = specFor(type)
   return {
     id: makeId('node'),
     type,
@@ -158,8 +158,10 @@ export function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n))
 }
 
-export function specFor(type: string) {
-  return NODE_SPECS[type]
+export function specFor(type: string): NodeSpec {
+  const spec = NODE_SPECS[type]
+  if (!spec) throw new Error(`未知节点类型：${type}`)
+  return spec
 }
 
 export function nodeHeight(node: FlowNode): number {

@@ -1,6 +1,6 @@
 # void.dev
 
-个人技术博客 — 不灸水，不追热点，只写真正踩过坑的东西
+个人技术博客与浏览器实验室。正式文章存储在 Cloudflare D1，前端提供搜索、评论、AI 助手、在线工具和交互式系统实验。
 
 [![Nuxt 4](https://img.shields.io/badge/Nuxt-4-00DC82?style=flat-square&logo=nuxt.js)](https://nuxt.com)
 [![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vue.js)](https://vuejs.org)
@@ -24,7 +24,19 @@
 | 代码高亮 | Shiki + markdown-it           | 客户端懒加载                                                   |
 | 动画     | GSAP 3 + Anime.js             | 页面过渡 + Lab 卡片                                            |
 | PWA      | @vite-pwa/nuxt                | 离线缓存，可安装                                               |
-| AI 助手  | CF Workers AI (Qwen3 30B MoE) | 免费，无需 API Key，博客问答                                   |  |
+| AI 助手  | CF Workers AI (Qwen3 30B MoE) | 无需额外 API Key，以已发布文章作为问答上下文                   |
+
+---
+
+## 功能
+
+- D1 驱动的文章发布、草稿、标签、全文搜索、阅读量、点赞与评论。
+- Admin 后台支持 Markdown 编辑与预览、文章状态管理和 FTS 维护。
+- Lab 包含 37 个交互式游戏/可视化实验和 26 个在线工具。
+- AI Flow 支持可执行 DAG、预设流程、拖拽连线、分支、多输入、撤销重做、自动布局、Minimap，以及 JSON / Mermaid 导入导出。
+- PWA、响应式布局、键盘操作和 reduced motion 适配。
+
+正式环境以 D1 为唯一文章来源。`server/content/demo-post.ts` 仅用于本地没有 D1 binding 时的页面预览，不会进入生产文章列表或生产直链。
 
 ---
 
@@ -67,10 +79,11 @@ void-blog/
 │   │   ├── index.vue             # 首页
 │   │   ├── blog/[slug].vue       # 文章页（Shiki + TOC + TTS + 评论）
 │   │   ├── explore.vue           # 搜索 + 标签词云 + 统计
-│   │   ├── lab/                  # 20+ 游戏与工具
+│   │   ├── lab/                  # 37 个实验/游戏 + 26 个在线工具
 │   │   └── admin/                # 后台（JWT 鉴权）
 │   └── plugins/shiki.client.ts  # Markdown 渲染
-├── server/api/                   # posts / search / stats / ai-chat / comments
+├── server/api/                   # posts / search / stats / ai-chat / comments / admin
+├── server/content/demo-post.ts   # 仅限无 D1 的本地预览文章
 ├── migrations/                   # D1 SQL
 └── wrangler.toml                 # CF Pages 配置
 ```

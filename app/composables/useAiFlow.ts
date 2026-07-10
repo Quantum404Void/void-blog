@@ -8,7 +8,7 @@ import { NODE_SPECS, NO_FLOW, makeId, makeNode, formatLogValue,
 } from '~/utils/ai-flow/nodes'
 import { PRESETS, buildPreset } from '~/utils/ai-flow/presets'
 import { runGraph as execGraph } from '~/utils/ai-flow/runner'
-import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
+import type { FlowNode, FlowValue, Wire, FlowGroup } from '~/types/ai-flow'
 
 const STORAGE_KEY = 'void-blog:ai-flow:v2'
 
@@ -61,7 +61,7 @@ export function useAiFlow() {
     const node = getNode(wire.fromNode)
     if (!node || node.error) return false
     const val = node.outputsData?.[wire.fromPort]
-    return val !== undefined && val !== NO_FLOW
+    return val !== undefined && (val as unknown) !== NO_FLOW
   }
 
   function wireCountForInput(nodeId: string, toPort: number) {
@@ -126,12 +126,15 @@ export function useAiFlow() {
     const p = payload as Record<string, unknown>
     const rawNodes = Array.isArray(p.nodes) ? p.nodes : []
     const validNodes = rawNodes
-      .filter((n: unknown): n is Record<string, unknown> => !!n && typeof n === 'object' && 'id' in (n as object) && 'type' in (n as object) && NODE_SPECS[(n as Record<string,unknown>).type as string])
+      .filter((n: unknown): n is Record<string, unknown> => {
+        if (!n || typeof n !== 'object' || !('id' in n) || !('type' in n)) return false
+        return Boolean(NODE_SPECS[String((n as Record<string, unknown>).type)])
+      })
       .map((n: Record<string, unknown>) => ({
         id: String(n.id), type: String(n.type),
         x: Number(n.x ?? 0), y: Number(n.y ?? 0),
         params: { ...specFor(String(n.type)).createParams(), ...(n.params && typeof n.params === 'object' ? n.params : {}) },
-        result: undefined, outputsData: [] as unknown[], error: '',
+        result: undefined, outputsData: [] as FlowValue[], error: '',
       }))
     const nodeIdSet = new Set(validNodes.map((n) => n.id))
     const rawWires = Array.isArray(p.wires) ? p.wires : []
@@ -157,10 +160,11 @@ export function useAiFlow() {
     selectedNodeIds.value = []
     runLog.value = []
     globalError.value = ''
-    if (viewRef && payload.view) {
-      viewRef.x = Number(payload.view.x ?? 120)
-      viewRef.y = Number(payload.view.y ?? 80)
-      viewRef.scale = clamp(Number(payload.view.scale ?? 1), 0.35, 2.5)
+    const rawView = p.view && typeof p.view === 'object' ? p.view as Record<string, unknown> : null
+    if (viewRef && rawView) {
+      viewRef.x = Number(rawView.x ?? 120)
+      viewRef.y = Number(rawView.y ?? 80)
+      viewRef.scale = clamp(Number(rawView.scale ?? 1), 0.35, 2.5)
     }
   }
 
@@ -282,7 +286,7 @@ export function useAiFlow() {
     groups.value.push({
       id: makeId('group'),
       title: `Group ${groups.value.length + 1}`,
-      color: colors[groups.value.length % colors.length],
+      color: colors[groups.value.length % colors.length] ?? '#00d4ff',
       nodeIds: [...selectedNodeIds.value],
     })
     lastRunSummary.value = `已将 ${selectedNodeIds.value.length} 个节点编组`

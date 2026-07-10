@@ -214,7 +214,6 @@ const tools = [
   { href: '/lab/tools/ascii', icon: 'A', label: 'ASCII Art', desc: '文字转 ASCII 艺术字', tag: 'ART', color: '#ff00aa' },
   { href: '/lab/tools/baseconv', icon: '0x', label: '进制转换', desc: '二/八/十/十六进制互转', tag: 'MATH', color: '#ffa500' },
   { href: '/lab/tools/cron', icon: '⏰', label: 'Cron 解析', desc: 'Cron 表达式可视化解析', tag: 'UTIL', color: '#b400ff' },
-  { href: '/lab/tools/brainfuck', icon: '🧠', label: 'Brainfuck', desc: 'Brainfuck 解释器', tag: 'ESOTERIC', color: '#00ff88' },
   { href: '/lab/tools/netinfo', icon: '🌐', label: '网络信息', desc: '查看 IP / User-Agent 等网络信息', tag: 'NET', color: '#00d4ff' },
   { href: '/lab/tools/jwt', icon: '🔑', label: 'JWT 解析', desc: '解析 JWT 的 Header / Payload', tag: 'CRYPTO', color: '#f47067' },
   { href: '/lab/tools/uuid', icon: '🆔', label: 'UUID 生成', desc: '批量生成 v4 UUID，一键复制', tag: 'UTIL', color: '#00ff88' },

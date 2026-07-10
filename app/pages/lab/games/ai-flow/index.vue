@@ -2,10 +2,10 @@
 import { NODE_SPECS, makeId, makeNode, formatValue,
   clamp, specFor, nodeHeight, inputPortY, outputPortY,
   inputLabel, outputLabel, bezierPath,
-  NODE_W, PORT_R, STAGE_W, STAGE_H, MINIMAP_W, MINIMAP_H,
+  NODE_W, HEADER_H, PORT_R, STAGE_W, STAGE_H, MINIMAP_W, MINIMAP_H,
 } from '~/utils/ai-flow/nodes'
 import { PRESETS } from '~/utils/ai-flow/presets'
-import type { FlowNode, Wire, FlowGroup } from '~/types/ai-flow'
+import type { FlowNode, Wire, FlowGroup, NodeSpec } from '~/types/ai-flow'
 import { useAiFlow } from '~/composables/useAiFlow'
 
 const { siteName } = useSiteConfig()
@@ -125,10 +125,10 @@ const pendingWirePath = computed(() => {
 })
 
 const groupedSpecs = computed(() => {
-  const out: Record<string, Array<{ type: string; spec: any }>> = {}
+  const out: Record<string, Array<{ type: string; spec: NodeSpec }>> = {}
   for (const [type, spec] of Object.entries(NODE_SPECS)) {
     if (!out[spec.category]) out[spec.category] = []
-    out[spec.category].push({ type, spec })
+    out[spec.category]!.push({ type, spec })
   }
   return out
 })
@@ -316,7 +316,8 @@ async function copyText(text: string, label: string) {
 function onWindowKeyDown(e: KeyboardEvent) {
   if (quickAddOpen.value) {
     if (e.key === 'Escape') { quickAddOpen.value = false; quickAddQuery.value = ''; e.preventDefault(); return }
-    if (e.key === 'Enter' && quickAddItems.value.length) { createNodeAtCenter(quickAddItems.value[0].type); e.preventDefault(); return }
+    const firstItem = quickAddItems.value[0]
+    if (e.key === 'Enter' && firstItem) { createNodeAtCenter(firstItem.type); e.preventDefault(); return }
   }
   if (isEditableTarget(e.target)) return
   if (e.key === 'Tab') { quickAddOpen.value = !quickAddOpen.value; if (!quickAddOpen.value) quickAddQuery.value = ''; e.preventDefault(); return }
@@ -385,7 +386,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col overflow-hidden" style="background:#08080f;color:var(--color-text-primary)">
+  <div>
+    <div class="h-screen flex flex-col overflow-hidden" style="background:#08080f;color:var(--color-text-primary)">
     <AppNav :crumbs="crumbs" />
     <h1 class="sr-only">AI Flow 可视化编辑器</h1>
 
@@ -580,7 +582,7 @@ onUnmounted(() => {
                   <label class="block text-[10px] font-mono mb-1" style="color:var(--color-text-muted)">{{ param.label }}</label>
                   <input v-if="param.kind === 'number'" v-model.number="node.params[param.key]" type="number" :step="param.step ?? 1" :min="param.min" :max="param.max" class="w-full rounded border px-2 py-1.5 text-xs font-mono" style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff">
                   <input v-else-if="param.kind === 'text'" v-model="node.params[param.key]" type="text" :placeholder="param.placeholder" class="w-full rounded border px-2 py-1.5 text-xs font-mono" style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff">
-                  <textarea v-else-if="param.kind === 'textarea'" v-model="node.params[param.key]" :placeholder="param.placeholder" rows="3" class="w-full rounded border px-2 py-1.5 text-xs font-mono resize-none" style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff" />
+                  <textarea v-else-if="param.kind === 'textarea'" :value="String(node.params[param.key] ?? '')" :placeholder="param.placeholder" rows="3" class="w-full rounded border px-2 py-1.5 text-xs font-mono resize-none" style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff" @input="node.params[param.key] = ($event.target as HTMLTextAreaElement).value" />
                   <select v-else-if="param.kind === 'select'" v-model="node.params[param.key]" class="w-full rounded border px-2 py-1.5 text-xs font-mono" style="border-color:rgba(255,255,255,0.08);background:#0f1320;color:#e7f7ff">
                     <option v-for="option in param.options" :key="String(option.value)" :value="option.value">{{ option.label }}</option>
                   </select>
@@ -682,7 +684,7 @@ onUnmounted(() => {
         @update:import-json-value="importJsonText = $event"
       />
     </div>
-  </div>
+    </div>
 
   <!-- Context Menu -->
   <Teleport to="body">
@@ -747,4 +749,5 @@ onUnmounted(() => {
       </div>
     </Transition>
   </Teleport>
+  </div>
 </template>

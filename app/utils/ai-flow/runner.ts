@@ -1,7 +1,7 @@
 // utils/ai-flow-runner.ts
 // 纯函数运行器：接收 nodes/wires，返回执行结果，无副作用
 
-import { NO_FLOW, normalizeRunResult, formatLogValue, NODE_SPECS } from './nodes'
+import { NO_FLOW, normalizeRunResult, formatLogValue, specFor } from './nodes'
 import type { FlowNode, FlowValue, Wire } from '~/types/ai-flow'
 
 export interface NodeExecutionResult {
@@ -64,7 +64,7 @@ export function runGraph(nodes: FlowNode[], wires: Wire[]): RunResult {
 
   for (const nodeId of order) {
     const node = nodeMap.get(nodeId)!
-    const spec = NODE_SPECS[node.type]
+    const spec = specFor(node.type)
     const inWires = [...(incoming.get(node.id) ?? [])].sort((a, b) => a.toPort - b.toPort)
     const inputs: FlowValue[] = Array.from({ length: spec.inputs }, () => undefined)
     const linkedPorts = new Set(inWires.map(w => w.toPort))

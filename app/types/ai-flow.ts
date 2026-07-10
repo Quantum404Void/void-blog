@@ -26,7 +26,15 @@ export interface ParamSpec {
  * FlowValue — 流中流转的所有可能值类型。
  * 使用 unknown 而非 any，强制调用方做类型守卫。
  */
-export type FlowValue = string | number | boolean | FlowValue[] | Record<string, FlowValue> | null | undefined
+export type FlowPrimitive = string | number | boolean | null | undefined
+
+export interface FlowValueArray extends Array<FlowValue> {}
+
+export interface FlowValueObject {
+  [key: string]: FlowValue
+}
+
+export type FlowValue = FlowPrimitive | FlowValueArray | FlowValueObject
 
 /** 节点运行上下文 */
 export interface NodeRunContext {

@@ -27,7 +27,7 @@ export default defineNuxtConfig({
       { path: '~/components/lab',          prefix: '' },
       { path: '~/components/editor',       prefix: '' },
       { path: '~/components/ai-assistant', prefix: '' },
-      { path: '~/components/ai-flow',      prefix: '' },
+      { path: '~/components/ai-flow',      prefix: 'AiFlow' },
     ],
   },
 

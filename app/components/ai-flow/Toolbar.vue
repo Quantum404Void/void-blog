@@ -1,6 +1,6 @@
 <template>
   <div
-    class="px-4 pt-3 pb-2 flex flex-wrap gap-2 items-center border-b"
+    class="ai-flow-toolbar px-4 pt-3 pb-2 flex flex-wrap gap-2 items-center border-b"
     style="border-color:var(--color-void-border)"
   >
     <div class="text-sm font-mono font-bold" style="color:var(--color-neon-cyan)">AI Flow / Executable Flowchart</div>
@@ -142,3 +142,9 @@ defineEmits<{
   (e: 'toggleSnap'): void
 }>()
 </script>
+
+<style scoped>
+.ai-flow-toolbar button {
+  min-height: 44px;
+}
+</style>
