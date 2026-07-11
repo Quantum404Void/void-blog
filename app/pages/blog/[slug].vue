@@ -442,7 +442,8 @@ const copyLink = () => copyToClipboard(shareUrl.value)
 
 <style scoped>
 .article-shell {
-  width: min(100%, 68rem);
+  position: relative;
+  width: 100%;
 }
 
 .article-main {
@@ -465,22 +466,15 @@ const copyLink = () => copyToClipboard(shareUrl.value)
 }
 
 @media (min-width: 1280px) {
-  .article-shell {
-    display: grid;
-    grid-template-columns: minmax(0, 45rem) 14rem;
-    gap: 5rem;
-    align-items: start;
-  }
-
-  .article-main {
-    margin-inline: 0;
-  }
-
   .article-prose {
     margin-inline: 0;
   }
 
   .article-toc {
+    position: absolute;
+    top: 4rem;
+    left: calc(50% + 24rem);
+    width: 14rem;
     min-width: 0;
   }
 }
