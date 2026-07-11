@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass" aria-label="管理后台导航">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 min-h-16 py-2 flex flex-wrap items-center gap-3">
+      <div class="layout-shell layout-admin min-h-16 py-2 flex flex-wrap items-center gap-3">
         <NuxtLink href="/" class="font-mono text-sm text-[var(--color-neon-green)]">void.dev</NuxtLink>
         <span class="text-[var(--color-text-muted)] font-mono text-xs">/</span>
         <span class="font-mono text-sm text-[var(--color-neon-cyan)]">admin</span>
@@ -19,7 +19,7 @@
       </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
+    <main class="layout-shell layout-admin py-8 sm:py-10 space-y-8">
 
       <!-- Dashboard 卡片 -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">

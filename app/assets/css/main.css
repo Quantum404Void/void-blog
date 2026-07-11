@@ -142,6 +142,53 @@
 
 /* Neon glow utilities */
 @layer utilities {
+  .layout-shell {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  .layout-reading { max-width: 48rem; }
+  .layout-content { max-width: 64rem; }
+  .layout-admin { max-width: 72rem; }
+  .layout-workspace { max-width: 80rem; }
+
+  @media (min-width: 640px) {
+    .layout-shell { padding-inline: 1.5rem; }
+  }
+
+  @media (min-width: 1280px) {
+    .layout-shell { padding-inline: 2rem; }
+  }
+
+  .lab-tools-route nav[aria-label="主导航"] + div,
+  .lab-games-route nav[aria-label="主导航"] + div {
+    width: 100%;
+    max-width: 80rem !important;
+    margin-inline: auto;
+    padding-inline: 1rem !important;
+  }
+
+  .lab-tools-route footer > div,
+  .lab-games-route footer > div {
+    width: 100%;
+    max-width: 80rem !important;
+  }
+
+  @media (min-width: 640px) {
+    .lab-tools-route nav[aria-label="主导航"] + div,
+    .lab-games-route nav[aria-label="主导航"] + div {
+      padding-inline: 1.5rem !important;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .lab-tools-route nav[aria-label="主导航"] + div,
+    .lab-games-route nav[aria-label="主导航"] + div {
+      padding-inline: 2rem !important;
+    }
+  }
+
   .glow-green {
     text-shadow: 0 0 10px rgba(0, 255, 136, 0.8),
                  0 0 20px rgba(0, 255, 136, 0.4),

@@ -1,6 +1,6 @@
 <template>
   <footer class="border-t border-[var(--color-void-border)] mt-auto" style="background:rgba(6,6,14,0.6)">
-    <div :class="maxW" class="mx-auto px-4 sm:px-6 py-8">
+    <div :class="containerClass" class="layout-shell py-8">
       <div class="mb-6 h-px bg-gradient-to-r from-transparent via-[var(--color-void-border)] to-transparent"></div>
       <!-- back link slot -->
       <div v-if="backHref" class="flex justify-center mb-5">
@@ -26,10 +26,10 @@ const { buildHash } = useRuntimeConfig().public as any
 withDefaults(defineProps<{
   backHref?: string
   backLabel?: string
-  maxW?: string
+  containerClass?: string
 }>(), {
   backHref: '/',
   backLabel: '返回首页',
-  maxW: 'max-w-2xl',
+  containerClass: 'layout-content',
 })
 </script>

@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)] overflow-x-hidden">
     <AppNav :crumbs="[{ label: 'blog', href: '/blog' }]" />
 
-    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-20" ref="mainRef">
+    <main class="layout-shell layout-reading py-14 sm:py-20" ref="mainRef">
       <!-- Header -->
       <div class="mb-12 blog-header">
         <h1 class="font-mono text-4xl font-black tracking-tight mb-3">
@@ -95,7 +95,7 @@
       </div>
     </main>
 
-    <AppFooter maxW="max-w-3xl" />
+    <AppFooter containerClass="layout-reading" />
   </div>
 </template>
 

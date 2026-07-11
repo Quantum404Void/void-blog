@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen" style="background:var(--color-void);color:#e0e0e0">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'Pomodoro' }]" />
-    <div class="max-w-xl mx-auto px-4 py-12 flex flex-col items-center">
+    <div class="layout-shell layout-workspace py-12 flex flex-col items-center">
       <h1 class="text-3xl font-bold mb-2" style="color:#39ff14;font-family:monospace">
         <span style="color:#00ffff">~/</span>pomodoro
       </h1>

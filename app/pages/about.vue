@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)] overflow-x-hidden">
     <AppNav :crumbs="[{ label: 'about' }]" />
 
-    <main class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <main class="layout-shell layout-content py-12 sm:py-16">
       <!-- 终端头部 -->
       <div class="font-mono mb-12">
         <div class="text-xs space-y-1 mb-6">

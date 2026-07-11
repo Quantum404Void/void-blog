@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'netinfo' }]" />
-    <div class="max-w-3xl mx-auto px-6 py-10 space-y-6">
+    <div class="layout-shell layout-workspace py-10 space-y-6">
       <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/netinfo</p>
 
       <h1 class="font-mono text-xl font-bold text-[var(--color-neon-cyan)] mb-6">网络信息</h1>

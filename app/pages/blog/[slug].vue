@@ -7,7 +7,7 @@
     <AppNav :crumbs="[{ label: 'blog', href: '/blog' }, { label: post?.title ?? slug }]" />
 
     <!-- Layout: article + TOC -->
-    <div class="article-shell mx-auto px-4 py-10 sm:px-6 sm:py-16">
+    <div class="article-shell layout-shell py-10 sm:py-16">
       <!-- Article -->
       <main class="article-main min-w-0">
         <header class="article-header mb-12 sm:mb-16">

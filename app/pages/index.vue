@@ -10,7 +10,7 @@
       <div class="absolute bottom-0 left-0 rounded-full" style="width:420px;height:420px;background:radial-gradient(circle, rgba(0,212,255,0.07), transparent 70%);transform:translate(-30%,30%);pointer-events:none"></div>
 
 
-      <div class="relative max-w-3xl mx-auto px-5 sm:px-8">
+      <div class="layout-shell layout-content relative">
         <div class="flex items-start gap-3 sm:gap-4 mb-8" ref="heroBlock">
           <div class="mt-2 w-2 h-2 rounded-full bg-[var(--color-neon-green)] shrink-0 hero-online-dot" style="box-shadow: 0 0 8px rgba(0,255,136,0.8);"></div>
           <div>
@@ -67,7 +67,7 @@
     </section>
 
     <!-- Content grid -->
-    <div class="max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-16">
+    <div class="layout-shell layout-content py-10 sm:py-16">
       <!-- Quick links row -->
       <nav aria-label="站点快捷链接" class="flex flex-wrap items-center gap-x-4 mb-10 font-mono text-xs text-[var(--color-text-muted)]">
         <a :href="authorGithub" target="_blank" rel="noopener"
@@ -134,7 +134,7 @@
       </section>
     </div>
 
-    <AppFooter maxW="max-w-3xl" backHref="">
+    <AppFooter containerClass="layout-content" backHref="">
       <span class="font-mono text-xs">
         构建于 <span class="text-[var(--color-neon-cyan)]">Nuxt 4</span> ·
         <span class="text-[var(--color-neon-purple)]">Tailwind v4</span> ·

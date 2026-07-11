@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'number-theory' }]" />
-    <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="layout-shell layout-workspace py-10">
       <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/number-theory</p>
 
       <h1 class="font-mono text-xl font-bold mb-1" style="color:rgba(255,165,0,0.9)">Number Theory</h1>

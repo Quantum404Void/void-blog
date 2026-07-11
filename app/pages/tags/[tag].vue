@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'tags', href: '/tags' }, { label: `#${tag}` }]" />
 
-    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <main class="layout-shell layout-reading py-12 sm:py-16">
       <!-- Tag Header -->
       <div class="mb-10">
         <!-- Color accent bar -->
@@ -56,7 +56,7 @@
       </div>
     </main>
 
-    <AppFooter maxW="max-w-3xl" backHref="/tags" backLabel="返回标签" />
+    <AppFooter containerClass="layout-reading" backHref="/tags" backLabel="返回标签" />
   </div>
 </template>
 

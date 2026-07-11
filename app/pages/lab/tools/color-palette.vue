@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: '颜色工具' }]" />
 
-    <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="layout-shell layout-workspace py-10">
       <p class="font-mono text-[10px] text-[var(--color-text-muted)] tracking-[0.25em] uppercase mb-2">~/lab/tools/color-palette</p>
 
       <h1 class="font-mono text-2xl font-bold mb-2" style="color:#ff2d78;text-shadow:0 0 20px rgba(255,45,120,0.5)">颜色工具</h1>

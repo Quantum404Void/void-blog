@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen" style="background:var(--color-void);color:#e0e0e0">
     <AppNav :crumbs="[{ label: 'lab', href: '/lab' }, { label: 'tools', href: '/lab' }, { label: 'Subnet Calc' }]" />
-    <div class="max-w-3xl mx-auto px-4 py-12">
+    <div class="layout-shell layout-workspace py-12">
       <h1 class="text-3xl font-bold mb-2" style="color:#39ff14;font-family:monospace">
         <span style="color:#00ffff">~/</span>subnet
       </h1>

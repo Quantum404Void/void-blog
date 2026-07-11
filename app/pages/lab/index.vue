@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-[var(--color-void)]">
     <AppNav :crumbs="[{ label: 'lab' }]" />
 
-    <main class="max-w-5xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+    <main class="layout-shell layout-content py-12 sm:py-16">
       <div class="mb-12">
         <p class="font-mono text-xs text-[var(--color-text-muted)] mb-3">interactive_lab</p>
         <h1 class="font-mono text-4xl sm:text-5xl font-bold tracking-[-0.035em] text-[var(--color-text-primary)] mb-3">
@@ -82,7 +82,7 @@
         <button class="tool-button mt-2" @click="searchQuery = ''">清空搜索</button>
       </div>
     </main>
-    <AppFooter maxW="max-w-5xl" />
+    <AppFooter containerClass="layout-content" />
   </div>
 </template>
 

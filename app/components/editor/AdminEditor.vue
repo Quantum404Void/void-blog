@@ -146,7 +146,7 @@ async function save() {
   <div class="min-h-screen bg-[var(--color-void)]">
     <!-- Nav -->
     <nav class="sticky top-0 z-50 border-b border-[var(--color-void-border)] nav-glass">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 min-h-16 py-2 flex flex-wrap items-center gap-3">
+      <div class="layout-shell layout-admin min-h-16 py-2 flex flex-wrap items-center gap-3">
         <NuxtLink href="/admin" class="admin-action inline-flex items-center px-2 font-mono text-sm text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">← 文章列表</NuxtLink>
         <span class="text-[var(--color-text-muted)]">/</span>
         <span class="font-mono text-sm text-[var(--color-neon-cyan)]">{{ isNew ? '新建文章' : '编辑文章' }}</span>
@@ -183,7 +183,7 @@ async function save() {
       </div>
     </Transition>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <main class="layout-shell layout-admin py-6 sm:py-8">
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 lg:gap-8">
         <!-- 左：编辑区 -->
         <div class="space-y-4">
