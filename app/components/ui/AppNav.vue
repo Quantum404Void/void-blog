@@ -1,5 +1,6 @@
 <template>
-  <nav aria-label="主导航" class="sticky top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.96);backdrop-filter:blur(10px)">
+  <div class="h-14" aria-hidden="true"></div>
+  <nav aria-label="主导航" class="fixed inset-x-0 top-0 z-50 border-b border-[var(--color-void-border)]" style="background:rgba(5,5,12,0.96);backdrop-filter:blur(10px)">
     <div class="w-full px-4 sm:px-6 xl:px-8 h-14">
     <div class="max-w-2xl mx-auto h-full flex items-center justify-between gap-3 min-w-0">
 
