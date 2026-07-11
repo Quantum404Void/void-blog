@@ -56,7 +56,7 @@
       </div>
     </main>
 
-    <AppFooter backHref="/tags" backLabel="返回标签" />
+    <AppFooter maxW="max-w-3xl" backHref="/tags" backLabel="返回标签" />
   </div>
 </template>
 

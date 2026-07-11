@@ -7,9 +7,9 @@
     <AppNav :crumbs="[{ label: 'blog', href: '/blog' }, { label: post?.title ?? slug }]" />
 
     <!-- Layout: article + TOC -->
-    <div class="article-shell mx-auto px-5 py-10 sm:px-8 sm:py-16">
+    <div class="article-shell mx-auto px-4 py-10 sm:px-6 sm:py-16">
       <!-- Article -->
-      <main class="min-w-0">
+      <main class="article-main min-w-0">
         <header class="article-header mb-12 sm:mb-16">
           <div class="mb-6 flex flex-wrap items-center gap-2">
             <span v-if="post.demo" class="inline-flex min-h-8 items-center rounded-full border border-[rgba(0,255,136,0.32)] px-3 font-mono text-[11px] text-[var(--color-neon-green)]">
@@ -442,7 +442,12 @@ const copyLink = () => copyToClipboard(shareUrl.value)
 
 <style scoped>
 .article-shell {
-  width: min(100%, 76rem);
+  width: min(100%, 68rem);
+}
+
+.article-main {
+  width: min(100%, 45rem);
+  margin-inline: auto;
 }
 
 .article-title {
@@ -462,9 +467,13 @@ const copyLink = () => copyToClipboard(shareUrl.value)
 @media (min-width: 1280px) {
   .article-shell {
     display: grid;
-    grid-template-columns: minmax(0, 46rem) 14rem;
+    grid-template-columns: minmax(0, 45rem) 14rem;
     gap: 5rem;
     align-items: start;
+  }
+
+  .article-main {
+    margin-inline: 0;
   }
 
   .article-prose {
