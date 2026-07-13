@@ -2,6 +2,7 @@
 defineOptions({ name: 'AdminEditor' })
 
 import type { Post } from '~/types/post'
+import MarkdownIt from 'markdown-it'
 import { getApiErrorMessage } from '~/utils/apiError'
 import { createPostSlug } from '~/utils/postSlug'
 
@@ -60,9 +61,32 @@ const estimatedReadingMinutes = computed(() => {
 
 const { buildMd } = useMarkdown()
 const mdInst = shallowRef<MarkdownRenderer | null>(null)
-onMounted(async () => { mdInst.value = await buildMd() })
+const previewState = shallowRef<'idle' | 'loading' | 'ready' | 'fallback'>('idle')
+const basicMd = new MarkdownIt({ html: false, linkify: true, typographer: true })
+
+async function ensureMarkdownRenderer() {
+  if (mdInst.value || previewState.value === 'loading') return
+  previewState.value = 'loading'
+  try {
+    mdInst.value = await buildMd()
+    previewState.value = 'ready'
+  }
+  catch {
+    previewState.value = 'fallback'
+  }
+}
+
+onMounted(() => { void ensureMarkdownRenderer() })
 const previewMode = shallowRef(false)
-const renderedPreview = computed(() => form.content && mdInst.value ? mdInst.value.render(form.content) : '')
+const renderedPreview = computed(() => {
+  if (!form.content) return ''
+  return (mdInst.value ?? basicMd).render(form.content)
+})
+
+function togglePreview() {
+  previewMode.value = !previewMode.value
+  if (previewMode.value) void ensureMarkdownRenderer()
+}
 
 const toolbar = [
   { label: 'H2', before: '\n## ', after: '' }, { label: 'H3', before: '\n### ', after: '' },
@@ -209,7 +233,7 @@ async function save() {
                 {{ btn.label }}
               </button>
               <div class="flex-1"></div>
-              <button type="button" @click="previewMode = !previewMode"
+              <button type="button" @click="togglePreview"
                 class="font-mono text-[10px] px-3 rounded transition-colors"
                 :class="previewMode ? 'text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.1)]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-void-muted)]'">
                 {{ previewMode ? '编辑' : '预览' }}
@@ -217,7 +241,14 @@ async function save() {
             </div>
             <ClientOnly>
               <CodeMirrorEditor v-if="!previewMode" v-model="form.content" min-height="clamp(28rem, 60vh, 48rem)" />
-              <div v-else class="prose min-h-[clamp(28rem,60vh,48rem)] px-4 sm:px-6 py-4 overflow-auto" v-html="renderedPreview" />
+              <div v-else class="min-h-[clamp(28rem,60vh,48rem)] overflow-auto px-4 py-4 sm:px-6">
+                <p v-if="previewState === 'loading'" role="status" class="mb-4 font-mono text-xs text-[var(--color-text-muted)]">正在加载语法高亮，正文已使用基础渲染显示…</p>
+                <p v-else-if="previewState === 'fallback'" role="status" class="mb-4 rounded-md border border-[rgba(255,200,0,0.25)] bg-[rgba(255,200,0,0.06)] px-3 py-2 font-mono text-xs text-[#ffc800]">语法高亮暂不可用，当前为基础 Markdown 预览。</p>
+                <article v-if="form.content" class="prose" v-html="renderedPreview" />
+                <div v-else class="flex min-h-80 items-center justify-center text-center font-mono text-xs text-[var(--color-text-muted)]">
+                  输入正文后，这里会显示实时预览。
+                </div>
+              </div>
             </ClientOnly>
           </div>
         </div>

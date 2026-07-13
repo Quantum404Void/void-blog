@@ -136,7 +136,10 @@ function buildMd(): Promise<MarkdownIt> {
   }
 
   return _md
-  })()  // end async IIFE
+  })().catch((error) => {
+    _mdPromise = null
+    throw error
+  })
   return _mdPromise
 }
 

@@ -1,5 +1,15 @@
 <template>
-  <div ref="editorContainer" class="cm-editor-wrap" :class="{ 'cm-no-border': noBorder }" />
+  <div class="cm-editor-wrap" :class="{ 'cm-no-border': noBorder }">
+    <div v-show="!initError" ref="editorContainer" class="cm-editor-host" />
+    <textarea
+      v-if="initError"
+      :value="modelValue"
+      class="cm-editor-fallback"
+      :style="{ minHeight }"
+      aria-label="Markdown 正文编辑器"
+      @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -42,8 +52,19 @@ const props = withDefaults(defineProps<{
 })
 const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
 
-const editorContainer = ref<HTMLDivElement | null>(null)
+const editorContainer = useTemplateRef<HTMLDivElement>('editorContainer')
+const initError = shallowRef(false)
 let view: EditorView | null = null
+
+function syncDocument(value: string) {
+  if (!view) return
+  const current = view.state.doc.toString()
+  if (current === value) return
+  view.dispatch({
+    changes: { from: 0, to: current.length, insert: value },
+    selection: view.state.selection,
+  })
+}
 
 function getLangExtension(lang: string) {
   switch (lang) {
@@ -64,12 +85,13 @@ function getLangExtension(lang: string) {
 onMounted(() => {
   if (!editorContainer.value) return
 
-  const updateListener = EditorView.updateListener.of((u) => {
-    if (u.docChanged) emit('update:modelValue', u.state.doc.toString())
-  })
+  try {
+    const updateListener = EditorView.updateListener.of((u) => {
+      if (u.docChanged) emit('update:modelValue', u.state.doc.toString())
+    })
 
-  // void.dev 全局风格主题（与 main.css 保持一致）
-  const voidTheme = EditorView.theme({
+    // void.dev 全局风格主题（与 main.css 保持一致）
+    const voidTheme = EditorView.theme({
     '&': {
       background: 'var(--color-void-card)',
       color: 'var(--color-text-primary)',
@@ -114,9 +136,9 @@ onMounted(() => {
     '.tok-attributeValue': { color: '#00ff88' },
     '.tok-meta':      { color: '#6868a0' },
     '.tok-invalid':   { color: '#ff2d78' },
-  }, { dark: true })
+    }, { dark: true })
 
-  const extensions: Extension[] = [
+    const extensions: Extension[] = [
     voidTheme,
     getLangExtension(props.lang),
     highlightActiveLine(),
@@ -142,30 +164,29 @@ onMounted(() => {
       },
     }),
     updateListener,
-  ]
+    ]
 
-  if (props.showLineNumbers) {
-    extensions.splice(1, 0, lineNumbers(), highlightActiveLineGutter())
+    if (props.showLineNumbers) {
+      extensions.splice(1, 0, lineNumbers(), highlightActiveLineGutter())
+    }
+
+    const state = EditorState.create({
+      doc: props.modelValue,
+      extensions,
+    })
+
+    view = new EditorView({ state, parent: editorContainer.value })
+    syncDocument(props.modelValue)
   }
-
-  const state = EditorState.create({
-    doc: props.modelValue,
-    extensions,
-  })
-
-  view = new EditorView({ state, parent: editorContainer.value })
+  catch (error) {
+    initError.value = true
+    console.error('CodeMirror initialization failed', error)
+  }
 })
 
 watch(() => props.modelValue, (val) => {
-  if (!view) return
-  const current = view.state.doc.toString()
-  if (current !== val) {
-    view.dispatch({
-      changes: { from: 0, to: current.length, insert: val },
-      selection: view.state.selection,
-    })
-  }
-})
+  syncDocument(val)
+}, { flush: 'post' })
 
 onUnmounted(() => { view?.destroy(); view = null })
 </script>
@@ -178,6 +199,21 @@ onUnmounted(() => { view?.destroy(); view = null })
   overflow: hidden;
   border: 1px solid var(--color-void-border);
   transition: border-color 0.15s;
+}
+.cm-editor-host {
+  min-height: v-bind('props.minHeight');
+}
+.cm-editor-fallback {
+  width: 100%;
+  resize: vertical;
+  border: 0;
+  background: var(--color-void-card);
+  color: var(--color-text-primary);
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  outline: none;
 }
 .cm-editor-wrap:focus-within {
   border-color: rgba(0, 212, 255, 0.35);

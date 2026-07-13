@@ -6,6 +6,7 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3-4FC08D?style=flat-square&logo=vue.js)](https://vuejs.org)
 [![Tailwind v4](https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
 [![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages+D1+AI-F38020?style=flat-square&logo=cloudflare)](https://pages.cloudflare.com)
+[![Bun](https://img.shields.io/badge/Bun-1.3-000000?style=flat-square&logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
 
 **[void.redx.space](https://void.redx.space)**
@@ -17,6 +18,7 @@
 | 层       | 技术                          | 说明                                                           |
 | -------- | ----------------------------- | -------------------------------------------------------------- |
 | 框架     | Nuxt 4.4 + Vue 3              | `future.compatibilityVersion: 4`，`app/` 子目录结构            |
+| 工具链   | Bun 1.3                       | 唯一包管理器与脚本运行器，提交 `bun.lock`                     |
 | 样式     | Tailwind CSS v4               | CSS-native，`@theme` 自定义变量                                |
 | 数据库   | Cloudflare D1 (SQLite)        | FTS5 全文搜索，`post_stats` 访问/点赞统计，`comments` 评论系统 |
 | 部署     | Cloudflare Pages              | Edge 渲染，CI/CD 自动部署                                      |
@@ -52,16 +54,38 @@
 ```bash
 git clone https://github.com/Quantum404Void/void-blog.git
 cd void-blog
-npm install
-npm run dev
+bun install --frozen-lockfile
+bun run dev
 ```
+
+常用命令：
+
+```bash
+bun run dev       # 本地开发
+bun run build     # 生产构建
+bun run generate  # 生成 Cloudflare Pages 产物
+bun x wrangler pages dev dist  # 本地预览 Pages Worker 与绑定
+```
+
+项目只维护 `bun.lock`，不要使用 `npm install`、`pnpm install` 或提交其他包管理器锁文件。
+
+### 完全重装依赖
+
+PowerShell：
+
+```powershell
+Remove-Item -Recurse -Force node_modules, .nuxt, dist -ErrorAction SilentlyContinue
+bun install --frozen-lockfile
+```
+
+如果需要主动更新依赖和锁文件，使用 `bun install`，确认构建通过后提交 `package.json` 与 `bun.lock`。
 
 首次部署，执行 D1 migrations：
 
 ```bash
-npx wrangler d1 execute void-blog-posts --remote --file=migrations/0001_init.sql
-npx wrangler d1 execute void-blog-posts --remote --file=migrations/0002_fts_wordcount.sql
-npx wrangler d1 execute void-blog-posts --remote --file=migrations/0003_comments.sql
+bun x wrangler d1 execute void-blog-posts --remote --file=migrations/0001_init.sql
+bun x wrangler d1 execute void-blog-posts --remote --file=migrations/0002_fts_wordcount.sql
+bun x wrangler d1 execute void-blog-posts --remote --file=migrations/0003_comments.sql
 ```
 
 CF Pages 环境变量：

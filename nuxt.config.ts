@@ -36,6 +36,15 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css', 'katex/dist/katex.min.css'],
 
   vite: {
+    resolve: {
+      // CodeMirror extensions rely on singleton state/view classes.
+      dedupe: [
+        '@codemirror/autocomplete',
+        '@codemirror/language',
+        '@codemirror/state',
+        '@codemirror/view',
+      ],
+    },
     plugins: [tailwindcss()],
     build: {
       rollupOptions: {
