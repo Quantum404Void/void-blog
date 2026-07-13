@@ -2,6 +2,8 @@
 defineOptions({ name: 'AdminEditor' })
 
 import type { Post } from '~/types/post'
+import { getApiErrorMessage } from '~/utils/apiError'
+import { createPostSlug } from '~/utils/postSlug'
 
 interface AdminPost extends Post {
   updated_at?: string
@@ -9,11 +11,6 @@ interface AdminPost extends Post {
 
 interface MarkdownRenderer {
   render: (source: string) => string
-}
-
-interface ApiError {
-  data?: { message?: string }
-  message?: string
 }
 
 const props = defineProps<{ isNew: boolean; initialSlug?: string }>()
@@ -26,7 +23,9 @@ const form = reactive({
   slug: '', title: '', description: '', content: '',
   pub_date: new Date().toISOString().slice(0, 10), draft: false,
 })
+const slugSeed = Date.now()
 const tagsInput = shallowRef('')
+const slugEdited = shallowRef(false)
 const parsedTags = computed(() => tagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean))
 
 if (!props.isNew && props.initialSlug) {
@@ -42,10 +41,14 @@ if (!props.isNew && props.initialSlug) {
 }
 
 watch(() => form.title, (value) => {
-  if (!props.isNew || form.slug) return
-  const ascii = value.toLowerCase().replace(/[\u4e00-\u9fa5]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
-  form.slug = ascii || `post-${value.length.toString(36)}`
+  if (!props.isNew || slugEdited.value || !value.trim()) return
+  form.slug = createPostSlug(value, slugSeed)
 })
+
+function markSlugEdited() {
+  slugEdited.value = true
+  form.slug = form.slug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '')
+}
 
 const snapshot = () => JSON.stringify({ ...form, tags: parsedTags.value })
 const savedSnapshot = shallowRef(snapshot())
@@ -100,6 +103,7 @@ onUnmounted(() => {
 onBeforeRouteLeave(() => !isDirty.value || window.confirm('有未保存的修改，确定离开吗？'))
 
 const saving = shallowRef(false)
+const fieldError = shallowRef('')
 const toast = reactive({ msg: '', type: 'ok' as 'ok' | 'err' })
 let toastTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -110,24 +114,21 @@ function showToast(msg: string, type: 'ok' | 'err' = 'ok') {
   toastTimer = setTimeout(() => { toast.msg = '' }, 3000)
 }
 
-function getErrorMessage(error: unknown) {
-  const apiError = error as ApiError
-  return apiError.data?.message ?? apiError.message ?? '保存失败'
-}
-
 async function save() {
   if (saving.value) return
   if (!form.title.trim() || !form.slug.trim() || !form.content.trim()) {
-    showToast('标题、slug 和内容不能为空', 'err')
+    fieldError.value = '请补全标题、Slug 和正文后再保存'
+    showToast(fieldError.value, 'err')
     return
   }
+  fieldError.value = ''
   saving.value = true
   try {
     const body = { ...form, tags: parsedTags.value }
     if (props.isNew) {
       await $fetch('/api/admin/posts', { method: 'POST', body })
       savedSnapshot.value = JSON.stringify(body)
-      showToast('文章已发布')
+      showToast(form.draft ? '草稿已保存' : '文章已发布')
       await router.push('/admin')
     } else {
       await $fetch(`/api/admin/posts/${props.initialSlug}`, { method: 'PUT', body })
@@ -135,7 +136,8 @@ async function save() {
       showToast('文章已更新')
     }
   } catch (error: unknown) {
-    showToast(getErrorMessage(error), 'err')
+    fieldError.value = getApiErrorMessage(error, '保存失败，请稍后重试')
+    showToast(fieldError.value, 'err')
   } finally {
     saving.value = false
   }
@@ -162,12 +164,13 @@ async function save() {
               </div>
             </div>
           </label>
-          <button @click="save" :disabled="saving"
+          <button type="button" @click="save" :disabled="saving || !isDirty"
+            :aria-busy="saving"
             class="font-mono text-xs px-4 rounded-lg border transition-colors"
             :class="saving
-              ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] cursor-not-allowed'
+              ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-70'
               : 'border-[rgba(0,255,136,0.4)] text-[var(--color-neon-green)] bg-[rgba(0,255,136,0.06)] hover:bg-[rgba(0,255,136,0.12)]'">
-            {{ saving ? '保存中…' : (isNew ? '发布' : '更新') }}
+            {{ saving ? '保存中…' : (!isDirty ? '已保存' : (isNew ? (form.draft ? '保存草稿' : '发布文章') : '更新文章')) }}
           </button>
         </div>
       </div>
@@ -184,25 +187,29 @@ async function save() {
     </Transition>
 
     <main class="layout-shell layout-admin py-6 sm:py-8">
+      <div v-if="fieldError" role="alert" class="mb-5 flex items-start justify-between gap-4 rounded-lg border border-[rgba(255,45,120,0.35)] bg-[rgba(255,45,120,0.08)] px-4 py-3 font-mono text-xs text-[var(--color-neon-pink)]">
+        <span>{{ fieldError }}</span>
+        <button type="button" class="min-h-0 shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]" aria-label="关闭错误提示" @click="fieldError = ''">✕</button>
+      </div>
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 lg:gap-8">
         <!-- 左：编辑区 -->
         <div class="space-y-4">
           <label for="post-title" class="sr-only">文章标题</label>
-          <input id="post-title" v-model="form.title" placeholder="文章标题…"
+          <input id="post-title" v-model="form.title" maxlength="160" placeholder="文章标题…"
             class="w-full bg-transparent border-b border-[var(--color-void-border)] focus:border-[rgba(0,212,255,0.5)] outline-none py-3 font-mono text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] transition-colors" />
           <label for="post-description" class="sr-only">文章描述</label>
-          <input id="post-description" v-model="form.description" placeholder="文章描述（SEO 用）…"
+          <input id="post-description" v-model="form.description" maxlength="320" placeholder="文章描述（SEO 用，最多 320 字）…"
             class="w-full bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-4 font-mono text-sm text-[var(--color-text-secondary)] placeholder:text-[var(--color-text-muted)] outline-none focus:border-[rgba(0,212,255,0.4)] transition-colors" />
 
           <div class="border border-[var(--color-void-border)] rounded-xl overflow-hidden">
             <!-- 工具栏 -->
             <div class="flex flex-wrap items-center gap-1 px-2 sm:px-4 py-2 border-b border-[var(--color-void-border)] bg-[rgba(0,0,0,0.2)]">
-              <button v-for="btn in toolbar" :key="btn.label" @click="insertMarkdown(btn.before, btn.after)"
+              <button v-for="btn in toolbar" :key="btn.label" type="button" @click="insertMarkdown(btn.before, btn.after)"
                 class="font-mono text-[10px] px-3 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-void-muted)] transition-colors">
                 {{ btn.label }}
               </button>
               <div class="flex-1"></div>
-              <button @click="previewMode = !previewMode"
+              <button type="button" @click="previewMode = !previewMode"
                 class="font-mono text-[10px] px-3 rounded transition-colors"
                 :class="previewMode ? 'text-[var(--color-neon-cyan)] bg-[rgba(0,212,255,0.1)]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-void-muted)]'">
                 {{ previewMode ? '编辑' : '预览' }}
@@ -219,7 +226,7 @@ async function save() {
         <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
           <div>
             <label for="post-slug" class="block font-mono text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">Slug</label>
-            <input id="post-slug" v-model="form.slug" :disabled="!isNew" placeholder="url-slug"
+            <input id="post-slug" v-model="form.slug" :disabled="!isNew" maxlength="80" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="url-slug" @input="markSlugEdited"
               class="w-full bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg px-3 font-mono text-xs text-[var(--color-text-primary)] outline-none focus:border-[rgba(0,212,255,0.4)] transition-colors disabled:opacity-50" />
           </div>
           <div>
@@ -235,6 +242,7 @@ async function save() {
               <span v-for="tag in parsedTags" :key="tag"
                 class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-void-muted)] text-[var(--color-text-muted)]">#{{ tag }}</span>
             </div>
+            <p class="mt-2 font-mono text-[9px] leading-relaxed text-[var(--color-text-muted)]">保存后不可修改；仅使用小写字母、数字和连字符。</p>
           </div>
           <!-- 统计 -->
           <div class="border border-[var(--color-void-border)] rounded-lg p-3 space-y-1.5 font-mono text-[10px]">

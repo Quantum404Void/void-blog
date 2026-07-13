@@ -96,13 +96,13 @@
           系统操作
         </div>
         <div class="flex flex-wrap items-center gap-3 px-4 py-4">
-          <button @click="syncWordCount" :disabled="syncing"
+          <button type="button" @click="syncWordCount" :disabled="syncing || rebuilding || Boolean(busyAction)" :aria-busy="syncing"
             class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
             :class="syncing ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] cursor-wait'
               : 'border-[rgba(0,212,255,0.4)] text-[var(--color-neon-cyan)] hover:bg-[rgba(0,212,255,0.06)]'">
             {{ syncing ? '同步中…' : '同步字数' }}
           </button>
-          <button @click="rebuildFts" :disabled="rebuilding"
+          <button type="button" @click="rebuildFts" :disabled="rebuilding || syncing || Boolean(busyAction)" :aria-busy="rebuilding"
             class="font-mono text-xs px-4 py-2 rounded-lg border transition-all"
             :class="rebuilding ? 'border-[var(--color-void-border)] text-[var(--color-text-muted)] cursor-wait'
               : 'border-[rgba(180,0,255,0.4)] text-[var(--color-neon-purple,#b400ff)] hover:bg-[rgba(180,0,255,0.06)]'">
@@ -197,13 +197,15 @@
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] whitespace-nowrap cursor-pointer select-none transition-all hover:opacity-80"
+                  <button type="button" class="min-h-8 rounded-full border px-2 text-[10px] whitespace-nowrap select-none transition-all hover:opacity-80 disabled:cursor-wait disabled:opacity-60"
                     :class="post.draft
-                      ? 'bg-[rgba(255,200,0,0.1)] text-[#ffc800] border border-[rgba(255,200,0,0.3)]'
-                      : 'bg-[rgba(0,255,136,0.08)] text-[var(--color-neon-green)] border border-[rgba(0,255,136,0.3)]'"
+                      ? 'bg-[rgba(255,200,0,0.1)] text-[#ffc800] border-[rgba(255,200,0,0.3)]'
+                      : 'bg-[rgba(0,255,136,0.08)] text-[var(--color-neon-green)] border-[rgba(0,255,136,0.3)]'"
+                    :disabled="Boolean(busyAction)"
+                    :aria-label="post.draft ? `发布 ${post.title}` : `转为草稿 ${post.title}`"
                     @click.stop="toggleDraft(post)">
-                    {{ post.draft ? '草稿' : '已发布' }}
-                  </span>
+                    {{ busyAction === `draft:${post.slug}` ? '处理中…' : (post.draft ? '草稿' : '已发布') }}
+                  </button>
                 </td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-3">
@@ -211,8 +213,10 @@
                       class="text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] transition-colors">预览</NuxtLink>
                     <NuxtLink :href="`/admin/posts/${post.slug}`"
                       class="text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] transition-colors">编辑</NuxtLink>
-                    <button @click="deletePost(post.slug)"
-                      class="text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] transition-colors">删除</button>
+                    <button type="button" :disabled="Boolean(busyAction)" @click="deletePost(post.slug)"
+                      class="min-h-8 text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] transition-colors disabled:cursor-wait disabled:opacity-50">
+                      {{ busyAction === `delete:${post.slug}` ? '删除中…' : '删除' }}
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -230,8 +234,8 @@
                 <h2 class="text-sm font-semibold text-[var(--color-text-primary)]">{{ post.title }}</h2>
                 <p class="mt-1 break-all font-mono text-[10px] text-[var(--color-text-muted)]">{{ post.slug }}</p>
               </div>
-              <button class="shrink-0 rounded-full border px-2.5 font-mono text-[10px]" :class="post.draft ? 'border-[rgba(255,200,0,0.3)] text-[#ffc800]' : 'border-[rgba(0,255,136,0.3)] text-[var(--color-neon-green)]'" @click="toggleDraft(post)">
-                {{ post.draft ? '草稿' : '已发布' }}
+              <button type="button" :disabled="Boolean(busyAction)" class="shrink-0 rounded-full border px-2.5 font-mono text-[10px] disabled:cursor-wait disabled:opacity-60" :class="post.draft ? 'border-[rgba(255,200,0,0.3)] text-[#ffc800]' : 'border-[rgba(0,255,136,0.3)] text-[var(--color-neon-green)]'" @click="toggleDraft(post)">
+                {{ busyAction === `draft:${post.slug}` ? '处理中…' : (post.draft ? '草稿' : '已发布') }}
               </button>
             </div>
             <div class="mt-3 flex flex-wrap gap-1.5">
@@ -242,7 +246,7 @@
               <div class="flex items-center gap-1">
                 <NuxtLink :href="`/blog/${post.slug}`" target="_blank" class="admin-action inline-flex items-center px-3 font-mono text-xs text-[var(--color-neon-cyan)]">预览</NuxtLink>
                 <NuxtLink :href="`/admin/posts/${post.slug}`" class="admin-action inline-flex items-center px-3 font-mono text-xs text-[var(--color-neon-green)]">编辑</NuxtLink>
-                <button class="px-3 font-mono text-xs text-[var(--color-neon-pink)]" @click="deletePost(post.slug)">删除</button>
+                <button type="button" :disabled="Boolean(busyAction)" class="px-3 font-mono text-xs text-[var(--color-neon-pink)] disabled:cursor-wait disabled:opacity-50" @click="deletePost(post.slug)">{{ busyAction === `delete:${post.slug}` ? '删除中…' : '删除' }}</button>
               </div>
             </div>
           </article>
@@ -255,6 +259,7 @@
 
 <script setup lang="ts">
 import type { PostSummary } from '~/types/post'
+import { getApiErrorMessage } from '~/utils/apiError'
 
 interface AdminOverview {
   posts: { total: number; published: number; drafts: number }
@@ -263,10 +268,7 @@ interface AdminOverview {
   recentActive: Array<{ slug: string; views: number; updated_at: string }>
 }
 
-interface ApiError {
-  data?: { message?: string }
-  message?: string
-}
+const busyAction = shallowRef('')
 
 definePageMeta({ layout: false })
 const { siteName } = useSiteConfig()
@@ -324,11 +326,6 @@ const rebuilding = shallowRef(false)
 const opsMsg = shallowRef('')
 let opsTimer: ReturnType<typeof setTimeout> | undefined
 
-function getErrorMessage(error: unknown) {
-  const apiError = error as ApiError
-  return apiError.data?.message ?? apiError.message ?? String(error)
-}
-
 function clearOpsMessageLater() {
   if (opsTimer) clearTimeout(opsTimer)
   opsTimer = setTimeout(() => { opsMsg.value = '' }, 4000)
@@ -339,6 +336,7 @@ onUnmounted(() => {
 })
 
 async function syncWordCount() {
+  if (syncing.value || rebuilding.value || busyAction.value) return
   syncing.value = true
   opsMsg.value = ''
   try {
@@ -346,7 +344,7 @@ async function syncWordCount() {
     opsMsg.value = `已同步 ${r.updated} 篇字数`
     await refresh()
   } catch (error: unknown) {
-    opsMsg.value = `同步失败：${getErrorMessage(error)}`
+    opsMsg.value = `同步失败：${getApiErrorMessage(error, '请稍后重试')}`
   } finally {
     syncing.value = false
     clearOpsMessageLater()
@@ -354,13 +352,14 @@ async function syncWordCount() {
 }
 
 async function rebuildFts() {
+  if (rebuilding.value || syncing.value || busyAction.value) return
   rebuilding.value = true
   opsMsg.value = ''
   try {
     const r = await $fetch<{ rebuilt: number }>('/api/admin/rebuild-fts', { method: 'POST' })
     opsMsg.value = `FTS 已重建 ${r.rebuilt} 篇`
   } catch (error: unknown) {
-    opsMsg.value = `重建失败：${getErrorMessage(error)}`
+    opsMsg.value = `重建失败：${getApiErrorMessage(error, '请稍后重试')}`
   } finally {
     rebuilding.value = false
     clearOpsMessageLater()
@@ -373,23 +372,37 @@ async function logout() {
 }
 
 async function toggleDraft(post: PostSummary) {
+  if (busyAction.value) return
+  busyAction.value = `draft:${post.slug}`
   try {
     await $fetch(`/api/admin/posts/${post.slug}`, {
       method: 'PUT', body: { draft: !post.draft },
     })
     await refresh()
+    opsMsg.value = post.draft ? `已发布 ${post.title}` : `已转为草稿 ${post.title}`
   } catch (error: unknown) {
-    opsMsg.value = `状态更新失败：${getErrorMessage(error)}`
+    opsMsg.value = `状态更新失败：${getApiErrorMessage(error, '请稍后重试')}`
+  }
+  finally {
+    busyAction.value = ''
+    clearOpsMessageLater()
   }
 }
 
 async function deletePost(slug: string) {
   if (!confirm(`确认删除 ${slug}？`)) return
+  if (busyAction.value) return
+  busyAction.value = `delete:${slug}`
   try {
     await $fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' })
     await refresh()
+    opsMsg.value = `已删除 ${slug}`
   } catch (error: unknown) {
-    opsMsg.value = `删除失败：${getErrorMessage(error)}`
+    opsMsg.value = `删除失败：${getApiErrorMessage(error, '请稍后重试')}`
+  }
+  finally {
+    busyAction.value = ''
+    clearOpsMessageLater()
   }
 }
 </script>

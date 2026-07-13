@@ -1,9 +1,7 @@
 <script setup lang="ts">
-definePageMeta({ layout: false })
+import { getApiErrorMessage } from '~/utils/apiError'
 
-interface LoginError {
-  data?: { message?: string }
-}
+definePageMeta({ layout: false })
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Admin Login | ${siteName}`, robots: 'noindex' })
@@ -27,7 +25,7 @@ async function handleLogin() {
     await $fetch('/api/auth/login', { method: 'POST', body: { password: password.value } })
     await navigateTo('/admin')
   } catch (loginError: unknown) {
-    error.value = (loginError as LoginError).data?.message ?? '验证失败，请检查密码后重试'
+    error.value = getApiErrorMessage(loginError, '验证失败，请检查密码后重试')
   } finally {
     loading.value = false
   }
