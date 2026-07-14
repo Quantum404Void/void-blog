@@ -47,6 +47,7 @@ function buildMd(): Promise<MarkdownIt> {
       import('shiki/langs/toml.mjs'),
       import('shiki/langs/sql.mjs'),
       import('shiki/langs/rust.mjs'),
+      import('shiki/langs/zig.mjs'),
       import('shiki/langs/go.mjs'),
       import('shiki/langs/java.mjs'),
       import('shiki/langs/markdown.mjs'),
