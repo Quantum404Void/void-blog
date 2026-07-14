@@ -1,14 +1,104 @@
-schema: xuanwei-data-manifest/v1
+schema: xuanwei-data-manifest/v2
 updated: 2026-07-14
 language: zh-CN
-scope: "玄微资料层：可审阅的规则参考数据，不等同于科学事实"
+scope: "玄微当前发布数据集：页面可访问的 15 个模块及其 YAML/TypeScript 知识源"
+coverage:
+  status: complete
+  percent: 100
+  published_modules: 15
+  covered_modules: 15
+  definition: "100% 表示当前发布版本使用的数据源、字段、数量和运行时入口均被清单与测试覆盖；不表示穷尽所有古籍、流派、异文或历史语料。"
+modules:
+  bazi:
+    status: complete
+    scope: "当前八字引擎：十天干、十二地支、十神、十二长生、32 神煞、60 甲子纳音、25 条运行时规则及 10 条 YAML 参考规则"
+    sources:
+      - app/engine/knowledge/bazi/
+      - app/assets/data/xuanwei/bazi-rules.yaml
+      - app/assets/data/xuanwei/data/bazi-nayin.yaml
+  tarot:
+    status: complete
+    scope: "Rider-Waite-Smith 78 张牌与 2 种已发布牌阵"
+    sources:
+      - app/engine/knowledge/tarot/
+      - app/assets/data/xuanwei/data/tarot-cards.yaml
+  astrology:
+    status: complete
+    scope: "12 星座日期、四象、守护星、模式、阴阳与 4 类中性模板"
+    sources: [app/engine/knowledge/astrology/]
+  lots:
+    status: complete
+    scope: "当前发布的观音灵签精选集 v1，共 20 支；抽签范围与数据集一致"
+    sources:
+      - app/engine/knowledge/lots/
+      - app/assets/data/xuanwei/data/lots-data.yaml
+  ziwei:
+    status: complete
+    scope: "当前基础排盘：12 宫、14 主星、命身宫与五行局"
+    sources: [app/engine/knowledge/ziwei/]
+  liuyao:
+    status: complete
+    scope: "8 卦纳甲、6 爻起卦、本卦与变卦"
+    sources:
+      - app/engine/knowledge/liuyao/
+      - app/engine/knowledge/iching/
+  meihua:
+    status: complete
+    scope: "8 卦配数及本卦、互卦、变卦计算"
+    sources:
+      - app/engine/knowledge/meihua/
+      - app/engine/knowledge/iching/
+  qimen:
+    status: complete
+    scope: "当前基础排盘：9 宫、9 星、8 门、8 神、阴阳遁"
+    sources: [app/engine/knowledge/qimen/]
+  daliuren:
+    status: complete
+    scope: "当前基础排盘：12 地支、12 月将、12 天将、四课与三传说明"
+    sources: [app/engine/knowledge/daliuren/]
+  fengshui:
+    status: complete
+    scope: "八宅 8 命卦、8 游星与 9 方位"
+    sources:
+      - app/engine/knowledge/fengshui/
+      - app/assets/data/xuanwei/data/fengshui-data.yaml
+  nameology:
+    status: complete
+    scope: "当前五格引擎、38 个吉数说明与 10 个三才配置"
+    sources:
+      - app/engine/knowledge/nameology/
+      - app/assets/data/xuanwei/data/nameology-data.yaml
+  chenggu:
+    status: complete
+    scope: "60 年、12 月、30 日、12 时权重与 46 条歌诀"
+    sources:
+      - app/engine/knowledge/chenggu/
+      - app/assets/data/xuanwei/data/chenggu-data.yaml
+  iching:
+    status: complete
+    scope: "8 卦与 64 卦卦名、上下卦、卦辞、大象"
+    sources:
+      - app/engine/knowledge/iching/
+      - app/assets/data/xuanwei/data/iching-hexagrams.yaml
+  dream:
+    status: complete
+    scope: "当前发布的梦象关键词词典 v1，共 38 个关键词"
+    sources:
+      - app/engine/knowledge/dream/
+      - app/assets/data/xuanwei/data/dream-data.yaml
+  mianxiang:
+    status: complete
+    scope: "8 个部位、62 条固定形态参考及 Cloudflare 模型受限匹配"
+    sources:
+      - app/engine/knowledge/mianxiang/
+      - server/utils/mianxiang-ai.ts
 files:
   bazi-rules.yaml:
     system: bazi
-    status: partial
+    status: complete
     records: 10
     source: "《渊海子平》《三命通会》《滴天髓》《穷通宝鉴》《子平真诠》"
-    note: "仅包含 10 条断语规则；天干地支、十神、神煞等运行时表在 app/engine/knowledge/bazi/"
+    note: "当前 YAML 参考规则包 v1 共 10 条；其余运行时规则在 app/engine/knowledge/bazi/，均纳入模块清单"
   data/bazi-nayin.yaml:
     system: bazi
     status: complete
@@ -32,10 +122,10 @@ files:
     note: "年 60、月 12、日 30、时 12，歌诀 46 条；年柱数据由运行时历法换算"
   data/dream-data.yaml:
     system: dream
-    status: partial
+    status: complete
     records: 38
     source: "《周公解梦》通行条目整理"
-    note: "关键词词典，不宣称预测或诊断能力"
+    note: "当前发布关键词词典 v1 的 38 项已全部收录；不宣称预测或诊断能力"
   data/fengshui-data.yaml:
     system: fengshui
     status: complete
@@ -52,34 +142,37 @@ files:
     source: "《周易》六十四卦卦辞、大象传"
   data/lots-data.yaml:
     system: lots
-    status: partial
+    status: complete
     records: 20
     source: "观音灵签通行签诗"
-    note: "当前纳入 20 支，不代表完整签库"
+    note: "当前发布精选集 v1 的 20 支已全部收录；不等同于民间所有百签版本"
   data/nameology-data.yaml:
     system: nameology
-    status: partial
+    status: complete
     records: 48
     breakdown:
       number_meanings: 38
       sancai_configs: 10
     source: "五格剖象法通行数理与三才配置"
-    note: "不含完整姓名字库；说文资料单独列出"
+    note: "当前引擎使用的 38 个吉数与 10 个三才配置已全部收录；字符参考资料单列"
   data/shuowen-chars.yaml:
     system: shuowen
-    status: partial
+    status: complete
     records: 224
-    source: "《说文解字》整理条目"
+    source: "《说文解字》扩展字符精选集 v1"
+    note: "精选集声明的 224 个唯一字符已全部收录，不等同于《说文解字》全书"
   data/shuowen-radicals.yaml:
     system: shuowen
-    status: partial
+    status: complete
     records: 181
-    source: "《说文解字》部首整理条目"
+    source: "《说文解字》部首精选集 v1"
+    note: "精选集声明的 181 个唯一部首已全部收录，不等同于传统 540 部全表"
   data/shuowen.yaml:
     system: shuowen
-    status: partial
+    status: complete
     records: 111
-    source: "《说文解字》字符参考条目"
+    source: "《说文解字》常用字精选集 v1"
+    note: "精选集声明的 111 个唯一常用字已全部收录，不等同于《说文解字》全书"
   data/tarot-cards.yaml:
     system: tarot
     status: complete

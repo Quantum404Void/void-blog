@@ -6,10 +6,13 @@ import { NAYIN_TAGS } from '../app/engine/knowledge/bazi/nayin'
 import { HEXAGRAMS } from '../app/engine/knowledge/iching'
 import { GUANYIN_LOTS } from '../app/engine/knowledge/lots'
 import { MAJOR_ARCANA, MINOR_ARCANA } from '../app/engine/knowledge/tarot/cards'
+import { REGISTERED_MODULES } from '../app/engine/knowledge'
 
 const root = path.resolve('app/assets/data/xuanwei')
 const manifest = yaml.load(fs.readFileSync(path.join(root, 'DATA_MANIFEST.yaml'), 'utf8')) as {
   schema: string
+  coverage: { status: string; percent: number; published_modules: number; covered_modules: number; definition: string }
+  modules: Record<string, { status: string; scope: string; sources: string[] }>
   files: Record<string, { system: string; status: string; records: number; breakdown?: Record<string, number> }>
 }
 
@@ -19,7 +22,7 @@ const expectUnique = (values: unknown[]) => expect(new Set(values).size).toBe(va
 
 describe('xuanwei YAML data integrity', () => {
   test('every manifest file exists and parses as YAML', () => {
-    expect(manifest.schema).toBe('xuanwei-data-manifest/v1')
+    expect(manifest.schema).toBe('xuanwei-data-manifest/v2')
     const yamlFiles = fs.readdirSync(path.join(root, 'data')).filter(file => file.endsWith('.yaml')).map(file => `data/${file}`)
     yamlFiles.push('bazi-rules.yaml')
     expect(Object.keys(manifest.files).sort()).toEqual(yamlFiles.sort())
@@ -29,8 +32,27 @@ describe('xuanwei YAML data integrity', () => {
       expect(fs.existsSync(file)).toBe(true)
       expect(() => yaml.load(fs.readFileSync(file, 'utf8'))).not.toThrow()
       expect(metadata.system.trim()).toBeTruthy()
-      expect(['complete', 'partial'].includes(metadata.status)).toBe(true)
+      expect(metadata.status).toBe('complete')
       expect(metadata.records).toBeGreaterThan(0)
+    }
+  })
+
+  test('covers 100% of published modules and their declared sources', () => {
+    const registeredIds = REGISTERED_MODULES.map(module => module.id).sort()
+    const coveredIds = Object.keys(manifest.modules).sort()
+    expect(coveredIds).toEqual(registeredIds)
+    expect(manifest.coverage).toMatchObject({
+      status: 'complete',
+      percent: 100,
+      published_modules: registeredIds.length,
+      covered_modules: coveredIds.length,
+    })
+    expect(isText(manifest.coverage.definition)).toBe(true)
+    for (const module of Object.values(manifest.modules)) {
+      expect(module.status).toBe('complete')
+      expect(isText(module.scope)).toBe(true)
+      expect(module.sources.length).toBeGreaterThan(0)
+      for (const source of module.sources) expect(fs.existsSync(path.resolve(source))).toBe(true)
     }
   })
 
