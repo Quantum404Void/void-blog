@@ -2,15 +2,17 @@
  * engine/knowledge/mianxiang/index.ts — 面相（古籍参考）
  *
  * 数据来源：《麻衣相法》(宋·麻衣道者)、《柳庄相法》(明·袁珙)
- * 面相模块为古籍知识查阅，不涉及AI人脸扫描。
- * 用户选择面部部位后，查阅该部位在相书中的各种形态及其含义。
+ * 模型只从这里定义的有限形态中选择可见外观，条文解释仍由本地规则引擎生成。
  */
 
 import { createEmptyMatrix } from '@/engine/types'
 import type { SymbolMatrix } from '@/engine/types'
+import type { MianxiangFeature, MianxiangObservation } from '~/types/mianxiang'
 
 /** 各部位相书条文 */
-const REFERENCES: Record<string, { form: string; meaning: string }[]> = {
+export interface MianxiangReference { form: string; meaning: string }
+
+export const MIANXIANG_REFERENCES: Record<MianxiangFeature, MianxiangReference[]> = {
   '眉': [
     { form: '眉长过目', meaning: '兄弟和睦，朋友众多。' },
     { form: '眉清目秀', meaning: '心思细腻，聪慧过人。' },
@@ -93,7 +95,7 @@ const REFERENCES: Record<string, { form: string; meaning: string }[]> = {
 
 export function mianxiangLookup(feature: string): SymbolMatrix {
   const matrix = createEmptyMatrix('mianxiang', `面相查阅: ${feature}`)
-  const entries = REFERENCES[feature]
+  const entries = MIANXIANG_REFERENCES[feature as MianxiangFeature]
 
   if (entries) {
     matrix.symbols.push({ id: `mx-${feature}`, name: feature, category: 'mianxiang', position: feature, attributes: { count: String(entries.length) } })
@@ -109,6 +111,41 @@ export function mianxiangLookup(feature: string): SymbolMatrix {
       id: 'mx-notfound', ruleId: 'mianxiang', category: 'general',
       text: `未找到"${feature}"的相关条文。可选部位：眉、眼、鼻、口、耳、额、颧、下巴。`,
       tone: 'neutral', weight: 50
+    })
+  }
+
+  return matrix
+}
+
+export function mianxiangFromObservations(observations: MianxiangObservation[]): SymbolMatrix {
+  const matrix = createEmptyMatrix('mianxiang', `Cloudflare AI 外观匹配: ${observations.length}项`)
+
+  for (const observation of observations) {
+    const reference = MIANXIANG_REFERENCES[observation.feature].find(item => item.form === observation.form)
+    if (!reference) continue
+    matrix.symbols.push({
+      id: `mx-ai-${observation.feature}`,
+      name: observation.form,
+      category: 'mianxiang',
+      position: observation.feature,
+      attributes: { confidence: observation.confidence.toFixed(2) },
+    })
+    matrix.interpretations.push({
+      id: `mx-ai-${observation.feature}-ref`,
+      ruleId: 'mianxiang-ai-ref',
+      category: 'general',
+      text: `【${observation.feature}】模型匹配：${reference.form}\n古籍条文：${reference.meaning}`,
+      tone: 'neutral',
+      source: '《麻衣相法》',
+      weight: Math.round(observation.confidence * 100),
+      modernNote: `Cloudflare Vision 匹配置信度 ${Math.round(observation.confidence * 100)}%。模型只负责匹配可见外观，条文来自本地固定知识库。`,
+    })
+  }
+
+  if (!matrix.interpretations.length) {
+    matrix.interpretations.push({
+      id: 'mx-ai-empty', ruleId: 'mianxiang-ai-ref', category: 'general',
+      text: '照片中没有足够清晰、可匹配的面部形态。', tone: 'neutral', weight: 50,
     })
   }
 

@@ -160,6 +160,7 @@ export default defineNuxtConfig({
     '/api/admin/**': { headers: { 'Cache-Control': 'no-store' } },
     '/api/auth/**': { headers: { 'Cache-Control': 'no-store' } },
     '/api/ai-chat': { headers: { 'Cache-Control': 'no-store' } },
+    '/api/xuanwei/**': { headers: { 'Cache-Control': 'no-store' } },
     '/rss.xml': { isr: isProduction ? 3600 : false },
     '/sitemap.xml': { isr: isProduction ? 3600 : false },
   },

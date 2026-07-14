@@ -101,4 +101,9 @@
 .xw-feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
 .xw-feature-grid button { min-height: 2.75rem; border: 1px solid var(--color-void-border); border-radius: .5rem; background: var(--color-void); color: var(--color-text-secondary); cursor: pointer; }
 .xw-feature-grid button:hover, .xw-feature-grid button:focus-visible, .xw-feature-grid button[aria-pressed='true'] { border-color: var(--xw-accent); background: var(--xw-accent-soft); color: var(--xw-accent); }
+.xw-observation-list { display: grid; gap: .5rem; }
+.xw-observation { display: flex; min-height: 2.75rem; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem .75rem; border: 1px solid var(--color-void-border); border-radius: .55rem; background: var(--color-void); }
+.xw-observation strong { color: var(--color-text-primary); font-family: var(--xw-serif); font-size: .78rem; }
+.xw-observation span { color: var(--xw-accent); font-family: var(--font-mono); font-size: .7rem; }
+.xw-model-note { margin: .75rem 0 0; color: var(--color-text-muted); font-family: var(--font-mono); font-size: .62rem; line-height: 1.6; }
 @media (max-width: 40rem) { .xw-form-grid, .xw-form-grid-3, .xw-form-grid-4 { grid-template-columns: 1fr; } .xw-result-grid { grid-template-columns: repeat(min(var(--xw-cols, 2), 2), minmax(0, 1fr)); } .xw-pillar-grid, .xw-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .xw-zodiac-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

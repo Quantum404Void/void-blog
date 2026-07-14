@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
+import { nextTick, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
-import { mianxiangLookup } from '@/engine/knowledge/mianxiang'
+import { mianxiangFromObservations, mianxiangLookup } from '@/engine/knowledge/mianxiang'
 import type { SymbolMatrix } from '@/engine/types'
+import type { MianxiangAnalysisResponse } from '~/types/mianxiang'
 
 const features = ['眉', '眼', '鼻', '口', '耳', '额', '颧', '下巴']
 const selected = shallowRef('')
@@ -10,10 +11,10 @@ const matrix = shallowRef<SymbolMatrix | null>(null)
 const cameraStarted = shallowRef(false)
 const photo = shallowRef<string | null>(null)
 const errorMessage = shallowRef('')
+const analyzing = shallowRef(false)
+const analysis = shallowRef<MianxiangAnalysisResponse | null>(null)
 const video = useTemplateRef<HTMLVideoElement>('video')
 const canvas = useTemplateRef<HTMLCanvasElement>('canvas')
-const text = computed(() => matrix.value?.interpretations[0]?.text ?? '')
-const note = computed(() => matrix.value?.interpretations[0]?.modernNote ?? '')
 let stream: MediaStream | null = null
 
 function stopCamera() {
@@ -59,10 +60,37 @@ function capture() {
   stopCamera()
 }
 
+async function analyzePhoto() {
+  if (!photo.value || analyzing.value) return
+  analyzing.value = true
+  errorMessage.value = ''
+  analysis.value = null
+  matrix.value = null
+  selected.value = ''
+  try {
+    const image = await fetch(photo.value).then(response => response.blob())
+    const result = await $fetch<MianxiangAnalysisResponse>('/api/xuanwei/mianxiang', {
+      method: 'POST',
+      body: image,
+      headers: { 'Content-Type': image.type || 'image/jpeg' },
+    })
+    analysis.value = result
+    matrix.value = mianxiangFromObservations(result.observations)
+  }
+  catch (error) {
+    const data = error as { data?: { message?: string }; message?: string }
+    errorMessage.value = data.data?.message ?? data.message ?? 'Cloudflare 模型分析失败，请稍后重试。'
+  }
+  finally {
+    analyzing.value = false
+  }
+}
+
 async function retake() {
   photo.value = null
   selected.value = ''
   matrix.value = null
+  analysis.value = null
   await startCamera()
 }
 
@@ -75,4 +103,4 @@ onBeforeRouteLeave(stopCamera)
 onBeforeUnmount(stopCamera)
 </script>
 
-<template><section class="xw-page"><header><h1>面相古籍对照</h1><p>拍照仅在本机浏览器处理，不上传服务器</p></header><div class="xw-stack"><XuanweiPanel title="拍照自观"><button v-if="!cameraStarted && !photo" class="xw-camera-start" type="button" @click="startCamera"><span aria-hidden="true">镜</span><strong>开启摄像头</strong><small>需要浏览器摄像头权限</small></button><div v-if="cameraStarted && !photo" class="xw-camera"><video ref="video" autoplay muted playsinline></video><div class="xw-face-frame" aria-hidden="true"></div></div><canvas ref="canvas" hidden></canvas><div v-if="photo" class="xw-photo"><img :src="photo" alt="刚刚拍摄的面部照片"><div class="xw-face-frame" aria-hidden="true"></div></div><p v-if="errorMessage" class="xw-error" role="alert">{{ errorMessage }}</p><div class="xw-action-row"><button v-if="cameraStarted && !photo" class="xw-action" type="button" @click="capture">拍照</button><button v-if="photo" class="xw-action xw-action-secondary" type="button" @click="retake">重新拍摄</button><button v-if="errorMessage && !cameraStarted" class="xw-action xw-action-secondary" type="button" @click="startCamera">重试</button></div></XuanweiPanel><XuanweiPanel v-if="photo" title="选择部位查阅古籍条文"><div class="xw-feature-grid"><button v-for="feature in features" :key="feature" type="button" :aria-pressed="selected === feature" @click="lookup(feature)">{{ feature }}</button></div></XuanweiPanel><XuanweiPanel v-if="matrix" :title="`${selected}部条文`"><p class="xw-interpretation">{{ text }}</p><hr class="xw-divider"><p class="xw-result-note">{{ note }}</p></XuanweiPanel><XuanweiNotice tone="warning">本工具不进行人脸识别或自动判断，仅提供古籍条文对照；内容不具科学诊断依据。</XuanweiNotice></div></section></template>
+<template><section class="xw-page"><header><h1>面相古籍对照</h1><p>Cloudflare Vision 匹配可见外观，照片不保存</p></header><div class="xw-stack"><XuanweiPanel title="拍照分析"><button v-if="!cameraStarted && !photo" class="xw-camera-start" type="button" @click="startCamera"><span aria-hidden="true">镜</span><strong>开启摄像头</strong><small>需要浏览器摄像头权限</small></button><div v-if="cameraStarted && !photo" class="xw-camera"><video ref="video" autoplay muted playsinline></video><div class="xw-face-frame" aria-hidden="true"></div></div><canvas ref="canvas" hidden></canvas><div v-if="photo" class="xw-photo"><img :src="photo" alt="刚刚拍摄的面部照片"><div class="xw-face-frame" aria-hidden="true"></div></div><p v-if="errorMessage" class="xw-error" role="alert">{{ errorMessage }}</p><div class="xw-action-row"><button v-if="cameraStarted && !photo" class="xw-action" type="button" @click="capture">拍照</button><button v-if="photo" class="xw-action" type="button" :disabled="analyzing" @click="analyzePhoto">{{ analyzing ? 'Cloudflare 分析中…' : '使用 Cloudflare 模型分析' }}</button><button v-if="photo" class="xw-action xw-action-secondary" type="button" :disabled="analyzing" @click="retake">重新拍摄</button><button v-if="errorMessage && !cameraStarted && !photo" class="xw-action xw-action-secondary" type="button" @click="startCamera">重试</button></div></XuanweiPanel><XuanweiPanel v-if="analysis" title="模型匹配结果"><p v-if="analysis.warning" class="xw-result-note">{{ analysis.warning }}</p><div v-if="analysis.observations.length" class="xw-observation-list"><div v-for="item in analysis.observations" :key="item.feature" class="xw-observation"><strong>{{ item.feature }} · {{ item.form }}</strong><span>{{ Math.round(item.confidence * 100) }}%</span></div></div><p class="xw-model-note">模型：{{ analysis.model }} · 图像质量：{{ analysis.imageQuality === 'good' ? '良好' : '受限' }}</p></XuanweiPanel><XuanweiPanel v-if="photo" title="手动查阅古籍条文"><div class="xw-feature-grid"><button v-for="feature in features" :key="feature" type="button" :aria-pressed="selected === feature" @click="lookup(feature)">{{ feature }}</button></div></XuanweiPanel><XuanweiPanel v-if="matrix" :title="selected ? `${selected}部条文` : '古籍条文对照'"><div class="xw-reading-list"><article v-for="item in matrix.interpretations" :key="item.id"><p class="xw-interpretation">{{ item.text }}</p><p v-if="item.modernNote" class="xw-result-note">{{ item.modernNote }}</p></article></div></XuanweiPanel><XuanweiNotice tone="warning">模型不识别身份，也不推断年龄、性别、种族、健康、情绪或性格。它只从固定的 62 条传统形态中匹配可见外观；内容不具科学诊断或预测依据。</XuanweiNotice></div></section></template>
