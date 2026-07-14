@@ -61,6 +61,7 @@ describe('xuanwei YAML data integrity', () => {
       ['bazi-rules.yaml', load('bazi-rules.yaml').rules.length],
       ['data/bazi-nayin.yaml', load('data/bazi-nayin.yaml').nayin.length],
       ['data/chenggu-data.yaml', Object.keys(load('data/chenggu-data.yaml').yearWeight).length + load('data/chenggu-data.yaml').monthWeight.length + load('data/chenggu-data.yaml').dayWeight.length + load('data/chenggu-data.yaml').hourWeight.length + Object.keys(load('data/chenggu-data.yaml').songs).length],
+      ['data/classics-catalog.yaml', load('data/classics-catalog.yaml').classics.length],
       ['data/iching-hexagrams.yaml', load('data/iching-hexagrams.yaml').hexagrams.length],
       ['data/lots-data.yaml', load('data/lots-data.yaml').lots.length],
       ['data/dream-data.yaml', Object.keys(load('data/dream-data.yaml').dreams).length],
@@ -78,6 +79,27 @@ describe('xuanwei YAML data integrity', () => {
     expect(manifest.files['data/fengshui-data.yaml']?.breakdown).toEqual({ palaces: 8, star_meanings: 8, directions: 9 })
     expect(manifest.files['data/nameology-data.yaml']?.breakdown).toEqual({ number_meanings: 38, sancai_configs: 10 })
     expect(manifest.files['data/tarot-cards.yaml']?.breakdown).toEqual({ major_arcana: 22, minor_arcana: 56, spreads: 2 })
+  })
+
+  test('catalogs every classic named in BOOKS.md without false full-text claims', () => {
+    const catalog = load('data/classics-catalog.yaml')
+    const classics = catalog.classics as Array<Record<string, string>>
+    const books = fs.readFileSync(path.join(root, 'BOOKS.md'), 'utf8')
+    const namedTitles = [...books.matchAll(/《([^》]+)》/g)].map(match => match[1].replace(/\(.+\)$/u, ''))
+    const aliases: Record<string, string> = { '周易': '周易', '易经': '周易' }
+    const catalogTitles = new Set(classics.map(item => item.title))
+
+    expect(catalog.schema).toBe('xuanwei-classics-catalog/v1')
+    expect(catalog.coverage.status).toBe('complete')
+    expectUnique(classics.map(item => item.id))
+    expectUnique(classics.map(item => item.title))
+    for (const title of namedTitles) expect(catalogTitles.has(aliases[title] ?? title)).toBe(true)
+    for (const item of classics) {
+      expect([item.id, item.title, item.system, item.period, item.author, item.mode, item.source_status].every(isText)).toBe(true)
+      expect(['structured', 'indexed'].includes(item.mode)).toBe(true)
+      expect(['open', 'excerpt_open', 'bibliography', 'variant', 'copyright_review', 'title_review'].includes(item.source_status)).toBe(true)
+      if (['open', 'excerpt_open'].includes(item.source_status)) expect(item.source_url?.startsWith('https://')).toBe(true)
+    }
   })
 
   test('I Ching contains the canonical 64 unique hexagrams', () => {

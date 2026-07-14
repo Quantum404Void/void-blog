@@ -18,6 +18,7 @@
 | --- | --- | --- |
 | `bazi-nayin.yaml` | 八字 | 60 个干支条目、30 个纳音对 |
 | `chenggu-data.yaml` | 称骨 | 年/月/日/时权重与 46 条歌诀 |
+| `classics-catalog.yaml` | 古籍目录 | 全部 45 部古籍与传统资料的书目、体系、收录方式和来源状态 |
 | `dream-data.yaml` | 解梦 | 38 个关键词 |
 | `fengshui-data.yaml` | 风水 | 八宅方位与命卦表 |
 | `iching-hexagrams.yaml` | 易经 | 64 卦 |

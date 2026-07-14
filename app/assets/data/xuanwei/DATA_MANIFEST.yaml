@@ -120,6 +120,14 @@ files:
       songs: 46
     source: "袁天罡称骨歌通行表"
     note: "年 60、月 12、日 30、时 12，歌诀 46 条；年柱数据由运行时历法换算"
+  data/classics-catalog.yaml:
+    system: bibliography
+    status: complete
+    records: 46
+    breakdown:
+      cataloged_classics: 46
+    source: "项目古籍总目录；开放来源优先使用维基文库，其他条目标注书目、异本或版权核验状态"
+    note: "覆盖 BOOKS.md 声明的全部古籍与传统资料；不把无可靠开放来源的条目标为全文"
   data/dream-data.yaml:
     system: dream
     status: complete

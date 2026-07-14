@@ -1,0 +1,52 @@
+schema: xuanwei-classics-catalog/v1
+updated: 2026-07-14
+coverage:
+  status: complete
+  definition: "覆盖 BOOKS.md 声明的全部古籍与传统资料：每部均有书目、体系、时代、归属、收录方式和来源状态。全文状态仅在存在可核验开放文本时声明。"
+classics:
+  - { id: yuan-hai-zi-ping, title: 渊海子平, system: bazi, period: 宋, author: 徐大升, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/淵海子平" }
+  - { id: san-ming-tong-hui, title: 三命通会, system: bazi, period: 明, author: 万民英, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/三命通會_(四庫全書本)" }
+  - { id: di-tian-sui, title: 滴天髓, system: bazi, period: 清, author: "京图撰、任铁樵注", mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/滴天髓" }
+  - { id: qiong-tong-bao-jian, title: 穷通宝鉴, system: bazi, period: 明清, author: "佚名、余春台整理", mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/穷通宝鉴" }
+  - { id: zi-ping-zhen-quan, title: 子平真诠, system: bazi, period: 清, author: 沈孝瞻, mode: structured, source_status: bibliography }
+  - { id: xing-ping-hui-hai, title: 星平会海, system: bazi, period: 明, author: 月金山人, mode: structured, source_status: bibliography }
+  - { id: shen-feng-tong-kao, title: 神峰通考, system: bazi, period: 明, author: 张楠, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/神峰通考" }
+  - { id: yu-zhao-ding-zhen-jing, title: 玉照定真经, system: bazi, period: 晋, author: 郭璞, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/玉照定真經_(四庫全書本)" }
+  - { id: luo-lu-zi-san-ming-xiao-xi-fu, title: 珞琭子三命消息赋, system: bazi, period: 宋, author: 珞琭子, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/珞琭子三命消息賦註_(四庫全書本)" }
+  - { id: lan-tai-miao-xuan, title: 兰台妙选, system: bazi, period: 明, author: 不详, mode: indexed, source_status: excerpt_open, source_url: "https://zh.wikisource.org/wiki/欽定古今圖書集成/博物彙編/藝術典/第591卷" }
+  - { id: zao-hua-yuan-yao, title: 造化元钥, system: bazi, period: 清, author: 徐乐吾, mode: indexed, source_status: bibliography }
+  - { id: ming-li-yue-yan, title: 命理约言, system: bazi, period: 清, author: 陈素庵, mode: indexed, source_status: bibliography }
+  - { id: di-tian-sui-chan-wei, title: 滴天髓阐微, system: bazi, period: 清, author: 任铁樵, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/滴天髓闡微" }
+  - { id: qian-li-ming-gao, title: 千里命稿, system: bazi, period: 民国, author: 韦千里, mode: indexed, source_status: copyright_review }
+  - { id: zhou-yi, title: 周易, system: iching, period: 周, author: 传统归于周文王与周公, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/周易" }
+  - { id: guan-yin-ling-qian, title: 观音灵签, system: lots, period: 民间, author: 不详, mode: structured, source_status: variant }
+  - { id: zi-wei-dou-shu-quan-shu, title: 紫微斗数全书, system: ziwei, period: 明, author: 传统归于罗洪先, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/紫微斗數全書" }
+  - { id: shi-ba-fei-xing-ce-tian-zi-wei, title: 十八飞星策天紫微斗数, system: ziwei, period: 不详, author: 不详, mode: indexed, source_status: bibliography }
+  - { id: dao-zang-zi-wei-dou-shu, title: 道藏·紫微斗数, system: ziwei, period: 不详, author: 不详, mode: indexed, source_status: title_review }
+  - { id: jing-shi-yi-zhuan, title: 京氏易传, system: liuyao, period: 汉, author: 京房, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/京氏易傳" }
+  - { id: huo-zhu-lin, title: 火珠林, system: liuyao, period: 唐宋间, author: 传统归于麻衣道者, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/火珠林" }
+  - { id: bu-shi-zheng-zong, title: 卜筮正宗, system: liuyao, period: 清, author: 王洪绪, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/卜筮正宗（河潞武子龄校本）" }
+  - { id: zeng-shan-bu-yi, title: 增删卜易, system: liuyao, period: 清, author: 野鹤老人, mode: indexed, source_status: bibliography }
+  - { id: yi-yin, title: 易隐, system: liuyao, period: 清, author: 曹九锡, mode: indexed, source_status: bibliography }
+  - { id: mei-hua-yi-shu, title: 梅花易数, system: meihua, period: 宋, author: 传统归于邵雍, mode: structured, source_status: bibliography }
+  - { id: qi-men-dun-jia-mi-ji-da-quan, title: 奇门遁甲秘笈大全, system: qimen, period: 不详, author: 不详, mode: structured, source_status: title_review }
+  - { id: yan-bo-diao-sou-fu, title: 烟波钓叟赋, system: qimen, period: 宋, author: 传统归于赵普, mode: structured, source_status: bibliography }
+  - { id: qi-men-dun-jia-tong-zong, title: 奇门遁甲统宗, system: qimen, period: 清, author: 传统署诸葛武侯, mode: indexed, source_status: bibliography }
+  - { id: da-liu-ren-da-quan, title: 大六壬大全, system: daliuren, period: 明, author: 郭载騋, mode: structured, source_status: bibliography }
+  - { id: liu-ren-duan-an, title: 六壬断案, system: daliuren, period: 宋, author: 邵彦和, mode: indexed, source_status: bibliography }
+  - { id: ren-gui, title: 壬归, system: daliuren, period: 明清, author: 不详, mode: indexed, source_status: bibliography }
+  - { id: zang-shu, title: 葬书, system: fengshui, period: 晋, author: 郭璞, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/葬書" }
+  - { id: qing-nang-jing, title: 青囊经, system: fengshui, period: 唐, author: 传统归于杨筠松, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/青囊經" }
+  - { id: shen-shi-xuan-kong-xue, title: 沈氏玄空学, system: fengshui, period: 清末民初, author: 沈竹礽, mode: indexed, source_status: copyright_review }
+  - { id: ba-zhai-ming-jing, title: 八宅明镜, system: fengshui, period: 清, author: 箬冠道人, mode: structured, source_status: bibliography }
+  - { id: wu-ge-pou-xiang-fa, title: 五格剖象法, system: nameology, period: 近现代, author: 熊崎健翁, mode: structured, source_status: copyright_review }
+  - { id: shuo-wen-jie-zi, title: 说文解字, system: shuowen, period: 汉, author: 许慎, mode: structured, source_status: open, source_url: "https://zh.wikisource.org/wiki/說文解字" }
+  - { id: ma-yi-xiang-fa, title: 麻衣相法, system: mianxiang, period: 宋, author: 传统归于麻衣道者, mode: structured, source_status: bibliography }
+  - { id: liu-zhuang-xiang-fa, title: 柳庄相法, system: mianxiang, period: 明, author: 袁珙, mode: structured, source_status: bibliography }
+  - { id: tai-qing-shen-jian, title: 太清神鉴, system: mianxiang, period: 后周, author: 传统归于王朴, mode: indexed, source_status: open, source_url: "https://zh.wikisource.org/wiki/太清神鑑_(四庫全書本)" }
+  - { id: yuan-tian-gang-cheng-gu-ge, title: 袁天罡称骨歌, system: chenggu, period: 民间托名唐, author: 传统署袁天罡, mode: structured, source_status: variant }
+  - { id: zhou-gong-jie-meng, title: 周公解梦, system: dream, period: 民间, author: 传统托名周公, mode: structured, source_status: variant }
+  - { id: tai-yi-shen-shu, title: 太乙神数, system: taiyi, period: 唐, author: 王希明, mode: indexed, source_status: bibliography }
+  - { id: tai-yi-jin-jing-shi-jing, title: 太乙金镜式经, system: taiyi, period: 唐, author: 王希明, mode: indexed, source_status: bibliography }
+  - { id: xie-ji-bian-fang-shu, title: 协纪辨方书, system: calendar, period: 清, author: 允禄等奉敕编, mode: indexed, source_status: bibliography }
+  - { id: ao-tou-tong-shu, title: 鳌头通书, system: calendar, period: 明, author: 不详, mode: indexed, source_status: bibliography }
