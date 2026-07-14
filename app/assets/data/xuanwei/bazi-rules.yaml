@@ -1,0 +1,261 @@
+# ═══════════════════════════════════════════════════════════════
+# Oracle Engine — 八字断语规则知识库 (YAML)
+# ═══════════════════════════════════════════════════════════════
+#
+# 本文件定义 L2 规则断语层的八字命理规则。
+# 每条规则包含触发条件（基于 L0 符号和 L1 派生标签的组合）
+# 和对应的娱乐性断语。
+#
+# 书籍包：渊海子平、三命通会、滴天髓、穷通宝鉴、子平真诠
+# 版本：1.0.0
+# ═══════════════════════════════════════════════════════════════
+
+knowledge_base:
+  system: bazi
+  name: "八字命理断语库"
+  version: "1.0.0"
+  books:
+    - name: "渊海子平"
+      author: "宋·徐大升"
+      period: "宋"
+    - name: "三命通会"
+      author: "明·万民英"
+      period: "明"
+    - name: "滴天髓"
+      author: "清·任铁樵注"
+      period: "清"
+    - name: "穷通宝鉴"
+      author: "明·佚名 / 清·余春台"
+      period: "明清"
+    - name: "子平真诠"
+      author: "清·沈孝瞻"
+      period: "清"
+
+# ── 规则列表 ──────────────────────────────────────────
+
+rules:
+  # ─ 规则 1：正官格 ─
+  - id: "bazi-yaml-001"
+    name: "正官格"
+    book: "子平真诠"
+    condition:
+      type: tagMatch
+      required:
+        - "pillar-month-tenGod-zhengGuan"
+      optional:
+        - "pillar-year-tenGod-zhengYin"
+        - "pillar-hour-tenGod-zhengCai"
+    interpretations:
+      - id: "yaml-001a"
+        category: career
+        tone: positive
+        text: >
+          月令正官，正气官星入格。你骨子里有一种难得的正直感，
+          做事有原则、有底线，在团队中往往是那个让人信赖的角色。
+          这份端正的品格本身就是你最大的竞争力——
+          未来在管理、公职或大企业平台中，你的稳健会被看到。
+          保持这份坦荡，路会越走越宽。
+        source: "《子平真诠·论正官》"
+        weight: 80
+      - id: "yaml-001b"
+        category: general
+        tone: neutral
+        text: >
+          正官代表规则与秩序。你在生活中往往比较自律，
+          做事有条理，答应的事会认真兑现。这是很珍贵的品质，
+          但也别忘了偶尔放松一下——弦绷得太紧也需要调一调。
+        source: "《渊海子平》"
+        weight: 60
+
+  # ─ 规则 2：食神制杀 ─
+  - id: "bazi-yaml-002"
+    name: "食神制杀"
+    book: "渊海子平"
+    condition:
+      type: combination
+      required:
+        - "tenGod-qiSha"
+        - "tenGod-shiShen"
+    interpretations:
+      - id: "yaml-002a"
+        category: career
+        tone: positive
+        text: >
+          食神制杀，这是八字中非常漂亮的组合！
+          你有面对压力的勇气，也有化解问题的智慧。
+          七杀给你的冲劲和魄力，食神给你从容和变通——
+          两者结合，就是既能打硬仗又能守住底线的人才。
+          适合挑战性高的领域，越有难度你越能发挥。
+        source: "《渊海子平·食神制杀》"
+        weight: 90
+
+  # ─ 规则 3：财官印全 ─
+  - id: "bazi-yaml-003"
+    name: "财官印俱全"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "tenGod-zhengCai"
+        - "tenGod-zhengGuan"
+        - "tenGod-zhengYin"
+    interpretations:
+      - id: "yaml-003a"
+        category: general
+        tone: positive
+        text: >
+          财、官、印三者俱全，这是传统命理中非常受重视的格局。
+          财代表创造价值的能力，官代表获得认可的机会，
+          印代表持续学习的根基。三条线齐头并进，
+          意味着你在事业、人际和成长方面都有不错的配置，
+          是一个能全面发展的综合性人才。
+        source: "《三命通会·论三奇》"
+        weight: 95
+
+  # ─ 规则 4：伤官配印 ─
+  - id: "bazi-yaml-004"
+    name: "伤官配印"
+    book: "子平真诠"
+    condition:
+      type: combination
+      required:
+        - "tenGod-shangGuan"
+        - "tenGod-zhengYin"
+    interpretations:
+      - id: "yaml-004a"
+        category: study
+        tone: positive
+        text: >
+          伤官配印，才华与修养兼备。你的思维活跃、创意丰富，
+          但不浮躁、有深度。做学问、搞研究、写文章，
+          这些需要深度思考又需要灵感的领域特别适合你。
+          你的才华有根，不是昙花一现的那种——
+          静下心来深耕一个方向，成果会很扎实。
+        source: "《子平真诠》"
+        weight: 80
+
+  # ─ 规则 5：天乙贵人 ─
+  - id: "bazi-yaml-005"
+    name: "天乙贵人"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "shensha-tianYiGuiRen"
+    interpretations:
+      - id: "yaml-005a"
+        category: general
+        tone: positive
+        text: >
+          命带天乙贵人，这是最让人安心的神煞了。
+          它不是说你会一夜暴富或突然成名，而是说——
+          在你真正需要帮助的时候，总会有人出现拉你一把。
+          你的人际关系中藏着很多善缘，善待身边的人，
+          那些关键时刻的援手，往往就来自你平时的善意。
+        source: "《三命通会·论天乙贵人》"
+        weight: 90
+
+  # ─ 规则 6：文昌星 ─
+  - id: "bazi-yaml-006"
+    name: "文昌入命"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "shensha-wenChang"
+    interpretations:
+      - id: "yaml-006a"
+        category: study
+        tone: positive
+        text: >
+          文昌星入命，你在学习这件事上有天然的优势——
+          不是死记硬背的那种，而是真的能理解、能举一反三。
+          考试运不错，也适合从事与文字、教育、传播相关的工作。
+          好好利用这个天赋，知识是你最好的护身符。
+        source: "《三命通会》"
+        weight: 80
+
+  # ─ 规则 7：驿马星 ─
+  - id: "bazi-yaml-007"
+    name: "驿马逢冲"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "shensha-yiMa"
+    interpretations:
+      - id: "yaml-007a"
+        category: career
+        tone: neutral
+        text: >
+          驿马星动，说明你的人生不是那种一成不变的类型。
+          你可能比同龄人换过更多城市、更多岗位，
+          每一次变动都是一次成长。不要觉得漂泊是坏事——
+          你的适应力和见识正是在一次次移动中积累起来的。
+          适合出差多、变化快的行业，动起来你就赢了。
+        source: "《三命通会·论驿马》"
+        weight: 70
+
+  # ─ 规则 8：华盖星 ─
+  - id: "bazi-yaml-008"
+    name: "华盖照命"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "shensha-huaGai"
+    interpretations:
+      - id: "yaml-008a"
+        category: general
+        tone: neutral
+        text: >
+          华盖星下的人，往往比旁人更喜欢独处和思考。
+          你可能对艺术、哲学、玄学这类事物有天然的兴趣，
+          审美和直觉都相当不错。虽然有时候会觉得和周围不太合拍，
+          但这恰恰是你独特的地方——你看到的世界比大多数人更丰富。
+        source: "《三命通会·论华盖》"
+        weight: 75
+
+  # ─ 规则 9：日坐长生 ─
+  - id: "bazi-yaml-009"
+    name: "日坐长生"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "pillar-day-stage-changSheng"
+    interpretations:
+      - id: "yaml-009a"
+        category: love
+        tone: positive
+        text: >
+          日柱坐长生之地，这是一个温暖的感情配置。
+          你的情感世界充满生机，不容易枯竭。
+          在亲密关系中你往往能给伴侣带来正能量，
+          而对方也会在你需要的时候给予滋养。
+          感情这件事上，你的运气不错——珍惜就好。
+        source: "《三命通会》"
+        weight: 75
+
+  # ─ 规则 10：将星入命 ─
+  - id: "bazi-yaml-010"
+    name: "将星入命"
+    book: "三命通会"
+    condition:
+      type: tagMatch
+      required:
+        - "shensha-jiangXing"
+    interpretations:
+      - id: "yaml-010a"
+        category: career
+        tone: positive
+        text: >
+          将星入命，说明你骨子里有一种天然的号召力。
+          遇到事情你比别人更冷静、更有主见，
+          周围的人在关键时刻会不自觉地看向你。
+          这是天生的领导气质——好好培养自己的专业能力，
+          带着团队一起往前走，是你最擅长的事。
+        source: "《三命通会》"
+        weight: 75
+
+

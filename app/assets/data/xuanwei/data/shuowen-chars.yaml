@@ -1,0 +1,1358 @@
+total: 226
+characters:
+  - c: 甲
+    radical: 田
+    strokes: 5
+    struct: 象形
+    def: 东方之孟，阳气萌动，从木戴孚甲之象。
+    py: jiǎ
+  - c: 乙
+    radical: 乙
+    strokes: 1
+    struct: 象形
+    def: 象春艸木冤曲而出，阴气尚强，其出乙乙也。
+    py: yǐ
+  - c: 丙
+    radical: 一
+    strokes: 5
+    struct: 象形
+    def: 位南方，万物成，炳然。从一入门。
+    py: bǐng
+  - c: 丁
+    radical: 一
+    strokes: 2
+    struct: 象形
+    def: 夏时万物皆丁实。象形。
+    py: dīng
+  - c: 戊
+    radical: 戈
+    strokes: 5
+    struct: 象形
+    def: 中宫也。象六甲五龙相拘绞也。
+    py: wù
+  - c: 己
+    radical: 己
+    strokes: 3
+    struct: 象形
+    def: 中宫也。象万物辟藏诎形也。
+    py: jǐ
+  - c: 庚
+    radical: 广
+    strokes: 8
+    struct: 象形
+    def: 位西方，象秋时万物庚庚有实也。
+    py: gēng
+  - c: 辛
+    radical: 辛
+    strokes: 7
+    struct: 象形
+    def: 秋时万物成而孰。金刚味辛。
+    py: xīn
+  - c: 壬
+    radical: 士
+    strokes: 4
+    struct: 象形
+    def: 位北方也。阴极阳生。象人褢妊之形。
+    py: rén
+  - c: 癸
+    radical: 癶
+    strokes: 9
+    struct: 象形
+    def: 冬时水土平，可揆度也。象水从四方流入地中之形。
+    py: guǐ
+  - c: 子
+    radical: 子
+    strokes: 3
+    struct: 象形
+    def: 十一月，阳气动，万物滋，人以为称。
+    py: zǐ
+  - c: 丑
+    radical: 一
+    strokes: 4
+    struct: 象形
+    def: 纽也。十二月，万物动，用事。象手之形。
+    py: chǒu
+  - c: 寅
+    radical: 宀
+    strokes: 11
+    struct: 象形
+    def: 髌也。正月，阳气动，去黄泉，欲上出，阴尚强。
+    py: yín
+  - c: 卯
+    radical: 卩
+    strokes: 5
+    struct: 象形
+    def: 冒也。二月，万物冒地而出。象开门之形。
+    py: mǎo
+  - c: 辰
+    radical: 辰
+    strokes: 7
+    struct: 象形
+    def: 震也。三月，阳气动，雷电振，民农时也。
+    py: chén
+  - c: 巳
+    radical: 巳
+    strokes: 3
+    struct: 象形
+    def: 巳也。四月，阳气已出，阴气已藏。故巳为蛇。
+    py: sì
+  - c: 午
+    radical: 十
+    strokes: 4
+    struct: 象形
+    def: 啎也。五月，阴气午逆阳。冒地而出。
+    py: wǔ
+  - c: 未
+    radical: 木
+    strokes: 5
+    struct: 象形
+    def: 味也。六月，滋味也。五行，木老于未。象木重枝叶也。
+    py: wèi
+  - c: 申
+    radical: 田
+    strokes: 5
+    struct: 象形
+    def: 神也。七月，阴气成，体自申束。从臼，自持也。
+    py: shēn
+  - c: 酉
+    radical: 酉
+    strokes: 7
+    struct: 象形
+    def: 就也。八月黍成，可为酎酒。象古文酉之形。
+    py: yǒu
+  - c: 戌
+    radical: 戈
+    strokes: 6
+    struct: 象形
+    def: 灭也。九月，阳气微，万物毕成，阳下入地也。
+    py: xū
+  - c: 亥
+    radical: 亠
+    strokes: 6
+    struct: 象形
+    def: 荄也。十月，微阳起，接盛阴。
+    py: hài
+  - c: 一
+    radical: 一
+    strokes: 1
+    struct: 指事
+    def: 惟初太始，道立于一，造分天地，化成万物。
+    py: yī
+  - c: 二
+    radical: 二
+    strokes: 2
+    struct: 指事
+    def: 地之数也。从偶一。
+    py: èr
+  - c: 三
+    radical: 一
+    strokes: 3
+    struct: 指事
+    def: 天地人之道也。从三数。
+    py: sān
+  - c: 四
+    radical: 囗
+    strokes: 5
+    struct: 指事
+    def: 阴数也。象四分之形。
+    py: sì
+  - c: 五
+    radical: 二
+    strokes: 4
+    struct: 指事
+    def: 五行也。从二，阴阳在天地间交午也。
+    py: wǔ
+  - c: 六
+    radical: 八
+    strokes: 4
+    struct: 指事
+    def: 易之数，阴变于六，正于八。从入从八。
+    py: liù
+  - c: 七
+    radical: 一
+    strokes: 2
+    struct: 指事
+    def: 阳之正也。从一，微阴从中衺出也。
+    py: qī
+  - c: 八
+    radical: 八
+    strokes: 2
+    struct: 指事
+    def: 别也。象分别相背之形。
+    py: bā
+  - c: 九
+    radical: 乙
+    strokes: 2
+    struct: 指事
+    def: 阳之变也。象其屈曲究尽之形。
+    py: jiǔ
+  - c: 十
+    radical: 十
+    strokes: 2
+    struct: 指事
+    def: 数之具也。一为东西，丨为南北，则四方中央备矣。
+    py: shí
+  - c: 百
+    radical: 白
+    strokes: 6
+    struct: 会意
+    def: 十十也。从一白。
+    py: bǎi
+  - c: 千
+    radical: 十
+    strokes: 3
+    struct: 形声
+    def: 十百也。从十从人。
+    py: qiān
+  - c: 萬
+    radical: 艸
+    strokes: 12
+    struct: 象形
+    def: 虫也。从厹，象形。
+    py: wàn
+  - c: 金
+    radical: 金
+    strokes: 8
+    struct: 形声
+    def: 五色金也。黄为之长。生于土。
+    py: jīn
+  - c: 木
+    radical: 木
+    strokes: 4
+    struct: 象形
+    def: 冒也。冒地而生。东方之行。
+    py: mù
+  - c: 水
+    radical: 水
+    strokes: 4
+    struct: 象形
+    def: 准也。北方之行。象众水并流。
+    py: shuǐ
+  - c: 火
+    radical: 火
+    strokes: 4
+    struct: 象形
+    def: 燬也。南方之行，炎而上。象形。
+    py: huǒ
+  - c: 土
+    radical: 土
+    strokes: 3
+    struct: 象形
+    def: 地之吐生物者也。
+    py: tǔ
+  - c: 青
+    radical: 青
+    strokes: 8
+    struct: 会意
+    def: 东方色也。木生火，从生丹。
+    py: qīng
+  - c: 赤
+    radical: 赤
+    strokes: 7
+    struct: 会意
+    def: 南方色也。从大从火。
+    py: chì
+  - c: 黄
+    radical: 黄
+    strokes: 11
+    struct: 会意
+    def: 地之色也。从田从炗。
+    py: huáng
+  - c: 白
+    radical: 白
+    strokes: 5
+    struct: 象形
+    def: 西方色也。阴用事，物色白。
+    py: bái
+  - c: 黑
+    radical: 黑
+    strokes: 12
+    struct: 会意
+    def: 火所熏之色也。从炎，上出𡆧。
+    py: hēi
+  - c: 東
+    radical: 木
+    strokes: 8
+    struct: 会意
+    def: 动也。从日在木中。
+    py: dōng
+  - c: 西
+    radical: 襾
+    strokes: 6
+    struct: 象形
+    def: 鸟在巢上。象形。
+    py: xī
+  - c: 南
+    radical: 十
+    strokes: 9
+    struct: 形声
+    def: 艸木至南方，有枝任也。
+    py: nán
+  - c: 北
+    radical: 匕
+    strokes: 5
+    struct: 会意
+    def: 乖也。从二人相背。
+    py: běi
+  - c: 中
+    radical: 丨
+    strokes: 4
+    struct: 指事
+    def: 内也。从口丨，上下通。
+    py: zhōng
+  - c: 命
+    radical: 口
+    strokes: 8
+    struct: 会意
+    def: 使也。从口从令。
+    py: mìng
+  - c: 運
+    radical: 辵
+    strokes: 12
+    struct: 形声
+    def: 移徙也。从辵军声。
+    py: yùn
+  - c: 氣
+    radical: 气
+    strokes: 10
+    struct: 象形
+    def: 云气也。象形。
+    py: qì
+  - c: 神
+    radical: 示
+    strokes: 9
+    struct: 形声
+    def: 天神，引出万物者也。从示申。
+    py: shén
+  - c: 鬼
+    radical: 鬼
+    strokes: 10
+    struct: 象形
+    def: 人所归为鬼。从人，象鬼头。
+    py: guǐ
+  - c: 福
+    radical: 示
+    strokes: 13
+    struct: 形声
+    def: 祐也。从示畐声。
+    py: fú
+  - c: 祿
+    radical: 示
+    strokes: 12
+    struct: 形声
+    def: 福也。从示录声。
+    py: lù
+  - c: 壽
+    radical: 士
+    strokes: 14
+    struct: 形声
+    def: 久也。从老省，𠷎声。
+    py: shòu
+  - c: 喜
+    radical: 口
+    strokes: 12
+    struct: 会意
+    def: 乐也。从壴从口。
+    py: xǐ
+  - c: 吉
+    radical: 口
+    strokes: 6
+    struct: 会意
+    def: 善也。从士口。
+    py: jí
+  - c: 凶
+    radical: 凵
+    strokes: 4
+    struct: 指事
+    def: 恶也。象地穿交陷其中也。
+    py: xiōng
+  - c: 德
+    radical: 彳
+    strokes: 15
+    struct: 形声
+    def: 升也。从彳㥁声。
+    py: dé
+  - c: 仁
+    radical: 人
+    strokes: 4
+    struct: 会意
+    def: 亲也。从人从二。
+    py: rén
+  - c: 義
+    radical: 羊
+    strokes: 13
+    struct: 会意
+    def: 己之威仪也。从我羊。
+    py: yì
+  - c: 禮
+    radical: 示
+    strokes: 17
+    struct: 会意
+    def: 履也。所以事神致福也。
+    py: lǐ
+  - c: 智
+    radical: 日
+    strokes: 12
+    struct: 会意
+    def: 识词也。从白从亏从知。
+    py: zhì
+  - c: 信
+    radical: 人
+    strokes: 9
+    struct: 会意
+    def: 诚也。从人从言。
+    py: xìn
+  - c: 誠
+    radical: 言
+    strokes: 13
+    struct: 形声
+    def: 信也。从言成声。
+    py: chéng
+  - c: 善
+    radical: 口
+    strokes: 12
+    struct: 会意
+    def: 吉也。从誩从羊。
+    py: shàn
+  - c: 惡
+    radical: 心
+    strokes: 12
+    struct: 形声
+    def: 过也。从心亚声。
+    py: è
+  - c: 天
+    radical: 大
+    strokes: 4
+    struct: 会意
+    def: 颠也。至高无上，从一大。
+    py: tiān
+  - c: 地
+    radical: 土
+    strokes: 6
+    struct: 形声
+    def: 元气初分，轻清阳为天，重浊阴为地。万物所陈列也。从土也声。
+    py: dì
+  - c: 日
+    radical: 日
+    strokes: 4
+    struct: 象形
+    def: 实也。太阳之精不亏。从口一。
+    py: rì
+  - c: 月
+    radical: 月
+    strokes: 4
+    struct: 象形
+    def: 阙也。大阴之精。象形。
+    py: yuè
+  - c: 星
+    radical: 日
+    strokes: 9
+    struct: 形声
+    def: 万物之精，上为列星。从晶生声。
+    py: xīng
+  - c: 風
+    radical: 風
+    strokes: 9
+    struct: 形声
+    def: 八风也。风动虫生。从虫凡声。
+    py: fēng
+  - c: 雨
+    radical: 雨
+    strokes: 8
+    struct: 象形
+    def: 水从云下也。一象天，冂象云。
+    py: yǔ
+  - c: 雲
+    radical: 雨
+    strokes: 12
+    struct: 象形
+    def: 山川气也。从雨，云象雲回转形。
+    py: yún
+  - c: 雷
+    radical: 雨
+    strokes: 13
+    struct: 会意
+    def: 阴阳薄动，雷雨生物者也。从雨，畾象回转形。
+    py: léi
+  - c: 電
+    radical: 雨
+    strokes: 13
+    struct: 形声
+    def: 阴阳激燿也。从雨从申。
+    py: diàn
+  - c: 山
+    radical: 山
+    strokes: 3
+    struct: 象形
+    def: 宣也。宣气散，生万物，有石而高。
+    py: shān
+  - c: 川
+    radical: 川
+    strokes: 3
+    struct: 象形
+    def: 贯穿通流水也。
+    py: chuān
+  - c: 海
+    radical: 水
+    strokes: 10
+    struct: 形声
+    def: 天池也。以纳百川者。从水每声。
+    py: hǎi
+  - c: 河
+    radical: 水
+    strokes: 8
+    struct: 形声
+    def: 水。出焞煌塞外昆仑山，发原注海。从水可声。
+    py: hé
+  - c: 江
+    radical: 水
+    strokes: 6
+    struct: 形声
+    def: 水。出蜀湔氐徼外崏山，入海。从水工声。
+    py: jiāng
+  - c: 春
+    radical: 日
+    strokes: 9
+    struct: 会意
+    def: 推也。从艸从日，艸春时生也。屯声。
+    py: chūn
+  - c: 夏
+    radical: 夊
+    strokes: 10
+    struct: 会意
+    def: 中国之人也。
+    py: xià
+  - c: 秋
+    radical: 禾
+    strokes: 9
+    struct: 会意
+    def: 禾谷熟也。
+    py: qiū
+  - c: 冬
+    radical: 仌
+    strokes: 5
+    struct: 会意
+    def: 四时尽也。从仌从夂。
+    py: dōng
+  - c: 心
+    radical: 心
+    strokes: 4
+    struct: 象形
+    def: 人心，土藏，在身之中。
+    py: xīn
+  - c: 目
+    radical: 目
+    strokes: 5
+    struct: 象形
+    def: 人眼。象形。
+    py: mù
+  - c: 耳
+    radical: 耳
+    strokes: 6
+    struct: 象形
+    def: 主听也。象形。
+    py: ěr
+  - c: 口
+    radical: 口
+    strokes: 3
+    struct: 象形
+    def: 人所以言食也。象形。
+    py: kǒu
+  - c: 手
+    radical: 手
+    strokes: 4
+    struct: 象形
+    def: 拳也。象形。
+    py: shǒu
+  - c: 足
+    radical: 足
+    strokes: 7
+    struct: 象形
+    def: 人之足也。在下。从止口。
+    py: zú
+  - c: 身
+    radical: 身
+    strokes: 7
+    struct: 象形
+    def: 躬也。象人之身。
+    py: shēn
+  - c: 骨
+    radical: 骨
+    strokes: 9
+    struct: 会意
+    def: 肉之核也。从冎有肉。
+    py: gǔ
+  - c: 血
+    radical: 血
+    strokes: 6
+    struct: 会意
+    def: 祭所荐牲血也。从皿，一象血形。
+    py: xuè
+  - c: 首
+    radical: 首
+    strokes: 9
+    struct: 象形
+    def: 头也。象形。
+    py: shǒu
+  - c: 面
+    radical: 面
+    strokes: 9
+    struct: 象形
+    def: 颜前也。
+    py: miàn
+  - c: 龍
+    radical: 龍
+    strokes: 16
+    struct: 象形
+    def: 鳞虫之长。能幽能明，能细能巨。
+    py: lóng
+  - c: 鳳
+    radical: 鳥
+    strokes: 14
+    struct: 形声
+    def: 神鸟也。出于东方君子之国。
+    py: fèng
+  - c: 虎
+    radical: 虍
+    strokes: 8
+    struct: 象形
+    def: 山兽之君。从虍，虎足象人足。象形。
+    py: hǔ
+  - c: 馬
+    radical: 馬
+    strokes: 10
+    struct: 象形
+    def: 怒也，武也。象马头髦尾四足之形。
+    py: mǎ
+  - c: 牛
+    radical: 牛
+    strokes: 4
+    struct: 象形
+    def: 大牲也。象角头三、封尾之形。
+    py: niú
+  - c: 羊
+    radical: 羊
+    strokes: 6
+    struct: 象形
+    def: 祥也。象头角足尾之形。
+    py: yáng
+  - c: 魚
+    radical: 魚
+    strokes: 11
+    struct: 象形
+    def: 水虫也。象形。
+    py: yú
+  - c: 鳥
+    radical: 鳥
+    strokes: 11
+    struct: 象形
+    def: 长尾禽总名也。象形。
+    py: niǎo
+  - c: 蛇
+    radical: 虫
+    strokes: 11
+    struct: 形声
+    def: 它或从虫。
+    py: shé
+  - c: 龜
+    radical: 龜
+    strokes: 16
+    struct: 象形
+    def: 旧也。外骨内肉者也。
+    py: guī
+  - c: 人
+    radical: 人
+    strokes: 2
+    struct: 象形
+    def: 天地之性最贵者也。象臂胫之形。
+    py: rén
+  - c: 大
+    radical: 大
+    strokes: 3
+    struct: 象形
+    def: 天大，地大，人亦大。故大象人形。
+    py: dà
+  - c: 女
+    radical: 女
+    strokes: 3
+    struct: 象形
+    def: 妇人也。象形。
+    py: nǚ
+  - c: 男
+    radical: 田
+    strokes: 7
+    struct: 会意
+    def: 丈夫也。从田从力。言男用力于田也。
+    py: nán
+  - c: 父
+    radical: 又
+    strokes: 4
+    struct: 会意
+    def: 矩也。家长率教者。从又举杖。
+    py: fù
+  - c: 母
+    radical: 女
+    strokes: 5
+    struct: 象形
+    def: 牧也。从女，象怀子形。
+    py: mǔ
+  - c: 子
+    radical: 子
+    strokes: 3
+    struct: 象形
+    def: 十一月阳气动，万物滋。象形。
+    py: zǐ
+  - c: 君
+    radical: 口
+    strokes: 7
+    struct: 会意
+    def: 尊也。从尹发号，故从口。
+    py: jūn
+  - c: 臣
+    radical: 臣
+    strokes: 6
+    struct: 象形
+    def: 牵也。事君也。象屈服之形。
+    py: chén
+  - c: 民
+    radical: 氏
+    strokes: 5
+    struct: 指事
+    def: 众萌也。从古文之象。
+    py: mín
+  - c: 王
+    radical: 王
+    strokes: 4
+    struct: 会意
+    def: 天下所归往也。董仲舒曰：古之造文者，三画而连其中谓之王。
+    py: wáng
+  - c: 生
+    radical: 生
+    strokes: 5
+    struct: 象形
+    def: 进也。象艸木生出土上。
+    py: shēng
+  - c: 死
+    radical: 歹
+    strokes: 6
+    struct: 会意
+    def: 澌也，人所离也。从歺从人。
+    py: sǐ
+  - c: 行
+    radical: 行
+    strokes: 6
+    struct: 象形
+    def: 人之步趋也。从彳从亍。
+    py: xíng
+  - c: 走
+    radical: 走
+    strokes: 7
+    struct: 会意
+    def: 趋也。从夭止。
+    py: zǒu
+  - c: 言
+    radical: 言
+    strokes: 7
+    struct: 会意
+    def: 直言曰言，论难曰语。从口䇂声。
+    py: yán
+  - c: 見
+    radical: 見
+    strokes: 7
+    struct: 会意
+    def: 视也。从儿从目。
+    py: jiàn
+  - c: 聞
+    radical: 耳
+    strokes: 14
+    struct: 形声
+    def: 知闻也。从耳门声。
+    py: wén
+  - c: 思
+    radical: 心
+    strokes: 9
+    struct: 会意
+    def: 容也。从心囟声。
+    py: sī
+  - c: 知
+    radical: 矢
+    strokes: 8
+    struct: 会意
+    def: 词也。从口从矢。
+    py: zhī
+  - c: 學
+    radical: 子
+    strokes: 16
+    struct: 形声
+    def: 觉悟也。从教从冂。冂，尚蒙也。臼声。
+    py: xué
+  - c: 門
+    radical: 門
+    strokes: 8
+    struct: 象形
+    def: 闻也。从二户。象形。
+    py: mén
+  - c: 戶
+    radical: 戶
+    strokes: 4
+    struct: 象形
+    def: 护也。半门曰户。象形。
+    py: hù
+  - c: 車
+    radical: 車
+    strokes: 7
+    struct: 象形
+    def: 舆轮之总名。夏后时奚仲所造。象形。
+    py: chē
+  - c: 舟
+    radical: 舟
+    strokes: 6
+    struct: 象形
+    def: 船也。古者刳木为舟，剡木为楫。象形。
+    py: zhōu
+  - c: 刀
+    radical: 刀
+    strokes: 2
+    struct: 象形
+    def: 兵也。象形。
+    py: dāo
+  - c: 弓
+    radical: 弓
+    strokes: 3
+    struct: 象形
+    def: 以近穷远。象形。
+    py: gōng
+  - c: 矢
+    radical: 矢
+    strokes: 5
+    struct: 象形
+    def: 弓弩矢也。从入，象镝栝羽之形。
+    py: shǐ
+  - c: 玉
+    radical: 玉
+    strokes: 5
+    struct: 象形
+    def: 石之美。有五德。象三玉之连。
+    py: yù
+  - c: 貝
+    radical: 貝
+    strokes: 7
+    struct: 象形
+    def: 海介虫也。象形。
+    py: bèi
+  - c: 絲
+    radical: 絲
+    strokes: 12
+    struct: 会意
+    def: 蚕所吐也。从二糸。
+    py: sī
+  - c: 衣
+    radical: 衣
+    strokes: 6
+    struct: 象形
+    def: 依也。上曰衣，下曰裳。象覆二人之形。
+    py: yī
+  - c: 食
+    radical: 食
+    strokes: 9
+    struct: 会意
+    def: 一米也。从皀亼声。
+    py: shí
+  - c: 鼎
+    radical: 鼎
+    strokes: 13
+    struct: 象形
+    def: 三足两耳，和五味之宝器也。
+    py: dǐng
+  - c: 豆
+    radical: 豆
+    strokes: 7
+    struct: 象形
+    def: 古食肉器也。从口，象形。
+    py: dòu
+  - c: 皿
+    radical: 皿
+    strokes: 5
+    struct: 象形
+    def: 饭食之用器也。象形。
+    py: mǐn
+  - c: 石
+    radical: 石
+    strokes: 5
+    struct: 象形
+    def: 山石也。在厂之下；口，象形。
+    py: shí
+  - c: 竹
+    radical: 竹
+    strokes: 6
+    struct: 象形
+    def: 冬生艸也。象形。
+    py: zhú
+  - c: 艸
+    radical: 艸
+    strokes: 6
+    struct: 象形
+    def: 百芔也。从二屮。
+    py: cǎo
+  - c: 木
+    radical: 木
+    strokes: 4
+    struct: 象形
+    def: 冒也。冒地而生。
+    py: mù
+  - c: 禾
+    radical: 禾
+    strokes: 5
+    struct: 象形
+    def: 嘉谷也。
+    py: hé
+  - c: 米
+    radical: 米
+    strokes: 6
+    struct: 象形
+    def: 粟实也。象禾实之形。
+    py: mǐ
+  - c: 道
+    radical: 辵
+    strokes: 12
+    struct: 会意
+    def: 所行道也。从辵从首。一达谓之道。
+    py: dào
+  - c: 义
+    radical: 羊
+    strokes: 13
+    struct: 会意
+    def: 己之威仪也。从我羊。
+    py: yì
+  - c: 礼
+    radical: 示
+    strokes: 17
+    struct: 会意
+    def: 履也。所以事神致福也。
+    py: lǐ
+  - c: 忠
+    radical: 心
+    strokes: 8
+    struct: 形声
+    def: 敬也。从心中声。
+    py: zhōng
+  - c: 孝
+    radical: 子
+    strokes: 7
+    struct: 会意
+    def: 善事父母者。从老省，从子。子承老也。
+    py: xiào
+  - c: 美
+    radical: 羊
+    strokes: 9
+    struct: 会意
+    def: 甘也。从羊从大。羊在六畜主给膳也。
+    py: měi
+  - c: 真
+    radical: 匕
+    strokes: 10
+    struct: 会意
+    def: 仙人变形而登天也。从匕从目从乚。
+    py: zhēn
+  - c: 理
+    radical: 玉
+    strokes: 11
+    struct: 形声
+    def: 治玉也。从玉里声。
+    py: lǐ
+  - c: 性
+    radical: 心
+    strokes: 8
+    struct: 形声
+    def: 人之阳气性善者也。从心生声。
+    py: xìng
+  - c: 情
+    radical: 心
+    strokes: 11
+    struct: 形声
+    def: 人之阴气有欲者。从心青声。
+    py: qíng
+  - c: 爱
+    radical: 夊
+    strokes: 10
+    struct: 形声
+    def: 行貌。从夊㤅声。
+    py: ài
+  - c: 家
+    radical: 宀
+    strokes: 10
+    struct: 会意
+    def: 居也。从宀，豭省声。
+    py: jiā
+  - c: 国
+    radical: 囗
+    strokes: 8
+    struct: 会意
+    def: 邦也。从囗从或。
+    py: guó
+  - c: 安
+    radical: 宀
+    strokes: 6
+    struct: 会意
+    def: 静也。从女在宀下。
+    py: ān
+  - c: 富
+    radical: 宀
+    strokes: 12
+    struct: 形声
+    def: 备也。一曰厚也。从宀畐声。
+    py: fù
+  - c: 贵
+    radical: 貝
+    strokes: 9
+    struct: 形声
+    def: 物不贱也。从貝臾声。
+    py: guì
+  - c: 乐
+    radical: 木
+    strokes: 5
+    struct: 象形
+    def: 五声八音总名。象鼓鞞。
+    py: yuè
+  - c: 怒
+    radical: 心
+    strokes: 9
+    struct: 形声
+    def: 恚也。从心奴声。
+    py: nù
+  - c: 哀
+    radical: 口
+    strokes: 9
+    struct: 形声
+    def: 闵也。从口衣声。
+    py: āi
+  - c: 惧
+    radical: 心
+    strokes: 11
+    struct: 形声
+    def: 恐也。从心瞿声。
+    py: jù
+  - c: 忧
+    radical: 心
+    strokes: 7
+    struct: 形声
+    def: 愁也。从心尤声。
+    py: yōu
+  - c: 想
+    radical: 心
+    strokes: 13
+    struct: 形声
+    def: 冀思也。从心相声。
+    py: xiǎng
+  - c: 忘
+    radical: 心
+    strokes: 7
+    struct: 形声
+    def: 不识也。从心从亡，亡亦声。
+    py: wàng
+  - c: 光
+    radical: 火
+    strokes: 6
+    struct: 会意
+    def: 明也。从火在人上，光明意也。
+    py: guāng
+  - c: 暗
+    radical: 日
+    strokes: 13
+    struct: 形声
+    def: 日无光也。从日音声。
+    py: àn
+  - c: 明
+    radical: 明
+    strokes: 8
+    struct: 会意
+    def: 照也。从月从囧。
+    py: míng
+  - c: 清
+    radical: 水
+    strokes: 11
+    struct: 形声
+    def: 朖也。澂水之貌。从水青声。
+    py: qīng
+  - c: 浊
+    radical: 水
+    strokes: 9
+    struct: 形声
+    def: 水。从水蜀声。
+    py: zhuó
+  - c: 刚
+    radical: 刀
+    strokes: 10
+    struct: 形声
+    def: 强断也。从刀冈声。
+    py: gāng
+  - c: 柔
+    radical: 木
+    strokes: 9
+    struct: 形声
+    def: 木曲直也。从木矛声。
+    py: róu
+  - c: 静
+    radical: 青
+    strokes: 14
+    struct: 形声
+    def: 审也。从青争声。
+    py: jìng
+  - c: 动
+    radical: 力
+    strokes: 6
+    struct: 形声
+    def: 作也。从力重声。
+    py: dòng
+  - c: 变
+    radical: 攴
+    strokes: 8
+    struct: 形声
+    def: 更也。从攴䜌声。
+    py: biàn
+  - c: 化
+    radical: 匕
+    strokes: 4
+    struct: 会意
+    def: 教行也。从匕从人，匕亦声。
+    py: huà
+  - c: 通
+    radical: 辵
+    strokes: 10
+    struct: 形声
+    def: 达也。从辵甬声。
+    py: tōng
+  - c: 达
+    radical: 辵
+    strokes: 12
+    struct: 形声
+    def: 行不相遇也。从辵羍声。
+    py: dá
+  - c: 进
+    radical: 辵
+    strokes: 11
+    struct: 形声
+    def: 登也。从辵，閵省声。
+    py: jìn
+  - c: 退
+    radical: 辵
+    strokes: 9
+    struct: 会意
+    def: 却也。一曰行迟也。从彳从日从夊。
+    py: tuì
+  - c: 成
+    radical: 戊
+    strokes: 6
+    struct: 形声
+    def: 就也。从戊丁声。
+    py: chéng
+  - c: 败
+    radical: 攴
+    strokes: 8
+    struct: 形声
+    def: 毁也。从攴贝。
+    py: bài
+  - c: 得
+    radical: 彳
+    strokes: 11
+    struct: 会意
+    def: 行有所得也。从彳㝵声。
+    py: dé
+  - c: 失
+    radical: 手
+    strokes: 5
+    struct: 形声
+    def: 纵也。从手乙声。
+    py: shī
+  - c: 有
+    radical: 月
+    strokes: 6
+    struct: 会意
+    def: 不宜有也。从月又声。
+    py: yǒu
+  - c: 无
+    radical: 亡
+    strokes: 12
+    struct: 会意
+    def: 亡也。从亡舞声。
+    py: wú
+  - c: 始
+    radical: 女
+    strokes: 8
+    struct: 形声
+    def: 女之初也。从女台声。
+    py: shǐ
+  - c: 终
+    radical: 糸
+    strokes: 8
+    struct: 形声
+    def: 絿丝也。从糸冬声。
+    py: zhōng
+  - c: 祸
+    radical: 示
+    strokes: 12
+    struct: 形声
+    def: 害也，神不福也。从示呙声。
+    py: huò
+  - c: 禄
+    radical: 示
+    strokes: 12
+    struct: 形声
+    def: 福也。从示录声。
+    py: lù
+  - c: 寿
+    radical: 士
+    strokes: 14
+    struct: 形声
+    def: 久也。从老省，𠷎声。
+    py: shòu
+  - c: 康
+    radical: 禾
+    strokes: 11
+    struct: 形声
+    def: 谷皮也。从禾从米，庚声。
+    py: kāng
+  - c: 疾
+    radical: 疒
+    strokes: 10
+    struct: 形声
+    def: 病也。从疒矢声。
+    py: jí
+  - c: 病
+    radical: 疒
+    strokes: 10
+    struct: 形声
+    def: 疾加也。从疒丙声。
+    py: bìng
+  - c: 药
+    radical: 艸
+    strokes: 9
+    struct: 形声
+    def: 治病艸。从艸乐声。
+    py: yào
+  - c: 体
+    radical: 骨
+    strokes: 7
+    struct: 形声
+    def: 总十二属也。从骨豊声。
+    py: tǐ
+  - c: 色
+    radical: 色
+    strokes: 6
+    struct: 会意
+    def: 颜气也。从人从卩。
+    py: sè
+  - c: 气
+    radical: 气
+    strokes: 4
+    struct: 象形
+    def: 云气也。象形。
+    py: qì
+  - c: 韵
+    radical: 音
+    strokes: 13
+    struct: 形声
+    def: 和也。从音员声。
+    py: yùn
+  - c: 声
+    radical: 耳
+    strokes: 7
+    struct: 形声
+    def: 音也。从耳殸声。
+    py: shēng
+  - c: 音
+    radical: 音
+    strokes: 9
+    struct: 形声
+    def: 声也。生于心，有节于外。
+    py: yīn
+  - c: 文
+    radical: 文
+    strokes: 4
+    struct: 象形
+    def: 错画也。象交文。
+    py: wén
+  - c: 字
+    radical: 子
+    strokes: 6
+    struct: 会意
+    def: 乳也。从子在宀下，子亦声。
+    py: zì
+  - c: 书
+    radical: 曰
+    strokes: 10
+    struct: 形声
+    def: 箸也。从聿者声。
+    py: shū
+  - c: 画
+    radical: 田
+    strokes: 8
+    struct: 会意
+    def: 界也。象田四界。聿，所以画之。
+    py: huà
+  - c: 易
+    radical: 日
+    strokes: 8
+    struct: 象形
+    def: 蜥易，蝘蜓，守宫也。象形。
+    py: yì
+  - c: 经
+    radical: 糸
+    strokes: 8
+    struct: 形声
+    def: 织也。从糸巠声。
+    py: jīng
+  - c: 典
+    radical: 丌
+    strokes: 8
+    struct: 会意
+    def: 五帝之书也。从册在丌上。
+    py: diǎn
+  - c: 学
+    radical: 子
+    strokes: 16
+    struct: 形声
+    def: 觉悟也。从教从冂。
+    py: xué
+  - c: 问
+    radical: 口
+    strokes: 6
+    struct: 形声
+    def: 讯也。从口门声。
+    py: wèn
+  - c: 答
+    radical: 竹
+    strokes: 12
+    struct: 形声
+    def: 当也。从竹合声。
+    py: dá
+  - c: 辩
+    radical: 辛
+    strokes: 16
+    struct: 形声
+    def: 治也。从言在辡之间。
+    py: biàn
+  - c: 论
+    radical: 言
+    strokes: 6
+    struct: 形声
+    def: 议也。从言仑声。
+    py: lùn
+  - c: 说
+    radical: 言
+    strokes: 7
+    struct: 形声
+    def: 释也。从言兑声。
+    py: shuō
+  - c: 诗
+    radical: 言
+    strokes: 8
+    struct: 形声
+    def: 志也。从言寺声。
+    py: shī
+  - c: 歌
+    radical: 欠
+    strokes: 14
+    struct: 形声
+    def: 咏也。从欠哥声。
+    py: gē

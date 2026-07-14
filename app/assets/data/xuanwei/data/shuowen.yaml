@@ -1,0 +1,920 @@
+# 说文解字 — 常用字数据 (YAML)
+# 数据来源：《说文解字》(汉·许慎)
+# 每个字包含：小篆写法提示、部首、结构、本义
+# 版本: 1.0.0
+
+characters:
+  # ── 卷一·示部 ──
+  - char: "一"
+    radical: "一"
+    structure: "指事"
+    definition: "惟初太始，道立于一，造分天地，化成万物。"
+    pinyin: "yī"
+    strokes: 1
+    source: "《说文·一》"
+
+  - char: "天"
+    radical: "一"
+    structure: "会意"
+    definition: "颠也。至高无上，从一大。"
+    pinyin: "tiān"
+    strokes: 4
+    source: "《说文·一》"
+
+  - char: "元"
+    radical: "一"
+    structure: "会意"
+    definition: "始也。从一从兀。"
+    pinyin: "yuán"
+    strokes: 4
+    source: "《说文·一》"
+
+  - char: "示"
+    radical: "示"
+    structure: "象形"
+    definition: "天垂象，见吉凶，所以示人也。从二，三垂，日月星也。观乎天文，以察时变。示，神事也。"
+    pinyin: "shì"
+    strokes: 5
+    source: "《说文·示》"
+
+  - char: "神"
+    radical: "示"
+    structure: "形声"
+    definition: "天神，引出万物者也。从示申声。"
+    pinyin: "shén"
+    strokes: 9
+    source: "《说文·示》"
+
+  - char: "福"
+    radical: "示"
+    structure: "形声"
+    definition: "祐也。从示畐声。"
+    pinyin: "fú"
+    strokes: 13
+    source: "《说文·示》"
+
+  # ── 卷二·口部 ──
+  - char: "口"
+    radical: "口"
+    structure: "象形"
+    definition: "人所以言食也。象形。"
+    pinyin: "kǒu"
+    strokes: 3
+    source: "《说文·口》"
+
+  - char: "名"
+    radical: "口"
+    structure: "会意"
+    definition: "自命也。从口从夕。夕者，冥也。冥不相见，故以口自名。"
+    pinyin: "míng"
+    strokes: 6
+    source: "《说文·口》"
+
+  - char: "吾"
+    radical: "口"
+    structure: "形声"
+    definition: "我自称也。从口五声。"
+    pinyin: "wú"
+    strokes: 7
+    source: "《说文·口》"
+
+  - char: "君"
+    radical: "口"
+    structure: "会意"
+    definition: "尊也。从尹发号，故从口。"
+    pinyin: "jūn"
+    strokes: 7
+    source: "《说文·口》"
+
+  - char: "命"
+    radical: "口"
+    structure: "会意"
+    definition: "使也。从口从令。"
+    pinyin: "mìng"
+    strokes: 8
+    source: "《说文·口》"
+
+  - char: "和"
+    radical: "口"
+    structure: "形声"
+    definition: "相应也。从口禾声。"
+    pinyin: "hé"
+    strokes: 8
+    source: "《说文·口》"
+
+  # ── 卷三·言部 ──
+  - char: "言"
+    radical: "言"
+    structure: "会意"
+    definition: "直言曰言，论难曰语。从口䇂声。"
+    pinyin: "yán"
+    strokes: 7
+    source: "《说文·言》"
+
+  - char: "诗"
+    radical: "言"
+    structure: "形声"
+    definition: "志也。从言寺声。"
+    pinyin: "shī"
+    strokes: 8
+    source: "《说文·言》"
+
+  - char: "信"
+    radical: "言"
+    structure: "会意"
+    definition: "诚也。从人从言。会意。"
+    pinyin: "xìn"
+    strokes: 9
+    source: "《说文·言》"
+
+  - char: "诚"
+    radical: "言"
+    structure: "形声"
+    definition: "信也。从言成声。"
+    pinyin: "chéng"
+    strokes: 8
+    source: "《说文·言》"
+
+  # ── 卷四·心部 ──
+  - char: "心"
+    radical: "心"
+    structure: "象形"
+    definition: "人心，土藏，在身之中。象形。"
+    pinyin: "xīn"
+    strokes: 4
+    source: "《说文·心》"
+
+  - char: "思"
+    radical: "心"
+    structure: "会意"
+    definition: "容也。从心囟声。凡思之属皆从思。"
+    pinyin: "sī"
+    strokes: 9
+    source: "《说文·思》"
+
+  - char: "志"
+    radical: "心"
+    structure: "形声"
+    definition: "意也。从心之声。"
+    pinyin: "zhì"
+    strokes: 7
+    source: "《说文·心》"
+
+  - char: "意"
+    radical: "心"
+    structure: "会意"
+    definition: "志也。从心察言而知意也。从心从音。"
+    pinyin: "yì"
+    strokes: 13
+    source: "《说文·心》"
+
+  - char: "德"
+    radical: "彳"
+    structure: "形声"
+    definition: "升也。从彳㥁声。"
+    pinyin: "dé"
+    strokes: 15
+    source: "《说文·彳》"
+
+  - char: "仁"
+    radical: "人"
+    structure: "会意"
+    definition: "亲也。从人从二。"
+    pinyin: "rén"
+    strokes: 4
+    source: "《说文·人》"
+
+  - char: "义"
+    radical: "丶"
+    structure: "会意"
+    definition: "己之威仪也。从我羊。"
+    pinyin: "yì"
+    strokes: 3
+    source: "《说文·我》"
+
+  - char: "礼"
+    radical: "示"
+    structure: "会意"
+    definition: "履也。所以事神致福也。从示从豊，豊亦声。"
+    pinyin: "lǐ"
+    strokes: 5
+    source: "《说文·示》"
+
+  - char: "智"
+    radical: "白"
+    structure: "会意"
+    definition: "识词也。从白从亏从知。"
+    pinyin: "zhì"
+    strokes: 12
+    source: "《说文·白》"
+
+  # ── 卷五·水部 ──
+  - char: "水"
+    radical: "水"
+    structure: "象形"
+    definition: "准也。北方之行。象众水并流，中有微阳之气也。"
+    pinyin: "shuǐ"
+    strokes: 4
+    source: "《说文·水》"
+
+  - char: "河"
+    radical: "水"
+    structure: "形声"
+    definition: "水。出焞煌塞外昆仑山，发原注海。从水可声。"
+    pinyin: "hé"
+    strokes: 8
+    source: "《说文·水》"
+
+  - char: "江"
+    radical: "水"
+    structure: "形声"
+    definition: "水。出蜀湔氐徼外崏山，入海。从水工声。"
+    pinyin: "jiāng"
+    strokes: 6
+    source: "《说文·水》"
+
+  - char: "海"
+    radical: "水"
+    structure: "形声"
+    definition: "天池也。以纳百川者。从水每声。"
+    pinyin: "hǎi"
+    strokes: 10
+    source: "《说文·水》"
+
+  - char: "清"
+    radical: "水"
+    structure: "形声"
+    definition: "朖也。澂水之貌。从水青声。"
+    pinyin: "qīng"
+    strokes: 11
+    source: "《说文·水》"
+
+  # ── 卷六·火部 ──
+  - char: "火"
+    radical: "火"
+    structure: "象形"
+    definition: "燬也。南方之行，炎而上。象形。"
+    pinyin: "huǒ"
+    strokes: 4
+    source: "《说文·火》"
+
+  - char: "光"
+    radical: "火"
+    structure: "会意"
+    definition: "明也。从火在人上，光明意也。"
+    pinyin: "guāng"
+    strokes: 6
+    source: "《说文·火》"
+
+  - char: "明"
+    radical: "明"
+    structure: "会意"
+    definition: "照也。从月从囧。"
+    pinyin: "míng"
+    strokes: 8
+    source: "《说文·明》"
+
+  # ── 卷七·日部 ──
+  - char: "日"
+    radical: "日"
+    structure: "象形"
+    definition: "实也。太阳之精不亏。从口一。象形。"
+    pinyin: "rì"
+    strokes: 4
+    source: "《说文·日》"
+
+  - char: "月"
+    radical: "月"
+    structure: "象形"
+    definition: "阙也。大阴之精。象形。"
+    pinyin: "yuè"
+    strokes: 4
+    source: "《说文·月》"
+
+  - char: "星"
+    radical: "晶"
+    structure: "形声"
+    definition: "万物之精，上为列星。从晶生声。"
+    pinyin: "xīng"
+    strokes: 9
+    source: "《说文·晶》"
+
+  - char: "時"
+    radical: "日"
+    structure: "形声"
+    definition: "四时也。从日寺声。"
+    pinyin: "shí"
+    strokes: 10
+    source: "《说文·日》"
+
+  - char: "春"
+    radical: "艸"
+    structure: "会意"
+    definition: "推也。从艸从日，艸春时生也。屯声。"
+    pinyin: "chūn"
+    strokes: 9
+    source: "《说文·艸》"
+
+  - char: "夏"
+    radical: "夊"
+    structure: "会意"
+    definition: "中国之人也。从夊从页从臼。"
+    pinyin: "xià"
+    strokes: 10
+    source: "《说文·夊》"
+
+  - char: "秋"
+    radical: "禾"
+    structure: "会意"
+    definition: "禾谷熟也。从禾，𪚰省声。"
+    pinyin: "qiū"
+    strokes: 9
+    source: "《说文·禾》"
+
+  - char: "冬"
+    radical: "仌"
+    structure: "会意"
+    definition: "四时尽也。从仌从夂。夂，古文终字。"
+    pinyin: "dōng"
+    strokes: 5
+    source: "《说文·仌》"
+
+  # ── 卷八·人部 ──
+  - char: "人"
+    radical: "人"
+    structure: "象形"
+    definition: "天地之性最贵者也。象臂胫之形。"
+    pinyin: "rén"
+    strokes: 2
+    source: "《说文·人》"
+
+  - char: "大"
+    radical: "大"
+    structure: "象形"
+    definition: "天大，地大，人亦大。故大象人形。"
+    pinyin: "dà"
+    strokes: 3
+    source: "《说文·大》"
+
+  - char: "子"
+    radical: "子"
+    structure: "象形"
+    definition: "十一月，阳气动，万物滋，人以为称。象形。"
+    pinyin: "zǐ"
+    strokes: 3
+    source: "《说文·子》"
+
+  - char: "女"
+    radical: "女"
+    structure: "象形"
+    definition: "妇人也。象形。"
+    pinyin: "nǚ"
+    strokes: 3
+    source: "《说文·女》"
+
+  - char: "男"
+    radical: "田"
+    structure: "会意"
+    definition: "丈夫也。从田从力。言男用力于田也。"
+    pinyin: "nán"
+    strokes: 7
+    source: "《说文·男》"
+
+  - char: "父"
+    radical: "又"
+    structure: "会意"
+    definition: "矩也。家长率教者。从又举杖。"
+    pinyin: "fù"
+    strokes: 4
+    source: "《说文·又》"
+
+  - char: "母"
+    radical: "女"
+    structure: "象形"
+    definition: "牧也。从女，象怀子形。一曰象乳子也。"
+    pinyin: "mǔ"
+    strokes: 5
+    source: "《说文·女》"
+
+  - char: "身"
+    radical: "身"
+    structure: "象形"
+    definition: "躬也。象人之身。从人𠂆声。"
+    pinyin: "shēn"
+    strokes: 7
+    source: "《说文·身》"
+
+  # ── 卷九·山部 ──
+  - char: "山"
+    radical: "山"
+    structure: "象形"
+    definition: "宣也。宣气𢿱，生万物，有石而高。象形。"
+    pinyin: "shān"
+    strokes: 3
+    source: "《说文·山》"
+
+  - char: "岳"
+    radical: "山"
+    structure: "会意"
+    definition: "东岱、南靃、西华、北恒、中泰室。王者之所以巡狩所至。从山狱声。"
+    pinyin: "yuè"
+    strokes: 8
+    source: "《说文·山》"
+
+  # ── 卷十·马部 ──
+  - char: "马"
+    radical: "马"
+    structure: "象形"
+    definition: "怒也，武也。象马头髦尾四足之形。"
+    pinyin: "mǎ"
+    strokes: 3
+    source: "《说文·马》"
+
+  - char: "龍"
+    radical: "龍"
+    structure: "象形"
+    definition: "鳞虫之长。能幽能明，能细能巨，能短能长。春分而登天，秋分而潜渊。从肉飞之形，童省声。"
+    pinyin: "lóng"
+    strokes: 16
+    source: "《说文·龍》"
+
+  - char: "鳳"
+    radical: "鳥"
+    structure: "形声"
+    definition: "神鸟也。天老曰：凤之象也，鸿前麐后，蛇颈鱼尾，鹳颡鸳思，龙文虎背，燕颔鸡喙，五色备举。出于东方君子之国。"
+    pinyin: "fèng"
+    strokes: 14
+    source: "《说文·鳥》"
+
+  # ── 干支 ──
+  - char: "甲"
+    radical: "甲"
+    structure: "象形"
+    definition: "东方之孟，阳气萌动，从木戴孚甲之象。一曰：人头宜为甲，甲象人头。"
+    pinyin: "jiǎ"
+    strokes: 5
+    source: "《说文·甲》"
+
+  - char: "乙"
+    radical: "乙"
+    structure: "象形"
+    definition: "象春艸木冤曲而出，阴气尚强，其出乙乙也。与丨同意。乙承甲，象人颈。"
+    pinyin: "yǐ"
+    strokes: 1
+    source: "《说文·乙》"
+
+  - char: "丙"
+    radical: "丙"
+    structure: "象形"
+    definition: "位南方，万物成，炳然。阴气初起，阳气将亏。从一入门。一者，阳也。"
+    pinyin: "bǐng"
+    strokes: 5
+    source: "《说文·丙》"
+
+  - char: "丁"
+    radical: "丁"
+    structure: "象形"
+    definition: "夏时万物皆丁实。象形。丁承丙，象人心。"
+    pinyin: "dīng"
+    strokes: 2
+    source: "《说文·丁》"
+
+  - char: "戊"
+    radical: "戊"
+    structure: "象形"
+    definition: "中宫也。象六甲五龙相拘绞也。戊承丁，象人胁。"
+    pinyin: "wù"
+    strokes: 5
+    source: "《说文·戊》"
+
+  - char: "己"
+    radical: "己"
+    structure: "象形"
+    definition: "中宫也。象万物辟藏诎形也。己承戊，象人腹。"
+    pinyin: "jǐ"
+    strokes: 3
+    source: "《说文·己》"
+
+  - char: "庚"
+    radical: "庚"
+    structure: "象形"
+    definition: "位西方，象秋时万物庚庚有实也。庚承己，象人䐡。"
+    pinyin: "gēng"
+    strokes: 8
+    source: "《说文·庚》"
+
+  - char: "辛"
+    radical: "辛"
+    structure: "象形"
+    definition: "秋时万物成而孰。金刚味辛，辛痛即泣出。从一从䇂。䇂，辠也。辛承庚，象人股。"
+    pinyin: "xīn"
+    strokes: 7
+    source: "《说文·辛》"
+
+  - char: "壬"
+    radical: "壬"
+    structure: "象形"
+    definition: "位北方也。阴极阳生，故《易》曰：龙战于野。战者，接也。象人褢妊之形。承亥壬以子，生之叙也。"
+    pinyin: "rén"
+    strokes: 4
+    source: "《说文·壬》"
+
+  - char: "癸"
+    radical: "癸"
+    structure: "象形"
+    definition: "冬时水土平，可揆度也。象水从四方流入地中之形。癸承壬，象人足。"
+    pinyin: "guǐ"
+    strokes: 9
+    source: "《说文·癸》"
+
+  - char: "子"
+    radical: "子"
+    structure: "象形"
+    definition: "十一月阳气动，万物滋。象形。孳也。"
+    pinyin: "zǐ"
+    strokes: 3
+    source: "《说文·子》"
+
+  - char: "丑"
+    radical: "丑"
+    structure: "象形"
+    definition: "纽也。十二月，万物动，用事。象手之形。"
+    pinyin: "chǒu"
+    strokes: 4
+    source: "《说文·丑》"
+
+  - char: "寅"
+    radical: "寅"
+    structure: "象形"
+    definition: "髌也。正月，阳气动，去黄泉，欲上出，阴尚强。象宀不达，髌寅于下也。"
+    pinyin: "yín"
+    strokes: 11
+    source: "《说文·寅》"
+
+  - char: "卯"
+    radical: "卯"
+    structure: "象形"
+    definition: "冒也。二月，万物冒地而出。象开门之形。故二月为天门。"
+    pinyin: "mǎo"
+    strokes: 5
+    source: "《说文·卯》"
+
+  - char: "辰"
+    radical: "辰"
+    structure: "象形"
+    definition: "震也。三月，阳气动，雷电振，民农时也。物皆生。从乙匕，象芒达。厂声也。"
+    pinyin: "chén"
+    strokes: 7
+    source: "《说文·辰》"
+
+  - char: "巳"
+    radical: "巳"
+    structure: "象形"
+    definition: "巳也。四月，阳气已出，阴气已藏，万物见，成文章。故巳为蛇，象形。"
+    pinyin: "sì"
+    strokes: 3
+    source: "《说文·巳》"
+
+  - char: "午"
+    radical: "午"
+    structure: "象形"
+    definition: "啎也。五月，阴气午逆阳。冒地而出。"
+    pinyin: "wǔ"
+    strokes: 4
+    source: "《说文·午》"
+
+  - char: "未"
+    radical: "未"
+    structure: "象形"
+    definition: "味也。六月，滋味也。五行，木老于未。象木重枝叶也。"
+    pinyin: "wèi"
+    strokes: 5
+    source: "《说文·未》"
+
+  - char: "申"
+    radical: "申"
+    structure: "象形"
+    definition: "神也。七月，阴气成，体自申束。从臼，自持也。"
+    pinyin: "shēn"
+    strokes: 5
+    source: "《说文·申》"
+
+  - char: "酉"
+    radical: "酉"
+    structure: "象形"
+    definition: "就也。八月黍成，可为酎酒。象古文酉之形。"
+    pinyin: "yǒu"
+    strokes: 7
+    source: "《说文·酉》"
+
+  - char: "戌"
+    radical: "戌"
+    structure: "象形"
+    definition: "灭也。九月，阳气微，万物毕成，阳下入地也。五行，土生于戊，盛于戌。从戊含一。"
+    pinyin: "xū"
+    strokes: 6
+    source: "《说文·戌》"
+
+  - char: "亥"
+    radical: "亥"
+    structure: "象形"
+    definition: "荄也。十月，微阳起，接盛阴。从二，二，古文上字。一人男，一人女也。"
+    pinyin: "hài"
+    strokes: 6
+    source: "《说文·亥》"
+
+  # ── 五行相关 ──
+  - char: "木"
+    radical: "木"
+    structure: "象形"
+    definition: "冒也。冒地而生。东方之行。从屮，下象其根。"
+    pinyin: "mù"
+    strokes: 4
+    source: "《说文·木》"
+
+  - char: "金"
+    radical: "金"
+    structure: "形声"
+    definition: "五色金也。黄为之长。久薶不生衣，百炼不轻，从革不违。西方之行。生于土，从土。左右注，象金在土中形。今声。"
+    pinyin: "jīn"
+    strokes: 8
+    source: "《说文·金》"
+
+  - char: "土"
+    radical: "土"
+    structure: "象形"
+    definition: "地之吐生物者也。二象地之下、地之中，物出形也。"
+    pinyin: "tǔ"
+    strokes: 3
+    source: "《说文·土》"
+
+  # ── 颜色 ──
+  - char: "青"
+    radical: "青"
+    structure: "会意"
+    definition: "东方色也。木生火，从生丹。丹青之信言必然。"
+    pinyin: "qīng"
+    strokes: 8
+    source: "《说文·青》"
+
+  - char: "赤"
+    radical: "赤"
+    structure: "会意"
+    definition: "南方色也。从大从火。"
+    pinyin: "chì"
+    strokes: 7
+    source: "《说文·赤》"
+
+  - char: "黄"
+    radical: "黄"
+    structure: "会意"
+    definition: "地之色也。从田从炗，炗亦声。炗，古文光。"
+    pinyin: "huáng"
+    strokes: 11
+    source: "《说文·黄》"
+
+  - char: "白"
+    radical: "白"
+    structure: "象形"
+    definition: "西方色也。阴用事，物色白。从入合二。二，阴数。"
+    pinyin: "bái"
+    strokes: 5
+    source: "《说文·白》"
+
+  - char: "黑"
+    radical: "黑"
+    structure: "会意"
+    definition: "火所熏之色也。从炎，上出𡆧。𡆧，古窻字。"
+    pinyin: "hēi"
+    strokes: 12
+    source: "《说文·黑》"
+
+  # ── 数字 ──
+  - char: "三"
+    radical: "一"
+    structure: "指事"
+    definition: "天地人之道也。从三数。"
+    pinyin: "sān"
+    strokes: 3
+    source: "《说文·三》"
+
+  - char: "四"
+    radical: "四"
+    structure: "指事"
+    definition: "阴数也。象四分之形。"
+    pinyin: "sì"
+    strokes: 5
+    source: "《说文·四》"
+
+  - char: "五"
+    radical: "五"
+    structure: "指事"
+    definition: "五行也。从二，阴阳在天地间交午也。"
+    pinyin: "wǔ"
+    strokes: 4
+    source: "《说文·五》"
+
+  - char: "六"
+    radical: "六"
+    structure: "指事"
+    definition: "《易》之数，阴变于六，正于八。从入从八。"
+    pinyin: "liù"
+    strokes: 4
+    source: "《说文·六》"
+
+  - char: "七"
+    radical: "七"
+    structure: "指事"
+    definition: "阳之正也。从一，微阴从中衺出也。"
+    pinyin: "qī"
+    strokes: 2
+    source: "《说文·七》"
+
+  - char: "八"
+    radical: "八"
+    structure: "指事"
+    definition: "别也。象分别相背之形。"
+    pinyin: "bā"
+    strokes: 2
+    source: "《说文·八》"
+
+  - char: "九"
+    radical: "九"
+    structure: "指事"
+    definition: "阳之变也。象其屈曲究尽之形。"
+    pinyin: "jiǔ"
+    strokes: 2
+    source: "《说文·九》"
+
+  - char: "十"
+    radical: "十"
+    structure: "指事"
+    definition: "数之具也。一为东西，丨为南北，则四方中央备矣。"
+    pinyin: "shí"
+    strokes: 2
+    source: "《说文·十》"
+
+  - char: "百"
+    radical: "白"
+    structure: "会意"
+    definition: "十十也。从一白。数，十百为一贯。"
+    pinyin: "bǎi"
+    strokes: 6
+    source: "《说文·白》"
+
+  - char: "千"
+    radical: "十"
+    structure: "形声"
+    definition: "十百也。从十从人。"
+    pinyin: "qiān"
+    strokes: 3
+    source: "《说文·十》"
+
+  - char: "萬"
+    radical: "禸"
+    structure: "象形"
+    definition: "虫也。从厹，象形。"
+    pinyin: "wàn"
+    strokes: 12
+    source: "《说文·禸》"
+
+  # ── 方位 ──
+  - char: "東"
+    radical: "東"
+    structure: "会意"
+    definition: "动也。从木。官溥说：从日在木中。"
+    pinyin: "dōng"
+    strokes: 8
+    source: "《说文·東》"
+
+  - char: "西"
+    radical: "西"
+    structure: "象形"
+    definition: "鸟在巢上。象形。日在西方而鸟栖，故因以为东西之西。"
+    pinyin: "xī"
+    strokes: 6
+    source: "《说文·西》"
+
+  - char: "南"
+    radical: "𣎵"
+    structure: "形声"
+    definition: "艸木至南方，有枝任也。从𣎵𢆉声。"
+    pinyin: "nán"
+    strokes: 9
+    source: "《说文·𣎵》"
+
+  - char: "北"
+    radical: "北"
+    structure: "会意"
+    definition: "乖也。从二人相背。"
+    pinyin: "běi"
+    strokes: 5
+    source: "《说文·北》"
+
+  - char: "中"
+    radical: "丨"
+    structure: "指事"
+    definition: "内也。从口丨，上下通。"
+    pinyin: "zhōng"
+    strokes: 4
+    source: "《说文·丨》"
+
+  # ── 自然 ──
+  - char: "風"
+    radical: "風"
+    structure: "形声"
+    definition: "八风也。东方曰明庶风，东南曰清明风，南方曰景风，西南曰凉风，西方曰阊阖风，西北曰不周风，北方曰广莫风，东北曰融风。风动虫生。故虫八日而化。从虫凡声。"
+    pinyin: "fēng"
+    strokes: 9
+    source: "《说文·風》"
+
+  - char: "雨"
+    radical: "雨"
+    structure: "象形"
+    definition: "水从云下也。一象天，冂象云，水霝其间也。"
+    pinyin: "yǔ"
+    strokes: 8
+    source: "《说文·雨》"
+
+  - char: "云"
+    radical: "雲"
+    structure: "象形"
+    definition: "山川气也。从雨，云象雲回转形。"
+    pinyin: "yún"
+    strokes: 4
+    source: "《说文·雲》"
+
+  - char: "雷"
+    radical: "雨"
+    structure: "会意"
+    definition: "阴阳薄动，雷雨生物者也。从雨，畾象回转形。"
+    pinyin: "léi"
+    strokes: 13
+    source: "《说文·雨》"
+
+  - char: "电"
+    radical: "雨"
+    structure: "形声"
+    definition: "阴阳激燿也。从雨从申。"
+    pinyin: "diàn"
+    strokes: 5
+    source: "《说文·雨》"
+
+  - char: "雪"
+    radical: "雨"
+    structure: "形声"
+    definition: "凝雨，说物者。从雨彗声。"
+    pinyin: "xuě"
+    strokes: 11
+    source: "《说文·雨》"
+
+  # ── 身体 ──
+  - char: "目"
+    radical: "目"
+    structure: "象形"
+    definition: "人眼。象形。重童子也。"
+    pinyin: "mù"
+    strokes: 5
+    source: "《说文·目》"
+
+  - char: "耳"
+    radical: "耳"
+    structure: "象形"
+    definition: "主听也。象形。"
+    pinyin: "ěr"
+    strokes: 6
+    source: "《说文·耳》"
+
+  - char: "手"
+    radical: "手"
+    structure: "象形"
+    definition: "拳也。象形。"
+    pinyin: "shǒu"
+    strokes: 4
+    source: "《说文·手》"
+
+  - char: "足"
+    radical: "足"
+    structure: "象形"
+    definition: "人之足也。在下。从止口。"
+    pinyin: "zú"
+    strokes: 7
+    source: "《说文·足》"
+
+  - char: "首"
+    radical: "首"
+    structure: "象形"
+    definition: "𦣻同。古文𦣻也。巛象发，谓之鬊，鬊即巛也。"
+    pinyin: "shǒu"
+    strokes: 9
+    source: "《说文·首》"
+
+  - char: "骨"
+    radical: "骨"
+    structure: "会意"
+    definition: "肉之核也。从冎有肉。"
+    pinyin: "gǔ"
+    strokes: 9
+    source: "《说文·骨》"
+
+disclaimer: "本数据引自《说文解字》(汉·许慎)，仅供学术参考。"

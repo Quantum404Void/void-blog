@@ -28,12 +28,13 @@ export default defineNuxtConfig({
       { path: '~/components/editor',       prefix: '' },
       { path: '~/components/ai-assistant', prefix: '' },
       { path: '~/components/ai-flow',      prefix: 'AiFlow' },
+      { path: '~/components/xuanwei',      prefix: '' },
     ],
   },
 
   modules: ['@vite-pwa/nuxt'],
 
-  css: ['~/assets/css/main.css', 'katex/dist/katex.min.css'],
+  css: ['~/assets/css/main.css', '~/assets/css/xuanwei.css', 'katex/dist/katex.min.css'],
 
   vite: {
     resolve: {

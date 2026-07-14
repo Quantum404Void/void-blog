@@ -203,6 +203,7 @@ const games = [
 ]
 
 const tools = [
+  { href: '/xuanwei', icon: '玄', label: '玄微规则引擎', desc: '十五种传统术数规则计算与文化资料查阅', tag: 'CULTURE', color: '#74b8a4' },
   { href: '/lab/tools/json', icon: '{ }', label: 'JSON 格式化', desc: '格式化 / 压缩 / 校验 JSON', tag: 'FORMAT', color: '#00d4ff' },
   { href: '/lab/tools/regex', icon: '.*', label: '正则测试器', desc: '实时匹配 + 高亮 + 分组提取', tag: 'REGEX', color: '#39ff14' },
   { href: '/lab/tools/base64', icon: '64', label: 'Base64', desc: '编码 / 解码 / 文件转换', tag: 'ENCODE', color: '#ff00aa' },

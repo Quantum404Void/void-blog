@@ -1,0 +1,730 @@
+total: 182
+radicals:
+  - radical: 一
+    strokes: 1
+    def: 惟初太始，道立于一，造分天地，化成万物。
+    pinyin: yī
+  - radical: 丨
+    strokes: 1
+    def: 上下通也。引而上行读若囟，引而下行读若退。
+    pinyin: gǔn
+  - radical: 丶
+    strokes: 1
+    def: 有所绝止，丶而识之也。
+    pinyin: zhǔ
+  - radical: 丿
+    strokes: 1
+    def: 右戾也。象左引之形。
+    pinyin: piě
+  - radical: 乀
+    strokes: 1
+    def: 左戾也。从反丿。
+    pinyin: fú
+  - radical: 乙
+    strokes: 1
+    def: 象春艸木冤曲而出，阴气尚强，其出乙乙也。
+    pinyin: yǐ
+  - radical: 二
+    strokes: 2
+    def: 地之数也。从偶一。
+    pinyin: èr
+  - radical: 八
+    strokes: 2
+    def: 别也。象分别相背之形。
+    pinyin: bā
+  - radical: 人
+    strokes: 2
+    def: 天地之性最贵者也。
+    pinyin: rén
+  - radical: 入
+    strokes: 2
+    def: 内也。象从上俱下也。
+    pinyin: rù
+  - radical: 儿
+    strokes: 2
+    def: 仁人也。古文奇字人也。象形。
+    pinyin: ér
+  - radical: 几
+    strokes: 2
+    def: 踞几也。象形。
+    pinyin: jī
+  - radical: 凵
+    strokes: 2
+    def: 张口也。象形。
+    pinyin: kǎn
+  - radical: 刀
+    strokes: 2
+    def: 兵也。象形。
+    pinyin: dāo
+  - radical: 力
+    strokes: 2
+    def: 筋也。象人筋之形。
+    pinyin: lì
+  - radical: 勹
+    strokes: 2
+    def: 裹也。象人曲形，有所包裹。
+    pinyin: bāo
+  - radical: 匕
+    strokes: 2
+    def: 相与比叙也。从反人。
+    pinyin: bǐ
+  - radical: 十
+    strokes: 2
+    def: 数之具也。一为东西，丨为南北。
+    pinyin: shí
+  - radical: 卜
+    strokes: 2
+    def: 灼剥龟也，象灸龟之形。
+    pinyin: bǔ
+  - radical: 卩
+    strokes: 2
+    def: 瑞信也。象相合之形。
+    pinyin: jié
+  - radical: 厂
+    strokes: 2
+    def: 山石之厓岩，人可居。象形。
+    pinyin: hǎn
+  - radical: 又
+    strokes: 2
+    def: 手也。象形。三指者，手之列多略不过三也。
+    pinyin: yòu
+  - radical: 厶
+    strokes: 2
+    def: 奸衺也。韩非曰：苍颉作字，自营为厶。
+    pinyin: sī
+  - radical: 口
+    strokes: 3
+    def: 人所以言食也。象形。
+    pinyin: kǒu
+  - radical: 土
+    strokes: 3
+    def: 地之吐生物者也。二象地之下、地之中，物出形也。
+    pinyin: tǔ
+  - radical: 大
+    strokes: 3
+    def: 天大，地大，人亦大。故大象人形。
+    pinyin: dà
+  - radical: 女
+    strokes: 3
+    def: 妇人也。象形。王育说。
+    pinyin: nǚ
+  - radical: 子
+    strokes: 3
+    def: 十一月，阳气动，万物滋，人以为称。象形。
+    pinyin: zǐ
+  - radical: 寸
+    strokes: 3
+    def: 十分也。人手却一寸，动脉，谓之寸口。从又从一。
+    pinyin: cùn
+  - radical: 小
+    strokes: 3
+    def: 物之微也。从八，丨见而分之。
+    pinyin: xiǎo
+  - radical: 山
+    strokes: 3
+    def: 宣也。宣气散，生万物，有石而高。象形。
+    pinyin: shān
+  - radical: 巾
+    strokes: 3
+    def: 佩巾也。从冂，丨象糸也。
+    pinyin: jīn
+  - radical: 干
+    strokes: 3
+    def: 犯也。从反入，从一。
+    pinyin: gān
+  - radical: 幺
+    strokes: 3
+    def: 小也。象子初生之形。
+    pinyin: yāo
+  - radical: 广
+    strokes: 3
+    def: 因广为屋，象对剌高屋之形。
+    pinyin: yǎn
+  - radical: 廴
+    strokes: 3
+    def: 长行也。从彳引之。
+    pinyin: yǐn
+  - radical: 廾
+    strokes: 3
+    def: 竦手也。从𠂇从又。
+    pinyin: gǒng
+  - radical: 弋
+    strokes: 3
+    def: 橜也。象折木衺锐著形。
+    pinyin: yì
+  - radical: 弓
+    strokes: 3
+    def: 以近穷远。象形。
+    pinyin: gōng
+  - radical: 彐
+    strokes: 3
+    def: 彘头也。象形。
+    pinyin: jì
+  - radical: 彡
+    strokes: 3
+    def: 毛饰画文也。象形。
+    pinyin: shān
+  - radical: 彳
+    strokes: 3
+    def: 小步也。象人胫三属相连也。
+    pinyin: chì
+  - radical: 心
+    strokes: 4
+    def: 人心，土藏，在身之中。象形。博士说以为火藏。
+    pinyin: xīn
+  - radical: 戈
+    strokes: 4
+    def: 平头戟也。从弋，一横之。象形。
+    pinyin: gē
+  - radical: 户
+    strokes: 4
+    def: 护也。半门曰户。象形。
+    pinyin: hù
+  - radical: 手
+    strokes: 4
+    def: 拳也。象形。
+    pinyin: shǒu
+  - radical: 支
+    strokes: 4
+    def: 去竹之枝也。从手持半竹。
+    pinyin: zhī
+  - radical: 文
+    strokes: 4
+    def: 错画也。象交文。
+    pinyin: wén
+  - radical: 斗
+    strokes: 4
+    def: 十升也。象形，有柄。
+    pinyin: dǒu
+  - radical: 斤
+    strokes: 4
+    def: 斫木也。象形。
+    pinyin: jīn
+  - radical: 方
+    strokes: 4
+    def: 并船也。象两舟省、緫头形。
+    pinyin: fāng
+  - radical: 无
+    strokes: 4
+    def: 奇字无也。通于元者。
+    pinyin: wú
+  - radical: 日
+    strokes: 4
+    def: 实也。太阳之精不亏。从口一。象形。
+    pinyin: rì
+  - radical: 曰
+    strokes: 4
+    def: 词也。从口乙声。亦象口气出也。
+    pinyin: yuē
+  - radical: 月
+    strokes: 4
+    def: 阙也。大阴之精。象形。
+    pinyin: yuè
+  - radical: 木
+    strokes: 4
+    def: 冒也。冒地而生。东方之行。从屮，下象其根。
+    pinyin: mù
+  - radical: 欠
+    strokes: 4
+    def: 张口气悟也。象气从人上出之形。
+    pinyin: qiàn
+  - radical: 止
+    strokes: 4
+    def: 下基也。象艸木出有址，故以止为足。
+    pinyin: zhǐ
+  - radical: 歹
+    strokes: 4
+    def: 列骨之残也。从半冎。
+    pinyin: dǎi
+  - radical: 殳
+    strokes: 4
+    def: 以杸殊人也。又兵器。从又几声。
+    pinyin: shū
+  - radical: 毋
+    strokes: 4
+    def: 止之也。从女，有奸之者。
+    pinyin: wú
+  - radical: 比
+    strokes: 4
+    def: 密也。二人为从，反从为比。
+    pinyin: bǐ
+  - radical: 毛
+    strokes: 4
+    def: 眉发之属及兽毛也。象形。
+    pinyin: máo
+  - radical: 氏
+    strokes: 4
+    def: 巴蜀山名岸胁之旁箸欲落𡐦者曰氏。
+    pinyin: shì
+  - radical: 气
+    strokes: 4
+    def: 云气也。象形。
+    pinyin: qì
+  - radical: 水
+    strokes: 4
+    def: 准也。北方之行。象众水并流，中有微阳之气也。
+    pinyin: shuǐ
+  - radical: 火
+    strokes: 4
+    def: 燬也。南方之行，炎而上。象形。
+    pinyin: huǒ
+  - radical: 爪
+    strokes: 4
+    def: 丮也。覆手曰爪。象形。
+    pinyin: zhǎo
+  - radical: 父
+    strokes: 4
+    def: 矩也。家长率教者。从又举杖。
+    pinyin: fù
+  - radical: 爻
+    strokes: 4
+    def: 交也。象《易》六爻头交也。
+    pinyin: yáo
+  - radical: 爿
+    strokes: 4
+    def: 反片为爿。
+    pinyin: qiáng
+  - radical: 片
+    strokes: 4
+    def: 判木也。从半木。
+    pinyin: piàn
+  - radical: 牙
+    strokes: 4
+    def: 牡齿也。象上下相错之形。
+    pinyin: yá
+  - radical: 牛
+    strokes: 4
+    def: 大牲也。牛，件也；件，事理也。象角头三、封尾之形。
+    pinyin: niú
+  - radical: 犬
+    strokes: 4
+    def: 狗之有县蹏者也。象形。孔子曰：视犬之字如画狗也。
+    pinyin: quǎn
+  - radical: 玉
+    strokes: 5
+    def: 石之美。有五德。象三玉之连。丨，其贯也。
+    pinyin: yù
+  - radical: 示
+    strokes: 5
+    def: 天垂象，见吉凶，所以示人也。
+    pinyin: shì
+  - radical: 石
+    strokes: 5
+    def: 山石也。在厂之下；口，象形。
+    pinyin: shí
+  - radical: 目
+    strokes: 5
+    def: 人眼。象形。重童子也。
+    pinyin: mù
+  - radical: 矛
+    strokes: 5
+    def: 酋矛也。建于兵车，长二丈。象形。
+    pinyin: máo
+  - radical: 矢
+    strokes: 5
+    def: 弓弩矢也。从入，象镝栝羽之形。
+    pinyin: shǐ
+  - radical: 示
+    strokes: 5
+    def: 天垂象，见吉凶。
+    pinyin: shì
+  - radical: 禾
+    strokes: 5
+    def: 嘉谷也。二月始生，八月而孰，得时之中，故谓之禾。
+    pinyin: hé
+  - radical: 穴
+    strokes: 5
+    def: 土室也。从宀八声。
+    pinyin: xué
+  - radical: 立
+    strokes: 5
+    def: 住也。从大立一之上。
+    pinyin: lì
+  - radical: 竹
+    strokes: 6
+    def: 冬生艸也。象形。下垂者，箁箬也。
+    pinyin: zhú
+  - radical: 米
+    strokes: 6
+    def: 粟实也。象禾实之形。
+    pinyin: mǐ
+  - radical: 糸
+    strokes: 6
+    def: 细丝也。象束丝之形。
+    pinyin: mì
+  - radical: 缶
+    strokes: 6
+    def: 瓦器。所以盛酒浆。秦人鼓之以节歌。象形。
+    pinyin: fǒu
+  - radical: 网
+    strokes: 6
+    def: 庖牺所结绳以渔。从冂，下象网交文。
+    pinyin: wǎng
+  - radical: 羊
+    strokes: 6
+    def: 祥也。从𠁥，象头角足尾之形。
+    pinyin: yáng
+  - radical: 羽
+    strokes: 6
+    def: 鸟长毛也。象形。
+    pinyin: yǔ
+  - radical: 老
+    strokes: 6
+    def: 考也。七十曰老。从人毛匕。言须发变白也。
+    pinyin: lǎo
+  - radical: 而
+    strokes: 6
+    def: 颊毛也。象毛之形。
+    pinyin: ér
+  - radical: 耒
+    strokes: 6
+    def: 手耕曲木也。从木推丯。
+    pinyin: lěi
+  - radical: 耳
+    strokes: 6
+    def: 主听也。象形。
+    pinyin: ěr
+  - radical: 聿
+    strokes: 6
+    def: 所以书也。楚谓之聿，吴谓之不律，燕谓之弗。从聿一声。
+    pinyin: yù
+  - radical: 肉
+    strokes: 6
+    def: 胾肉。象形。
+    pinyin: ròu
+  - radical: 臣
+    strokes: 6
+    def: 牵也。事君也。象屈服之形。
+    pinyin: chén
+  - radical: 自
+    strokes: 6
+    def: 鼻也。象鼻形。
+    pinyin: zì
+  - radical: 至
+    strokes: 6
+    def: 鸟飞从高下至地也。从一，一犹地也。象形。
+    pinyin: zhì
+  - radical: 臼
+    strokes: 6
+    def: 舂也。古者掘地为臼，其后穿木石。象形。中，米也。
+    pinyin: jiù
+  - radical: 舌
+    strokes: 6
+    def: 在口，所以言也、别味也。从干从口，干亦声。
+    pinyin: shé
+  - radical: 舛
+    strokes: 6
+    def: 对卧也。从夊㐄相背。
+    pinyin: chuǎn
+  - radical: 舟
+    strokes: 6
+    def: 船也。古者，共鼓、货狄，刳木为舟，剡木为楫，以济不通。象形。
+    pinyin: zhōu
+  - radical: 艮
+    strokes: 6
+    def: 很也。从匕目。匕目，犹目相匕，不相下也。
+    pinyin: gèn
+  - radical: 色
+    strokes: 6
+    def: 颜气也。从人从卩。
+    pinyin: sè
+  - radical: 艸
+    strokes: 6
+    def: 百芔也。从二屮。
+    pinyin: cǎo
+  - radical: 虍
+    strokes: 6
+    def: 虎文也。象形。
+    pinyin: hū
+  - radical: 虫
+    strokes: 6
+    def: 一名蝮，博三寸，首大如擘指。象其卧形。
+    pinyin: huǐ
+  - radical: 血
+    strokes: 6
+    def: 祭所荐牲血也。从皿，一象血形。
+    pinyin: xuè
+  - radical: 行
+    strokes: 6
+    def: 人之步趋也。从彳从亍。
+    pinyin: xíng
+  - radical: 衣
+    strokes: 6
+    def: 依也。上曰衣，下曰裳。象覆二人之形。
+    pinyin: yī
+  - radical: 襾
+    strokes: 6
+    def: 覆也。从冂，上下覆之。
+    pinyin: yà
+  - radical: 見
+    strokes: 7
+    def: 视也。从儿从目。
+    pinyin: jiàn
+  - radical: 角
+    strokes: 7
+    def: 兽角也。象形，角与刀、鱼相似。
+    pinyin: jiǎo
+  - radical: 言
+    strokes: 7
+    def: 直言曰言，论难曰语。从口䇂声。
+    pinyin: yán
+  - radical: 谷
+    strokes: 7
+    def: 泉出通川为谷。从水半见，出于口。
+    pinyin: gǔ
+  - radical: 豆
+    strokes: 7
+    def: 古食肉器也。从口，象形。
+    pinyin: dòu
+  - radical: 豕
+    strokes: 7
+    def: 彘也。竭其尾，故谓之豕。象毛足而后有尾。
+    pinyin: shǐ
+  - radical: 豸
+    strokes: 7
+    def: 兽长𦟝，行豸豸然，欲有所司杀形。
+    pinyin: zhì
+  - radical: 貝
+    strokes: 7
+    def: 海介虫也。居陆名猋，在水名蜬。象形。
+    pinyin: bèi
+  - radical: 赤
+    strokes: 7
+    def: 南方色也。从大从火。
+    pinyin: chì
+  - radical: 走
+    strokes: 7
+    def: 趋也。从夭止。夭止者，屈也。
+    pinyin: zǒu
+  - radical: 足
+    strokes: 7
+    def: 人之足也。在下。从止口。
+    pinyin: zú
+  - radical: 身
+    strokes: 7
+    def: 躬也。象人之身。从人𠂆声。
+    pinyin: shēn
+  - radical: 車
+    strokes: 7
+    def: 舆轮之总名。夏后时奚仲所造。象形。
+    pinyin: chē
+  - radical: 辛
+    strokes: 7
+    def: 秋时万物成而孰；金刚，味辛，辛痛即泣出。
+    pinyin: xīn
+  - radical: 辰
+    strokes: 7
+    def: 震也。三月，阳气动，雷电振，民农时也。
+    pinyin: chén
+  - radical: 辵
+    strokes: 7
+    def: 乍行乍止也。从彳从止。
+    pinyin: chuò
+  - radical: 邑
+    strokes: 7
+    def: 国也。从囗；先王之制，尊卑有大小，从卪。
+    pinyin: yì
+  - radical: 酉
+    strokes: 7
+    def: 就也。八月黍成，可为酎酒。象古文酉之形。
+    pinyin: yǒu
+  - radical: 釆
+    strokes: 7
+    def: 辨别也。象兽指爪分别也。
+    pinyin: biàn
+  - radical: 里
+    strokes: 7
+    def: 居也。从田从土。
+    pinyin: lǐ
+  - radical: 金
+    strokes: 8
+    def: 五色金也。黄为之长。久薶不生衣，百炼不轻，从革不违。
+    pinyin: jīn
+  - radical: 長
+    strokes: 8
+    def: 久远也。从兀从匕。兀者，高远意也。
+    pinyin: cháng
+  - radical: 門
+    strokes: 8
+    def: 闻也。从二户。象形。
+    pinyin: mén
+  - radical: 阜
+    strokes: 8
+    def: 大陆，山无石者。象形。
+    pinyin: fù
+  - radical: 隶
+    strokes: 8
+    def: 及也。从又，从尾省。又持尾者，从后及之也。
+    pinyin: dài
+  - radical: 隹
+    strokes: 8
+    def: 鸟之短尾总名也。象形。
+    pinyin: zhuī
+  - radical: 雨
+    strokes: 8
+    def: 水从云下也。一象天，冂象云，水霝其间也。
+    pinyin: yǔ
+  - radical: 青
+    strokes: 8
+    def: 东方色也。木生火，从生丹。丹青之信言必然。
+    pinyin: qīng
+  - radical: 非
+    strokes: 8
+    def: 违也。从飞下翄，取其相背。
+    pinyin: fēi
+  - radical: 面
+    strokes: 9
+    def: 颜前也。从𦣻，象人面形。
+    pinyin: miàn
+  - radical: 革
+    strokes: 9
+    def: 兽皮治去其毛，革更之。象古文革之形。
+    pinyin: gé
+  - radical: 韋
+    strokes: 9
+    def: 相背也。从舛囗声。兽皮之韦，可以束枉戾相韦背，故借以为皮韦。
+    pinyin: wéi
+  - radical: 韭
+    strokes: 9
+    def: 菜名。一种而久者，故谓之韭。象形。
+    pinyin: jiǔ
+  - radical: 音
+    strokes: 9
+    def: 声也。生于心，有节于外，谓之音。从言含一。
+    pinyin: yīn
+  - radical: 頁
+    strokes: 9
+    def: 头也。从𦣻从儿。
+    pinyin: yè
+  - radical: 風
+    strokes: 9
+    def: 八风也。东方曰明庶风…风动虫生。故虫八日而化。从虫凡声。
+    pinyin: fēng
+  - radical: 飛
+    strokes: 9
+    def: 鸟翥也。象形。
+    pinyin: fēi
+  - radical: 食
+    strokes: 9
+    def: 一米也。从皀亼声。或说：亼皀也。
+    pinyin: shí
+  - radical: 首
+    strokes: 9
+    def: 𦣻同。古文𦣻也。巛象发，谓之鬊，鬊即巛也。
+    pinyin: shǒu
+  - radical: 香
+    strokes: 9
+    def: 芳也。从黍从甘。《春秋传》曰：黍稷馨香。
+    pinyin: xiāng
+  - radical: 馬
+    strokes: 10
+    def: 怒也，武也。象马头髦尾四足之形。
+    pinyin: mǎ
+  - radical: 骨
+    strokes: 10
+    def: 肉之核也。从冎有肉。
+    pinyin: gǔ
+  - radical: 高
+    strokes: 10
+    def: 崇也。象台观高之形。从冂口。与仓、舍同意。
+    pinyin: gāo
+  - radical: 髟
+    strokes: 10
+    def: 长发猋猋也。从长从彡。
+    pinyin: biāo
+  - radical: 鬥
+    strokes: 10
+    def: 两士相对，兵杖在后，象鬥之形。
+    pinyin: dòu
+  - radical: 鬯
+    strokes: 10
+    def: 以秬酿𩪍艸，芬芳攸服，以降神也。
+    pinyin: chàng
+  - radical: 鬲
+    strokes: 10
+    def: 鼎属。实五觳。斗二升曰觳。象腹交文，三足。
+    pinyin: lì
+  - radical: 鬼
+    strokes: 10
+    def: 人所归为鬼。从人，象鬼头。鬼阴气贼害，从厶。
+    pinyin: guǐ
+  - radical: 魚
+    strokes: 11
+    def: 水虫也。象形。鱼尾与燕尾相似。
+    pinyin: yú
+  - radical: 鳥
+    strokes: 11
+    def: 长尾禽总名也。象形。鸟之足似匕，从匕。
+    pinyin: niǎo
+  - radical: 鹵
+    strokes: 11
+    def: 西方咸地也。从西省，象盐形。
+    pinyin: lǔ
+  - radical: 鹿
+    strokes: 11
+    def: 兽也。象头角四足之形。鸟鹿足相似，从匕。
+    pinyin: lù
+  - radical: 麥
+    strokes: 11
+    def: 芒谷，秋穜厚薶，故谓之麦。从来，有穗者；从夊。
+    pinyin: mài
+  - radical: 麻
+    strokes: 11
+    def: 与𣏟同。人所治，在屋下。从广从𣏟。
+    pinyin: má
+  - radical: 黄
+    strokes: 12
+    def: 地之色也。从田从炗，炗亦声。
+    pinyin: huáng
+  - radical: 黍
+    strokes: 12
+    def: 禾属而黏者也。以大暑而穜，故谓之黍。从禾，雨省声。
+    pinyin: shǔ
+  - radical: 黑
+    strokes: 12
+    def: 火所熏之色也。从炎，上出𡆧。
+    pinyin: hēi
+  - radical: 黹
+    strokes: 12
+    def: 箴缕所紩衣。从㡀，丵省。
+    pinyin: zhǐ
+  - radical: 黽
+    strokes: 13
+    def: 鼃黽也。从它，象形。黽头与它头同。
+    pinyin: mǐn
+  - radical: 鼎
+    strokes: 13
+    def: 三足两耳，和五味之宝器也。象析木以炊也。
+    pinyin: dǐng
+  - radical: 鼓
+    strokes: 13
+    def: 郭也。春分之音，万物郭皮甲而出，故谓之鼓。从壴，支象其手击之也。
+    pinyin: gǔ
+  - radical: 鼠
+    strokes: 13
+    def: 穴虫之总名也。象形。
+    pinyin: shǔ
+  - radical: 鼻
+    strokes: 14
+    def: 引气自𢌿也。从自𢌿。
+    pinyin: bí
+  - radical: 齊
+    strokes: 14
+    def: 禾麦吐穗上平也。象形。
+    pinyin: qí
+  - radical: 齒
+    strokes: 15
+    def: 口龂骨也。象口齿之形，止声。
+    pinyin: chǐ
+  - radical: 龍
+    strokes: 16
+    def: 鳞虫之长。能幽能明，能细能巨，能短能长。春分而登天，秋分而潜渊。
+    pinyin: lóng
+  - radical: 龜
+    strokes: 16
+    def: 旧也。外骨内肉者也。从它，龟头与它头同。
+    pinyin: guī
+  - radical: 龠
+    strokes: 17
+    def: 乐之竹管，三孔，以和众声也。从品仑。仑，理也。
+    pinyin: yuè

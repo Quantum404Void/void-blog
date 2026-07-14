@@ -1,0 +1,411 @@
+majorArcana:
+  - id: tarot-0
+    name: 愚者
+    number: 0
+    element: 风
+    planet: 天王星
+    meaning: 新的开始、冒险、天真
+    desc: The Fool — 新的旅程，无限可能
+  - id: tarot-1
+    name: 魔术师
+    number: 1
+    element: 风
+    planet: 水星
+    meaning: 创造力、技能、自信
+    desc: The Magician — 拥有将想法变为现实的能力
+  - id: tarot-2
+    name: 女祭司
+    number: 2
+    element: 水
+    planet: 月亮
+    meaning: 直觉、智慧、神秘
+    desc: The High Priestess — 倾听内心的声音
+  - id: tarot-3
+    name: 女皇
+    number: 3
+    element: 土
+    planet: 金星
+    meaning: 丰饶、母性、美
+    desc: The Empress — 丰收的季节
+  - id: tarot-4
+    name: 皇帝
+    number: 4
+    element: 火
+    planet: 白羊座
+    meaning: 权威、秩序、稳定
+    desc: The Emperor — 建立规则与秩序
+  - id: tarot-5
+    name: 教皇
+    number: 5
+    element: 土
+    planet: 金牛座
+    meaning: 传统、信仰、指导
+    desc: The Hierophant — 遵循内心的信念
+  - id: tarot-6
+    name: 恋人
+    number: 6
+    element: 风
+    planet: 双子座
+    meaning: 选择、爱情、和谐
+    desc: The Lovers — 重要的选择时刻
+  - id: tarot-7
+    name: 战车
+    number: 7
+    element: 水
+    planet: 巨蟹座
+    meaning: 意志力、胜利、前进
+    desc: The Chariot — 坚定的意志是最大的武器
+  - id: tarot-8
+    name: 力量
+    number: 8
+    element: 火
+    planet: 狮子座
+    meaning: 勇气、内在力量、耐心
+    desc: Strength — 真正的力量来自内心
+  - id: tarot-9
+    name: 隐士
+    number: 9
+    element: 土
+    planet: 处女座
+    meaning: 内省、智慧、孤独
+    desc: The Hermit — 暂别喧嚣
+  - id: tarot-10
+    name: 命运之轮
+    number: 10
+    element: 火
+    planet: 木星
+    meaning: 命运、转折、机遇
+    desc: Wheel of Fortune — 命运之轮转动
+  - id: tarot-11
+    name: 正义
+    number: 11
+    element: 风
+    planet: 天秤座
+    meaning: 公正、因果、平衡
+    desc: Justice — 种什么因得什么果
+  - id: tarot-12
+    name: 倒吊人
+    number: 12
+    element: 水
+    planet: 海王星
+    meaning: 牺牲、换个角度、等待
+    desc: The Hanged Man — 换个角度看世界
+  - id: tarot-13
+    name: 死神
+    number: 13
+    element: 水
+    planet: 天蝎座
+    meaning: 结束、转变、新生
+    desc: Death — 旧的不去新的不来
+  - id: tarot-14
+    name: 节制
+    number: 14
+    element: 火
+    planet: 射手座
+    meaning: 调和、适度、平衡
+    desc: Temperance — 不疾不徐
+  - id: tarot-15
+    name: 恶魔
+    number: 15
+    element: 土
+    planet: 摩羯座
+    meaning: 束缚、欲望、物质
+    desc: The Devil — 看清束缚你的枷锁
+  - id: tarot-16
+    name: 高塔
+    number: 16
+    element: 火
+    planet: 火星
+    meaning: 突变、崩塌、觉醒
+    desc: The Tower — 旧结构崩塌
+  - id: tarot-17
+    name: 星星
+    number: 17
+    element: 风
+    planet: 水瓶座
+    meaning: 希望、治愈、宁静
+    desc: The Star — 希望之光始终照耀
+  - id: tarot-18
+    name: 月亮
+    number: 18
+    element: 水
+    planet: 双鱼座
+    meaning: 潜意识、恐惧、幻觉
+    desc: The Moon — 面对内心的阴影
+  - id: tarot-19
+    name: 太阳
+    number: 19
+    element: 火
+    planet: 太阳
+    meaning: 快乐、成功、活力
+    desc: The Sun — 阳光普照
+  - id: tarot-20
+    name: 审判
+    number: 20
+    element: 火
+    planet: 冥王星
+    meaning: 觉醒、召唤、重生
+    desc: Judgement — 听从内心的召唤
+  - id: tarot-21
+    name: 世界
+    number: 21
+    element: 土
+    planet: 土星
+    meaning: 完成、圆满、旅程
+    desc: The World — 一个循环的圆满结束
+minorArcana:
+  wands:
+    name: 权杖
+    element: 火
+    cards:
+      - rank: ace
+        name: 权杖王牌
+        meaning: 新的行动、创造力
+        desc: Ace of Wands — 新的创造性行动的萌芽
+      - rank: '2'
+        name: 权杖二
+        meaning: 规划、展望未来
+        desc: Two of Wands — 手握地球仪望向远方
+      - rank: '3'
+        name: 权杖三
+        meaning: 远见、扩展
+        desc: Three of Wands — 站在岸边瞭望
+      - rank: '4'
+        name: 权杖四
+        meaning: 庆祝、和谐
+        desc: Four of Wands — 花环装饰的庆典
+      - rank: '5'
+        name: 权杖五
+        meaning: 竞争、冲突
+        desc: Five of Wands — 五人各持权杖相争
+      - rank: '6'
+        name: 权杖六
+        meaning: 胜利、认可
+        desc: Six of Wands — 戴着桂冠骑马而归
+      - rank: '7'
+        name: 权杖七
+        meaning: 坚守、防御
+        desc: Seven of Wands — 一人抵御六根权杖
+      - rank: '8'
+        name: 权杖八
+        meaning: 迅速、行动
+        desc: Eight of Wands — 八根权杖在空中飞驰
+      - rank: '9'
+        name: 权杖九
+        meaning: 警惕、坚持
+        desc: Nine of Wands — 受伤但仍紧握权杖
+      - rank: '10'
+        name: 权杖十
+        meaning: 负担、责任
+        desc: Ten of Wands — 怀抱十根权杖艰难前行
+      - rank: page
+        name: 权杖侍从
+        meaning: 热情、探索
+        desc: Page of Wands — 手持权杖的年轻探索者
+      - rank: knight
+        name: 权杖骑士
+        meaning: 行动、冒险
+        desc: Knight of Wands — 勇往直前的骑士
+      - rank: queen
+        name: 权杖王后
+        meaning: 自信、热情
+        desc: Queen of Wands — 手持向日葵与权杖
+      - rank: king
+        name: 权杖国王
+        meaning: 远见、创业
+        desc: King of Wands — 威严的国王
+  cups:
+    name: 圣杯
+    element: 水
+    cards:
+      - rank: ace
+        name: 圣杯王牌
+        meaning: 新感情、直觉
+        desc: Ace of Cups — 圣杯中涌出清泉
+      - rank: '2'
+        name: 圣杯二
+        meaning: 结合、伙伴关系
+        desc: Two of Cups — 男女各持圣杯对视
+      - rank: '3'
+        name: 圣杯三
+        meaning: 欢庆、友谊
+        desc: Three of Cups — 三位女子举杯欢庆
+      - rank: '4'
+        name: 圣杯四
+        meaning: 沉思、不满
+        desc: Four of Cups — 树下坐着的人对三杯视而不见
+      - rank: '5'
+        name: 圣杯五
+        meaning: 失落、悲伤
+        desc: Five of Cups — 黑袍人低头看着倾倒的三杯
+      - rank: '6'
+        name: 圣杯六
+        meaning: 回忆、怀旧
+        desc: Six of Cups — 男孩给女孩递花
+      - rank: '7'
+        name: 圣杯七
+        meaning: 幻想、选择
+        desc: Seven of Cups — 云中浮现七个杯子
+      - rank: '8'
+        name: 圣杯八
+        meaning: 离开、追寻
+        desc: Eight of Cups — 转身离开八只杯子的背影
+      - rank: '9'
+        name: 圣杯九
+        meaning: 满足、愿望实现
+        desc: Nine of Cups — 满足地坐在九只圣杯前
+      - rank: '10'
+        name: 圣杯十
+        meaning: 圆满、家庭幸福
+        desc: Ten of Cups — 彩虹下拥抱的夫妻
+      - rank: page
+        name: 圣杯侍从
+        meaning: 直觉、敏感
+        desc: Page of Cups — 手持杯中跃出鱼儿的少年
+      - rank: knight
+        name: 圣杯骑士
+        meaning: 浪漫、追求理想
+        desc: Knight of Cups — 骑白马的浪漫骑士
+      - rank: queen
+        name: 圣杯王后
+        meaning: 同情心、直觉
+        desc: Queen of Cups — 凝视华丽圣杯的慈祥王后
+      - rank: king
+        name: 圣杯国王
+        meaning: 情感成熟、宽容
+        desc: King of Cups — 坐在海上的沉稳国王
+  swords:
+    name: 宝剑
+    element: 风
+    cards:
+      - rank: ace
+        name: 宝剑王牌
+        meaning: 清晰、真理
+        desc: Ace of Swords — 云中高举宝剑
+      - rank: '2'
+        name: 宝剑二
+        meaning: 僵局、抉择
+        desc: Two of Swords — 蒙眼女子交叉双剑
+      - rank: '3'
+        name: 宝剑三
+        meaning: 心碎、悲伤
+        desc: Three of Swords — 三把剑穿过红心
+      - rank: '4'
+        name: 宝剑四
+        meaning: 休息、冥想
+        desc: Four of Swords — 躺在教堂中的骑士
+      - rank: '5'
+        name: 宝剑五
+        meaning: 冲突、失败
+        desc: Five of Swords — 胜利者回头看着落败者
+      - rank: '6'
+        name: 宝剑六
+        meaning: 过渡、疗伤
+        desc: Six of Swords — 船夫载着母子渡过水面
+      - rank: '7'
+        name: 宝剑七
+        meaning: 策略、偷跑
+        desc: Seven of Swords — 偷偷抱走五把剑的人
+      - rank: '8'
+        name: 宝剑八
+        meaning: 束缚、限制
+        desc: Eight of Swords — 被绑缚在剑阵中的女子
+      - rank: '9'
+        name: 宝剑九
+        meaning: 焦虑、噩梦
+        desc: Nine of Swords — 深夜坐起掩面哭泣
+      - rank: '10'
+        name: 宝剑十
+        meaning: 终结、最低点
+        desc: Ten of Swords — 背插十剑，曙光初现
+      - rank: page
+        name: 宝剑侍从
+        meaning: 警觉、好奇
+        desc: Page of Swords — 举剑迎风的少年
+      - rank: knight
+        name: 宝剑骑士
+        meaning: 果断、冲锋
+        desc: Knight of Swords — 全速冲锋的骑士
+      - rank: queen
+        name: 宝剑王后
+        meaning: 独立、敏锐
+        desc: Queen of Swords — 一手举剑一手伸出
+      - rank: king
+        name: 宝剑国王
+        meaning: 权威、公正
+        desc: King of Swords — 端坐王位的裁决者
+  pentacles:
+    name: 星币
+    element: 土
+    cards:
+      - rank: ace
+        name: 星币王牌
+        meaning: 新机会、繁荣
+        desc: Ace of Pentacles — 云中托着一枚金色星币
+      - rank: '2'
+        name: 星币二
+        meaning: 平衡、变通
+        desc: Two of Pentacles — 耍弄两枚星币的杂耍者
+      - rank: '3'
+        name: 星币三
+        meaning: 团队合作、技艺
+        desc: Three of Pentacles — 工匠与建筑师讨论
+      - rank: '4'
+        name: 星币四
+        meaning: 固守、节俭
+        desc: Four of Pentacles — 紧紧抱住四枚星币
+      - rank: '5'
+        name: 星币五
+        meaning: 匮乏、困境
+        desc: Five of Pentacles — 雪夜中相互搀扶
+      - rank: '6'
+        name: 星币六
+        meaning: 施与受、慈善
+        desc: Six of Pentacles — 商人用天平分钱
+      - rank: '7'
+        name: 星币七
+        meaning: 评估、耐心
+        desc: Seven of Pentacles — 农夫倚锄看作物
+      - rank: '8'
+        name: 星币八
+        meaning: 勤奋、技艺
+        desc: Eight of Pentacles — 专注雕刻的工匠
+      - rank: '9'
+        name: 星币九
+        meaning: 独立、富足
+        desc: Nine of Pentacles — 葡萄园中优雅的女子
+      - rank: '10'
+        name: 星币十
+        meaning: 财富、传承
+        desc: Ten of Pentacles — 庭院中老人与孩童
+      - rank: page
+        name: 星币侍从
+        meaning: 学习、实践
+        desc: Page of Pentacles — 专注凝视星币的少年
+      - rank: knight
+        name: 星币骑士
+        meaning: 可靠、耐心
+        desc: Knight of Pentacles — 骑黑马的稳重骑士
+      - rank: queen
+        name: 星币王后
+        meaning: 慷慨、务实
+        desc: Queen of Pentacles — 在花园中端详星币
+      - rank: king
+        name: 星币国王
+        meaning: 富足、稳健
+        desc: King of Pentacles — 坐在葡萄藤王座上
+spreads:
+  single:
+    name: 单张牌
+    positions:
+      - id: center
+        label: 今日指引
+  three:
+    name: 三张牌阵
+    positions:
+      - id: past
+        label: 过去
+      - id: present
+        label: 现在
+      - id: future
+        label: 未来
