@@ -1,0 +1,92 @@
+schema: xuanwei-data-manifest/v1
+updated: 2026-07-14
+language: zh-CN
+scope: "玄微资料层：可审阅的规则参考数据，不等同于科学事实"
+files:
+  bazi-rules.yaml:
+    system: bazi
+    status: partial
+    records: 10
+    source: "《渊海子平》《三命通会》《滴天髓》《穷通宝鉴》《子平真诠》"
+    note: "仅包含 10 条断语规则；天干地支、十神、神煞等运行时表在 app/engine/knowledge/bazi/"
+  data/bazi-nayin.yaml:
+    system: bazi
+    status: complete
+    records: 60
+    breakdown:
+      stem_branches: 60
+      nayin_pairs: 30
+    source: "六十甲子纳音表（按阴阳干支配对）"
+    note: "文件记录 60 个干支条目，对应 30 个纳音对；运行时干支表在 app/engine/knowledge/bazi/"
+  data/chenggu-data.yaml:
+    system: chenggu
+    status: complete
+    records: 160
+    breakdown:
+      year_weights: 60
+      month_weights: 12
+      day_weights: 30
+      hour_weights: 12
+      songs: 46
+    source: "袁天罡称骨歌通行表"
+    note: "年 60、月 12、日 30、时 12，歌诀 46 条；年柱数据由运行时历法换算"
+  data/dream-data.yaml:
+    system: dream
+    status: partial
+    records: 38
+    source: "《周公解梦》通行条目整理"
+    note: "关键词词典，不宣称预测或诊断能力"
+  data/fengshui-data.yaml:
+    system: fengshui
+    status: complete
+    records: 8
+    breakdown:
+      palaces: 8
+      star_meanings: 8
+      directions: 9
+    source: "八宅命卦与方位通行表"
+  data/iching-hexagrams.yaml:
+    system: iching
+    status: complete
+    records: 64
+    source: "《周易》六十四卦卦辞、大象传"
+  data/lots-data.yaml:
+    system: lots
+    status: partial
+    records: 20
+    source: "观音灵签通行签诗"
+    note: "当前纳入 20 支，不代表完整签库"
+  data/nameology-data.yaml:
+    system: nameology
+    status: partial
+    records: 48
+    breakdown:
+      number_meanings: 38
+      sancai_configs: 10
+    source: "五格剖象法通行数理与三才配置"
+    note: "不含完整姓名字库；说文资料单独列出"
+  data/shuowen-chars.yaml:
+    system: shuowen
+    status: partial
+    records: 224
+    source: "《说文解字》整理条目"
+  data/shuowen-radicals.yaml:
+    system: shuowen
+    status: partial
+    records: 181
+    source: "《说文解字》部首整理条目"
+  data/shuowen.yaml:
+    system: shuowen
+    status: partial
+    records: 111
+    source: "《说文解字》字符参考条目"
+  data/tarot-cards.yaml:
+    system: tarot
+    status: complete
+    records: 78
+    breakdown:
+      major_arcana: 22
+      minor_arcana: 56
+      spreads: 2
+    source: "Rider-Waite-Smith Tarot（1909）"
+    note: "大阿卡纳 22 张，权杖/圣杯/宝剑/星币各 14 张"

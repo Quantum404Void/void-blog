@@ -527,14 +527,6 @@ characters:
     strokes: 9
     source: "《说文·癸》"
 
-  - char: "子"
-    radical: "子"
-    structure: "象形"
-    definition: "十一月阳气动，万物滋。象形。孳也。"
-    pinyin: "zǐ"
-    strokes: 3
-    source: "《说文·子》"
-
   - char: "丑"
     radical: "丑"
     structure: "象形"

@@ -1,4 +1,4 @@
-total: 226
+total: 224
 characters:
   - c: 甲
     radical: 田
@@ -696,12 +696,6 @@ characters:
     struct: 象形
     def: 牧也。从女，象怀子形。
     py: mǔ
-  - c: 子
-    radical: 子
-    strokes: 3
-    struct: 象形
-    def: 十一月阳气动，万物滋。象形。
-    py: zǐ
   - c: 君
     radical: 口
     strokes: 7
@@ -894,12 +888,6 @@ characters:
     struct: 象形
     def: 百芔也。从二屮。
     py: cǎo
-  - c: 木
-    radical: 木
-    strokes: 4
-    struct: 象形
-    def: 冒也。冒地而生。
-    py: mù
   - c: 禾
     radical: 禾
     strokes: 5
