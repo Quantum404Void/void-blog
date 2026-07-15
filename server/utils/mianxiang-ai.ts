@@ -36,6 +36,38 @@ export async function runMianxiangVision(ai: VisionAi, input: Record<string, unk
   }
 }
 
+export async function parseOrRepairMianxiangResponse(
+  ai: VisionAi,
+  text: string,
+): Promise<Omit<MianxiangAnalysisResponse, 'model'>> {
+  try {
+    return parseMianxiangModelResponse(text)
+  }
+  catch {
+    const repaired = await ai.run(MIANXIANG_MODEL, {
+      prompt: `Convert the following model output to JSON only. Do not add observations that are not explicitly present.
+Required schema: {"imageQuality":"good|limited","observations":[{"feature":"眉","form":"眉长过目","confidence":0.75}]}
+If the output has no reliable allowed observation, return {"imageQuality":"limited","observations":[]}.
+
+MODEL OUTPUT:
+${text.slice(0, 6000)}`,
+      max_tokens: 900,
+      temperature: 0,
+    })
+
+    try {
+      return parseMianxiangModelResponse(responseText(repaired))
+    }
+    catch {
+      return {
+        imageQuality: 'limited',
+        observations: [],
+        warning: '模型未能返回可靠的结构化匹配结果，请调整光线和角度后重试。',
+      }
+    }
+  }
+}
+
 export function buildMianxiangPrompt(): string {
   const candidates = MIANXIANG_FEATURES.map(feature =>
     `${feature}: ${MIANXIANG_REFERENCES[feature].map(item => item.form).join('、')}`,
@@ -58,6 +90,14 @@ function extractJson(text: string): string {
   const end = text.lastIndexOf('}')
   if (start < 0 || end <= start) throw new Error('模型未返回 JSON')
   return text.slice(start, end + 1)
+}
+
+export function responseText(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (!value || typeof value !== 'object') return ''
+  const response = value as { response?: unknown; result?: { response?: unknown } }
+  if (typeof response.response === 'string') return response.response
+  return typeof response.result?.response === 'string' ? response.result.response : ''
 }
 
 function isFeature(value: unknown): value is MianxiangFeature {

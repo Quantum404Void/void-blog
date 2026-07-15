@@ -1,26 +1,15 @@
 import type { H3Event } from 'h3'
 import type { MianxiangAnalysisResponse } from '~/types/mianxiang'
-import { MIANXIANG_MODEL, buildMianxiangPrompt, parseMianxiangModelResponse, runMianxiangVision } from '~~/server/utils/mianxiang-ai'
+import { MIANXIANG_MODEL, buildMianxiangPrompt, parseOrRepairMianxiangResponse, responseText, runMianxiangVision } from '~~/server/utils/mianxiang-ai'
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const MAX_REQUESTS = 6
 const RATE_WINDOW_SECONDS = 60
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
-interface VisionResponse {
-  response?: string
-  result?: { response?: string }
-}
-
 function getAi(event: H3Event): Ai | undefined {
   const env = event.context.cloudflare?.env as { AI?: Ai } | undefined
   return env?.AI
-}
-
-function responseText(value: unknown): string {
-  if (!value || typeof value !== 'object') return ''
-  const response = value as VisionResponse
-  return response.response ?? response.result?.response ?? ''
 }
 
 export default defineEventHandler(async (event): Promise<MianxiangAnalysisResponse> => {
@@ -60,7 +49,7 @@ export default defineEventHandler(async (event): Promise<MianxiangAnalysisRespon
       temperature: 0,
       seed: 20260714,
     })
-    const parsed = parseMianxiangModelResponse(responseText(raw))
+    const parsed = await parseOrRepairMianxiangResponse(ai, responseText(raw))
     return { model: MIANXIANG_MODEL, ...parsed }
   }
   catch (error) {

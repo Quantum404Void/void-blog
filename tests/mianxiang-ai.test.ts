@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { MIANXIANG_FEATURES } from '../app/types/mianxiang'
 import { MIANXIANG_REFERENCES, mianxiangFromObservations } from '../app/engine/knowledge/mianxiang'
-import { MIANXIANG_MODEL, buildMianxiangPrompt, isMianxiangLicenseError, parseMianxiangModelResponse, runMianxiangVision } from '../server/utils/mianxiang-ai'
+import { MIANXIANG_MODEL, buildMianxiangPrompt, isMianxiangLicenseError, parseMianxiangModelResponse, parseOrRepairMianxiangResponse, responseText, runMianxiangVision } from '../server/utils/mianxiang-ai'
 
 describe('mianxiang knowledge integrity', () => {
   test('covers every supported feature with all 62 references', () => {
@@ -59,6 +59,12 @@ describe('mianxiang model response validation', () => {
 })
 
 describe('mianxiang model invocation', () => {
+  test('reads direct and nested Workers AI response shapes', () => {
+    expect(responseText('plain')).toBe('plain')
+    expect(responseText({ response: 'direct' })).toBe('direct')
+    expect(responseText({ result: { response: 'nested' } })).toBe('nested')
+  })
+
   test('accepts the Meta license once and retries the original vision request', async () => {
     const calls: Array<{ model: string; input: Record<string, unknown> }> = []
     const visionInput = { prompt: 'analyze', image: new ArrayBuffer(1) }
@@ -93,5 +99,31 @@ describe('mianxiang model invocation', () => {
     expect(isMianxiangLicenseError(new Error('license agreement required'))).toBe(true)
     await expect(runMianxiangVision(ai, { prompt: 'analyze' })).rejects.toThrow('capacity unavailable')
     expect(calls).toBe(1)
+  })
+
+  test('repairs malformed model output without inventing observations', async () => {
+    const ai = {
+      async run() {
+        return { response: '{"imageQuality":"limited","observations":[]}' }
+      },
+    }
+    await expect(parseOrRepairMianxiangResponse(ai, 'I cannot determine this reliably.')).resolves.toEqual({
+      imageQuality: 'limited',
+      observations: [],
+      warning: '照片中没有足够清晰、可匹配的面部形态。',
+    })
+  })
+
+  test('returns an honest limited result when repair is also malformed', async () => {
+    const ai = {
+      async run() {
+        return { response: 'still not json' }
+      },
+    }
+    await expect(parseOrRepairMianxiangResponse(ai, 'not json')).resolves.toEqual({
+      imageQuality: 'limited',
+      observations: [],
+      warning: '模型未能返回可靠的结构化匹配结果，请调整光线和角度后重试。',
+    })
   })
 })
