@@ -39,4 +39,15 @@ describe('xuanwei engines', () => {
     expect(matrix.systemId).toBeTruthy()
     expect(matrix.symbols.length + matrix.interpretations.length).toBeGreaterThan(0)
   })
+
+  test('nameology uses real character strokes and complete five-grid fields', () => {
+    const matrix = nameologyAnalyze('李', '明')
+    expect(matrix.symbols.map(symbol => [symbol.position, symbol.attributes.value, symbol.attributes.element])).toEqual([
+      ['天格', '8', '金'],
+      ['人格', '15', '土'],
+      ['地格', '9', '水'],
+      ['外格', '2', '木'],
+      ['总格', '15', '土'],
+    ])
+  })
 })

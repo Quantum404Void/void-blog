@@ -277,7 +277,8 @@ async function runSimulation() {
   simRunning.value = false
 }
 
-watch(roomSize, generatePeople, { immediate: true })
+watch(roomSize, generatePeople)
+onMounted(generatePeople)
 
 // ===== HASH COLLISION =====
 const hashInputStr = ref('hello, world, foo, bar, baz, test, abc, xyz')

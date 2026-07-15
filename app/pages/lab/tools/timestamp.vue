@@ -6,10 +6,10 @@ const timestampInput = shallowRef('1700000000')
 const dateInput = shallowRef('')
 const timestampResult = shallowRef('')
 const dateResult = shallowRef('')
-const now = shallowRef(new Date())
+const now = shallowRef<Date | null>(null)
 
-const currentTimestamp = computed(() => Math.floor(now.value.getTime() / 1000))
-const currentDate = computed(() => now.value.toLocaleString('zh-CN', { dateStyle: 'full', timeStyle: 'medium' }))
+const currentTimestamp = computed(() => now.value ? Math.floor(now.value.getTime() / 1000) : '—')
+const currentDate = computed(() => now.value?.toLocaleString('zh-CN', { dateStyle: 'full', timeStyle: 'medium' }) ?? '正在同步本地时间…')
 
 function timestampToDate() {
   const timestamp = Number(timestampInput.value)
@@ -31,7 +31,10 @@ function dateToTimestamp() {
 }
 
 let clock: ReturnType<typeof setInterval> | undefined
-onMounted(() => { clock = setInterval(() => { now.value = new Date() }, 1000) })
+onMounted(() => {
+  now.value = new Date()
+  clock = setInterval(() => { now.value = new Date() }, 1000)
+})
 onUnmounted(() => clearInterval(clock))
 </script>
 

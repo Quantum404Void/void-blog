@@ -14,7 +14,7 @@ const groupedModules = computed(() => xuanweiGroups.map(group => ({
       <div class="xw-hero-copy">
         <p>观象 · 明理 · 知微</p>
         <h1 id="xuanwei-title">玄微</h1>
-        <span>十五种术数体系，一个可审阅的规则引擎。</span>
+        <span>十五种术数体系，一座可审阅的古籍目录。</span>
       </div>
       <div class="xw-hero-note">
         <strong>规则，不是预言</strong>

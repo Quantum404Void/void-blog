@@ -206,6 +206,7 @@ const prefersReducedMotion = useReducedMotion()
 
 useCanonical('/explore')
 useSeoMeta({
+  title: `Explore | ${siteName}`,
   description: `搜索文章、浏览标签、查看博客统计`,
   ogTitle: `Explore | ${siteName}`,
   ogUrl: `${siteUrl}/explore`,

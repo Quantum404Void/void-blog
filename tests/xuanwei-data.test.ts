@@ -6,7 +6,7 @@ import { NAYIN_TAGS } from '../app/engine/knowledge/bazi/nayin'
 import { HEXAGRAMS } from '../app/engine/knowledge/iching'
 import { GUANYIN_LOTS } from '../app/engine/knowledge/lots'
 import { MAJOR_ARCANA, MINOR_ARCANA } from '../app/engine/knowledge/tarot/cards'
-import { REGISTERED_MODULES } from '../app/engine/knowledge'
+import { xuanweiModules } from '../app/features/xuanwei/modules'
 
 const root = path.resolve('app/assets/data/xuanwei')
 const manifest = yaml.load(fs.readFileSync(path.join(root, 'DATA_MANIFEST.yaml'), 'utf8')) as {
@@ -38,7 +38,7 @@ describe('xuanwei YAML data integrity', () => {
   })
 
   test('covers 100% of published modules and their declared sources', () => {
-    const registeredIds = REGISTERED_MODULES.map(module => module.id).sort()
+    const registeredIds = xuanweiModules.map(module => module.id).sort()
     const coveredIds = Object.keys(manifest.modules).sort()
     expect(coveredIds).toEqual(registeredIds)
     expect(manifest.coverage).toMatchObject({

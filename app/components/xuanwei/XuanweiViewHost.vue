@@ -17,6 +17,7 @@ const views = {
   fengshui: defineAsyncComponent(() => import('./views/FengshuiView.vue')),
   mianxiang: defineAsyncComponent(() => import('./views/MianxiangView.vue')),
   dream: defineAsyncComponent(() => import('./views/DreamView.vue')),
+  classics: defineAsyncComponent(() => import('./views/ClassicsView.vue')),
 } as const
 
 const activeView = computed(() => views[props.module as keyof typeof views])
