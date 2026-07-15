@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { MIANXIANG_FEATURES } from '../app/types/mianxiang'
 import { MIANXIANG_REFERENCES, mianxiangFromObservations } from '../app/engine/knowledge/mianxiang'
-import { buildMianxiangPrompt, parseMianxiangModelResponse } from '../server/utils/mianxiang-ai'
+import { MIANXIANG_MODEL, buildMianxiangPrompt, isMianxiangLicenseError, parseMianxiangModelResponse, runMianxiangVision } from '../server/utils/mianxiang-ai'
 
 describe('mianxiang knowledge integrity', () => {
   test('covers every supported feature with all 62 references', () => {
@@ -55,5 +55,43 @@ describe('mianxiang model response validation', () => {
     expect(matrix.symbols[0]?.attributes.confidence).toBe('0.82')
     expect(matrix.interpretations[0]?.text).toContain('兄弟和睦，朋友众多。')
     expect(matrix.interpretations[0]?.source).toBe('《麻衣相法》')
+  })
+})
+
+describe('mianxiang model invocation', () => {
+  test('accepts the Meta license once and retries the original vision request', async () => {
+    const calls: Array<{ model: string; input: Record<string, unknown> }> = []
+    const visionInput = { prompt: 'analyze', image: new ArrayBuffer(1) }
+    const ai = {
+      async run(model: typeof MIANXIANG_MODEL, input: Record<string, unknown>) {
+        calls.push({ model, input })
+        if (calls.length === 1) throw new Error('You must agree to the Meta license and Acceptable Use Policy')
+        if (input.prompt === 'agree') return { response: 'accepted' }
+        return { response: '{"imageQuality":"limited","observations":[]}' }
+      },
+    }
+
+    await expect(runMianxiangVision(ai, visionInput)).resolves.toEqual({
+      response: '{"imageQuality":"limited","observations":[]}',
+    })
+    expect(calls).toEqual([
+      { model: MIANXIANG_MODEL, input: visionInput },
+      { model: MIANXIANG_MODEL, input: { prompt: 'agree' } },
+      { model: MIANXIANG_MODEL, input: visionInput },
+    ])
+  })
+
+  test('does not retry unrelated model failures', async () => {
+    let calls = 0
+    const ai = {
+      async run() {
+        calls += 1
+        throw new Error('Workers AI capacity unavailable')
+      },
+    }
+
+    expect(isMianxiangLicenseError(new Error('license agreement required'))).toBe(true)
+    await expect(runMianxiangVision(ai, { prompt: 'analyze' })).rejects.toThrow('capacity unavailable')
+    expect(calls).toBe(1)
   })
 })

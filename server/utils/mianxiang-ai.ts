@@ -3,6 +3,11 @@ import type { MianxiangAnalysisResponse, MianxiangFeature, MianxiangObservation 
 import { MIANXIANG_REFERENCES } from '@/engine/knowledge/mianxiang'
 
 export const MIANXIANG_MODEL = '@cf/meta/llama-3.2-11b-vision-instruct' as const
+const LICENSE_ERROR_PATTERN = /agree|acceptable use|license|licence|terms/i
+
+interface VisionAi {
+  run(model: typeof MIANXIANG_MODEL, input: Record<string, unknown>): Promise<unknown>
+}
 
 interface RawObservation {
   feature?: unknown
@@ -13,6 +18,22 @@ interface RawObservation {
 interface RawAnalysis {
   imageQuality?: unknown
   observations?: unknown
+}
+
+export function isMianxiangLicenseError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return LICENSE_ERROR_PATTERN.test(message)
+}
+
+export async function runMianxiangVision(ai: VisionAi, input: Record<string, unknown>): Promise<unknown> {
+  try {
+    return await ai.run(MIANXIANG_MODEL, input)
+  }
+  catch (error) {
+    if (!isMianxiangLicenseError(error)) throw error
+    await ai.run(MIANXIANG_MODEL, { prompt: 'agree' })
+    return await ai.run(MIANXIANG_MODEL, input)
+  }
 }
 
 export function buildMianxiangPrompt(): string {

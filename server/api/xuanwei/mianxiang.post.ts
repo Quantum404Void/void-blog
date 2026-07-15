@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import type { MianxiangAnalysisResponse } from '~/types/mianxiang'
-import { MIANXIANG_MODEL, buildMianxiangPrompt, parseMianxiangModelResponse } from '~~/server/utils/mianxiang-ai'
+import { MIANXIANG_MODEL, buildMianxiangPrompt, parseMianxiangModelResponse, runMianxiangVision } from '~~/server/utils/mianxiang-ai'
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const MAX_REQUESTS = 6
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event): Promise<MianxiangAnalysisRespon
   if (!ai) throw createError({ statusCode: 503, message: 'Cloudflare AI 仅在部署环境可用' })
 
   try {
-    const raw = await ai.run(MIANXIANG_MODEL, {
+    const raw = await runMianxiangVision(ai, {
       prompt: buildMianxiangPrompt(),
       image: image.buffer.slice(image.byteOffset, image.byteOffset + image.byteLength),
       max_tokens: 900,
