@@ -77,7 +77,7 @@ describe('xuanwei YAML data integrity', () => {
     expect(manifest.files['data/bazi-nayin.yaml']?.breakdown).toEqual({ stem_branches: 60, nayin_pairs: 30 })
     expect(manifest.files['data/chenggu-data.yaml']?.breakdown).toEqual({ year_weights: 60, month_weights: 12, day_weights: 30, hour_weights: 12, songs: 46 })
     expect(manifest.files['data/fengshui-data.yaml']?.breakdown).toEqual({ palaces: 8, star_meanings: 8, directions: 9 })
-    expect(manifest.files['data/nameology-data.yaml']?.breakdown).toEqual({ number_meanings: 38, sancai_configs: 10 })
+    expect(manifest.files['data/nameology-data.yaml']?.breakdown).toEqual({ number_meanings: 81, sancai_configs: 125 })
     expect(manifest.files['data/tarot-cards.yaml']?.breakdown).toEqual({ major_arcana: 22, minor_arcana: 56, spreads: 2 })
   })
 
@@ -156,8 +156,9 @@ describe('xuanwei YAML data integrity', () => {
     expect(Object.values(dreams).every(isText)).toBe(true)
     expect(Object.keys(fengshui.youNian).sort()).toEqual(['乾', '兑', '坎', '坤', '巽', '离', '艮', '震'].sort())
     for (const palace of Object.values(fengshui.youNian) as Record<string, string>[]) expect(Object.keys(palace)).toHaveLength(9)
-    expect(Object.keys(nameology.numberMeaning)).toHaveLength(38)
-    expect(Object.keys(nameology.sancaiConfig)).toHaveLength(10)
+    expect(Object.keys(nameology.numberMeaning).map(Number).sort((a: number, b: number) => a - b)).toEqual(Array.from({ length: 81 }, (_, index) => index + 1))
+    const elements = ['木', '火', '土', '金', '水']
+    expect(Object.keys(nameology.sancaiConfig).sort()).toEqual(elements.flatMap(heaven => elements.flatMap(person => elements.map(earth => `${heaven}${person}${earth}`))).sort())
     expectUnique(rules.map((item: any) => item.id))
   })
 

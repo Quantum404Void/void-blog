@@ -49,5 +49,7 @@ describe('xuanwei engines', () => {
       ['外格', '2', '木'],
       ['总格', '15', '土'],
     ])
+    expect(matrix.interpretations.map(item => item.text).join('\n')).not.toContain('属中性')
+    expect(matrix.interpretations.map(item => item.text).join('\n')).toContain('金土水')
   })
 })

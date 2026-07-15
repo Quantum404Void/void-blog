@@ -163,12 +163,12 @@ files:
   data/nameology-data.yaml:
     system: nameology
     status: complete
-    records: 48
+    records: 206
     breakdown:
-      number_meanings: 38
-      sancai_configs: 10
-    source: "五格剖象法通行数理与三才配置"
-    note: "当前引擎使用的 38 个吉数与 10 个三才配置已全部收录；字符参考资料单列"
+      number_meanings: 81
+      sancai_configs: 125
+    source: "五格剖象法通行八十一数理；三才采用五行生克关系的完整组合说明"
+    note: "八十一数理完整收录；125 个三才组合为可审计的五行关系说明，不冒充古籍原文或确定性吉凶"
   data/shuowen-chars.yaml:
     system: shuowen
     status: complete
