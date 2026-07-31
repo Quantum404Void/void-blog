@@ -1,15 +1,15 @@
 /**
  * useAnime — SSR 安全的 Anime.js 懒加载 composable（模块级单例）
  */
-import type anime from 'animejs'
+type AnimeModule = typeof import('animejs')
 
-let _animePromise: Promise<typeof anime> | null = null
+let _animePromise: Promise<AnimeModule> | null = null
 
-export function useAnime(): Promise<typeof anime | null> {
+export function useAnime(): Promise<AnimeModule | null> {
   if (import.meta.server) return Promise.resolve(null)
 
   if (!_animePromise) {
-    _animePromise = import('animejs').then(m => m.default)
+    _animePromise = import('animejs')
   }
 
   return _animePromise

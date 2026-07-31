@@ -3,7 +3,7 @@
  * 使用 cnchar 库获取精确笔画数。
  */
 import { createEmptyMatrix } from '@/engine/types'
-import yaml from 'js-yaml'
+import { load as loadYaml } from 'js-yaml'
 import cnchar from 'cnchar'
 import nameologyRaw from '@/assets/data/xuanwei/data/nameology-data.yaml?raw'
 import type { SymbolMatrix } from '@/engine/types'
@@ -13,11 +13,14 @@ interface NameologyData {
   sancaiConfig: Record<string, string>
 }
 
-const nameologyData = yaml.load(nameologyRaw) as NameologyData
+const nameologyData = loadYaml(nameologyRaw) as NameologyData
 
 function getStroke(c: string): number {
+  // cnchar.stroke 在未传 'array' 时对单字返回 number
   const strokes = cnchar.stroke(c)
-  if (!Number.isInteger(strokes) || strokes <= 0) throw new Error(`无法识别“${c}”的笔画数，请输入常用汉字`)
+  if (typeof strokes !== 'number' || !Number.isInteger(strokes) || strokes <= 0) {
+    throw new Error(`无法识别“${c}”的笔画数，请输入常用汉字`)
+  }
   return strokes
 }
 
@@ -31,13 +34,14 @@ export function nameologyAnalyze(surname: string, givenName: string): SymbolMatr
   const m = createEmptyMatrix('nameology', `${surname}${givenName}`)
   const surnameChars = Array.from(surname)
   const givenChars = Array.from(givenName)
+  if (!surnameChars.length || !givenChars.length) throw new Error('请完整输入姓氏和名字')
   const chars = [...surnameChars, ...givenChars]
   const ss = chars.map(getStroke)
   const sn = surnameChars.length
   const surnameStrokes = ss.slice(0, sn)
   const givenStrokes = ss.slice(sn)
   const t = surnameStrokes.reduce((sum, value) => sum + value, 0) + (sn === 1 ? 1 : 0)
-  const r = surnameStrokes.at(-1)! + givenStrokes[0]
+  const r = surnameStrokes.at(-1)! + givenStrokes[0]!
   const d = givenStrokes.reduce((sum, value) => sum + value, 0) + (givenChars.length === 1 ? 1 : 0)
   const z = ss.reduce((a, b) => a + b, 0)
   const w = z - r + (sn === 1 ? 1 : 0) + (givenChars.length === 1 ? 1 : 0)

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import fs from 'node:fs'
 import path from 'node:path'
-import yaml from 'js-yaml'
+import { load as loadYaml } from 'js-yaml'
 import { NAYIN_TAGS } from '../app/engine/knowledge/bazi/nayin'
 import { HEXAGRAMS } from '../app/engine/knowledge/iching'
 import { GUANYIN_LOTS } from '../app/engine/knowledge/lots'
@@ -9,14 +9,14 @@ import { MAJOR_ARCANA, MINOR_ARCANA } from '../app/engine/knowledge/tarot/cards'
 import { xuanweiModules } from '../app/features/xuanwei/modules'
 
 const root = path.resolve('app/assets/data/xuanwei')
-const manifest = yaml.load(fs.readFileSync(path.join(root, 'DATA_MANIFEST.yaml'), 'utf8')) as {
+const manifest = loadYaml(fs.readFileSync(path.join(root, 'DATA_MANIFEST.yaml'), 'utf8')) as {
   schema: string
   coverage: { status: string; percent: number; published_modules: number; covered_modules: number; definition: string }
   modules: Record<string, { status: string; scope: string; sources: string[] }>
   files: Record<string, { system: string; status: string; records: number; breakdown?: Record<string, number> }>
 }
 
-const load = (relative: string) => yaml.load(fs.readFileSync(path.join(root, relative), 'utf8')) as Record<string, any>
+const load = (relative: string) => loadYaml(fs.readFileSync(path.join(root, relative), 'utf8')) as Record<string, any>
 const isText = (value: unknown) => typeof value === 'string' && value.trim().length > 0
 const expectUnique = (values: unknown[]) => expect(new Set(values).size).toBe(values.length)
 
@@ -30,7 +30,7 @@ describe('xuanwei YAML data integrity', () => {
     for (const [relative, metadata] of Object.entries(manifest.files)) {
       const file = path.join(root, relative)
       expect(fs.existsSync(file)).toBe(true)
-      expect(() => yaml.load(fs.readFileSync(file, 'utf8'))).not.toThrow()
+      expect(() => loadYaml(fs.readFileSync(file, 'utf8'))).not.toThrow()
       expect(metadata.system.trim()).toBeTruthy()
       expect(metadata.status).toBe('complete')
       expect(metadata.records).toBeGreaterThan(0)

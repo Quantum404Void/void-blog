@@ -1,16 +1,6 @@
 <script setup lang="ts">
-// @ts-expect-error markdown-it does not ship declarations in this project
 import MarkdownIt from 'markdown-it'
-
-interface MarkdownToken { attrSet: (name: string, value: string) => void }
-interface MarkdownRenderer { renderToken: (tokens: MarkdownToken[], index: number, options: Record<string, unknown>) => string }
-type LinkOpenRule = (
-  tokens: MarkdownToken[],
-  index: number,
-  options: Record<string, unknown>,
-  env: unknown,
-  self: MarkdownRenderer,
-) => string
+import type { RendererRule } from 'markdown-it'
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Markdown 预览 | ${siteName}` })
@@ -26,8 +16,8 @@ const source = shallowRef(`# Markdown 预览
 > 原始 HTML 会作为文本显示，避免预览注入。`)
 
 const markdown = new MarkdownIt({ html: false, linkify: true, typographer: true, breaks: false })
-const defaultLinkOpen = markdown.renderer.rules.link_open as LinkOpenRule | undefined
-const safeLinkOpen: LinkOpenRule = (tokens, index, options, env, self) => {
+const defaultLinkOpen = markdown.renderer.rules.link_open
+const safeLinkOpen: RendererRule = (tokens, index, options, env, self) => {
   tokens[index]?.attrSet('target', '_blank')
   tokens[index]?.attrSet('rel', 'noopener noreferrer')
   return defaultLinkOpen ? defaultLinkOpen(tokens, index, options, env, self) : self.renderToken(tokens, index, options)

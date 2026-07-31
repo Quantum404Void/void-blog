@@ -112,11 +112,10 @@ onMounted(async () => {
 
   const animateGrid = (grid: HTMLElement | null, delay = 0) => {
     if (!grid) return
-    anime({
-      targets: grid.querySelectorAll('.lab-card'),
+    anime.animate(grid.querySelectorAll('.lab-card'), {
       translateY: [8, 0],
       duration: 350,
-      easing: 'easeOutQuart',
+      ease: 'outQuart',
       delay: anime.stagger(40, { start: delay }),
     })
   }

@@ -1,7 +1,7 @@
 // app/utils/markdown-it-katex.ts
 // Custom markdown-it plugin for KaTeX math rendering
 // Supports: $$...$$ (display) and $...$ (inline)
-import type MarkdownIt from 'markdown-it'
+import type { MarkdownIt } from 'markdown-it'
 import katex from 'katex'
 
 function renderMath(tex: string, displayMode: boolean): string {
@@ -40,7 +40,7 @@ export function katexPlugin(md: MarkdownIt): void {
   })
 
   md.renderer.rules.katex_display = (tokens, idx) => {
-    return `<div class="math-display">${renderMath(tokens[idx].content, true)}</div>`
+    return `<div class="math-display">${renderMath(tokens[idx]!.content, true)}</div>`
   }
 
   // $...$ inline math
@@ -69,6 +69,6 @@ export function katexPlugin(md: MarkdownIt): void {
   })
 
   md.renderer.rules.katex_inline = (tokens, idx) => {
-    return renderMath(tokens[idx].content, false)
+    return renderMath(tokens[idx]!.content, false)
   }
 }

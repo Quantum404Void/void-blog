@@ -1,4 +1,4 @@
-import yaml from 'js-yaml'
+import { load as loadYaml } from 'js-yaml'
 import catalogRaw from '@/assets/data/xuanwei/data/classics-catalog.yaml?raw'
 
 export interface ClassicRecord {
@@ -17,7 +17,7 @@ interface ClassicsCatalog {
   classics: ClassicRecord[]
 }
 
-const parsed = yaml.load(catalogRaw) as ClassicsCatalog
+const parsed = loadYaml(catalogRaw) as ClassicsCatalog
 
 if (parsed.schema !== 'xuanwei-classics-catalog/v1' || !Array.isArray(parsed.classics)) {
   throw new Error('玄微古籍目录格式无效')

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import * as yaml from 'js-yaml'
+import { dump as dumpYaml, load as loadYaml } from 'js-yaml'
 import { useClipboard } from '@vueuse/core'
 
 type Direction = 'yaml2json' | 'json2yaml'
@@ -18,8 +18,8 @@ function convert() {
   if (!input.value.trim()) { output.value = ''; error.value = ''; return }
   try {
     output.value = direction.value === 'yaml2json'
-      ? JSON.stringify(yaml.load(input.value), null, indent.value)
-      : yaml.dump(JSON.parse(input.value), { indent: indent.value, lineWidth: -1, noRefs: true })
+      ? JSON.stringify(loadYaml(input.value), null, indent.value)
+      : dumpYaml(JSON.parse(input.value), { indent: indent.value, lineWidth: -1, noRefs: true })
     error.value = ''
   }
   catch (cause) {

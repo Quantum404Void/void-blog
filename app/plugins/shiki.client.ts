@@ -8,22 +8,19 @@ import {
   transformerMetaHighlight,
 } from '@shikijs/transformers'
 import MarkdownIt from 'markdown-it'
-// @ts-expect-error
+import type { MarkdownIt as MarkdownItInstance, RendererRule, Token } from 'markdown-it'
+import type { BundledLanguage } from 'shiki'
+// @ts-expect-error markdown-it-container \u672a\u63d0\u4f9b\u7c7b\u578b\u58f0\u660e
 import markdownItContainer from 'markdown-it-container'
 import { katexPlugin } from '~~/app/utils/markdown-it-katex'
-
-type MdToken = { tag: string; nesting: number; info: string; attrSet: (k: string, v: string) => void; children?: Array<{ content: string }> }
-type MdOptions = Record<string, unknown>
-type MdRenderer = { renderToken: (tokens: MdToken[], idx: number, options: MdOptions) => string }
-type RenderRule = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => string
 
 function toSlug(text: string) {
   return text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '')
 }
 
-let _mdPromise: Promise<MarkdownIt> | null = null
+let _mdPromise: Promise<MarkdownItInstance> | null = null
 
-function buildMd(): Promise<MarkdownIt> {
+function buildMd(): Promise<MarkdownItInstance> {
   if (_mdPromise) return _mdPromise
 
   _mdPromise = (async () => {
@@ -75,18 +72,18 @@ function buildMd(): Promise<MarkdownIt> {
 
   _md.use(fromHighlighter(hl as Parameters<typeof fromHighlighter>[0], {
     theme: 'github-dark-dimmed',
-    defaultLanguage: 'text',
-    fallbackLanguage: 'text',   // 未知语言 fallback 到纯文本，不抛错
+    // 'text' 是 shiki 的 SpecialLanguage，类型签名只接受 BuiltinLanguage
+    defaultLanguage: 'text' as BundledLanguage,
+    fallbackLanguage: 'text' as BundledLanguage,
     transformers: [
       {
-        pre(node: { tagName?: string; properties?: Record<string, unknown> }) {
-          const ctx = this as unknown as { options?: { lang?: string } }
-          const lang = ctx.options?.lang ?? ''
+        pre(node) {
+          const lang = this.options.lang
           if (lang && lang !== 'text' && lang !== 'plaintext') {
             node.properties['data-lang'] = lang
           }
           const cls = node.properties['class'] || ''
-          node.properties['class'] = cls ? cls + ' has-line-numbers' : 'has-line-numbers'
+          node.properties['class'] = cls ? `${cls} has-line-numbers` : 'has-line-numbers'
         }
       },
       transformerNotationDiff(),
@@ -100,13 +97,13 @@ function buildMd(): Promise<MarkdownIt> {
   // KaTeX math rendering
   _md.use(katexPlugin)
 
-  const _defHeading: RenderRule = _md.renderer.rules.heading_open ||
-    ((tokens: MdToken[], idx: number, options: MdOptions, _e: unknown, self: MdRenderer) => self.renderToken(tokens, idx, options))
-  _md.renderer.rules.heading_open = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => {
-    const tag = tokens[idx].tag
-    if (tag === 'h2' || tag === 'h3') {
-      const text = tokens[idx + 1]?.children?.map((x) => x.content).join('') ?? ''
-      tokens[idx].attrSet('id', toSlug(text))
+  const _defHeading: RendererRule = _md.renderer.rules.heading_open ||
+    ((tokens, idx, options, _e, self) => self.renderToken(tokens, idx, options))
+  _md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
+    const token = tokens[idx]!
+    if (token.tag === 'h2' || token.tag === 'h3') {
+      const text = tokens[idx + 1]?.children?.map(child => child.content).join('') ?? ''
+      token.attrSet('id', toSlug(text))
     }
     return _defHeading(tokens, idx, options, env, self)
   }
@@ -118,9 +115,10 @@ function buildMd(): Promise<MarkdownIt> {
     { name: 'info', icon: 'ℹ️', label: '说明' },
   ]) {
     _md.use(markdownItContainer, name, {
-      render(tokens: MdToken[], idx: number) {
-        if (tokens[idx].nesting === 1) {
-          const title = tokens[idx].info.trim().slice(name.length).trim() || label
+      render(tokens: Token[], idx: number) {
+        const token = tokens[idx]!
+        if (token.nesting === 1) {
+          const title = token.info.trim().slice(name.length).trim() || label
           return `<div class="callout callout-${name}"><p class="callout-title">${icon} ${title}</p>\n`
         }
         return '</div>\n'
@@ -128,11 +126,12 @@ function buildMd(): Promise<MarkdownIt> {
     })
   }
 
-  const _defImg: RenderRule = _md.renderer.rules.image ||
-    ((tokens: MdToken[], idx: number, options: MdOptions, _e: unknown, self: MdRenderer) => self.renderToken(tokens, idx, options))
-  _md.renderer.rules.image = (tokens: MdToken[], idx: number, options: MdOptions, env: unknown, self: MdRenderer) => {
-    tokens[idx].attrSet('loading', 'lazy')
-    tokens[idx].attrSet('decoding', 'async')
+  const _defImg: RendererRule = _md.renderer.rules.image ||
+    ((tokens, idx, options, _e, self) => self.renderToken(tokens, idx, options))
+  _md.renderer.rules.image = (tokens, idx, options, env, self) => {
+    const token = tokens[idx]!
+    token.attrSet('loading', 'lazy')
+    token.attrSet('decoding', 'async')
     return _defImg(tokens, idx, options, env, self)
   }
 
