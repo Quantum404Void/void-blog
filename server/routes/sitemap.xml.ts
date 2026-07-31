@@ -1,7 +1,12 @@
+import { hasD1, queryD1 } from '../utils/d1'
+import { demoPost } from '../content/demo-post'
+
 export default defineEventHandler(async (event) => {
-  const rows = await queryD1<{
-    slug: string; pub_date: string; updated_at: string
-  }>(event, "SELECT slug,pub_date,updated_at FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC")
+  const rows = hasD1(event)
+    ? await queryD1<{
+      slug: string; pub_date: string; updated_at: string
+    }>(event, "SELECT slug,pub_date,updated_at FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC")
+    : [{ slug: demoPost.slug, pub_date: demoPost.pub_date, updated_at: '' }]
 
   const config = useRuntimeConfig()
   const base = config.public.siteUrl as string

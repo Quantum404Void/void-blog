@@ -1,11 +1,21 @@
 // server/routes/rss.xml.ts — 使用 feed 包生成 RSS 2.0
 import { Feed } from 'feed'
-import { queryD1 } from '../utils/d1'
+import { hasD1, queryD1 } from '../utils/d1'
+import { demoPost } from '../content/demo-post'
+import { getServerMd } from '../utils/markdown'
 
 export default defineEventHandler(async (event) => {
-  const rows = await queryD1<{
-    slug: string; title: string; description: string; content: string; pub_date: string
-  }>(event, "SELECT slug,title,description,content,pub_date FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC LIMIT 20")
+  const rows = hasD1(event)
+    ? await queryD1<{
+      slug: string; title: string; description: string; content: string; pub_date: string
+    }>(event, "SELECT slug,title,description,content,pub_date FROM posts WHERE draft=0 AND slug!='about' ORDER BY pub_date DESC LIMIT 20")
+    : [{
+      slug: demoPost.slug,
+      title: demoPost.title,
+      description: demoPost.description,
+      content: demoPost.content,
+      pub_date: demoPost.pub_date,
+    }]
 
   const config = useRuntimeConfig()
   const base = config.public.siteUrl as string
@@ -35,13 +45,14 @@ export default defineEventHandler(async (event) => {
     },
   })
 
+  const md = getServerMd()
   for (const r of rows) {
     feed.addItem({
       title: r.title,
       id: `${base}/blog/${r.slug}`,
       link: `${base}/blog/${r.slug}`,
       description: r.description,
-      content: r.content,
+      content: md.render(r.content),
       date: new Date(r.pub_date),
       image: `${base}/og/${r.slug}`,
     })

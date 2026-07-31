@@ -1,29 +1,36 @@
 // server/routes/og/[slug].ts
-import { queryD1 } from '../../utils/d1'
+import { hasD1, queryD1 } from '../../utils/d1'
+import { DEMO_POST_SLUG, demoPost } from '../../content/demo-post'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')!
   const config = useRuntimeConfig()
-  const siteUrl = config.public.siteUrl as string
   const siteName = config.public.siteName as string
+  const authorName = config.public.authorName as string
 
   // 取文章标题和 tags
   let title = siteName
   let description = ''
   let tags: string[] = []
 
-  try {
+  if (hasD1(event)) {
     const rows = await queryD1<{ title: string; description: string; tags: string }>(
       event,
       'SELECT title, description, tags FROM posts WHERE slug=? AND draft=0',
       [slug]
     )
-    if (rows.length) {
-      title = rows[0].title
-      description = rows[0].description || ''
-      tags = JSON.parse(rows[0].tags || '[]')
+    const row = rows[0]
+    if (row) {
+      title = row.title
+      description = row.description || ''
+      tags = JSON.parse(row.tags || '[]')
     }
-  } catch {}
+  }
+  else if (slug === DEMO_POST_SLUG) {
+    title = demoPost.title
+    description = demoPost.description
+    tags = demoPost.tags
+  }
 
   // 截断标题避免超出
   const shortTitle = title.length > 52 ? title.slice(0, 49) + '...' : title
@@ -93,7 +100,7 @@ export default defineEventHandler(async (event) => {
   <rect x="60" y="570" width="200" height="1" fill="rgba(0,212,255,0.3)"/>
 
   <!-- 作者 -->
-  <text x="60" y="600" font-family="monospace" font-size="20" fill="#3a3a5a">王宇 · ${siteName}</text>
+  <text x="60" y="600" font-family="monospace" font-size="20" fill="#3a3a5a">${escapeXml(authorName)} · ${escapeXml(siteName)}</text>
 
   <!-- 右侧装饰（大字终端符号） -->
   <text x="900" y="450" font-family="monospace" font-size="280" fill="rgba(0,255,136,0.04)" font-weight="bold">&gt;_</text>
