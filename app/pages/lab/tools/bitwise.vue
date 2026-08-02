@@ -34,10 +34,10 @@
               v-for="bit in 32"
               :key="bit"
               class="font-mono text-[9px] w-[18px] h-[18px] flex items-center justify-center rounded-sm transition-colors"
-              :style="getBit(vals[idx], 32-bit) ? 'background:rgba(0,212,255,0.4);color:rgba(0,212,255,1)' : 'background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.2)'"
-            >{{ getBit(vals[idx], 32-bit) ? '1' : '0' }}</span>
+              :style="getBit(vals[idx]!, 32-bit) ? 'background:rgba(0,212,255,0.4);color:rgba(0,212,255,1)' : 'background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.2)'"
+            >{{ getBit(vals[idx]!, 32-bit) ? '1' : '0' }}</span>
           </div>
-          <div class="mt-1 font-mono text-[10px] text-[var(--color-text-muted)]">= {{ signed ? toSigned(vals[idx]) : vals[idx] >>> 0 }}</div>
+          <div class="mt-1 font-mono text-[10px] text-[var(--color-text-muted)]">= {{ signed ? toSigned(vals[idx]!) : vals[idx]! >>> 0 }}</div>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ const shiftN = ref(1)
 function setFmt(idx: number, fmt: string) {
   inputFmt.value[idx] = fmt
   // Re-encode current value in new format
-  const v = vals.value[idx] >>> 0
+  const v = vals.value[idx]! >>> 0
   if (fmt === 'dec') inputStr.value[idx] = String(v)
   else if (fmt === 'hex') inputStr.value[idx] = '0x' + v.toString(16)
   else inputStr.value[idx] = v.toString(2)
@@ -100,7 +100,7 @@ function setFmt(idx: number, fmt: string) {
 }
 
 function parseInput(idx: number) {
-  const s = inputStr.value[idx].trim()
+  const s = inputStr.value[idx]!.trim()
   inputErr.value[idx] = ''
   let v: number
   try {
@@ -129,7 +129,7 @@ function formatResult(v: number): string {
 }
 
 const ops = computed(() => {
-  const a = vals.value[0], b = vals.value[1], n = Math.max(0, Math.min(31, shiftN.value))
+  const a = vals.value[0]!, b = vals.value[1]!, n = Math.max(0, Math.min(31, shiftN.value))
   return [
     { name: 'and', label: 'A AND B', value: a & b },
     { name: 'or',  label: 'A OR B',  value: a | b },

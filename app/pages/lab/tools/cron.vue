@@ -33,8 +33,7 @@
 <script setup lang="ts">
 // @ts-ignore
 import cronstrue from 'cronstrue/i18n'
-// @ts-ignore
-import cronParser from 'cron-parser'
+import { CronExpressionParser } from 'cron-parser'
 
 const { siteName } = useSiteConfig()
 useSeoMeta({ title: `Cron 工具 | ${siteName}` })
@@ -62,7 +61,7 @@ const nextRuns = computed(()=>{
   const p=expr.value.trim().split(/\s+/)
   if(p.length!==5) return []
   try {
-    const interval = cronParser.parseExpression(expr.value)
+    const interval = CronExpressionParser.parse(expr.value)
     const results: Date[] = []
     for (let i = 0; i < 5; i++) {
       results.push(interval.next().toDate())

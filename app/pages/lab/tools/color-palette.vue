@@ -20,7 +20,7 @@
       <template v-if="topTab==='converter'">
         <div class="flex gap-4 items-center mb-6">
           <input type="color" v-model="cvtHex" class="w-16 h-16 rounded-xl border-0 cursor-pointer bg-transparent" style="padding:0">
-          <input v-model="cvtHex" @input="onCvtHexInput" placeholder="#000000"
+          <input v-model="cvtHex" placeholder="#000000"
             class="font-mono text-lg rounded-xl border border-gray-700 px-4 py-2 bg-[#050508] text-white outline-none w-40">
           <div class="w-16 h-16 rounded-xl border border-gray-700" :style="`background:${cvtHex}`"></div>
         </div>
@@ -109,7 +109,7 @@
       <!-- Export -->
       <section>
         <div class="flex gap-3 mb-4">
-          <button v-for="fmt in ['CSS变量','Tailwind','JSON']" :key="fmt" @click="exportFmt=fmt"
+          <button v-for="fmt in exportFormats" :key="fmt" @click="exportFmt=fmt"
             class="font-mono text-xs px-3 py-1.5 rounded border transition-all"
             :style="exportFmt===fmt ? 'border-color:#b400ff;color:#b400ff;background:rgba(180,0,255,0.1)' : 'border-color:rgba(255,255,255,0.15);color:#666'"
           >{{ fmt }}</button>
@@ -150,7 +150,7 @@ const cvtHex = ref('#39ff14')
 const topTabs = [
   { key: 'converter', label: '🎨 颜色转换' },
   { key: 'palette', label: '🖌️ 调色板' },
-]
+] as const
 const harmonies = [
   { key: 'complementary', label: '互补色' },
   { key: 'triadic', label: '三等分' },
@@ -226,10 +226,27 @@ function textColor(hex: string): string {
   return colord(hex).isLight() ? '#000000' : '#ffffff'
 }
 
-// 导出 CSS vars
-const exportCss = computed(() => {
-  return scaleColors.value.map(({ hex, label }) => `  --color-${label}: ${hex};`).join('\n')
+// 导出格式
+type ExportFormat = 'CSS变量' | 'Tailwind' | 'JSON'
+const exportFormats: ExportFormat[] = ['CSS变量', 'Tailwind', 'JSON']
+const exportFmt = ref<ExportFormat>('CSS变量')
+
+const exportCode = computed(() => {
+  const colors = scaleColors.value
+  if (exportFmt.value === 'Tailwind') {
+    return `colors: {\n  brand: {\n${colors.map(({ hex, label }) => `    '${label}': '${hex}',`).join('\n')}\n  },\n}`
+  }
+  if (exportFmt.value === 'JSON') {
+    return JSON.stringify(Object.fromEntries(colors.map(({ hex, label }) => [label, hex])), null, 2)
+  }
+  return `:root {\n${colors.map(({ hex, label }) => `  --color-${label}: ${hex};`).join('\n')}\n}`
 })
+
+async function copyExport() {
+  await copyToClipboard(exportCode.value)
+  toast.value = '已复制导出！'
+  setTimeout(() => toast.value = '', 1500)
+}
 
 async function copyColor(val: string) {
   await copyToClipboard(val)
