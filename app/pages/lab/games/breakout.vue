@@ -9,6 +9,11 @@
         <p class="font-mono text-xs text-[var(--color-text-muted)]">鼠标移动 / ← → 键控制挡板</p>
       </div>
 
+      <div class="mb-3 flex items-center gap-6 font-mono text-xs">
+        <span class="text-[var(--color-text-muted)]">SCORE <span id="score-el" class="text-[var(--color-neon-cyan)] font-bold tabular-nums">0</span></span>
+        <span class="text-[var(--color-text-muted)]">LIVES <span id="lives-el" class="text-[var(--color-neon-green)] font-bold tabular-nums">3</span></span>
+      </div>
+
       <div class="relative border border-[var(--color-void-border)] rounded-xl overflow-hidden mx-auto" style="width:100%;max-width:800px;aspect-ratio:800/520;background:#06060e;box-shadow:0 0 40px rgba(0,212,255,0.1),inset 0 0 60px rgba(0,0,0,0.5)">
         <canvas id="breakout-canvas" width="800" height="520" style="display:block;width:100%;height:100%"></canvas>
         <div id="game-overlay" class="absolute inset-0 flex flex-col items-center justify-center font-mono" style="background:rgba(6,6,14,0.92)">
@@ -33,6 +38,8 @@
 const { siteName } = useSiteConfig()
 useHead({ title: `Breakout | ${siteName}` })
 useSeoMeta({ title: `Breakout | ${siteName}` })
+
+let animId = 0
 
 onMounted(() => {
   const canvas = document.getElementById('breakout-canvas') as HTMLCanvasElement
@@ -69,7 +76,6 @@ onMounted(() => {
   let ballDX = 4, ballDY = -4
   let score = 0, lives = 3
   let gameState: 'idle' | 'running' | 'paused' | 'dead' | 'win' = 'idle'
-  let animId = 0
   let mouseX = W / 2
   let keys = { left: false, right: false }
 
@@ -81,7 +87,7 @@ onMounted(() => {
           x: BRICK_OFF_X + c * (BRICK_W + BRICK_PAD),
           y: BRICK_OFF_Y + r * (BRICK_H + BRICK_PAD),
           alive: true,
-          color: ROW_COLORS[r % ROW_COLORS.length]
+          color: ROW_COLORS[r % ROW_COLORS.length]!
         })
       }
     }

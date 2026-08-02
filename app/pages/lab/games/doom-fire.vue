@@ -10,7 +10,7 @@
           <input
             type="range"
             min="0"
-            max="36"
+            max="35"
             v-model.number="intensity"
             class="slider"
           />
@@ -77,15 +77,16 @@ const paletteRGBA: number[] = PALETTE.map(hex => {
 })
 
 const canvasEl = ref<HTMLCanvasElement | null>(null)
-const intensity = ref(36)
+const intensity = ref(35)
 const paused = ref(false)
 const fps = ref(0)
 
 const pixels = new Uint8Array(W * H)
 
 function initBottom() {
+  const value = Math.min(intensity.value, PALETTE.length - 1)
   for (let x = 0; x < W; x++) {
-    pixels[(H - 1) * W + x] = intensity.value
+    pixels[(H - 1) * W + x] = value
   }
 }
 
@@ -93,7 +94,7 @@ function step() {
   for (let y = 0; y < H - 1; y++) {
     for (let x = 0; x < W; x++) {
       const decay = Math.random() < 0.5 ? 0 : 1
-      const src = pixels[(y + 1) * W + x]
+      const src = pixels[(y + 1) * W + x]!
       const dst = (x - decay + W) % W
       pixels[y * W + dst] = Math.max(0, src - decay)
     }
@@ -102,7 +103,7 @@ function step() {
 
 function render(ctx: CanvasRenderingContext2D, imgData: ImageData, buf32: Uint32Array) {
   for (let i = 0; i < W * H; i++) {
-    buf32[i] = paletteRGBA[pixels[i]]
+    buf32[i] = paletteRGBA[pixels[i]!]!
   }
   ctx.putImageData(imgData, 0, 0)
 }
@@ -153,7 +154,7 @@ function onCanvasClick(e: MouseEvent) {
       const nx = (cx + dx + W) % W
       const ny = cy + dy
       if (ny >= 0 && ny < H) {
-        pixels[ny * W + nx] = Math.max(0, pixels[ny * W + nx] - 20)
+        pixels[ny * W + nx] = Math.max(0, pixels[ny * W + nx]! - 20)
       }
     }
   }

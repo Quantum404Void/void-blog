@@ -20,7 +20,7 @@
             <span class="text-[var(--color-neon-cyan)] w-8">{{ packetLoss }}%</span>
           </div>
           <div class="flex gap-2 ml-auto">
-            <button @click="simulate" :disabled="running" class="font-mono text-xs px-4 py-2 border border-[var(--color-neon-cyan)] text-[var(--color-neon-cyan)] hover:bg-[var(--color-neon-cyan)]/10 disabled:opacity-40 transition-all">
+            <button @click="simulate()" :disabled="running" class="font-mono text-xs px-4 py-2 border border-[var(--color-neon-cyan)] text-[var(--color-neon-cyan)] hover:bg-[var(--color-neon-cyan)]/10 disabled:opacity-40 transition-all">
               {{ running ? '模拟中...' : '▶ 开始模拟' }}
             </button>
             <button @click="simulateLoss" :disabled="running" class="font-mono text-xs px-4 py-2 border border-red-500 text-red-400 hover:bg-red-500/10 disabled:opacity-40 transition-all">
@@ -158,7 +158,7 @@ const resourceTypes = [
 ]
 
 function getResourceColor(i: number) {
-  return resourceTypes[i % resourceTypes.length].color
+  return resourceTypes[i % resourceTypes.length]!.color
 }
 
 interface Request {
@@ -280,9 +280,9 @@ function simulate(lossOverride?: number) {
     const h1 = buildH1(requestCount.value, loss)
     const h2 = buildH2(requestCount.value, loss)
     const h3 = buildH3(requestCount.value, loss)
-    protocols[0].requests = h1.requests; protocols[0].totalTime = h1.totalTime; protocols[0].lostPackets = h1.lostPackets
-    protocols[1].requests = h2.requests; protocols[1].totalTime = h2.totalTime; protocols[1].lostPackets = h2.lostPackets
-    protocols[2].requests = h3.requests; protocols[2].totalTime = h3.totalTime; protocols[2].lostPackets = h3.lostPackets
+    protocols[0]!.requests = h1.requests; protocols[0]!.totalTime = h1.totalTime; protocols[0]!.lostPackets = h1.lostPackets
+    protocols[1]!.requests = h2.requests; protocols[1]!.totalTime = h2.totalTime; protocols[1]!.lostPackets = h2.lostPackets
+    protocols[2]!.requests = h3.requests; protocols[2]!.totalTime = h3.totalTime; protocols[2]!.lostPackets = h3.lostPackets
     running.value = false
     simulated.value = true
   }, 600)
