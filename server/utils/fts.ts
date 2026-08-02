@@ -32,8 +32,8 @@ export async function ftsUpdate(event: H3Event, slug: string, fields: {
     const rows = await queryD1<{ title: string; description: string; content: string }>(
       event, 'SELECT title, description, content FROM posts WHERE slug=?', [slug]
     )
-    if (!rows.length) return
     const cur = rows[0]
+    if (!cur) return
     const newTitle = fields.title ?? cur.title
     const newDesc = fields.description ?? cur.description
     const newContent = fields.content ?? cur.content

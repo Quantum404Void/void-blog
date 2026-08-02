@@ -1,10 +1,9 @@
 // server/api/admin/tags.get.ts — 全站标签使用频率统计
-import { verifyToken } from '../../utils/auth'
+// 鉴权由 server/middleware/admin-auth.ts 统一处理
 
 interface TagCount { tag: string; count: number }
 
 export default defineEventHandler(async (event) => {
-  await verifyToken(event)
   const rows = await queryD1<{ tags: string }>(
     event,
     `SELECT tags FROM posts WHERE draft=0`

@@ -35,7 +35,7 @@ export default defineEventHandler(async (event: H3Event) => {
      WHERE slug = ? AND ip = ? AND created_at > datetime('now', ?)`,
     [slug, ip, `-${RATE_LIMIT_SEC} seconds`]
   );
-  if (recent[0]?.c > 5) {
+  if ((recent[0]?.c ?? 0) > 5) {
     throw createError({ statusCode: 429, message: '评论过于频繁，请稍后再试' });
   }
 

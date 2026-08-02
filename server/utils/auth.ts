@@ -34,8 +34,8 @@ export async function verifyToken(secret: string, token: string): Promise<boolea
     const payload = token.slice(0, lastDot)
     const sig = token.slice(lastDot + 1)
     if (!(await hmacVerify(secret, payload, sig))) return false
-    const exp = parseInt(payload.split(':')[1])
-    return Date.now() / 1000 < exp
+    const exp = Number(payload.split(':')[1])
+    return Number.isFinite(exp) && Date.now() / 1000 < exp
   } catch { return false }
 }
 

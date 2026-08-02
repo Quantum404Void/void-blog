@@ -1,9 +1,8 @@
 // server/api/admin/rebuild-fts.post.ts — FTS5 全量重建
-import { verifyToken } from '../../utils/auth'
+// 鉴权由 server/middleware/admin-auth.ts 统一处理
 import { calcWordCount } from '../../utils/fts'
 
 export default defineEventHandler(async (event) => {
-  await verifyToken(event)
   const db = getD1(event)
 
   // 取所有文章
