@@ -41,19 +41,21 @@ export interface DayunStep {
 /**
  * 使用 lunar-javascript 精确排盘
  */
+/** 拆分干支字符串，lunar-javascript 保证返回两字，异常数据直接报错而非静默产生空干支 */
+function splitGanZhi(ganzhi: string): [stem: string, branch: string] {
+  const [stem, branch] = Array.from(ganzhi)
+  if (!stem || !branch) throw new Error(`无效干支：${ganzhi}`)
+  return [stem, branch]
+}
+
 export function calculateBazi(input: BaziInput): BaziResult {
   const solar = solarFromBranchHour(input.year, input.month, input.day, input.hour)
   const lunar = solar.getLunar()
 
-  const yearGZ = lunar.getYearInGanZhiExact()
-  const monthGZ = lunar.getMonthInGanZhiExact()
-  const dayGZ = lunar.getDayInGanZhiExact()
-  const timeGZ = lunar.getTimeInGanZhi()
-
-  const yearStem = yearGZ[0]; const yearBranch = yearGZ[1]
-  const monthStem = monthGZ[0]; const monthBranch = monthGZ[1]
-  const dayStem = dayGZ[0]; const dayBranch = dayGZ[1]
-  const hourStem = timeGZ[0]; const hourBranch = timeGZ[1]
+  const [yearStem, yearBranch] = splitGanZhi(lunar.getYearInGanZhiExact())
+  const [monthStem, monthBranch] = splitGanZhi(lunar.getMonthInGanZhiExact())
+  const [dayStem, dayBranch] = splitGanZhi(lunar.getDayInGanZhiExact())
+  const [hourStem, hourBranch] = splitGanZhi(lunar.getTimeInGanZhi())
 
   const pillars: BaziPillars = {
     year: { stem: yearStem, branch: yearBranch, stemId: `stem-${yearStem.toLowerCase()}`, branchId: `branch-${yearBranch}` },
@@ -92,32 +94,38 @@ export function calculateDayun(year: number, month: number, day: number, hour: n
   const forward = (isYangYear && gender === 'male') || (!isYangYear && gender === 'female')
   const startAge = Math.max(1, Math.min(10, Math.floor(((month - 1) * 30 + day) / 3)))
   const result: DayunStep[] = []
-  const stemOrder = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸']
-  const branchOrder = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']
-  let si = stemOrder.indexOf(monthStem), bi = branchOrder.indexOf(monthBranch)
+  const stemOrder = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'] as const
+  const branchOrder = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'] as const
+  let si = stemOrder.indexOf(monthStem as typeof stemOrder[number])
+  let bi = branchOrder.indexOf(monthBranch as typeof branchOrder[number])
   for (let step = 0; step < 8; step++) {
     if (step === 0) { forward ? (si=(si+1)%10,bi=(bi+1)%12) : (si=(si+9)%10,bi=(bi+11)%12) }
     else { forward ? (si=(si+1)%10,bi=(bi+1)%12) : (si=(si+9)%10,bi=(bi+11)%12) }
-    result.push({ startAge: startAge + step * 10, stem: stemOrder[si], branch: branchOrder[bi], pillar: `${stemOrder[si]}${branchOrder[bi]}` })
+    const stem = stemOrder[si]!, branch = branchOrder[bi]!
+    result.push({ startAge: startAge + step * 10, stem, branch, pillar: `${stem}${branch}` })
   }
   return result
 }
 
 export function baziResultToTags(result: BaziResult, input: BaziInput): SemanticTag[] {
   const tags: SemanticTag[] = []
-  const pillarKeys = ['year','month','day','hour'] as const
-  const pillarLabels = ['年柱','月柱','日柱','时柱']
-  for (let i = 0; i < 4; i++) {
-    const key = pillarKeys[i], label = pillarLabels[i]
-    const stemTag = HEAVENLY_STEMS.find(s => s.name === result.pillars[key].stem)
+  const pillars = [
+    { key: 'year', label: '年柱' },
+    { key: 'month', label: '月柱' },
+    { key: 'day', label: '日柱' },
+    { key: 'hour', label: '时柱' },
+  ] as const
+  for (const { key, label } of pillars) {
+    const pillar = result.pillars[key]
+    const stemTag = HEAVENLY_STEMS.find(s => s.name === pillar.stem)
     if (stemTag) tags.push({ ...stemTag, id: `pillar-${key}-${stemTag.id}`, attributes: { ...stemTag.attributes, pillar: label } })
-    const branchTag = EARTHLY_BRANCHES.find(b => b.name === result.pillars[key].branch)
+    const branchTag = EARTHLY_BRANCHES.find(b => b.name === pillar.branch)
     if (branchTag) tags.push({ ...branchTag, id: `pillar-${key}-${branchTag.id}`, attributes: { ...branchTag.attributes, pillar: label } })
     const tgTag = TEN_GODS.find(t => t.id === result.tenGods[key])
     if (tgTag) tags.push({ ...tgTag, id: `pillar-${key}-${tgTag.id}`, attributes: { ...tgTag.attributes, pillar: label } })
     const stageTag = TWELVE_STAGES.find(s => s.id === result.twelveStages[key])
     if (stageTag) tags.push({ ...stageTag, id: `pillar-${key}-${stageTag.id}`, attributes: { ...stageTag.attributes, pillar: label } })
-    const nayinTag = getNayin(result.pillars[key].stem, result.pillars[key].branch)
+    const nayinTag = getNayin(pillar.stem, pillar.branch)
     if (nayinTag) tags.push({ ...nayinTag, id: `pillar-${key}-${nayinTag.id}`, attributes: { ...nayinTag.attributes, pillar: label } })
   }
   tags.push({ id: `dayMaster-${result.dayMaster}`, name: result.dayMaster, category: 'dayMaster', attributes: { stem: result.dayMaster, gender: input.gender }, description: `日主为${result.dayMaster}` })

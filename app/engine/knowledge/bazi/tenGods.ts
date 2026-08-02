@@ -110,7 +110,9 @@ export const TEN_GODS: SemanticTag[] = [
  * element: "木" → 生 "火" → 生 "土" → 生 "金" → 生 "水" → 生 "木"
  * element: "木" → 克 "土" → 克 "水" → 克 "火" → 克 "金" → 克 "木"
  */
-const ELEMENT_CYCLE: Record<string, { generate: string; overcome: string }> = {
+type Element = '木' | '火' | '土' | '金' | '水'
+
+const ELEMENT_CYCLE: Record<Element, { generate: Element; overcome: Element }> = {
   '木': { generate: '火', overcome: '土' },
   '火': { generate: '土', overcome: '金' },
   '土': { generate: '金', overcome: '水' },
@@ -125,7 +127,7 @@ const ELEMENT_CYCLE: Record<string, { generate: string; overcome: string }> = {
  * @returns 十神 ID，如 "tenGod-shiShen"
  */
 export function determineTenGod(dayMaster: string, otherStem: string): string {
-  const HEAVENLY_STEMS_DATA: { name: string; element: string; yinYang: string }[] = [
+  const HEAVENLY_STEMS_DATA: { name: string; element: Element; yinYang: string }[] = [
     { name: '甲', element: '木', yinYang: '阳' },
     { name: '乙', element: '木', yinYang: '阴' },
     { name: '丙', element: '火', yinYang: '阳' },

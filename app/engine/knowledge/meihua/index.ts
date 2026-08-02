@@ -48,6 +48,7 @@ function meihuaCast(upperIdx: number, lowerIdx: number, changingYao: number): Sy
 
   const upperName = NUM_TO_TRIGRAM[upperIdx0]
   const lowerName = NUM_TO_TRIGRAM[lowerIdx0]
+  if (!upperName || !lowerName) throw new Error(`无效卦数：上${upperNum} 下${lowerNum}`)
 
   const matrix = createEmptyMatrix('meihua', `上${upperNum}(${upperName}) 下${lowerNum}(${lowerName}) 动爻${yaoNum}`)
 

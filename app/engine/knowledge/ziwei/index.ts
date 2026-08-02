@@ -49,23 +49,23 @@ export function calculateZiwei(year: number, month: number, day: number, hour: n
   const lDay = lunar.getDay()
 
   // 年干
-  const yearGZ = lunar.getYearInGanZhiExact()
-  const yearStem = yearGZ[0]
+  const yearStem = lunar.getYearInGanZhiExact()[0]
+  if (!yearStem) throw new Error('无法解析年干')
 
   // 命宫: 从寅宫起正月，顺数至生月，再逆数至生时
   const mingIdx = ((2 - lMonth + hour + 12) % 12 + 12) % 12
-  const mingBranch = ZODIAC[mingIdx]
+  const mingBranch = ZODIAC[mingIdx]!
 
   // 身宫: 从寅宫起正月，顺数至生月，再顺数至生时
   const shenIdx = ((2 + lMonth - 1 + hour) % 12 + 12) % 12
-  const shenBranch = ZODIAC[shenIdx]
+  const shenBranch = ZODIAC[shenIdx]!
 
   // 命宫天干 (五虎遁): 甲己→丙寅, 乙庚→戊寅, 丙辛→庚寅, 丁壬→壬寅, 戊癸→甲寅
   const stemStart: Record<string, number> = {'甲':2,'乙':4,'丙':6,'丁':8,'戊':0,'己':2,'庚':4,'辛':6,'壬':8,'癸':0}
   const stemBase = stemStart[yearStem] ?? 0
   const mingStemIdx = (stemBase + mingIdx) % 10
   const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸']
-  const mingStem = STEMS[mingStemIdx]
+  const mingStem = STEMS[mingStemIdx]!
 
   // 五行局: 命宫干支的纳音定五行局
   const nayinMap: Record<string, string> = {
@@ -109,15 +109,15 @@ export function calculateZiwei(year: number, month: number, day: number, hour: n
   // 构建十二宫
   const palaces: ZiweiPalace[] = []
   for (let i = 0; i < 12; i++) {
-    const branch = ZODIAC[(mingIdx + i) % 12]
+    const branch = ZODIAC[(mingIdx + i) % 12]!
     const stemIdx = (stemBase + (mingIdx + i)) % 10
-    const stem = STEMS[stemIdx]
+    const stem = STEMS[stemIdx]!
     const stars: string[] = []
-    const ziweiOffset = (i - ziweiPos + 12) % 12
-    const tianfuOffset = (i - tianfuPos + 12) % 12
-    if (ziweiStars[ziweiOffset]) stars.push(ziweiStars[ziweiOffset])
-    if (tianfuStars[tianfuOffset]) stars.push(tianfuStars[tianfuOffset])
-    palaces.push({ name: PALACE_NAMES[i], branch, stem, stars })
+    const ziwei = ziweiStars[(i - ziweiPos + 12) % 12]
+    const tianfu = tianfuStars[(i - tianfuPos + 12) % 12]
+    if (ziwei) stars.push(ziwei)
+    if (tianfu) stars.push(tianfu)
+    palaces.push({ name: PALACE_NAMES[i]!, branch, stem, stars })
   }
 
   return { mingGong: { branch: mingBranch, stem: mingStem }, shenGong: { branch: shenBranch, stem: mingStem }, fiveElement, palaces }

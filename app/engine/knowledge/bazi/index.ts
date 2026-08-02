@@ -30,31 +30,28 @@ export function computeBaziMatrix(input: BaziInput): SymbolMatrix {
   const matrix = createEmptyMatrix('bazi', inputSummary)
 
   // L0: 基础符号（天干地支）
-  const pillarNames = ['年柱', '月柱', '日柱', '时柱']
-  const pillarKeys = ['year', 'month', 'day', 'hour'] as const
-  const pillarStems = [
-    result.pillars.year.stem, result.pillars.month.stem,
-    result.pillars.day.stem, result.pillars.hour.stem
-  ]
-  const pillarBranches = [
-    result.pillars.year.branch, result.pillars.month.branch,
-    result.pillars.day.branch, result.pillars.hour.branch
-  ]
+  const pillars = [
+    { key: 'year', name: '年柱' },
+    { key: 'month', name: '月柱' },
+    { key: 'day', name: '日柱' },
+    { key: 'hour', name: '时柱' },
+  ] as const
 
-  for (let i = 0; i < 4; i++) {
+  for (const { key, name } of pillars) {
+    const { stem, branch } = result.pillars[key]
     matrix.symbols.push({
-      id: `stem-${pillarStems[i].toLowerCase()}`,
-      name: pillarStems[i],
+      id: `stem-${stem.toLowerCase()}`,
+      name: stem,
       category: 'stem',
-      position: `${pillarNames[i]}/天干`,
-      attributes: { pillar: pillarKeys[i] }
+      position: `${name}/天干`,
+      attributes: { pillar: key }
     })
     matrix.symbols.push({
-      id: `branch-${pillarBranches[i]}`,
-      name: pillarBranches[i],
+      id: `branch-${branch}`,
+      name: branch,
       category: 'branch',
-      position: `${pillarNames[i]}/地支`,
-      attributes: { pillar: pillarKeys[i] }
+      position: `${name}/地支`,
+      attributes: { pillar: key }
     })
   }
 

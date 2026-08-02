@@ -30,7 +30,8 @@ export function qimenCast(year: number, month: number, day: number, hour: number
   const isYangDun = ['冬至','小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种'].some(j => jieQi.includes(j))
 
   // 符头定局数 (简化: 用日干支序号)
-  const dayStem = dayGZ[0]; const dayBranch = dayGZ[1]
+  const [dayStem, dayBranch] = Array.from(dayGZ)
+  if (!dayStem || !dayBranch) throw new Error(`无效日干支：${dayGZ}`)
   const stemIdx = STEMS.indexOf(dayStem)
   const branchIdx = BRANCHES.indexOf(dayBranch)
   const juNum = ((stemIdx + branchIdx) % 9) + 1
@@ -42,8 +43,8 @@ export function qimenCast(year: number, month: number, day: number, hour: number
   for (let i = 0; i < 9; i++) {
     const starIdx = isYangDun ? ((i + juNum - 1) % 9) : ((i - juNum + 1 + 9) % 9)
     matrix.symbols.push({
-      id: `qm-g${i}`, name: EARTH_PLATE[i], category: 'qimen', position: `宫${i+1}`,
-      attributes: { star: STAR_NAMES[starIdx], door: DOOR_NAMES[starIdx], god: isYangDun ? GOD_NAMES_YANG[i%8] : GOD_NAMES_YIN[i%8] }
+      id: `qm-g${i}`, name: EARTH_PLATE[i]!, category: 'qimen', position: `宫${i+1}`,
+      attributes: { star: STAR_NAMES[starIdx]!, door: DOOR_NAMES[starIdx]!, god: (isYangDun ? GOD_NAMES_YANG[i%8] : GOD_NAMES_YIN[i%8])! }
     })
   }
 
@@ -55,6 +56,7 @@ export function qimenCast(year: number, month: number, day: number, hour: number
 
   // 时干落宫
   const timeStem = timeGZ[0]
+  if (!timeStem) throw new Error(`无效时干支：${timeGZ}`)
   const timeStemIdx = STEMS.indexOf(timeStem)
   matrix.interpretations.push({
     id: 'qm-time', ruleId: 'qm-time', category: 'general',

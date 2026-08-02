@@ -86,9 +86,9 @@ export function chengguCalculate(yearPillar: string, month: number, day: number,
   const matrix = createEmptyMatrix('chenggu', `年${yearPillar} 月${month} 日${day} 时${hour}`)
 
   const yw = YEAR_WEIGHT[yearPillar] ?? 5
-  const mw = MONTH_WEIGHT[(month - 1 + 12) % 12]
-  const dw = DAY_WEIGHT[(day - 1 + 30) % 30]
-  const hw = HOUR_WEIGHT[hour % 12]
+  const mw = MONTH_WEIGHT[(month - 1 + 12) % 12] ?? 0
+  const dw = DAY_WEIGHT[(day - 1 + 30) % 30] ?? 0
+  const hw = HOUR_WEIGHT[hour % 12] ?? 0
 
   const totalQian = yw + mw + dw + hw
   const liang = Math.floor(totalQian / 10)

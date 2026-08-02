@@ -48,7 +48,7 @@ export function getZodiacByDate(month: number, day: number): MatrixSymbol {
         return ZODIAC_SIGNS.find(s => s.id === range.id)!
     }
   }
-  return ZODIAC_SIGNS[0]
+  return ZODIAC_SIGNS[0]!
 }
 
 function seededRandom(seed: number): () => number {
@@ -87,11 +87,13 @@ export function generateHoroscope(month: number, day: number, seed?: number): Sy
   matrix.metadata.seed = seedVal
   matrix.symbols.push(sign)
 
-  for (const cat of ['career', 'wealth', 'love', 'health']) {
-    const templates = CATEGORY_TEMPLATES[cat]
+  for (const cat of ['career', 'wealth', 'love', 'health'] as const) {
+    const templates = CATEGORY_TEMPLATES[cat] ?? []
+    const text = templates[Math.floor(rand() * templates.length)]
+    if (!text) continue
     matrix.interpretations.push({
-      id: `astro-${cat}-${seedVal}`, ruleId: `astro-${cat}`, category: cat as 'career' | 'wealth' | 'love' | 'health',
-      text: templates[Math.floor(rand() * templates.length)],
+      id: `astro-${cat}-${seedVal}`, ruleId: `astro-${cat}`, category: cat,
+      text,
       tone: 'neutral', weight: 50
     })
   }

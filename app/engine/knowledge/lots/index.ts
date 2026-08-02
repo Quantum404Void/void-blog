@@ -41,6 +41,7 @@ export function drawLot(seed?: number): SymbolMatrix {
   const rand = seededRandom(seedVal)
   const idx = Math.floor(rand() * GUANYIN_LOTS.length)
   const lot = GUANYIN_LOTS[idx]
+  if (!lot) throw new Error('观音灵签数据缺失')
   const matrix = createEmptyMatrix('lots', `观音灵签 第${lot.number}签`)
 
   matrix.symbols.push({

@@ -125,35 +125,38 @@ export function checkShensha(params: {
   yearStem: string; monthStem: string; hourStem: string; jiaziIndex: number
 }): SemanticTag[] {
   const r: SemanticTag[] = []
-  const br = [params.yearBranch, params.monthBranch, params.dayBranch, params.hourBranch]
-  const st = [params.yearStem, params.monthStem, params.dayStem, params.hourStem]
-  const pn = ['年', '月', '日', '时']
+  const pillars = [
+    { branch: params.yearBranch, stem: params.yearStem, name: '年' },
+    { branch: params.monthBranch, stem: params.monthStem, name: '月' },
+    { branch: params.dayBranch, stem: params.dayStem, name: '日' },
+    { branch: params.hourBranch, stem: params.hourStem, name: '时' },
+  ]
   const dayPillar = `${params.dayStem}${params.dayBranch}`
+  const BRANCH_CYCLE = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']
 
   // 吉神检测
-  for (let i = 0; i < 4; i++) {
-    if (TIAN_YI_MAP[params.dayStem]?.includes(br[i])) pushTag(r, 'shensha-tianYiGuiRen', pn[i])
-    if (br[i] === WEN_CHANG_MAP[params.dayStem]) pushTag(r, 'shensha-wenChang', pn[i])
-    if (br[i] === YI_MA_MAP[params.yearBranch] || br[i] === YI_MA_MAP[params.dayBranch]) pushTag(r, 'shensha-yiMa', pn[i])
-    if (br[i] === TAO_HUA_MAP[params.yearBranch] || br[i] === TAO_HUA_MAP[params.dayBranch]) pushTag(r, 'shensha-taoHua', pn[i])
-    if (br[i] === JIANG_XING_MAP[params.dayBranch]) pushTag(r, 'shensha-jiangXing', pn[i])
-    if (br[i] === HUA_GAI_MAP[params.dayBranch]) pushTag(r, 'shensha-huaGai', pn[i])
-    if (br[i] === YANG_REN_MAP[params.dayStem]) pushTag(r, 'shensha-yangRen', pn[i])
-    if (st[i] === TIAN_DE_MAP[params.monthBranch]) pushTag(r, 'shensha-tianDe', pn[i])
-    if (st[i] === YUE_DE_MAP[params.monthBranch]) pushTag(r, 'shensha-yueDeGuiRen', pn[i])
-    if (br[i] === HONG_LUAN_MAP[params.yearBranch]) pushTag(r, 'shensha-hongLuan', pn[i])
+  for (const { branch, stem, name } of pillars) {
+    if (TIAN_YI_MAP[params.dayStem]?.includes(branch)) pushTag(r, 'shensha-tianYiGuiRen', name)
+    if (branch === WEN_CHANG_MAP[params.dayStem]) pushTag(r, 'shensha-wenChang', name)
+    if (branch === YI_MA_MAP[params.yearBranch] || branch === YI_MA_MAP[params.dayBranch]) pushTag(r, 'shensha-yiMa', name)
+    if (branch === TAO_HUA_MAP[params.yearBranch] || branch === TAO_HUA_MAP[params.dayBranch]) pushTag(r, 'shensha-taoHua', name)
+    if (branch === JIANG_XING_MAP[params.dayBranch]) pushTag(r, 'shensha-jiangXing', name)
+    if (branch === HUA_GAI_MAP[params.dayBranch]) pushTag(r, 'shensha-huaGai', name)
+    if (branch === YANG_REN_MAP[params.dayStem]) pushTag(r, 'shensha-yangRen', name)
+    if (stem === TIAN_DE_MAP[params.monthBranch]) pushTag(r, 'shensha-tianDe', name)
+    if (stem === YUE_DE_MAP[params.monthBranch]) pushTag(r, 'shensha-yueDeGuiRen', name)
+    if (branch === HONG_LUAN_MAP[params.yearBranch]) pushTag(r, 'shensha-hongLuan', name)
     // 天喜为红鸾对冲
     const hl = HONG_LUAN_MAP[params.yearBranch]
     if (hl) {
-      const hlIdx = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'].indexOf(hl)
-      const txIdx = (hlIdx + 6) % 12
-      if (br[i] === ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][txIdx]) pushTag(r, 'shensha-tianXi', pn[i])
+      const txIdx = (BRANCH_CYCLE.indexOf(hl) + 6) % 12
+      if (branch === BRANCH_CYCLE[txIdx]) pushTag(r, 'shensha-tianXi', name)
     }
   }
 
   // 空亡
   for (const kw of KONG_WANG_MAP[Math.floor(params.jiaziIndex / 10)] || []) {
-    for (let i = 0; i < 4; i++) if (br[i] === kw) pushTag(r, 'shensha-kongWang', pn[i])
+    for (const { branch, name } of pillars) if (branch === kw) pushTag(r, 'shensha-kongWang', name)
   }
 
   // 日柱特殊神煞
@@ -163,7 +166,7 @@ export function checkShensha(params: {
 
   // 辰戌为天罗地网
   let chenCount = 0, xuCount = 0
-  for (const b of br) { if (b === '辰') chenCount++; if (b === '戌') xuCount++ }
+  for (const { branch } of pillars) { if (branch === '辰') chenCount++; if (branch === '戌') xuCount++ }
   if (chenCount >= 2 || xuCount >= 2) pushTag(r, 'shensha-tianLuoDiWang', '四柱')
 
   return r

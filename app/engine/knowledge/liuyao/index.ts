@@ -74,8 +74,9 @@ export function liuyaoCast(seed?: number): SymbolMatrix {
 
   // 爻象
   const yaoNames = ['初爻','二爻','三爻','四爻','五爻','上爻']
-  for (let i = 0; i < 6; i++) {
-    matrix.symbols.push({ id: `yao-${i}`, name: yaoNames[i], category: 'yao', position: yaoNames[i], attributes: { value: String(yaoValues[i]), name: yaoName(yaoValues[i]), changing: String(yaoChanges(yaoValues[i])) } })
+  for (const [i, name] of yaoNames.entries()) {
+    const value = yaoValues[i]!
+    matrix.symbols.push({ id: `yao-${i}`, name, category: 'yao', position: name, attributes: { value: String(value), name: yaoName(value), changing: String(yaoChanges(value)) } })
   }
 
   // 本卦

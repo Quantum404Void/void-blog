@@ -17,7 +17,10 @@ function seededRandom(seed: number): () => number {
 
 function shuffle<T>(arr: T[], rand: () => number): T[] {
   const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] }
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[a[i], a[j]] = [a[j]!, a[i]!]
+  }
   return a
 }
 
@@ -39,8 +42,7 @@ export function drawTarot(input: TarotInput, seed?: number): SymbolMatrix {
         cardId: shuffled[i]?.id ?? 'tarot-0', reversed: rand() > 0.5, position: pos.id
       }))
 
-  for (let i = 0; i < cards.length; i++) {
-    const draw = cards[i]
+  for (const [i, draw] of cards.entries()) {
     const card = findCard(draw.cardId)
     const pos = spread.positions[i]
     if (!card) continue
@@ -48,7 +50,7 @@ export function drawTarot(input: TarotInput, seed?: number): SymbolMatrix {
     matrix.symbols.push({
       id: card.id, name: card.name, category: card.category,
       position: pos?.label ?? draw.position,
-      attributes: { reversed: String(draw.reversed), number: card.attributes.number || '', element: card.attributes.element }
+      attributes: { reversed: String(draw.reversed), number: card.attributes.number || '', element: card.attributes.element ?? '' }
     })
 
     matrix.derivedTags.push({
@@ -56,7 +58,7 @@ export function drawTarot(input: TarotInput, seed?: number): SymbolMatrix {
       name: draw.reversed ? `${card.name}(逆位)` : `${card.name}(正位)`,
       category: draw.reversed ? 'reversed' : 'upright',
       position: pos?.label ?? draw.position, derivedFrom: [card.id],
-      attributes: { element: card.attributes.element }
+      attributes: { element: card.attributes.element ?? '' }
     })
 
     const prefix = draw.reversed ? '（逆位）' : ''

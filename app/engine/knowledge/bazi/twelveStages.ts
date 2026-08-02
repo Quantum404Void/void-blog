@@ -168,5 +168,5 @@ export function getTwelveStage(stem: string, branch: string): string {
     offset = (startIdx - branchIdx + 12) % 12
   }
 
-  return stageIds[offset]
+  return stageIds[offset] ?? ''
 }

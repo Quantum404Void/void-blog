@@ -23,20 +23,21 @@ export function daliurenCast(year: number, month: number, day: number, hour: num
   const solar = Solar.fromYmd(year, month, day)
   const lunar = solar.getLunar()
   const dayGZ = lunar.getDayInGanZhiExact()
-  const dayStem = dayGZ[0]; const dayBranch = dayGZ[1]
+  const [dayStem, dayBranch] = Array.from(dayGZ)
+  if (!dayStem || !dayBranch) throw new Error(`无效日干支：${dayGZ}`)
 
   // 月将: 根据中气确定
-  const yueJiang = MONTH_JIANG[(month - 1 + 12) % 12]
+  const yueJiang = MONTH_JIANG[(month - 1 + 12) % 12]!
   const yueJiangIdx = BRANCHES.indexOf(yueJiang)
 
   // 占时 (时辰)
-  const zhanShi = BRANCHES[hour % 12]
+  const zhanShi = BRANCHES[hour % 12]!
   const zhanShiIdx = BRANCHES.indexOf(zhanShi)
 
   // 天盘: 月将加占时 → 天盘[占时]=月将, 顺排
   const skyPlate: string[] = []
   for (let i = 0; i < 12; i++) {
-    skyPlate[(zhanShiIdx + i) % 12] = BRANCHES[(yueJiangIdx + i) % 12]
+    skyPlate[(zhanShiIdx + i) % 12] = BRANCHES[(yueJiangIdx + i) % 12]!
   }
 
   // 四课: 日干支
@@ -44,12 +45,12 @@ export function daliurenCast(year: number, month: number, day: number, hour: num
   const dayBranchIdx = BRANCHES.indexOf(dayBranch)
 
   // 四课简化表示
-  const ke1_upper = skyPlate[dayStemIdx % 12]
-  const ke1_lower = BRANCHES[dayStemIdx % 12]
-  const ke2_upper = skyPlate[BRANCHES.indexOf(ke1_upper)]
-  const ke3_upper = skyPlate[dayBranchIdx]
-  const ke3_lower = BRANCHES[dayBranchIdx]
-  const ke4_upper = skyPlate[BRANCHES.indexOf(ke3_upper)]
+  const ke1_upper = skyPlate[dayStemIdx % 12]!
+  const ke1_lower = BRANCHES[dayStemIdx % 12]!
+  const ke2_upper = skyPlate[BRANCHES.indexOf(ke1_upper)]!
+  const ke3_upper = skyPlate[dayBranchIdx]!
+  const ke3_lower = BRANCHES[dayBranchIdx]!
+  const ke4_upper = skyPlate[BRANCHES.indexOf(ke3_upper)]!
 
   const matrix = createEmptyMatrix('daliuren', `大六壬 ${dayGZ}日${zhanShi}时`)
   matrix.symbols.push(

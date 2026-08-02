@@ -50,7 +50,7 @@ function calcMingGua(year: number, gender: 'male' | 'female'): string {
   const map: Record<number, string> = { 1:'坎',2:'坤',3:'震',4:'巽',5:'中',6:'乾',7:'兑',8:'艮',9:'离' }
   // 中5: 男寄坤, 女寄艮
   if (num === 5) return gender === 'male' ? '坤' : '艮'
-  return map[num]
+  return map[num] ?? '坎'
 }
 
 export function fengshuiAnalyze(year: number, gender: 'male' | 'female'): SymbolMatrix {
@@ -64,7 +64,7 @@ export function fengshuiAnalyze(year: number, gender: 'male' | 'female'): Symbol
   for (let i = 1; i <= 9; i++) {
     if (i === 5) continue
     const star = YOU_NIAN[mingGua]?.[i] ?? '伏位'
-    const dir = PALACE_NAMES[i - 1]
+    const dir = PALACE_NAMES[i - 1]!
     matrix.symbols.push({ id: `fs-g${i}`, name: `${dir}(${star})`, category: 'fengshui', position: dir, attributes: { star, direction: dir } })
   }
 
