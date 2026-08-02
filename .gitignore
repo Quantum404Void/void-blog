@@ -8,3 +8,4 @@ node_modules/
 *.py
 /types/*.d.ts.bak
 screenshots/
+/worker-configuration.d.ts
