@@ -25,16 +25,18 @@ function getColor(v: number): TileColor {
 }
 
 // ── pure game logic ───────────────────────────────────────────
-function moveLeft(row: number[]): { row: number[]; score: number } {
+type Row4 = number[]
+
+function moveLeft(row: Row4): { row: Row4; score: number } {
   const f = row.filter(x => x !== 0)
   let score = 0
   for (let i = 0; i < f.length - 1; i++) {
-    if (f[i] === f[i + 1]) { f[i] *= 2; score += f[i]; f.splice(i + 1, 1); i++ }
+    if (f[i] === f[i + 1]) { f[i] = f[i]! * 2; score += f[i]!; f.splice(i + 1, 1); i++ }
   }
   while (f.length < 4) f.push(0)
   return { row: f, score }
 }
-function transpose(g: number[][]): number[][] { return g[0].map((_, c) => g.map(r => r[c])) }
+function transpose(g: number[][]): number[][] { return g[0]!.map((_, c) => g.map(r => r[c]!)) }
 function reverseRows(g: number[][]): number[][] { return g.map(r => [...r].reverse()) }
 
 function applyMove(g: number[][], dir: Dir): { grid: number[][]; score: number; moved: boolean } {
@@ -61,20 +63,21 @@ function addRandom(g: number[][]): number[][] {
   const empty: [number, number][] = []
   for (let r = 0; r < 4; r++)
     for (let c = 0; c < 4; c++)
-      if (g[r][c] === 0) empty.push([r, c])
+      if (g[r]![c] === 0) empty.push([r, c])
   if (!empty.length) return g
-  const [r, c] = empty[Math.floor(Math.random() * empty.length)]
+  const [r, c] = empty[Math.floor(Math.random() * empty.length)]!
   const ng = g.map(row => [...row])
-  ng[r][c] = Math.random() < 0.9 ? 2 : 4
+  ng[r]![c] = Math.random() < 0.9 ? 2 : 4
   return ng
 }
 
 function isGameOver(g: number[][]): boolean {
   for (let r = 0; r < 4; r++)
     for (let c = 0; c < 4; c++) {
-      if (g[r][c] === 0) return false
-      if (c < 3 && g[r][c] === g[r][c + 1]) return false
-      if (r < 3 && g[r][c] === g[r + 1][c]) return false
+      const v = g[r]![c]
+      if (v === 0) return false
+      if (c < 3 && v === g[r]![c + 1]) return false
+      if (r < 3 && v === g[r + 1]![c]) return false
     }
   return true
 }
@@ -106,7 +109,7 @@ function doMove(dir: Dir) {
   const mk = new Set<string>()
   for (let r = 0; r < 4; r++)
     for (let c = 0; c < 4; c++)
-      if (ng[r][c] !== 0 && ng[r][c] !== grid.value[r][c])
+      if (ng[r]![c] !== 0 && ng[r]![c] !== grid.value[r]![c])
         mk.add(`${r}-${c}`)
   mergedKeys.value = mk
 
@@ -133,9 +136,15 @@ function onKey(e: KeyboardEvent) {
 }
 
 let tx = 0, ty = 0
-function onTouchStart(e: TouchEvent) { tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY }
+function onTouchStart(e: TouchEvent) {
+  const t = e.changedTouches[0]
+  if (!t) return
+  tx = t.clientX; ty = t.clientY
+}
 function onTouchEnd(e: TouchEvent) {
-  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty
+  const t = e.changedTouches[0]
+  if (!t) return
+  const dx = t.clientX - tx, dy = t.clientY - ty
   if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return
   doMove(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'))
 }

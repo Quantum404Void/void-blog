@@ -84,12 +84,12 @@ const posts = computed(() => postsData.value || [])
 // Date range
 const dateRange = computed(() => {
   const dates = posts.value
-    .map((p: PostSummary) => p.pub_date ? new Date(p.date) : null)
-    .filter(Boolean)
+    .filter((p: PostSummary) => p.pub_date)
+    .map((p: PostSummary) => new Date(p.pub_date))
     .sort((a: Date, b: Date) => a.getTime() - b.getTime())
   if (dates.length < 2) return null
   const fmt = (d: Date) => `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}`
-  return { earliest: fmt(dates[0]), latest: fmt(dates[dates.length - 1]) }
+  return { earliest: fmt(dates[0]!), latest: fmt(dates[dates.length - 1]!) }
 })
 
 // Related tags (co-occurring in same posts)

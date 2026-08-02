@@ -312,17 +312,20 @@ interface StatsData {
 const { data: statsRaw } = await useFetch('/api/stats', { default: () => ({}) })
 const stats = computed(() => (statsRaw.value ?? {}) as StatsData)
 
-const overviewCards = computed(() => [
-  { label: '总文章数', value: (postsData.value || []).length, color: 'neon-cyan' },
-  { label: '标签数量', value: stats.value.totalTags ?? 0, color: 'neon-green' },
-  { label: '写作年份', value: Object.keys(stats.value.byYear ?? {}).length, color: 'neon-purple' },
-  { label: '创作开始', value: (postsData.value || []).length ? (postsData.value || [])[(postsData.value || []).length - 1].pub_date.slice(0, 4) : '-', color: 'neon-pink' },
-])
+const overviewCards = computed(() => {
+  const posts = postsData.value || []
+  return [
+    { label: '总文章数', value: posts.length, color: 'neon-cyan' },
+    { label: '标签数量', value: stats.value.totalTags ?? 0, color: 'neon-green' },
+    { label: '写作年份', value: Object.keys(stats.value.byYear ?? {}).length, color: 'neon-purple' },
+    { label: '创作开始', value: posts.at(-1)?.pub_date?.slice(0, 4) ?? '-', color: 'neon-pink' },
+  ]
+})
 
 const yearPlotData = computed(() => {
   const byYear = stats.value.byYear ?? {}
   const neon = ['#00d4ff', '#39ff14', '#b44cff', '#ff2d78', '#ffa500']
-  return Object.keys(byYear).sort().map((y, i) => ({ label: y, value: byYear[y], color: neon[i % neon.length] }))
+  return Object.keys(byYear).sort().map((y, i) => ({ label: y, value: byYear[y] ?? 0, color: neon[i % neon.length]! }))
 })
 
 const tagPlotData = computed(() => {

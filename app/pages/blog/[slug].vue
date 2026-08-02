@@ -352,12 +352,12 @@ const prevPost = computed(() => curIdx.value >= 0 && curIdx.value < allPosts.val
 const nextPost = computed(() => curIdx.value > 0 ? allPosts.value[curIdx.value - 1] : null)
 
 // prev/next prefetch
-useHead(computed(() => ({
+useHead(() => ({
   link: [
-    ...(prevPost.value ? [{ rel: 'prefetch', href: `/blog/${prevPost.value.slug}` }] : []),
-    ...(nextPost.value ? [{ rel: 'prefetch', href: `/blog/${nextPost.value.slug}` }] : []),
-  ]
-})))
+    ...(prevPost.value ? [{ rel: 'prefetch' as const, href: `/blog/${prevPost.value.slug}` }] : []),
+    ...(nextPost.value ? [{ rel: 'prefetch' as const, href: `/blog/${nextPost.value.slug}` }] : []),
+  ],
+}))
 
 // 浏览量 + 点赞
 const postViews = shallowRef(0)

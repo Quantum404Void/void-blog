@@ -5,14 +5,15 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // ── difficulty presets ────────────────────────────────────────
 interface Difficulty { rows: number; cols: number; mines: number; label: string }
-const DIFFS: Record<string, Difficulty> = {
+const DIFFS = {
   easy:   { rows: 9,  cols: 9,  mines: 10, label: '初级 9×9/10' },
   medium: { rows: 16, cols: 16, mines: 40, label: '中级 16×16/40' },
   hard:   { rows: 16, cols: 30, mines: 99, label: '高级 30×16/99' },
-}
+} satisfies Record<string, Difficulty>
+type DiffKey = keyof typeof DIFFS
 
 // ── state ─────────────────────────────────────────────────────
-const diffKey   = ref('easy')
+const diffKey   = ref<DiffKey>('easy')
 const diff      = computed(() => DIFFS[diffKey.value])
 
 type CellState = 'hidden' | 'revealed' | 'flagged'
@@ -26,8 +27,15 @@ const remaining = ref(0)
 let   timer: ReturnType<typeof setInterval> | null = null
 const faceMap   = { playing: '🙂', won: '😎', dead: '😵' }
 
+/** 网格坐标访问器；调用点始终在已校验的边界内，缺失即为逻辑错误 */
+function at(r: number, c: number): Cell {
+  const cell = cells.value[r]?.[c]
+  if (!cell) throw new Error(`格子越界：(${r}, ${c})`)
+  return cell
+}
+
 // ── init ──────────────────────────────────────────────────────
-function startGame(key?: string) {
+function startGame(key?: DiffKey) {
   if (key) diffKey.value = key
   const { rows, cols, mines } = diff.value
   cells.value = Array.from({ length: rows }, () =>
@@ -48,22 +56,22 @@ function placeMines(er: number, ec: number) {
         positions.push([r, c])
   // Fisher-Yates shuffle, pick first `mines`
   for (let i = positions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [positions[i], positions[j]] = [positions[j], positions[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[positions[i], positions[j]] = [positions[j]!, positions[i]!]
   }
-  for (let i = 0; i < mines; i++) cells.value[positions[i][0]][positions[i][1]].mine = true
+  for (const [r, c] of positions.slice(0, mines)) at(r, c).mine = true
 
   // calc adjacency
   for (let r = 0; r < rows; r++)
     for (let c = 0; c < cols; c++) {
-      if (cells.value[r][c].mine) continue
+      if (at(r, c).mine) continue
       let cnt = 0
       for (let dr = -1; dr <= 1; dr++)
         for (let dc = -1; dc <= 1; dc++) {
           const nr = r + dr, nc = c + dc
-          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && cells.value[nr][nc].mine) cnt++
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && at(nr, nc).mine) cnt++
         }
-      cells.value[r][c].adj = cnt
+      at(r, c).adj = cnt
     }
 }
 
@@ -73,14 +81,14 @@ function floodReveal(sr: number, sc: number) {
   const queue: [number, number][] = [[sr, sc]]
   while (queue.length) {
     const [r, c] = queue.shift()!
-    const cell = cells.value[r][c]
+    const cell = at(r, c)
     if (cell.state !== 'hidden') continue
     cell.state = 'revealed'
     if (cell.adj === 0 && !cell.mine) {
       for (let dr = -1; dr <= 1; dr++)
         for (let dc = -1; dc <= 1; dc++) {
           const nr = r + dr, nc = c + dc
-          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && cells.value[nr][nc].state === 'hidden')
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && at(nr, nc).state === 'hidden')
             queue.push([nr, nc])
         }
     }
@@ -94,7 +102,7 @@ function checkWin(): boolean {
 // ── event handlers ────────────────────────────────────────────
 function handleClick(r: number, c: number) {
   if (status.value !== 'playing') return
-  const cell = cells.value[r][c]
+  const cell = at(r, c)
   if (cell.state !== 'hidden') return
 
   if (firstClick.value) {
@@ -126,7 +134,7 @@ function handleClick(r: number, c: number) {
 function handleRightClick(e: MouseEvent, r: number, c: number) {
   e.preventDefault()
   if (status.value !== 'playing') return
-  const cell = cells.value[r][c]
+  const cell = at(r, c)
   if (cell.state === 'revealed') return
   if (cell.state === 'flagged') { cell.state = 'hidden'; remaining.value++ }
   else { cell.state = 'flagged'; remaining.value-- }
@@ -134,7 +142,7 @@ function handleRightClick(e: MouseEvent, r: number, c: number) {
 
 // chord: click on revealed number reveals neighbors if flag count matches
 function handleChord(r: number, c: number) {
-  const cell = cells.value[r][c]
+  const cell = at(r, c)
   if (cell.state !== 'revealed' || cell.adj === 0) return
   const { rows, cols } = diff.value
   let flags = 0
@@ -143,8 +151,9 @@ function handleChord(r: number, c: number) {
     for (let dc = -1; dc <= 1; dc++) {
       const nr = r + dr, nc = c + dc
       if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-        if (cells.value[nr][nc].state === 'flagged') flags++
-        else if (cells.value[nr][nc].state === 'hidden') neighbors.push([nr, nc])
+        const neighbor = at(nr, nc)
+        if (neighbor.state === 'flagged') flags++
+        else if (neighbor.state === 'hidden') neighbors.push([nr, nc])
       }
     }
   if (flags === cell.adj) neighbors.forEach(([nr, nc]) => handleClick(nr, nc))

@@ -37,18 +37,18 @@
 
       <!-- Post list -->
       <div ref="listParent" class="blog-list">
-        <div v-for="year in years" :key="year" class="mb-16 year-block">
+        <div v-for="group in yearGroups" :key="group.year" class="mb-16 year-block">
           <!-- Year divider -->
           <div class="flex items-center gap-4 mb-8">
-            <span class="font-mono text-xs font-bold text-[var(--color-neon-cyan)] tracking-[0.2em] uppercase">{{ year }}</span>
+            <span class="font-mono text-xs font-bold text-[var(--color-neon-cyan)] tracking-[0.2em] uppercase">{{ group.year }}</span>
             <span class="flex-1 h-px bg-gradient-to-r from-[rgba(0,212,255,0.25)] to-transparent"></span>
-            <span class="font-mono text-[10px] text-[var(--color-text-muted)]">{{ byYear[year].length }} 篇</span>
+            <span class="font-mono text-[10px] text-[var(--color-text-muted)]">{{ group.posts.length }} 篇</span>
           </div>
 
           <!-- Cards — ssvex 大卡片风格 -->
           <div class="space-y-0 year-section-list">
             <NuxtLink
-              v-for="post in byYear[year]"
+              v-for="post in group.posts"
               :key="post.slug"
               :href="`/blog/${post.slug}`"
               class="post-scroll-item group block border-b border-[var(--color-void-border)] py-8 last:border-0 transition-all duration-200 hover:border-[rgba(0,212,255,0.15)]"
@@ -135,14 +135,17 @@ function formatFullDate(date: string) {
 }
 
 const byYear = computed(() => {
-  const map: Record<string, PostSummary[]> = {}
+  const map = new Map<string, PostSummary[]>()
   for (const p of filtered.value) {
     const y = p.pub_date.slice(0, 4)
-    ;(map[y] = map[y] || []).push(p)
+    const bucket = map.get(y)
+    if (bucket) bucket.push(p)
+    else map.set(y, [p])
   }
   return map
 })
-const years = computed(() => Object.keys(byYear.value).sort((a, b) => Number(b) - Number(a)))
+const years = computed(() => [...byYear.value.keys()].sort((a, b) => Number(b) - Number(a)))
+const yearGroups = computed(() => years.value.map(year => ({ year, posts: byYear.value.get(year) ?? [] })))
 
 const [listParent] = useAutoAnimate({ duration: 200 })
 const mainRef = useTemplateRef<HTMLElement>('mainRef')

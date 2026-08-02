@@ -66,8 +66,8 @@ function render() {
   }
 
   // bar/barh 明确声明 band scale 避免字符串数字警告
-  const xBand = props.type === 'bar' ? { ...baseOpts.x, type: 'band' } : baseOpts.x
-  const yBand = props.type === 'barh' ? { ...baseOpts.y, type: 'band' } : baseOpts.y
+  const xBand = props.type === 'bar' ? { ...baseOpts.x, type: 'band' as const } : baseOpts.x
+  const yBand = props.type === 'barh' ? { ...baseOpts.y, type: 'band' as const } : baseOpts.y
 
   if (props.type === 'barh') {
     marks = [
@@ -135,9 +135,9 @@ function render() {
   if (svg) {
     svg.style.overflow = 'visible'
     // 修正 tick/label 颜色
-    svg.querySelectorAll('text').forEach(t => { (t as HTMLElement).style.fill = DARK.text })
-    svg.querySelectorAll('line, path[class*="tick"]').forEach((el) => { (el as HTMLElement).style.stroke = DARK.tick })
-    svg.querySelectorAll('[class*="grid"] line').forEach((el) => { (el as HTMLElement).style.stroke = DARK.grid })
+    svg.querySelectorAll('text').forEach(t => { t.style.fill = DARK.text })
+    svg.querySelectorAll<SVGElement>('line, path[class*="tick"]').forEach((el) => { el.style.stroke = DARK.tick })
+    svg.querySelectorAll<SVGElement>('[class*="grid"] line').forEach((el) => { el.style.stroke = DARK.grid })
   }
 
   container.value.appendChild(plot)

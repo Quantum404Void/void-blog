@@ -106,17 +106,18 @@ function triggerMatrix() {
     ctx.fillStyle = 'rgba(0,0,0,0.05)'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     for (let i = 0; i < cols; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)]
+      const char = chars[Math.floor(Math.random() * chars.length)]!
+      const trailChar = chars[Math.floor(Math.random() * chars.length)]!
       const x = i * colW
-      const y = drops[i] * colW
+      const y = drops[i]! * colW
       // head: bright white, body: green
       ctx.font = `${colW - 2}px monospace`
       ctx.fillStyle = '#ffffff'
       ctx.fillText(char, x, y)
       ctx.fillStyle = '#00ff41'
-      ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y - colW)
+      ctx.fillText(trailChar, x, y - colW)
       if (y > canvas.height && Math.random() > 0.975) drops[i] = 0
-      drops[i]++
+      drops[i]!++
     }
     frame++
   }, 50)
