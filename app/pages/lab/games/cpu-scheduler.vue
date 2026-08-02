@@ -217,7 +217,7 @@ function addProcess() {
     arrival: newProc.arrival,
     burst: newProc.burst,
     priority: newProc.priority,
-    color: COLORS[nextColorIdx++ % COLORS.length]
+    color: COLORS[nextColorIdx++ % COLORS.length]!
   })
   newProc.name = ''
   newProc.arrival = 0
@@ -238,7 +238,7 @@ function loadPreset() {
     { name: 'P5', arrival: 6, burst: 3, priority: 1 }
   ]
   for (const p of preset) {
-    processes.value.push({ id: nextId++, color: COLORS[nextColorIdx++ % COLORS.length], ...p })
+    processes.value.push({ id: nextId++, color: COLORS[nextColorIdx++ % COLORS.length]!, ...p })
   }
 }
 
@@ -263,12 +263,12 @@ function scheduleSJF(procs: Process[]): GanttBlock[] {
   while (done < procs.length) {
     const avail = remaining.filter(p => !p.done && p.arrival <= t)
     if (!avail.length) {
-      const next = remaining.filter(p => !p.done).sort((a, b) => a.arrival - b.arrival)[0]
+      const next = remaining.filter(p => !p.done).sort((a, b) => a.arrival - b.arrival)[0]!
       blocks.push({ name: 'IDLE', start: t, end: next.arrival, duration: next.arrival - t, color: '#444' })
       t = next.arrival
       continue
     }
-    const p = avail.sort((a, b) => a.burst - b.burst)[0]
+    const p = avail.sort((a, b) => a.burst - b.burst)[0]!
     blocks.push({ name: p.name, start: t, end: t + p.burst, duration: p.burst, color: p.color })
     t += p.burst
     p.done = true
@@ -283,11 +283,11 @@ function scheduleRR(procs: Process[], q: number): GanttBlock[] {
   let t = 0
   const queue: typeof tasks = []
   let i = 0
-  const enqueue = () => { while (i < tasks.length && tasks[i].arrival <= t) queue.push(tasks[i++]) }
+  const enqueue = () => { while (i < tasks.length && tasks[i]!.arrival <= t) queue.push(tasks[i++]!) }
   enqueue()
   while (queue.length > 0 || i < tasks.length) {
     if (!queue.length) {
-      const next = tasks[i]
+      const next = tasks[i]!
       blocks.push({ name: 'IDLE', start: t, end: next.arrival, duration: next.arrival - t, color: '#444' })
       t = next.arrival
       enqueue()
@@ -312,12 +312,12 @@ function schedulePriority(procs: Process[]): GanttBlock[] {
   while (done < procs.length) {
     const avail = remaining.filter(p => !p.done && p.arrival <= t)
     if (!avail.length) {
-      const next = remaining.filter(p => !p.done).sort((a, b) => a.arrival - b.arrival)[0]
+      const next = remaining.filter(p => !p.done).sort((a, b) => a.arrival - b.arrival)[0]!
       blocks.push({ name: 'IDLE', start: t, end: next.arrival, duration: next.arrival - t, color: '#444' })
       t = next.arrival
       continue
     }
-    const p = avail.sort((a, b) => a.priority - b.priority || a.arrival - b.arrival)[0]
+    const p = avail.sort((a, b) => a.priority - b.priority || a.arrival - b.arrival)[0]!
     blocks.push({ name: p.name, start: t, end: t + p.burst, duration: p.burst, color: p.color })
     t += p.burst
     p.done = true
@@ -369,7 +369,7 @@ function animateNext() {
     if (animIdx >= ganttBlocks.value.length) { animating.value = false; currentTime.value = ganttBlocks.value[ganttBlocks.value.length - 1]?.end || 0 }
     return
   }
-  const block = ganttBlocks.value[animIdx]
+  const block = ganttBlocks.value[animIdx]!
   visibleGantt.value.push(block)
   currentTime.value = block.end
   animIdx++

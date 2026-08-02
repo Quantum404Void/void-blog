@@ -49,7 +49,7 @@ function countLive(){let c=0;for(let i=0;i<grid.length;i++)if(grid[i])c++;liveCo
 function placePattern(name: string){
   const cells=PATTERNS[name]; if(!cells) return
   const cx=Math.floor(COLS/2), cy=Math.floor(ROWS/2)
-  cells.forEach(([dx,dy])=>grid[idx(cx+dx,cy+dy)]=1)
+  cells.forEach(([dx,dy])=>grid[idx(cx+dx!,cy+dy!)]=1)
   draw(); countLive()
 }
 
@@ -60,7 +60,7 @@ function step(){
   nextGrid.fill(0)
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
     let n=0
-    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(dx===0&&dy===0)continue;n+=grid[idx(x+dx,y+dy)]}
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(dx===0&&dy===0)continue;n+=grid[idx(x+dx,y+dy)]!}
     const alive=grid[idx(x,y)]
     nextGrid[idx(x,y)]=(alive?(n===2||n===3):(n===3))?1:0
   }

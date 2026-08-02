@@ -209,9 +209,9 @@ function stepOnce(): boolean {
   switch (cmd) {
     case '>': _pointer = Math.min(_pointer + 1, TAPE_SIZE - 1); break
     case '<': _pointer = Math.max(_pointer - 1, 0); break
-    case '+': _tape[_pointer] = (_tape[_pointer] + 1) & 0xff; break
-    case '-': _tape[_pointer] = (_tape[_pointer] - 1 + 256) & 0xff; break
-    case '.': _output += String.fromCharCode(_tape[_pointer]); break
+    case '+': _tape[_pointer] = (_tape[_pointer]! + 1) & 0xff; break
+    case '-': _tape[_pointer] = (_tape[_pointer]! - 1 + 256) & 0xff; break
+    case '.': _output += String.fromCharCode(_tape[_pointer]!); break
     case ',':
       _tape[_pointer] = _inputIdx < _input.length ? _input.charCodeAt(_inputIdx++) : 0
       break

@@ -81,18 +81,18 @@ let score=0, lines=0, level=1, gameOver=false, paused=false, dropTimer=0, dropIn
 let animFrame=0, started=false
 
 function createBoard() { return Array.from({length:ROWS}, ()=>Array(COLS).fill(null)) }
-function randomPiece() { const k=KEYS[Math.floor(Math.random()*KEYS.length)]; const p=PIECES[k]; return {shape:p.shape.map(r=>[...r]),color:p.color} }
-function rotate(m: number[][]) { return m[0].map((_,i)=>m.map(r=>r[i]).reverse()) }
+function randomPiece() { const k=KEYS[Math.floor(Math.random()*KEYS.length)]!; const p=PIECES[k]!; return {shape:p.shape.map(r=>[...r]),color:p.color} }
+function rotate(m: number[][]) { return m[0]!.map((_,i)=>m.map(r=>r[i]!).reverse()) }
 function isValid(shape: number[][], px: number, py: number) {
   return shape.every((row,dy)=>row.every((cell,dx)=>{ if(!cell) return true; const nx=px+dx,ny=py+dy; return nx>=0&&nx<COLS&&ny<ROWS&&!board[ny]?.[nx] }))
 }
 function ghostPos() { let gy=pos.y; while(isValid(current.shape,pos.x,gy+1))gy++; return gy }
 
 function lockPiece() {
-  current.shape.forEach((row: number[],dy: number)=>row.forEach((cell: number,dx: number)=>{ if(cell) board[pos.y+dy][pos.x+dx]=current.color }))
+  current.shape.forEach((row: number[],dy: number)=>row.forEach((cell: number,dx: number)=>{ if(cell) board[pos.y+dy]![pos.x+dx]=current.color }))
   let cleared=0
-  for(let r=ROWS-1;r>=0;r--) { if(board[r].every(c=>c!==null)){board.splice(r,1);board.unshift(Array(COLS).fill(null));cleared++;r++} }
-  if(cleared>0){ lines+=cleared; score+=SCORE_TABLE[cleared]*level; level=Math.floor(lines/10)+1; dropInterval=Math.max(100,500-(level-1)*40); updateUI() }
+  for(let r=ROWS-1;r>=0;r--) { if(board[r]!.every(c=>c!==null)){board.splice(r,1);board.unshift(Array(COLS).fill(null));cleared++;r++} }
+  if(cleared>0){ lines+=cleared; score+=SCORE_TABLE[cleared]!*level; level=Math.floor(lines/10)+1; dropInterval=Math.max(100,500-(level-1)*40); updateUI() }
   spawnPiece()
 }
 

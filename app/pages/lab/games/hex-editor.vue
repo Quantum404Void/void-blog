@@ -96,8 +96,8 @@
         <template v-if="selectedIdx >= 0 && selectedIdx < bytes.length">
           <span>偏移: <span style="color:rgba(57,255,20,0.9)">0x{{ selectedIdx.toString(16).padStart(4,'0') }}</span></span>
           <span>十进制: <span style="color:rgba(0,212,255,0.9)">{{ bytes[selectedIdx] }}</span></span>
-          <span>二进制: <span style="color:rgba(180,0,255,0.9)">{{ bytes[selectedIdx].toString(2).padStart(8,'0') }}</span></span>
-          <span>ASCII: <span style="color:rgba(255,165,0,0.9)">{{ bytes[selectedIdx] >= 32 && bytes[selectedIdx] < 127 ? String.fromCharCode(bytes[selectedIdx]) : 'N/A' }}</span></span>
+          <span>二进制: <span style="color:rgba(180,0,255,0.9)">{{ bytes[selectedIdx]!.toString(2).padStart(8,'0') }}</span></span>
+          <span>ASCII: <span style="color:rgba(255,165,0,0.9)">{{ bytes[selectedIdx]! >= 32 && bytes[selectedIdx]! < 127 ? String.fromCharCode(bytes[selectedIdx]!) : 'N/A' }}</span></span>
         </template>
         <span v-else class="italic opacity-60">点击字节查看详情</span>
       </div>
@@ -172,7 +172,7 @@ function downloadFile() {
 function startEdit(idx: number) {
   selectedIdx.value = idx
   editingIdx.value = idx
-  editVal.value = bytes.value[idx].toString(16).padStart(2, '0')
+  editVal.value = bytes.value[idx]!.toString(16).padStart(2, '0')
   nextTick(() => editInputRef.value?.select())
 }
 

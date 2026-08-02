@@ -82,7 +82,7 @@
                 <span class="font-mono text-xs text-[var(--color-text-muted)] w-6">x{{ i+1 }}</span>
                 <input type="range" v-model.number="inputs[i]" min="-1" max="1" step="0.05"
                   class="flex-1 accent-cyan-400" />
-                <span class="font-mono text-xs text-[var(--color-neon-cyan)] w-10 text-right">{{ inputs[i].toFixed(2) }}</span>
+                <span class="font-mono text-xs text-[var(--color-neon-cyan)] w-10 text-right">{{ inputs[i]!.toFixed(2) }}</span>
               </div>
             </div>
           </div>
@@ -269,14 +269,14 @@ function forwardPass(doAnimate: boolean) {
   const acts: number[][] = [inputs.value.slice()]
   const preacts: number[][] = [inputs.value.slice()]
   for (let li = 0; li < layers.value.length - 1; li++) {
-    const fromActs = acts[li]
-    const toN = layers.value[li+1]
+    const fromActs = acts[li]!
+    const toN = layers.value[li+1]!
     const layerActs: number[] = []
     const layerPre: number[] = []
     for (let ti = 0; ti < toN; ti++) {
       let sum = biases.value[li]?.[ti] ?? 0
       for (let fi = 0; fi < fromActs.length; fi++) {
-        sum += fromActs[fi] * (weights.value[li]?.[ti]?.[fi] ?? 0)
+        sum += fromActs[fi]! * (weights.value[li]?.[ti]?.[fi] ?? 0)
       }
       layerPre.push(sum)
       layerActs.push(li < layers.value.length - 2 ? activate(sum) : 1 / (1 + Math.exp(-sum)))

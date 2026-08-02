@@ -210,13 +210,13 @@ function startTrace() {
 
   steps.value.forEach((_, i) => {
     const t1 = setTimeout(() => {
-      steps.value[i].active = true
+      steps.value[i]!.active = true
     }, delay * i)
     const t2 = setTimeout(() => {
-      steps.value[i].active = false
-      steps.value[i].done = true
+      steps.value[i]!.active = false
+      steps.value[i]!.done = true
       if (i === steps.value.length - 1) {
-        finalResult.value = steps.value[i].response
+        finalResult.value = steps.value[i]!.response
         tracing.value = false
         startTTL()
       }

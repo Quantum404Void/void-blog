@@ -327,10 +327,11 @@ function cmdLs(args: string[]): string[] {
 
 function cmdCat(args: string[]): string[] {
   if (!args.length) return [red('cat: missing file operand')]
-  const path = normalizePath(resolvePath(args[0]))
+  const arg0 = args[0]!
+  const path = normalizePath(resolvePath(arg0))
   const node = resolveNode(path)
-  if (!node) return [red(`cat: ${escHtml(args[0])}: No such file or directory`)]
-  if (node.type === 'dir') return [red(`cat: ${escHtml(args[0])}: Is a directory`)]
+  if (!node) return [red(`cat: ${escHtml(arg0)}: No such file or directory`)]
+  if (node.type === 'dir') return [red(`cat: ${escHtml(arg0)}: Is a directory`)]
   return (node.content || '').split('\n').map(l => escHtml(l))
 }
 
@@ -358,8 +359,8 @@ function cmdMan(args: string[]): string[] {
     sl: ['SL(1)  —  steam locomotive', '', 'USAGE: sl', 'Runs a train across the terminal.'],
   }
   if (!args.length) return [red('What manual page do you want?')]
-  const page = manPages[args[0]]
-  if (!page) return [red(`No manual entry for ${escHtml(args[0])}`)]
+  const page = manPages[args[0]!]
+  if (!page) return [red(`No manual entry for ${escHtml(args[0]!)}`)]
   return page.map(l => escHtml(l))
 }
 
@@ -402,7 +403,7 @@ function cmdNeofetch(): string[] {
   const lines: string[] = []
   const max = Math.max(art.length, info.length)
   for (let i = 0; i < max; i++) {
-    const a = art[i] ? `<span style="color:#00d4ff">${escHtml(art[i])}</span>` : ' '.repeat(36)
+    const a = art[i] ? `<span style="color:#00d4ff">${escHtml(art[i]!)}</span>` : ' '.repeat(36)
     const b = info[i] || ''
     lines.push(`${a}   ${b}`)
   }
@@ -505,7 +506,7 @@ function cmdSl(): void {
     ]
   ]
   let offset = 80
-  const frame = frames[0]
+  const frame = frames[0]!
   slTimer = setInterval(() => {
     const shifted = frame.map(l => ' '.repeat(Math.max(0, offset)) + l)
     const rendered = shifted.map(l => `<span style="color:#fbbf24">${escHtml(l)}</span>`)
@@ -533,7 +534,7 @@ function execute(raw: string) {
   historyIndex.value = -1
 
   const parts = trimmed.split(/\s+/)
-  const cmd = parts[0]
+  const cmd = parts[0]!
   const args = parts.slice(1)
 
   if (cmd === 'clear') {
@@ -611,13 +612,13 @@ function handleKeydown(e: KeyboardEvent) {
     e.preventDefault()
     if (historyIndex.value < cmdHistory.value.length - 1) {
       historyIndex.value++
-      currentInput.value = cmdHistory.value[historyIndex.value]
+      currentInput.value = cmdHistory.value[historyIndex.value]!
     }
   } else if (e.key === 'ArrowDown') {
     e.preventDefault()
     if (historyIndex.value > 0) {
       historyIndex.value--
-      currentInput.value = cmdHistory.value[historyIndex.value]
+      currentInput.value = cmdHistory.value[historyIndex.value]!
     } else {
       historyIndex.value = -1
       currentInput.value = ''
@@ -626,7 +627,7 @@ function handleKeydown(e: KeyboardEvent) {
     e.preventDefault()
     const parts = currentInput.value.split(/\s+/)
     if (parts.length === 1) {
-      const prefix = parts[0]
+      const prefix = parts[0]!
       const matches = COMMANDS.filter(c => c.startsWith(prefix))
       if (matches.length === 1) {
         currentInput.value = matches[0] + ' '

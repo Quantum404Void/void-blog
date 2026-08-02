@@ -133,7 +133,7 @@ class BPlusTree {
   _insert(node: BNode, key: number, onSplit?: (id: number) => void): { newKey: number; newChild: BNode | null } {
     if (node.isLeaf) {
       let i = 0
-      while (i < node.keys.length && key > node.keys[i]) i++
+      while (i < node.keys.length && key > node.keys[i]!) i++
       node.keys.splice(i, 0, key)
       if (node.keys.length > this.maxKeys) {
         return this._splitLeaf(node, onSplit)
@@ -141,8 +141,8 @@ class BPlusTree {
       return { newKey: 0, newChild: null }
     } else {
       let i = 0
-      while (i < node.keys.length && key >= node.keys[i]) i++
-      const { newKey, newChild } = this._insert(node.children[i], key, onSplit)
+      while (i < node.keys.length && key >= node.keys[i]!) i++
+      const { newKey, newChild } = this._insert(node.children[i]!, key, onSplit)
       if (newChild) {
         node.keys.splice(i, 0, newKey)
         node.children.splice(i + 1, 0, newChild)
@@ -162,12 +162,12 @@ class BPlusTree {
     sibling.next = node.next
     node.next = sibling
     onSplit?.(node.id)
-    return { newKey: sibling.keys[0], newChild: sibling }
+    return { newKey: sibling.keys[0]!, newChild: sibling }
   }
 
   _splitInternal(node: BNode, onSplit?: (id: number) => void): { newKey: number; newChild: BNode } {
     const mid = Math.floor(node.keys.length / 2)
-    const pushUp = node.keys[mid]
+    const pushUp = node.keys[mid]!
     const sibling = mkNode(false)
     sibling.keys = node.keys.splice(mid + 1)
     node.keys.splice(mid)
@@ -179,7 +179,7 @@ class BPlusTree {
   delete(key: number): boolean {
     const deleted = this._delete(this.root, key)
     if (!this.root.isLeaf && this.root.keys.length === 0 && this.root.children.length > 0) {
-      this.root = this.root.children[0]
+      this.root = this.root.children[0]!
     }
     return deleted
   }
@@ -192,8 +192,8 @@ class BPlusTree {
       return true
     }
     let i = 0
-    while (i < node.keys.length && key >= node.keys[i]) i++
-    const child = node.children[i]
+    while (i < node.keys.length && key >= node.keys[i]!) i++
+    const child = node.children[i]!
     const deleted = this._delete(child, key)
     if (!deleted) return false
     if (child.keys.length < this.minKeys) {
@@ -201,16 +201,16 @@ class BPlusTree {
     }
     // fix internal keys
     for (let j = 0; j < node.keys.length; j++) {
-      const leftLeaf = this._leftmostLeaf(node.children[j+1])
-      if (leftLeaf) node.keys[j] = leftLeaf.keys[0]
+      const leftLeaf = this._leftmostLeaf(node.children[j+1]!)
+      if (leftLeaf) node.keys[j] = leftLeaf.keys[0]!
     }
     return true
   }
 
   _rebalance(parent: BNode, idx: number) {
-    const child = parent.children[idx]
-    const leftSib = idx > 0 ? parent.children[idx-1] : null
-    const rightSib = idx < parent.children.length-1 ? parent.children[idx+1] : null
+    const child = parent.children[idx]!
+    const leftSib = idx > 0 ? parent.children[idx-1]! : null
+    const rightSib = idx < parent.children.length-1 ? parent.children[idx+1]! : null
 
     if (rightSib && rightSib.keys.length > this.minKeys) {
       // borrow from right
@@ -239,15 +239,15 @@ class BPlusTree {
 
   _leftmostLeaf(node: BNode): BNode | null {
     if (node.isLeaf) return node
-    return node.children.length ? this._leftmostLeaf(node.children[0]) : null
+    return node.children.length ? this._leftmostLeaf(node.children[0]!) : null
   }
 
   find(key: number): boolean {
     let node = this.root
     while (!node.isLeaf) {
       let i = 0
-      while (i < node.keys.length && key >= node.keys[i]) i++
-      node = node.children[i]
+      while (i < node.keys.length && key >= node.keys[i]!) i++
+      node = node.children[i]!
     }
     return node.keys.includes(key)
   }
@@ -348,7 +348,7 @@ function computeLayout() {
       childPositions.push(cx + cw/2)
       cx = assignX(c, cx) + 0
     }
-    const x = (childPositions[0] + childPositions[childPositions.length-1]) / 2
+    const x = (childPositions[0]! + childPositions[childPositions.length-1]!) / 2
     const w = Math.max(60, n.keys.length * CELL_W + 16)
     positions.set(n.id, { x, y, w })
     return cx
@@ -414,8 +414,8 @@ async function doInsert() {
     renderTree()
     await new Promise(r => setTimeout(r, delay.value))
     let i = 0
-    while (i < node.keys.length && key >= node.keys[i]) i++
-    node = node.children[i]
+    while (i < node.keys.length && key >= node.keys[i]!) i++
+    node = node.children[i]!
   }
   path.push(node.id)
   highlightNodes.value = new Set(path)
@@ -452,8 +452,8 @@ async function doDelete() {
     highlightNodes.value = new Set(path)
     renderTree()
     await new Promise(r => setTimeout(r, delay.value))
-    let i = 0; while (i < node.keys.length && key >= node.keys[i]) i++
-    node = node.children[i]
+    let i = 0; while (i < node.keys.length && key >= node.keys[i]!) i++
+    node = node.children[i]!
   }
   path.push(node.id)
   highlightNodes.value = new Set(path)
@@ -482,8 +482,8 @@ async function doFind() {
     highlightNodes.value = new Set(path)
     renderTree()
     await new Promise(r => setTimeout(r, delay.value))
-    let i = 0; while (i < node.keys.length && key >= node.keys[i]) i++
-    node = node.children[i]
+    let i = 0; while (i < node.keys.length && key >= node.keys[i]!) i++
+    node = node.children[i]!
   }
   path.push(node.id)
   highlightNodes.value = new Set(path)

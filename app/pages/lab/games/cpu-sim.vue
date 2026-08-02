@@ -196,21 +196,21 @@ function parseProgram(): { instrs: Instr[], lineMap: number[] } {
   const lineMap: number[] = []
 
   for (let i = 0; i < lines.length; i++) {
-    const raw = code.value.split('\n')[i].replace(/;.*$/, '').trim()
+    const raw = code.value.split('\n')[i]!.replace(/;.*$/, '').trim()
     if (!raw) { instrs.push({ op: 'NOP' }); lineMap.push(i); continue }
     const parts = raw.split(/[\s,]+/)
-    const op = parts[0].toUpperCase()
+    const op = parts[0]!.toUpperCase()
     try {
       if (op === 'MOV') {
-        instrs.push({ op: 'MOV', rx: parseInt(parts[1].slice(1)), imm: parseInt(parts[2]) })
+        instrs.push({ op: 'MOV', rx: parseInt(parts[1]!.slice(1)), imm: parseInt(parts[2]!) })
       } else if (['ADD','SUB','AND','OR'].includes(op)) {
-        instrs.push({ op: op as any, rx: parseInt(parts[1].slice(1)), ry: parseInt(parts[2].slice(1)) })
+        instrs.push({ op: op as any, rx: parseInt(parts[1]!.slice(1)), ry: parseInt(parts[2]!.slice(1)) })
       } else if (op === 'JMP') {
-        instrs.push({ op: 'JMP', addr: parseInt(parts[1]) })
+        instrs.push({ op: 'JMP', addr: parseInt(parts[1]!) })
       } else if (op === 'JZ') {
-        instrs.push({ op: 'JZ', addr: parseInt(parts[1]) })
+        instrs.push({ op: 'JZ', addr: parseInt(parts[1]!) })
       } else if (op === 'PRINT') {
-        instrs.push({ op: 'PRINT', rx: parseInt(parts[1].slice(1)) })
+        instrs.push({ op: 'PRINT', rx: parseInt(parts[1]!.slice(1)) })
       } else if (op === 'HLT') {
         instrs.push({ op: 'HLT' })
       } else {
@@ -244,29 +244,29 @@ function execStep() {
   if (halted.value) return
   if (pc.value >= program.length) { halted.value = true; return }
 
-  const instr = program[pc.value]
+  const instr = program[pc.value]!
   const changed = new Set<number>()
 
   const r = regs.value
   switch (instr.op) {
     case 'MOV': r[instr.rx] = clamp8(instr.imm); changed.add(instr.rx); pc.value++; break
     case 'ADD': {
-      const v = clamp8(r[instr.rx] + r[instr.ry])
+      const v = clamp8(r[instr.rx]! + r[instr.ry]!)
       r[instr.rx] = v; changed.add(instr.rx)
       flags.Z = v === 0; pc.value++; break
     }
     case 'SUB': {
-      const v = clamp8(r[instr.rx] - r[instr.ry])
+      const v = clamp8(r[instr.rx]! - r[instr.ry]!)
       r[instr.rx] = v; changed.add(instr.rx)
       flags.Z = v === 0; pc.value++; break
     }
     case 'AND': {
-      const v = r[instr.rx] & r[instr.ry]
+      const v = r[instr.rx]! & r[instr.ry]!
       r[instr.rx] = v; changed.add(instr.rx)
       flags.Z = v === 0; pc.value++; break
     }
     case 'OR': {
-      const v = r[instr.rx] | r[instr.ry]
+      const v = r[instr.rx]! | r[instr.ry]!
       r[instr.rx] = v; changed.add(instr.rx)
       flags.Z = v === 0; pc.value++; break
     }
@@ -281,7 +281,7 @@ function execStep() {
     case 'NOP': pc.value++; break
   }
   // sync mem with regs (first 8 bytes)
-  for (let i = 0; i < NUM_REGS; i++) mem.value[i] = r[i]
+  for (let i = 0; i < NUM_REGS; i++) mem.value[i] = r[i]!
   changedRegs.value = changed
 }
 

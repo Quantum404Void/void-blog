@@ -106,7 +106,7 @@ const modes = [
   { key: 'bars', label: '频域柱状' },
   { key: 'wave', label: '波形' },
   { key: 'polar', label: '圆形极坐标' },
-]
+] as const
 
 let audioCtx: AudioContext | null = null
 let analyser: AnalyserNode | null = null
@@ -159,7 +159,7 @@ function logBins(data: Uint8Array, bars: number): number[] {
     const binStart = Math.floor(logStart / nyquist * data.length)
     const binEnd = Math.ceil(logEnd / nyquist * data.length)
     let max = 0
-    for (let j = Math.max(binStart, 0); j < Math.min(binEnd, data.length); j++) max = Math.max(max, data[j])
+    for (let j = Math.max(binStart, 0); j < Math.min(binEnd, data.length); j++) max = Math.max(max, data[j]!)
     result.push(max / 255)
   }
   return result
@@ -334,7 +334,7 @@ function drawBars(ctx: CanvasRenderingContext2D, data: Uint8Array) {
   const barW = (cw - bars) / bars
 
   for (let i = 0; i < bars; i++) {
-    const val = bins[i]
+    const val = bins[i]!
     const h = val * ch * 0.9
     // neon green → cyan gradient
     const t = i / bars
@@ -380,7 +380,7 @@ function drawWave(ctx: CanvasRenderingContext2D, data: Uint8Array) {
   const sliceW = cw / data.length
   let x = 0
   for (let i = 0; i < data.length; i++) {
-    const v = data[i] / 128 - 1
+    const v = data[i]! / 128 - 1
     const y = (v * ch / 2) + ch / 2
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
     x += sliceW
@@ -397,7 +397,7 @@ function drawPolar(ctx: CanvasRenderingContext2D, freqData: Uint8Array, timeData
   // Inner circle: time-domain waveform
   ctx.beginPath()
   for (let i = 0; i < timeData.length; i++) {
-    const v = timeData[i] / 128 - 1
+    const v = timeData[i]! / 128 - 1
     const angle = (i / timeData.length) * Math.PI * 2 - Math.PI / 2
     const r = baseR + v * baseR * 0.6
     const x = cx + Math.cos(angle) * r
@@ -418,7 +418,7 @@ function drawPolar(ctx: CanvasRenderingContext2D, freqData: Uint8Array, timeData
 
   ctx.save()
   for (let i = 0; i < bars; i++) {
-    const val = bins[i]
+    const val = bins[i]!
     const angle = (i / bars) * Math.PI * 2 - Math.PI / 2
     const r1 = baseR * 1.1
     const r2 = r1 + val * (outerR - r1)
@@ -447,7 +447,7 @@ function drawPolar(ctx: CanvasRenderingContext2D, freqData: Uint8Array, timeData
 function detectBeat(freqData: Uint8Array) {
   // Energy in bass band (first 10 bins)
   let energy = 0
-  for (let i = 0; i < 10; i++) energy += freqData[i]
+  for (let i = 0; i < 10; i++) energy += freqData[i]!
   energy /= 10 * 255
 
   energyHistory.push(energy)
@@ -465,7 +465,7 @@ function detectBeat(freqData: Uint8Array) {
     while (beatTimes.length > 8) beatTimes.shift()
     if (beatTimes.length >= 2) {
       const intervals: number[] = []
-      for (let i = 1; i < beatTimes.length; i++) intervals.push(beatTimes[i] - beatTimes[i-1])
+      for (let i = 1; i < beatTimes.length; i++) intervals.push(beatTimes[i]! - beatTimes[i-1]!)
       const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length
       bpm.value = Math.round(60000 / avgInterval)
     }

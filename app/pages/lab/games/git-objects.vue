@@ -300,7 +300,7 @@ let demoTimer: ReturnType<typeof setTimeout>
 // Repo state
 const repoInit = ref(false)
 const objects = ref<GitObject[]>([])
-const refs = ref<Record<string, string>>({}) // name -> object id
+const refs = ref<Record<string, string | undefined>>({}) // name -> object id
 const HEAD = ref<string>('main') // branch name or commit id
 const currentBranch = ref<string>('main')
 const stagingArea = ref<{ filename: string; blobId: string }[]>([])
@@ -545,7 +545,7 @@ function gitMerge(name: string) {
     label: `Merge branch '${name}'`,
     detail: `tree ${tree.sha.slice(0,7)}\nparent ${dstCommit?.sha.slice(0,7) || ''}\nparent ${srcCommit?.sha.slice(0,7) || ''}\n\nMerge branch '${name}'`,
     treeId: tree.id,
-    parentIds: [dstId, srcId].filter(Boolean),
+    parentIds: [dstId, srcId].filter((id): id is string => Boolean(id)),
   })
 
   refs.value[currentBranch.value] = mergeCommit.id
@@ -606,7 +606,7 @@ function runDemoStep(steps: string[], idx: number) {
     demoRunning.value = false
     return
   }
-  cmdInput.value = steps[idx]
+  cmdInput.value = steps[idx]!
   runCmd()
   demoTimer = setTimeout(() => runDemoStep(steps, idx + 1), 1200)
 }

@@ -358,7 +358,7 @@ function disassemble(opcode: number): string {
 }
 
 const currentInstruction = computed(() => {
-  const opcode = (cpu.memory[cpu.pc] << 8) | cpu.memory[cpu.pc + 1]
+  const opcode = (cpu.memory[cpu.pc]! << 8) | cpu.memory[cpu.pc + 1]!
   return `${cpu.pc.toString(16).toUpperCase().padStart(4,'0')}: ${opcode.toString(16).toUpperCase().padStart(4,'0')} — ${disassemble(opcode)}`
 })
 
@@ -380,19 +380,19 @@ function initCPU(romData: Uint8Array) {
 
   // Load font
   for (let i = 0; i < FONT_DATA.length; i++) {
-    cpu.memory[i] = FONT_DATA[i]
+    cpu.memory[i] = FONT_DATA[i]!
   }
 
   // Load ROM
   for (let i = 0; i < romData.length; i++) {
-    cpu.memory[0x200 + i] = romData[i]
+    cpu.memory[0x200 + i] = romData[i]!
   }
 }
 
 function executeInstruction() {
   if (cpu.waitingForKey >= 0) return
 
-  const opcode = (cpu.memory[cpu.pc] << 8) | cpu.memory[cpu.pc + 1]
+  const opcode = (cpu.memory[cpu.pc]! << 8) | cpu.memory[cpu.pc + 1]!
   const nnn = opcode & 0x0FFF
   const n = opcode & 0x000F
   const x = (opcode & 0x0F00) >> 8
@@ -407,7 +407,7 @@ function executeInstruction() {
         cpu.display.fill(0)
       } else if (opcode === 0x00EE) {
         cpu.sp--
-        cpu.pc = cpu.stack[cpu.sp]
+        cpu.pc = cpu.stack[cpu.sp]!
       }
       break
     case 0x1000:
@@ -431,38 +431,38 @@ function executeInstruction() {
       cpu.v[x] = kk
       break
     case 0x7000:
-      cpu.v[x] = (cpu.v[x] + kk) & 0xFF
+      cpu.v[x] = (cpu.v[x]! + kk) & 0xFF
       break
     case 0x8000:
       switch (n) {
-        case 0x0: cpu.v[x] = cpu.v[y]; break
-        case 0x1: cpu.v[x] |= cpu.v[y]; break
-        case 0x2: cpu.v[x] &= cpu.v[y]; break
-        case 0x3: cpu.v[x] ^= cpu.v[y]; break
+        case 0x0: cpu.v[x] = cpu.v[y]!; break
+        case 0x1: cpu.v[x]! |= cpu.v[y]!; break
+        case 0x2: cpu.v[x]! &= cpu.v[y]!; break
+        case 0x3: cpu.v[x]! ^= cpu.v[y]!; break
         case 0x4: {
-          const sum = cpu.v[x] + cpu.v[y]
+          const sum = cpu.v[x]! + cpu.v[y]!
           cpu.v[0xF] = sum > 0xFF ? 1 : 0
           cpu.v[x] = sum & 0xFF
           break
         }
         case 0x5: {
-          cpu.v[0xF] = cpu.v[x] >= cpu.v[y] ? 1 : 0
-          cpu.v[x] = (cpu.v[x] - cpu.v[y] + 256) & 0xFF
+          cpu.v[0xF] = cpu.v[x]! >= cpu.v[y]! ? 1 : 0
+          cpu.v[x] = (cpu.v[x]! - cpu.v[y]! + 256) & 0xFF
           break
         }
         case 0x6: {
-          cpu.v[0xF] = cpu.v[x] & 0x1
-          cpu.v[x] >>= 1
+          cpu.v[0xF] = cpu.v[x]! & 0x1
+          cpu.v[x]! >>= 1
           break
         }
         case 0x7: {
-          cpu.v[0xF] = cpu.v[y] >= cpu.v[x] ? 1 : 0
-          cpu.v[x] = (cpu.v[y] - cpu.v[x] + 256) & 0xFF
+          cpu.v[0xF] = cpu.v[y]! >= cpu.v[x]! ? 1 : 0
+          cpu.v[x] = (cpu.v[y]! - cpu.v[x]! + 256) & 0xFF
           break
         }
         case 0xE: {
-          cpu.v[0xF] = (cpu.v[x] & 0x80) >> 7
-          cpu.v[x] = (cpu.v[x] << 1) & 0xFF
+          cpu.v[0xF] = (cpu.v[x]! & 0x80) >> 7
+          cpu.v[x] = (cpu.v[x]! << 1) & 0xFF
           break
         }
       }
@@ -474,24 +474,24 @@ function executeInstruction() {
       cpu.i = nnn
       break
     case 0xB000:
-      cpu.pc = nnn + cpu.v[0]
+      cpu.pc = nnn + cpu.v[0]!
       break
     case 0xC000:
       cpu.v[x] = Math.floor(Math.random() * 256) & kk
       break
     case 0xD000: {
-      const xPos = cpu.v[x] % 64
-      const yPos = cpu.v[y] % 32
+      const xPos = cpu.v[x]! % 64
+      const yPos = cpu.v[y]! % 32
       cpu.v[0xF] = 0
       for (let row = 0; row < n; row++) {
-        const spriteByte = cpu.memory[cpu.i + row]
+        const spriteByte = cpu.memory[cpu.i + row]!
         for (let col = 0; col < 8; col++) {
           if (spriteByte & (0x80 >> col)) {
             const px = (xPos + col) % 64
             const py = (yPos + row) % 32
             const idx = py * 64 + px
             if (cpu.display[idx]) cpu.v[0xF] = 1
-            cpu.display[idx] ^= 1
+            cpu.display[idx]! ^= 1
           }
         }
       }
@@ -499,9 +499,9 @@ function executeInstruction() {
     }
     case 0xE000:
       if (kk === 0x9E) {
-        if (cpu.keys[cpu.v[x]]) cpu.pc += 2
+        if (cpu.keys[cpu.v[x]!]) cpu.pc += 2
       } else if (kk === 0xA1) {
-        if (!cpu.keys[cpu.v[x]]) cpu.pc += 2
+        if (!cpu.keys[cpu.v[x]!]) cpu.pc += 2
       }
       break
     case 0xF000:
@@ -510,20 +510,20 @@ function executeInstruction() {
         case 0x0A:
           cpu.waitingForKey = x
           break
-        case 0x15: cpu.dt = cpu.v[x]; break
-        case 0x18: cpu.st = cpu.v[x]; break
-        case 0x1E: cpu.i = (cpu.i + cpu.v[x]) & 0xFFFF; break
-        case 0x29: cpu.i = cpu.v[x] * 5; break
+        case 0x15: cpu.dt = cpu.v[x]!; break
+        case 0x18: cpu.st = cpu.v[x]!; break
+        case 0x1E: cpu.i = (cpu.i + cpu.v[x]!) & 0xFFFF; break
+        case 0x29: cpu.i = cpu.v[x]! * 5; break
         case 0x33:
-          cpu.memory[cpu.i] = Math.floor(cpu.v[x] / 100)
-          cpu.memory[cpu.i + 1] = Math.floor((cpu.v[x] % 100) / 10)
-          cpu.memory[cpu.i + 2] = cpu.v[x] % 10
+          cpu.memory[cpu.i] = Math.floor(cpu.v[x]! / 100)
+          cpu.memory[cpu.i + 1] = Math.floor((cpu.v[x]! % 100) / 10)
+          cpu.memory[cpu.i + 2] = cpu.v[x]! % 10
           break
         case 0x55:
-          for (let r = 0; r <= x; r++) cpu.memory[cpu.i + r] = cpu.v[r]
+          for (let r = 0; r <= x; r++) cpu.memory[cpu.i + r] = cpu.v[r]!
           break
         case 0x65:
-          for (let r = 0; r <= x; r++) cpu.v[r] = cpu.memory[cpu.i + r]
+          for (let r = 0; r <= x; r++) cpu.v[r] = cpu.memory[cpu.i + r]!
           break
       }
       break

@@ -49,7 +49,7 @@ function initCols() {
 
 function nextTheme() {
   themeIdx=(themeIdx+1)%THEMES.length
-  const t=THEMES[themeIdx]
+  const t=THEMES[themeIdx]!
   if(themeNameEl.value){themeNameEl.value.textContent=t.name;themeNameEl.value.style.color=t.fg}
   const cv=canvasEl.value!; cv.getContext('2d')!.clearRect(0,0,cv.width,cv.height)
 }
@@ -63,20 +63,20 @@ function frame(ts: number){
   frameCount++; fpsAcc+=dt
   if(fpsAcc>=800){const el=document.getElementById('fps-badge');if(el)el.textContent=Math.round(frameCount/(fpsAcc/1000))+' fps';frameCount=0;fpsAcc=0}
   if(paused.value) return
-  const cv=canvasEl.value!; const ctx=cv.getContext('2d')!; const t=THEMES[themeIdx]
+  const cv=canvasEl.value!; const ctx=cv.getContext('2d')!; const t=THEMES[themeIdx]!
   ctx.fillStyle=t.bg; ctx.fillRect(0,0,cv.width,cv.height)
   ctx.font=`bold ${fontSize.value}px 'JetBrains Mono',monospace`
   for(let i=0;i<cols;i++){
-    const x=i*fontSize.value, y=drops[i]*fontSize.value
-    const ch=t.chars[Math.floor(Math.random()*t.chars.length)]
+    const x=i*fontSize.value, y=drops[i]!*fontSize.value
+    const ch=t.chars[Math.floor(Math.random()*t.chars.length)]!
     ctx.shadowBlur=10; ctx.shadowColor=t.glow; ctx.fillStyle=t.head; ctx.fillText(ch,x,y)
-    if(drops[i]>1){ctx.shadowBlur=3;ctx.fillStyle=t.fg;ctx.fillText(t.chars[Math.floor(Math.random()*t.chars.length)],x,y-fontSize.value)}
-    drops[i]+=colSpeeds[i]*Number(speedMult.value)*(dt/16)
+    if(drops[i]!>1){ctx.shadowBlur=3;ctx.fillStyle=t.fg;ctx.fillText(t.chars[Math.floor(Math.random()*t.chars.length)]!,x,y-fontSize.value)}
+    drops[i]=drops[i]!+colSpeeds[i]!*Number(speedMult.value)*(dt/16)
     if(y>cv.height&&Math.random()>0.97) drops[i]=Math.random()*-30
   }
   ctx.shadowBlur=0
   for(let i=ripples.length-1;i>=0;i--){
-    const r=ripples[i]; r.r+=4*Number(speedMult.value); r.life-=0.025
+    const r=ripples[i]!; r.r+=4*Number(speedMult.value); r.life-=0.025
     if(r.life<=0){ripples.splice(i,1);continue}
     ctx.save();ctx.globalAlpha=r.life*0.6;ctx.strokeStyle=t.fg;ctx.lineWidth=2;ctx.shadowBlur=8;ctx.shadowColor=t.glow
     ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);ctx.stroke();ctx.restore()

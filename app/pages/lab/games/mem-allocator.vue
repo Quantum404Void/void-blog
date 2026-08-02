@@ -292,8 +292,8 @@ function sleep(ms: number) {
 function coalesce() {
   let i = 0
   while (i < blocks.value.length - 1) {
-    if (blocks.value[i].free && blocks.value[i + 1].free) {
-      blocks.value[i].size += blocks.value[i + 1].size
+    if (blocks.value[i]!.free && blocks.value[i + 1]!.free) {
+      blocks.value[i]!.size += blocks.value[i + 1]!.size
       blocks.value.splice(i + 1, 1)
     } else {
       i++
@@ -321,7 +321,7 @@ async function doMalloc() {
 
   let target: MemBlock
   if (strategy.value === 'first') {
-    target = candidates[0]
+    target = candidates[0]!
   } else if (strategy.value === 'best') {
     target = candidates.reduce((a, b) => a.size < b.size ? a : b)
   } else {
@@ -427,7 +427,7 @@ async function runRandom() {
   if (animating.value) return
   const sizes = [16, 24, 32, 48, 64, 80]
   for (let i = 0; i < 6; i++) {
-    mallocSize.value = sizes[Math.floor(Math.random() * sizes.length)]
+    mallocSize.value = sizes[Math.floor(Math.random() * sizes.length)]!
     await doMalloc()
     await sleep(150)
   }
@@ -440,7 +440,7 @@ async function runRandom() {
     await sleep(100)
   }
   // Allocate again to show coalescing effect
-  mallocSize.value = sizes[Math.floor(Math.random() * sizes.length)]
+  mallocSize.value = sizes[Math.floor(Math.random() * sizes.length)]!
   await doMalloc()
 }
 

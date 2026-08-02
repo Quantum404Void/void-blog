@@ -104,7 +104,7 @@ onMounted(() => {
 
   function step() {
     dir = nextDir
-    const head = snake[0]
+    const head = snake[0]!
     const nx = head.x + (dir==='LEFT'?-1:dir==='RIGHT'?1:0)
     const ny = head.y + (dir==='UP'?-1:dir==='DOWN'?1:0)
     if (!wallMode && (nx<0||nx>=COLS||ny<0||ny>=ROWS)) { die(); return }

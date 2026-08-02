@@ -146,7 +146,7 @@ function drawMain() {
   // Draw trail
   for (let i = 1; i < trail.length; i++) {
     const alpha = (i / trail.length) * 0.9
-    const p = trail[i], pp = trail[i - 1]
+    const p = trail[i]!, pp = trail[i - 1]!
     ctx.strokeStyle = `hsla(${p.hue},100%,65%,${alpha})`
     ctx.lineWidth = 1.5
     ctx.shadowColor = `hsla(${p.hue},100%,65%,0.4)`

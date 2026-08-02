@@ -72,7 +72,7 @@
                 :class="['rounded p-2 border transition-all duration-300', changedRegs.has(reg) ? 'border-[var(--color-neon-cyan)] shadow-[0_0_8px_var(--color-neon-cyan)]' : 'border-[var(--color-void-border)]']">
                 <div class="font-mono text-xs text-[var(--color-text-muted)]">{{ reg }}</div>
                 <div :class="['font-mono text-sm transition-colors', changedRegs.has(reg) ? 'text-[var(--color-neon-cyan)]' : 'text-[var(--color-text-primary)]']">
-                  {{ toHex(regs[reg]) }}
+                  {{ toHex(regs[reg]!) }}
                 </div>
                 <div class="font-mono text-xs text-[var(--color-text-muted)]">{{ regs[reg] }}</div>
               </div>
@@ -92,7 +92,7 @@
 
           <!-- Stack -->
           <div class="bg-[var(--color-void-card)] border border-[var(--color-void-border)] rounded-lg p-4">
-            <div class="font-mono text-xs text-[var(--color-text-muted)] mb-3">栈 (ESP={{ toHex(regs.ESP) }})</div>
+            <div class="font-mono text-xs text-[var(--color-text-muted)] mb-3">栈 (ESP={{ toHex(regs.ESP!) }})</div>
             <div class="flex flex-col gap-1">
               <div v-for="(slot, i) in stackSlots" :key="i"
                 :class="['flex items-center gap-2 font-mono text-xs rounded px-2 py-1 transition-all duration-300',
@@ -234,7 +234,7 @@ fact_done:`,
 
 function loadExample() {
   if (selectedExample.value && EXAMPLES[selectedExample.value]) {
-    code.value = EXAMPLES[selectedExample.value]
+    code.value = EXAMPLES[selectedExample.value]!
     reset()
   }
 }
@@ -254,7 +254,7 @@ const parsedLines = computed((): Instr[] => {
   const lines = codeLines.value
   const result: Instr[] = []
   for (let i = 0; i < lines.length; i++) {
-    const raw = lines[i]
+    const raw = lines[i]!
     const stripped = raw.replace(/;.*$/, '').trim()
     if (!stripped) continue
     // Label line
@@ -269,10 +269,10 @@ const parsedLines = computed((): Instr[] => {
     let label: string | undefined
     if (labelMatch) {
       label = labelMatch[1]
-      instrStr = labelMatch[2]
+      instrStr = labelMatch[2]!
     }
     const parts = instrStr.split(/[\s,]+/).filter(Boolean)
-    const op = parts[0].toUpperCase()
+    const op = parts[0]!.toUpperCase()
     const args = parts.slice(1)
     result.push({ op, args, label, lineNo: i, raw })
   }
@@ -303,7 +303,7 @@ function resolveOperand(arg: string, r: Record<string,number>, m: Record<number,
   // Memory: [EBX+4] or [EBX]
   const memMatch = arg.match(/^\[(\w+)([+-]\d+)?\]$/)
   if (memMatch) {
-    const base = r[memMatch[1].toUpperCase()] ?? 0
+    const base = r[memMatch[1]!.toUpperCase()] ?? 0
     const offset = memMatch[2] ? parseInt(memMatch[2]) : 0
     const addr = (base + offset) >>> 0
     return m[addr] ?? 0
@@ -324,7 +324,7 @@ function setOperand(arg: string, val: number, r: Record<string,number>, m: Recor
   // Memory
   const memMatch = arg.match(/^\[(\w+)([+-]\d+)?\]$/)
   if (memMatch) {
-    const base = r[memMatch[1].toUpperCase()] ?? 0
+    const base = r[memMatch[1]!.toUpperCase()] ?? 0
     const offset = memMatch[2] ? parseInt(memMatch[2]) : 0
     const addr = (base + offset) >>> 0
     m[addr] = val >>> 0
@@ -382,7 +382,7 @@ function execInstr(instr: Instr, r: Record<string,number>, f: Record<string,bool
     }
     case 'MUL': {
       const rhs = resolveOperand(a0, r, m)
-      const res = Math.imul(r.EAX, rhs) >>> 0
+      const res = Math.imul(r.EAX!, rhs) >>> 0
       r.EAX = res
       changed.add('EAX')
       return {}
@@ -390,7 +390,7 @@ function execInstr(instr: Instr, r: Record<string,number>, f: Record<string,bool
     case 'DIV': {
       const divisor = resolveOperand(a0, r, m)
       if (divisor === 0) return { error: '除零错误' }
-      r.EAX = Math.floor(r.EAX / divisor) >>> 0
+      r.EAX = Math.floor(r.EAX! / divisor) >>> 0
       r.EDX = r.EAX % divisor
       changed.add('EAX'); changed.add('EDX')
       return {}
@@ -441,7 +441,7 @@ function execInstr(instr: Instr, r: Record<string,number>, f: Record<string,bool
     }
     case 'PUSH': {
       const val = resolveOperand(a0, r, m)
-      r.ESP = (r.ESP - 4) >>> 0
+      r.ESP = (r.ESP! - 4) >>> 0
       changed.add('ESP')
       const idx = (STACK_BASE - r.ESP) / 4
       if (idx >= 0 && idx < STACK_SIZE) st[idx] = val
@@ -449,10 +449,10 @@ function execInstr(instr: Instr, r: Record<string,number>, f: Record<string,bool
       return {}
     }
     case 'POP': {
-      const idx = (STACK_BASE - r.ESP) / 4
-      const val = (idx >= 0 && idx < STACK_SIZE) ? st[idx] : 0
+      const idx = (STACK_BASE - r.ESP!) / 4
+      const val = (idx >= 0 && idx < STACK_SIZE) ? st[idx]! : 0
       setOperand(a0, val, r, m, changed, memCh)
-      r.ESP = (r.ESP + 4) >>> 0
+      r.ESP = (r.ESP! + 4) >>> 0
       changed.add('ESP')
       return {}
     }
@@ -465,7 +465,7 @@ function execInstr(instr: Instr, r: Record<string,number>, f: Record<string,bool
     case 'JLE': return { nextPc: (f.ZF || f.SF !== f.OF) ? (labelMap.value[a0] ?? pc.value + 1) : undefined }
     case 'CALL': {
       // push next pc, jump to label
-      r.ESP = (r.ESP - 4) >>> 0
+      r.ESP = (r.ESP! - 4) >>> 0
       changed.add('ESP')
       const retIdx = (STACK_BASE - r.ESP) / 4
       if (retIdx >= 0 && retIdx < STACK_SIZE) st[retIdx] = pc.value + 1
@@ -474,9 +474,9 @@ function execInstr(instr: Instr, r: Record<string,number>, f: Record<string,bool
       return { nextPc: target }
     }
     case 'RET': {
-      const idx = (STACK_BASE - r.ESP) / 4
-      const retAddr = (idx >= 0 && idx < STACK_SIZE) ? st[idx] : -1
-      r.ESP = (r.ESP + 4) >>> 0
+      const idx = (STACK_BASE - r.ESP!) / 4
+      const retAddr = (idx >= 0 && idx < STACK_SIZE) ? st[idx]! : -1
+      r.ESP = (r.ESP! + 4) >>> 0
       changed.add('ESP')
       if (retAddr < 0 || retAddr >= parsedLines.value.length) return { halt: true }
       return { nextPc: retAddr }
@@ -508,7 +508,7 @@ function step() {
   memChanged.value = new Set()
   errorMsg.value = ''
 
-  const instr = parsedLines.value[pc.value]
+  const instr = parsedLines.value[pc.value]!
   const r = regs.value
   const f = flags.value
   const m = memory.value
@@ -576,6 +576,6 @@ const stackSlots = computed(() => {
 
 // Load hello by default
 onMounted(() => {
-  code.value = EXAMPLES.hello
+  code.value = EXAMPLES.hello!
 })
 </script>

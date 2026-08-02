@@ -99,7 +99,7 @@
                 Regenerate
               </button>
               <div v-if="collisionPair.length === 2" class="mt-3 text-xs text-[var(--color-neon-cyan)]">
-                💥 Person {{ collisionPair[0]+1 }} & {{ collisionPair[1]+1 }} share birthday day {{ people[collisionPair[0]]?.birthday }}!
+                💥 Person {{ collisionPair[0]!+1 }} & {{ collisionPair[1]!+1 }} share birthday day {{ people[collisionPair[0]!]?.birthday }}!
               </div>
               <div v-else class="mt-3 text-xs text-[var(--color-text-muted)]">No collision found in current group.</div>
             </div>
@@ -239,7 +239,7 @@ function generatePeople() {
   const collSet = new Set<number>()
   let pair: number[] = []
   for (let i = 0; i < ps.length; i++) {
-    const b = ps[i].birthday
+    const b = ps[i]!.birthday
     if (seen.has(b)) {
       if (pair.length === 0) pair = [seen.get(b)!, i]
       collSet.add(seen.get(b)!)
@@ -322,7 +322,7 @@ const bucketsMap = computed<Record<number, HashItem[]>>(() => {
   const m: Record<number, HashItem[]> = {}
   for (const item of hashItems.value) {
     if (!m[item.bucket]) m[item.bucket] = []
-    m[item.bucket].push(item)
+    m[item.bucket]!.push(item)
   }
   return m
 })

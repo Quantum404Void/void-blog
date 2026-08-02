@@ -298,10 +298,10 @@ function parseRegex(src: string): NFA {
       let negate = false
       if (peek() === '^') { consume(); negate = true }
       while (pos < src.length && peek() !== ']') {
-        const c = consume()
+        const c = consume()!
         if (peek() === '-' && pos + 1 < src.length && src[pos+1] !== ']') {
           consume() // -
-          const end = consume()
+          const end = consume()!
           for (let cc = c.charCodeAt(0); cc <= end.charCodeAt(0); cc++) chars.push(String.fromCharCode(cc))
         } else chars.push(c)
       }
@@ -309,8 +309,8 @@ function parseRegex(src: string): NFA {
       const label = negate ? '.' : (chars.slice(0, 4).join('|') + (chars.length > 4 ? '…' : ''))
       return buildFromChar(label)
     }
-    if (peek() === '\\') { consume(); return buildFromChar(consume()) }
-    const c = consume()
+    if (peek() === '\\') { consume(); return buildFromChar(consume()!) }
+    const c = consume()!
     return buildFromChar(c)
   }
 
@@ -427,7 +427,7 @@ function layoutNFA(nfa: NFA) {
       const dist = Math.sqrt(dx*dx + dy*dy)
       const ux = dx / dist; const uy = dy / dist
       const key = `${Math.min(t.from, t.to)}-${Math.max(t.from, t.to)}`
-      const group = transitionGroups[key]
+      const group = transitionGroups[key]!
       const bend = group.length > 1 ? 25 : 0
       const mx = (from.x + to.x) / 2 - uy * bend
       const my = (from.y + to.y) / 2 + ux * bend
@@ -482,8 +482,7 @@ async function startMatch() {
   activeStates.value = new Set(current)
   closureLogs.value = [...logs]
 
-  for (let i = 0; i < str.length; i++) {
-    const ch = str[i]
+  for (const ch of str) {
     currentChar.value = ch
     matchSteps.value++
     await new Promise(r => setTimeout(r, 300))

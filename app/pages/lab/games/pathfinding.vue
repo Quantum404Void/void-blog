@@ -160,8 +160,8 @@ class MinHeap<T> {
   private _bubbleUp(i: number) {
     while (i > 0) {
       const p = (i - 1) >> 1
-      if (this.data[p].priority <= this.data[i].priority) break
-      ;[this.data[p], this.data[i]] = [this.data[i], this.data[p]]
+      if (this.data[p]!.priority <= this.data[i]!.priority) break
+      ;[this.data[p], this.data[i]] = [this.data[i]!, this.data[p]!]
       i = p
     }
   }
@@ -170,10 +170,10 @@ class MinHeap<T> {
     while (true) {
       let min = i
       const l = 2 * i + 1, r = 2 * i + 2
-      if (l < n && this.data[l].priority < this.data[min].priority) min = l
-      if (r < n && this.data[r].priority < this.data[min].priority) min = r
+      if (l < n && this.data[l]!.priority < this.data[min]!.priority) min = l
+      if (r < n && this.data[r]!.priority < this.data[min]!.priority) min = r
       if (min === i) break
-      ;[this.data[min], this.data[i]] = [this.data[i], this.data[min]]
+      ;[this.data[min], this.data[i]] = [this.data[i]!, this.data[min]!]
       i = min
     }
   }
@@ -199,7 +199,7 @@ const algorithms = [
   { id: 'dijkstra', name: 'Dijkstra' },
   { id: 'bfs', name: 'BFS' },
   { id: 'dfs', name: 'DFS' },
-]
+] as const
 
 const legend = [
   { label: 'Empty', color: '#0f0f1a' },
@@ -219,8 +219,8 @@ let endPos = { r: 10, c: 24 }
 
 function initGrid() {
   grid.value = Array.from({ length: ROWS }, () => Array(COLS).fill('empty') as CellState[])
-  grid.value[startPos.r][startPos.c] = 'start'
-  grid.value[endPos.r][endPos.c] = 'end'
+  grid.value[startPos.r]![startPos.c] = 'start'
+  grid.value[endPos.r]![endPos.c] = 'end'
 }
 
 // Drawing
@@ -234,7 +234,7 @@ function draw() {
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const state = grid.value[r][c]
+      const state = grid.value[r]![c]
       const x = c * CELL
       const y = r * CELL
 
@@ -287,20 +287,20 @@ function getCell(e: MouseEvent) {
 }
 
 function applyCell(r: number, c: number, erase: boolean) {
-  const cur = grid.value[r][c]
+  const cur = grid.value[r]![c]
   if (drawMode.value === 'wall') {
     if (cur === 'start' || cur === 'end') return
-    grid.value[r][c] = erase ? 'empty' : 'wall'
+    grid.value[r]![c] = erase ? 'empty' : 'wall'
   } else if (drawMode.value === 'start') {
     if (cur === 'end') return
-    grid.value[startPos.r][startPos.c] = 'empty'
+    grid.value[startPos.r]![startPos.c] = 'empty'
     startPos = { r, c }
-    grid.value[r][c] = 'start'
+    grid.value[r]![c] = 'start'
   } else if (drawMode.value === 'end') {
     if (cur === 'start') return
-    grid.value[endPos.r][endPos.c] = 'empty'
+    grid.value[endPos.r]![endPos.c] = 'empty'
     endPos = { r, c }
-    grid.value[r][c] = 'end'
+    grid.value[r]![c] = 'end'
   }
   draw()
 }
@@ -310,7 +310,7 @@ function onMouseDown(e: MouseEvent) {
   isMouseDown.value = true
   const cell = getCell(e)
   if (!cell) return
-  eraseMode.value = grid.value[cell.r][cell.c] === 'wall' && drawMode.value === 'wall'
+  eraseMode.value = grid.value[cell.r]![cell.c] === 'wall' && drawMode.value === 'wall'
   applyCell(cell.r, cell.c, eraseMode.value)
 }
 
@@ -333,8 +333,8 @@ function neighbors(r: number, c: number): Pos[] {
   const dirs8 = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]
   const dirs = diagonal.value ? dirs8 : dirs4
   return dirs
-    .map(([dr, dc]) => ({ r: r + dr, c: c + dc }))
-    .filter(p => p.r >= 0 && p.r < ROWS && p.c >= 0 && p.c < COLS && grid.value[p.r][p.c] !== 'wall')
+    .map(([dr, dc]) => ({ r: r + dr!, c: c + dc! }))
+    .filter(p => p.r >= 0 && p.r < ROWS && p.c >= 0 && p.c < COLS && grid.value[p.r]![p.c] !== 'wall')
 }
 
 function moveCost(from: Pos, to: Pos) {
@@ -544,10 +544,10 @@ function runAlgorithm() {
   if (isRunning.value) return
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      if (grid.value[r][c] === 'visited' || grid.value[r][c] === 'path')
-        grid.value[r][c] = 'empty'
-  grid.value[startPos.r][startPos.c] = 'start'
-  grid.value[endPos.r][endPos.c] = 'end'
+      if (grid.value[r]![c] === 'visited' || grid.value[r]![c] === 'path')
+        grid.value[r]![c] = 'empty'
+  grid.value[startPos.r]![startPos.c] = 'start'
+  grid.value[endPos.r]![endPos.c] = 'end'
 
   const t0 = performance.now()
   let result: { visited: Pos[]; path: Pos[] }
@@ -569,16 +569,16 @@ function runAlgorithm() {
     const steps = animSpeed.value
     if (phase === 'visit') {
       for (let i = 0; i < steps && vi < result.visited.length; i++, vi++) {
-        const p = result.visited[vi]
-        if (grid.value[p.r][p.c] === 'empty') grid.value[p.r][p.c] = 'visited'
+        const p = result.visited[vi]!
+        if (grid.value[p.r]![p.c] === 'empty') grid.value[p.r]![p.c] = 'visited'
         stats.value.visited = vi + 1
       }
       if (vi >= result.visited.length) phase = 'path'
     } else {
       for (let i = 0; i < steps && pi < result.path.length; i++, pi++) {
-        const p = result.path[pi]
-        if (grid.value[p.r][p.c] !== 'start' && grid.value[p.r][p.c] !== 'end')
-          grid.value[p.r][p.c] = 'path'
+        const p = result.path[pi]!
+        if (grid.value[p.r]![p.c] !== 'start' && grid.value[p.r]![p.c] !== 'end')
+          grid.value[p.r]![p.c] = 'path'
       }
       if (pi >= result.path.length) {
         draw()
@@ -603,7 +603,7 @@ function generateMaze() {
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++) {
       if ((r === startPos.r && c === startPos.c) || (r === endPos.r && c === endPos.c)) continue
-      if (Math.random() < 0.28) grid.value[r][c] = 'wall'
+      if (Math.random() < 0.28) grid.value[r]![c] = 'wall'
     }
   draw()
 }
@@ -611,7 +611,7 @@ function generateMaze() {
 function clearWalls() {
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      if (grid.value[r][c] === 'wall') grid.value[r][c] = 'empty'
+      if (grid.value[r]![c] === 'wall') grid.value[r]![c] = 'empty'
   draw()
 }
 

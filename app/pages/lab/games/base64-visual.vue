@@ -243,10 +243,10 @@ const byteGroups = computed<ByteGroup[]>(() => {
     const paddedChunk = [...chunk, ...Array(pad).fill(0)]
     const n = (paddedChunk[0] << 16) | (paddedChunk[1] << 8) | paddedChunk[2]
     const b64 = [
-      B64_CHARS[(n >> 18) & 63],
-      B64_CHARS[(n >> 12) & 63],
-      pad > 1 ? '=' : B64_CHARS[(n >> 6) & 63],
-      pad > 0 ? '=' : B64_CHARS[n & 63]
+      B64_CHARS[(n >> 18) & 63]!,
+      B64_CHARS[(n >> 12) & 63]!,
+      pad > 1 ? '=' : B64_CHARS[(n >> 6) & 63]!,
+      pad > 0 ? '=' : B64_CHARS[n & 63]!
     ]
     groups.push({
       bytes: chunk,
@@ -266,7 +266,7 @@ const base64Result = computed(() => {
 function byteHighlightColor(charIdx: number, byteIdx: number): string {
   const globalByteIdx = charInfos.value.slice(0, charIdx).reduce((s, c) => s + c.utf8.length, 0) + byteIdx
   const groupIdx = Math.floor(globalByteIdx / 3)
-  return groupColors[groupIdx % groupColors.length]
+  return groupColors[groupIdx % groupColors.length]!
 }
 
 // Decode

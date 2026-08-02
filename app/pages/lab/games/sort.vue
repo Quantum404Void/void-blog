@@ -62,7 +62,7 @@ const hasData = ref(false), running = ref(false), paused = ref(false)
 const stepDesc = ref('—'), cmpCount = ref(0), swapCount = ref(0), timeMs = ref(0)
 const delay = ref(80), arrSize = ref(60)
 
-const algos = [
+const algos: [string, string, string, string][] = [
   ['bubble','冒泡','O(n²)','#00d4ff'],['selection','选择','O(n²)','#39ff14'],
   ['insertion','插入','O(n²)','#ff00aa'],['quick','快排','O(n log n)','#b400ff'],
   ['merge','归并','O(n log n)','#00d4ff'],['heap','堆排','O(n log n)','#39ff14'],
@@ -98,7 +98,7 @@ function selectAlgo(algo: string, color: string){currentAlgo.value=algo;currentC
 function shuffle(){
   const n=arrSize.value
   arr=Array.from({length:n},(_,i)=>Math.floor((i+1)*(380/n)))
-  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j]!,arr[i]!]}
   highlights={};hasData.value=true;draw();cmpCount.value=0;swapCount.value=0;timeMs.value=0;stepDesc.value='—'
 }
 
@@ -122,8 +122,8 @@ function sleep(ms: number){return new Promise<void>(r=>{if(stopFlag){r();return}
 async function runSort(){
   const start=Date.now(); stopFlag=false; running.value=true; cmpCount.value=0; swapCount.value=0
   const a=[...arr], n=a.length
-  const swap=(i:number,j:number)=>{[a[i],a[j]]=[a[j],a[i]];arr=[...a];swapCount.value++}
-  const cmp=(i:number,j:number)=>{cmpCount.value++;return a[i]>a[j]}
+  const swap=(i:number,j:number)=>{[a[i],a[j]]=[a[j]!,a[i]!];arr=[...a];swapCount.value++}
+  const cmp=(i:number,j:number)=>{cmpCount.value++;return a[i]!>a[j]!}
 
   try {
     if(currentAlgo.value==='bubble'){
@@ -133,23 +133,23 @@ async function runSort(){
         draw();await sleep(delay.value)
       }
     } else if(currentAlgo.value==='selection'){
-      for(let i=0;i<n-1&&!stopFlag;i++){let mi=i;for(let j=i+1;j<n&&!stopFlag;j++){highlights={[i]:'#ffa500',[j]:'#ff2d78',[mi]:'#00d4ff'};cmpCount.value++;if(a[j]<a[mi])mi=j;draw();await sleep(delay.value)};swap(i,mi);draw();await sleep(delay.value)}
+      for(let i=0;i<n-1&&!stopFlag;i++){let mi=i;for(let j=i+1;j<n&&!stopFlag;j++){highlights={[i]:'#ffa500',[j]:'#ff2d78',[mi]:'#00d4ff'};cmpCount.value++;if(a[j]!<a[mi]!)mi=j;draw();await sleep(delay.value)};swap(i,mi);draw();await sleep(delay.value)}
     } else if(currentAlgo.value==='insertion'){
-      for(let i=1;i<n&&!stopFlag;i++){let j=i;while(j>0&&!stopFlag){highlights={[j]:'#ff2d78',[j-1]:'#ff2d78'};cmpCount.value++;if(a[j]<a[j-1]){swap(j,j-1);j--}else break;draw();await sleep(delay.value)}}
+      for(let i=1;i<n&&!stopFlag;i++){let j=i;while(j>0&&!stopFlag){highlights={[j]:'#ff2d78',[j-1]:'#ff2d78'};cmpCount.value++;if(a[j]!<a[j-1]!){swap(j,j-1);j--}else break;draw();await sleep(delay.value)}}
     } else if(currentAlgo.value==='quick'){
-      const qsort=async(lo:number,hi:number)=>{if(lo>=hi||stopFlag)return;const pivot=a[hi];let pi=lo;for(let j=lo;j<hi&&!stopFlag;j++){highlights={[j]:'#ff2d78',[hi]:'#ffa500'};cmpCount.value++;if(a[j]<=pivot){swap(pi,j);pi++;highlights={[pi-1]:'#39ff14'};draw();await sleep(delay.value)}else{draw();await sleep(delay.value)}};swap(pi,hi);await qsort(lo,pi-1);await qsort(pi+1,hi)}
+      const qsort=async(lo:number,hi:number)=>{if(lo>=hi||stopFlag)return;const pivot=a[hi]!;let pi=lo;for(let j=lo;j<hi&&!stopFlag;j++){highlights={[j]:'#ff2d78',[hi]:'#ffa500'};cmpCount.value++;if(a[j]!<=pivot){swap(pi,j);pi++;highlights={[pi-1]:'#39ff14'};draw();await sleep(delay.value)}else{draw();await sleep(delay.value)}};swap(pi,hi);await qsort(lo,pi-1);await qsort(pi+1,hi)}
       await qsort(0,n-1)
     } else if(currentAlgo.value==='merge'){
-      const merge2=async(lo:number,mid:number,hi:number)=>{const tmp=a.slice(lo,hi+1);let i=0,j=mid-lo+1,k=lo;while(i<=mid-lo&&j<=hi-lo&&!stopFlag){cmpCount.value++;highlights={[lo+i]:'#ff2d78',[lo+j]:'#00d4ff'};if(tmp[i]<=tmp[j])a[k++]=tmp[i++];else a[k++]=tmp[j++];arr=[...a];draw();await sleep(delay.value)};while(i<=mid-lo&&!stopFlag){a[k++]=tmp[i++];arr=[...a];draw();await sleep(delay.value)};while(j<=hi-lo&&!stopFlag){a[k++]=tmp[j++];arr=[...a];draw();await sleep(delay.value)}}
+      const merge2=async(lo:number,mid:number,hi:number)=>{const tmp=a.slice(lo,hi+1);let i=0,j=mid-lo+1,k=lo;while(i<=mid-lo&&j<=hi-lo&&!stopFlag){cmpCount.value++;highlights={[lo+i]:'#ff2d78',[lo+j]:'#00d4ff'};if(tmp[i]!<=tmp[j]!)a[k++]=tmp[i++]!;else a[k++]=tmp[j++]!;arr=[...a];draw();await sleep(delay.value)};while(i<=mid-lo&&!stopFlag){a[k++]=tmp[i++]!;arr=[...a];draw();await sleep(delay.value)};while(j<=hi-lo&&!stopFlag){a[k++]=tmp[j++]!;arr=[...a];draw();await sleep(delay.value)}}
       for(let s=1;s<n&&!stopFlag;s*=2)for(let lo=0;lo<n&&!stopFlag;lo+=2*s){const mid=Math.min(lo+s-1,n-1),hi=Math.min(lo+2*s-1,n-1);if(mid<hi)await merge2(lo,mid,hi)}
     } else if(currentAlgo.value==='heap'){
-      const heapify=async(n2:number,i:number)=>{let largest=i,l=2*i+1,r=2*i+2;cmpCount.value+=2;if(l<n2&&a[l]>a[largest])largest=l;if(r<n2&&a[r]>a[largest])largest=r;if(largest!==i){swap(i,largest);highlights={[i]:'#39ff14',[largest]:'#ff2d78'};draw();await sleep(delay.value);await heapify(n2,largest)}}
+      const heapify=async(n2:number,i:number)=>{let largest=i,l=2*i+1,r=2*i+2;cmpCount.value+=2;if(l<n2&&a[l]!>a[largest]!)largest=l;if(r<n2&&a[r]!>a[largest]!)largest=r;if(largest!==i){swap(i,largest);highlights={[i]:'#39ff14',[largest]:'#ff2d78'};draw();await sleep(delay.value);await heapify(n2,largest)}}
       for(let i=Math.floor(n/2)-1;i>=0&&!stopFlag;i--)await heapify(n,i)
       for(let i=n-1;i>0&&!stopFlag;i--){swap(0,i);await heapify(i,0)}
     } else if(currentAlgo.value==='counting'){
       const max=Math.max(...a), min=Math.min(...a), range=max-min+1
       const count=new Array(range).fill(0)
-      for(let i=0;i<n&&!stopFlag;i++){count[a[i]-min]++;highlights={[i]:'#ffa500'};cmpCount.value++;draw();await sleep(delay.value)}
+      for(let i=0;i<n&&!stopFlag;i++){count[a[i]!-min]++;highlights={[i]:'#ffa500'};cmpCount.value++;draw();await sleep(delay.value)}
       let k=0
       for(let i=0;i<range&&!stopFlag;i++)while(count[i]-->0&&!stopFlag){a[k]=i+min;arr=[...a];highlights={[k]:'#39ff14'};swapCount.value++;draw();await sleep(delay.value);k++}
     } else if(currentAlgo.value==='radix'){
@@ -158,14 +158,14 @@ async function runSort(){
       const maxDigits=Math.max(...a.map(digitCount))
       for(let d=0;d<maxDigits&&!stopFlag;d++){
         const buckets:number[][]=Array.from({length:10},()=>[])
-        for(let i=0;i<n&&!stopFlag;i++){buckets[getDigit(a[i],d)].push(a[i]);highlights={[i]:'#ff4444'};cmpCount.value++;draw();await sleep(delay.value)}
+        for(let i=0;i<n&&!stopFlag;i++){buckets[getDigit(a[i]!,d)]!.push(a[i]!);highlights={[i]:'#ff4444'};cmpCount.value++;draw();await sleep(delay.value)}
         let k=0;for(const b of buckets)for(const v of b){a[k]=v;arr=[...a];highlights={[k]:'#39ff14'};swapCount.value++;draw();await sleep(delay.value);k++}
       }
     } else if(currentAlgo.value==='tim'){
       const RUN=32
-      const insertionRun=async(left:number,right:number)=>{for(let i=left+1;i<=right&&!stopFlag;i++){let j=i;while(j>left&&!stopFlag){highlights={[j]:'#ff2d78',[j-1]:'#ff2d78'};cmpCount.value++;if(a[j]<a[j-1]){swap(j,j-1);j--}else break;draw();await sleep(delay.value)}}}
+      const insertionRun=async(left:number,right:number)=>{for(let i=left+1;i<=right&&!stopFlag;i++){let j=i;while(j>left&&!stopFlag){highlights={[j]:'#ff2d78',[j-1]:'#ff2d78'};cmpCount.value++;if(a[j]!<a[j-1]!){swap(j,j-1);j--}else break;draw();await sleep(delay.value)}}}
       for(let i=0;i<n&&!stopFlag;i+=RUN)await insertionRun(i,Math.min(i+RUN-1,n-1))
-      for(let s=RUN;s<n&&!stopFlag;s*=2)for(let lo=0;lo<n&&!stopFlag;lo+=2*s){const mid=Math.min(lo+s-1,n-1),hi=Math.min(lo+2*s-1,n-1);if(mid<hi){const tmp=a.slice(lo,hi+1);let i=0,j=mid-lo+1,k=lo;while(i<=mid-lo&&j<=hi-lo&&!stopFlag){cmpCount.value++;highlights={[lo+i]:'#aaffaa',[lo+j]:'#00d4ff'};if(tmp[i]<=tmp[j])a[k++]=tmp[i++];else a[k++]=tmp[j++];arr=[...a];draw();await sleep(delay.value)};while(i<=mid-lo&&!stopFlag){a[k++]=tmp[i++];arr=[...a];draw();await sleep(delay.value)};while(j<=hi-lo&&!stopFlag){a[k++]=tmp[j++];arr=[...a];draw();await sleep(delay.value)}}}
+      for(let s=RUN;s<n&&!stopFlag;s*=2)for(let lo=0;lo<n&&!stopFlag;lo+=2*s){const mid=Math.min(lo+s-1,n-1),hi=Math.min(lo+2*s-1,n-1);if(mid<hi){const tmp=a.slice(lo,hi+1);let i=0,j=mid-lo+1,k=lo;while(i<=mid-lo&&j<=hi-lo&&!stopFlag){cmpCount.value++;highlights={[lo+i]:'#aaffaa',[lo+j]:'#00d4ff'};if(tmp[i]!<=tmp[j]!)a[k++]=tmp[i++]!;else a[k++]=tmp[j++]!;arr=[...a];draw();await sleep(delay.value)};while(i<=mid-lo&&!stopFlag){a[k++]=tmp[i++]!;arr=[...a];draw();await sleep(delay.value)};while(j<=hi-lo&&!stopFlag){a[k++]=tmp[j++]!;arr=[...a];draw();await sleep(delay.value)}}}
     }
   } catch(e){}
   highlights={}; draw()

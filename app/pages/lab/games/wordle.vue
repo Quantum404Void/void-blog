@@ -44,7 +44,7 @@ const currentRow = ref(0), currentCol = ref(0)
 const answer = ref(''), gameOver = ref(false), message = ref(''), msgStyle = ref('')
 
 function newGame(){
-  answer.value=WORDS[Math.floor(Math.random()*WORDS.length)]
+  answer.value=WORDS[Math.floor(Math.random()*WORDS.length)]!
   guesses.value=Array.from({length:6},()=>[])
   results.value=Array.from({length:6},()=>[])
   currentRow.value=0; currentCol.value=0; gameOver.value=false; message.value=''
@@ -52,12 +52,12 @@ function newGame(){
 
 function type(k: string){
   if(gameOver.value||currentCol.value>=5) return
-  guesses.value[currentRow.value][currentCol.value]=k; currentCol.value++
+  guesses.value[currentRow.value]![currentCol.value]=k; currentCol.value++
 }
-function del(){if(currentCol.value>0){currentCol.value--;guesses.value[currentRow.value].splice(currentCol.value,1)}}
+function del(){if(currentCol.value>0){currentCol.value--;guesses.value[currentRow.value]!.splice(currentCol.value,1)}}
 function submit(){
   if(currentCol.value<5) return
-  const guess=guesses.value[currentRow.value].join('')
+  const guess=guesses.value[currentRow.value]!.join('')
   const ans=answer.value, res=Array(5).fill('absent')
   const ansArr=ans.split(''), used=Array(5).fill(false)
   for(let i=0;i<5;i++)if(guess[i]===ansArr[i]){res[i]='correct';used[i]=true}
@@ -85,7 +85,7 @@ function getKeyStyle(k: string){
   if(k==='⌫'||k==='↵') return 'border-color:rgba(255,255,255,0.15);color:#e8e8f0;background:rgba(255,255,255,0.05)'
   let best='none'
   for(let r=0;r<currentRow.value;r++){
-    const g=guesses.value[r].join(''), res=results.value[r]
+    const g=guesses.value[r]!.join(''), res=results.value[r]!
     for(let c=0;c<5;c++){if(g[c]===k){if(res[c]==='correct'){best='correct';break}else if(res[c]==='present'&&best!=='correct')best='present';else if(res[c]==='absent'&&best==='none')best='absent'}}
     if(best==='correct') break
   }

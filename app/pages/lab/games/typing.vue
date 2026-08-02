@@ -59,7 +59,7 @@ const typed = ref(''), snippetIdx = ref(0), started = ref(false), finished = ref
 const wpm = ref('--'), acc = ref('--'), timeLeft = ref(60), errorsCount = ref(0)
 let timerInterval: any=null, startTime=0
 
-const target = computed(()=>snippets[snippetIdx.value%snippets.length])
+const target = computed(()=>snippets[snippetIdx.value%snippets.length]!)
 const hasErrors = computed(()=>{
   const t=typed.value; return t.split('').some((c,i)=>c!==target.value[i])
 })

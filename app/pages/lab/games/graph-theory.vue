@@ -101,7 +101,7 @@ const R = 20
 
 function nodeAt(x: number, y: number): Node | null {
   for (let i = nodes.value.length - 1; i >= 0; i--) {
-    const n = nodes.value[i]
+    const n = nodes.value[i]!
     if (Math.hypot(n.x - x, n.y - y) < R) return n
   }
   return null
@@ -223,7 +223,7 @@ function animateSteps(steps: Array<() => void>, delay = 400) {
   let i = 0
   function next() {
     if (i >= steps.length) return
-    steps[i++]()
+    steps[i++]!()
     render()
     animTimeout = window.setTimeout(next, delay)
   }
@@ -234,7 +234,7 @@ function runAlgo(key: string) {
   if (nodes.value.length === 0) { statusMsg.value = '请先添加节点'; return }
   clearAnimations()
   activeAlgo.value = key
-  const start = nodes.value[0]
+  const start = nodes.value[0]!
 
   if (key === 'bfs') {
     const steps: Array<() => void> = []
@@ -289,19 +289,19 @@ function runAlgo(key: string) {
     const unvisited = new Set(nodes.value.map(n => n.id))
     while (unvisited.size) {
       let u = -1
-      unvisited.forEach(id => { if (u === -1 || dist[id] < dist[u]) u = id })
-      if (dist[u] === Infinity) break
+      unvisited.forEach(id => { if (u === -1 || dist[id]! < dist[u]!) u = id })
+      if (dist[u]! === Infinity) break
       unvisited.delete(u)
       for (const edge of edges.value.filter(e => e.from === u)) {
-        const alt = dist[u] + edge.weight
-        if (alt < dist[edge.to]) { dist[edge.to] = alt; prev[edge.to] = u }
+        const alt = dist[u]! + edge.weight
+        if (alt < dist[edge.to]!) { dist[edge.to] = alt; prev[edge.to] = u }
       }
     }
     // Animate path to last node
-    const target = nodes.value[nodes.value.length - 1]
+    const target = nodes.value[nodes.value.length - 1]!
     const path: number[] = []
     let cur: number | null = target.id
-    while (cur !== null) { path.unshift(cur); cur = prev[cur] }
+    while (cur !== null) { path.unshift(cur); cur = prev[cur]! }
     const steps: Array<() => void> = []
     if (path[0] !== start.id) {
       algoResult.value = '无路径'
@@ -312,7 +312,7 @@ function runAlgo(key: string) {
         steps.push(() => { n.color = '#ff2d78' })
       })
       for (let i = 0; i < path.length - 1; i++) {
-        const a = path[i], b = path[i+1]
+        const a = path[i]!, b = path[i+1]!
         const edge = edges.value.find(e => e.from === a && e.to === b)
         if (edge) steps.push(() => { edge.color = '#ff2d78' })
       }
@@ -354,7 +354,7 @@ function runAlgo(key: string) {
       const cur = queue.shift()!
       for (const nb of adjacency(cur)) {
         if (color[nb] === undefined) {
-          color[nb] = 1 - color[cur]
+          color[nb] = 1 - color[cur]!
           queue.push(nb)
         } else if (color[nb] === color[cur]) {
           isBipartite = false
@@ -388,7 +388,7 @@ function runAlgo(key: string) {
         node.label = String(idx)
       })
       for (const nb of adjacency(cur)) {
-        inDeg[nb]--
+        inDeg[nb]!--
         if (inDeg[nb] === 0) queue.push(nb)
       }
     }

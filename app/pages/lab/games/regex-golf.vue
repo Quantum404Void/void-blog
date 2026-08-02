@@ -145,7 +145,7 @@ const matchResults = ref<(boolean | null)[]>([])
 const rejectResults = ref<(boolean | null)[]>([])
 const cleared = ref<boolean[]>(new Array(levels.length).fill(false))
 
-const level = computed(() => levels[currentLevel.value])
+const level = computed(() => levels[currentLevel.value]!)
 
 const isCleared = computed(() => {
   if (matchResults.value.length === 0) return false

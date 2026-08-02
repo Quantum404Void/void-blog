@@ -420,7 +420,7 @@ async function runAnimation() {
 
   for (let i = 0; i < allPkts.length; i++) {
     if (cancelFlag) break
-    const pkt = allPkts[i]
+    const pkt = allPkts[i]!
 
     // Determine which state sequence to use
     let states: typeof HANDSHAKE_STATES
@@ -442,7 +442,7 @@ async function runAnimation() {
       }
     }
 
-    const stateEntry = states[stateIdx] ?? states[states.length - 1]
+    const stateEntry = states[stateIdx] ?? states[states.length - 1]!
 
     // 1. Show "sending" indicator
     const isRight = pkt.dir === 'right'
@@ -532,25 +532,25 @@ const unacked = computed(() => sendPtr.value - ackPtr.value)
 
 function sendNext() {
   if (unacked.value >= windowSize.value || sendPtr.value >= TOTAL_SEGS) return
-  segments.value[sendPtr.value].state = 'sent'
+  segments.value[sendPtr.value]!.state = 'sent'
   sendPtr.value++
 }
 
 function ackNext() {
   if (ackPtr.value >= sendPtr.value) return
-  if (segments.value[ackPtr.value].state === 'lost') return
-  segments.value[ackPtr.value].state = 'acked'
+  if (segments.value[ackPtr.value]!.state === 'lost') return
+  segments.value[ackPtr.value]!.state = 'acked'
   ackPtr.value++
 }
 
 function simulateLoss() {
   const idx = segments.value.findIndex((s, i) => s.state === 'sent' && i >= ackPtr.value)
-  if (idx !== -1) segments.value[idx].state = 'lost'
+  if (idx !== -1) segments.value[idx]!.state = 'lost'
 }
 
 function retransmit() {
   const idx = segments.value.findIndex(s => s.state === 'lost')
-  if (idx !== -1) segments.value[idx].state = 'sent'
+  if (idx !== -1) segments.value[idx]!.state = 'sent'
 }
 
 function resetWindow() {

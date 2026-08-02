@@ -280,8 +280,8 @@ function scheduleAnim(path: BSTNode[], finalMsg: string, delay = 350) {
 
   function step() {
     if (animStep < path.length) {
-      highlighted.add(path[animStep])
-      currentNode = path[animStep]
+      highlighted.add(path[animStep]!)
+      currentNode = path[animStep]!
       draw()
       animStep++
       animTimer = setTimeout(step, delay)
@@ -310,7 +310,7 @@ function doSearch() {
   const v = parseInt(inputVal.value)
   if (isNaN(v)) { statusMsg.value = 'Enter a valid number.'; return }
   const path = searchPath(root, v)
-  const found = path.length && path[path.length - 1].val === v
+  const found = path.length && path[path.length - 1]!.val === v
   scheduleAnim(path, found ? `Found ${v}` : `${v} not found`)
 }
 
@@ -318,7 +318,7 @@ function doDelete() {
   const v = parseInt(inputVal.value)
   if (isNaN(v)) { statusMsg.value = 'Enter a valid number.'; return }
   const path = searchPath(root, v)
-  const found = path.length && path[path.length - 1].val === v
+  const found = path.length && path[path.length - 1]!.val === v
   if (!found) { statusMsg.value = `${v} not found`; return }
   scheduleAnim(path, `Deleting ${v}…`, 300)
   setTimeout(() => {
